@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es6",
+    "outDir": "../../out/extension",
+    "lib": ["es6"],
+    "sourceMap": true,
+    "strict": true,
+    "skipLibCheck": false,
+    "forceConsistentCasingInFileNames": true
+  },
+  "exclude": ["node_modules"],
+  "include": ["./**/*"]
+}
