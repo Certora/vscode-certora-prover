@@ -27,6 +27,15 @@ export default {
       compilerOptions: {
         dev: !production,
       },
+      onwarn: (warning, handler) => {
+        if (
+          warning.code === 'a11y-missing-attribute' ||
+          warning.code === 'a11y-missing-content'
+        )
+          return
+
+        handler(warning)
+      },
     }),
     css({ output: 'bundle.css' }),
     resolve({
