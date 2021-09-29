@@ -1,5 +1,5 @@
 <script lang="ts">
-  import PaneToolbar from './PaneToolbar.svelte'
+  import Toolbar from './Toolbar.svelte'
 
   export let title: string
   export let actions: { title: string; onClick: () => void; icon: string }[] =
@@ -28,7 +28,7 @@
     />
     <h3 class="title" {title}>{title}</h3>
     <div class="actions">
-      <PaneToolbar {actions} />
+      <Toolbar {actions} />
     </div>
   </div>
   {#if isExpanded}

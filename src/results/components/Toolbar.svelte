@@ -1,5 +1,5 @@
 <script lang="ts">
-  import PaneActionItem from './PaneActionItem.svelte'
+  import ToolbarItem from './ToolbarItem.svelte'
 
   export let actions: { title: string; icon: string; onClick: () => void }[] =
     []
@@ -9,7 +9,7 @@
   <div class="action-bar">
     <ul class="actions-container">
       {#each actions as action}
-        <PaneActionItem
+        <ToolbarItem
           title={action.title}
           icon={action.icon}
           on:click={action.onClick}
