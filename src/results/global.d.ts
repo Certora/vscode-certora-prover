@@ -8,3 +8,6 @@ interface VSCodeWebApi {
 
 // eslint-disable-next-line no-unused-vars
 declare const vscode: VSCodeWebApi
+
+// eslint-disable-next-line no-unused-vars
+declare const mediaPath: string

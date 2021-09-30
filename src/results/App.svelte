@@ -1,6 +1,9 @@
 <script lang="ts">
   import Pane from './components/Pane.svelte'
   import CodeItemList from './components/CodeItemList.svelte'
+  import Tree from './components/Tree.svelte'
+
+  import certoraScriptOutput from './mocks/certora-script-output.json'
 </script>
 
 <Pane
@@ -11,7 +14,9 @@
   ]}
 />
 <Pane title="Smart contract B" />
-<Pane title="Call traces" />
+<Pane title="Call traces">
+  <Tree data={certoraScriptOutput.callTrace} />
+</Pane>
 <Pane title="Variables">
   <CodeItemList
     codeItems={[
