@@ -6,7 +6,7 @@
   import certoraScriptOutput2 from './mocks/certora-script-output-example-2.json'
   import certoraScriptOutput3 from './mocks/certora-script-output-example-3.json'
   import certoraScriptOutput4 from './mocks/certora-script-output-example-4.json'
-  import type { RuleTree, Rule } from './types'
+  import type { RuleTree, Rule, RuleTreeItem } from './types'
 
   const outputs = [
     certoraScriptOutput1,
@@ -34,8 +34,6 @@
       ...Array.from(emptyRules).map((rule: string) => ({ name: rule })),
     ]
 
-    console.log(dataWithEmptyRules)
-
     dataWithEmptyRules.forEach(rule => {
       hashTable[rule.name] = { ...rule, childrenList: [] }
     })
@@ -48,26 +46,46 @@
       }
     })
 
-    dataTree.forEach(treeItem => {
-      if (treeItem.assertMessage) {
-        treeItem.childrenList.push({
-          assertMessage: treeItem.assertMessage,
+    function setAssertMessage(node: RuleTreeItem) {
+      if (node.assertMessage) {
+        node.childrenList?.push({
+          name: node.assertMessage[0],
+          isAssertMessageNode: true,
+          result: node.result,
         })
       }
+
+      node.childrenList?.forEach((node: RuleTreeItem) => {
+        setAssertMessage(node)
+      })
+    }
+
+    dataTree.forEach(treeItem => {
+      setAssertMessage(treeItem)
     })
 
     return dataTree
   }
 
-  console.log(createRuleTree(outputs))
+  const tree = createRuleTree(outputs)
 </script>
 
 <Pane title="Rules">
-  <Tree data={certoraScriptOutput1.callTrace} />
+  <Tree
+    data={{
+      type: 'rules',
+      tree,
+    }}
+  />
 </Pane>
-<Pane title="Call traces">
-  <Tree data={certoraScriptOutput1.callTrace} />
-</Pane>
+<!-- <Pane title="Call traces">
+  <Tree
+    data={{
+      type: 'callstack',
+      tree: certoraScriptOutput1.callTrace,
+    }}
+  />
+</Pane> -->
 <Pane title="Variables">
   <CodeItemList
     codeItems={[

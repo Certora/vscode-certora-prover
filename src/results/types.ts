@@ -1,10 +1,3 @@
-export type TreeItem = {
-  name: string
-  childrenList: TreeItem[]
-}
-
-export type Tree = TreeItem[]
-
 export type Action = { title: string; onClick: () => void; icon: string }
 
 export type JumpToDefinition = {
@@ -21,8 +14,7 @@ export enum RuleResults {
   Skip = 'SKIP',
 }
 
-export type Variable = {
-  // TODO: Add type for varName: varValue
+export type Variable = Record<string, string | boolean> & {
   jumpToDefinition: JumpToDefinition[]
 }
 
@@ -79,15 +71,18 @@ export type Rule = {
 
 export type RuleTreeChildren =
   | (Rule & { childrenList: Rule[] })
-  | { assertMessage?: string[] }
+  | {
+      isAssertMessageNode?: boolean
+    }
 
-export type RuleTree = {
+export type RuleTreeItem = {
   name: string
   graph_link?: string
   result?: RuleResults
   duration?: number
   variables?: Variable[]
   assertMessage?: string[]
+  isAssertMessageNode?: boolean
   failureCauses?: {
     expr: string
     jumpToDefinition: JumpToDefinition[]
@@ -97,4 +92,6 @@ export type RuleTree = {
   callResolutionWarnings?: CallResolutionItem[]
   jumpToDefinition?: JumpToDefinition[]
   childrenList: RuleTreeChildren[]
-}[]
+}
+
+export type RuleTree = RuleTreeItem[]

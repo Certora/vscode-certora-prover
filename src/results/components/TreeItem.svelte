@@ -1,16 +1,40 @@
 <script lang="ts">
   import Toolbar from './Toolbar.svelte'
   import { getIconPath } from '../getIconPath'
-  import type { TreeItem, Action } from '../types'
+  import {
+    Action,
+    RuleTreeItem,
+    CallTraceFunction,
+    RuleResults,
+  } from '../types'
 
+  export let data:
+    | {
+        type: 'rules'
+        item: RuleTreeItem
+      }
+    | {
+        type: 'callstack'
+        item: CallTraceFunction
+      }
   export let setSize = 1
   export let posinset = 1
   export let actions: Action[] = []
   export let level = 1
 
-  export let item: TreeItem
-
-  $: hasChildren = Boolean(item.childrenList?.length)
+  $: hasChildren = Boolean(data.item.childrenList?.length)
+  $: statusIcon = getIconPath(
+    data.type === 'rules' && data.item.result
+      ? `/${data.item.result}-status.svg`
+      : `/unknown-status.svg`,
+  )
+  $: messageIcon = getIconPath(
+    data.type === 'rules' &&
+      data.item.isAssertMessageNode &&
+      data.item.result === RuleResults.Success
+      ? '/success-message.svg'
+      : '/error-message.svg',
+  )
 
   let isExpanded = false
   let isFocused = false
@@ -24,12 +48,12 @@
   aria-setsize={setSize}
   aria-posinset={posinset}
   aria-selected="false"
-  aria-label={item.name}
+  aria-label={data.item.name}
   aria-level={level}
   aria-expanded={isExpanded}
   draggable="false"
   tabindex="0"
-  title={item.name}
+  title={data.item.name}
   style="--indent: calc({level} * 8px)"
   on:click={() => (isExpanded = !isExpanded)}
   on:focus={() => (isFocused = true)}
@@ -43,27 +67,35 @@
         : ''}"
     />
     <div class="contents">
-      <div
-        class="icon"
-        style="background-image: url({getIconPath('/error-message.svg')});"
-      />
-      <!-- <div class="icon codicon codicon-debug-stackframe" /> -->
+      {#if data.type === 'rules' && data.item.isAssertMessageNode}
+        <div class="icon" style="background-image: url({messageIcon});" />
+      {/if}
+      {#if data.type === 'rules' && !data.item.isAssertMessageNode}
+        <div class="icon" style="background-image: url({statusIcon});" />
+      {/if}
+      {#if data.type === 'callstack'}
+        <div class="icon codicon codicon-debug-stackframe" />
+      {/if}
       <div class="label">
         <div class="label-container">
           <span class="name-container">
             <a class="label-name">
               <span class="highlighted-label">
-                <span>{item.name}</span>
+                <span>{data.item.name}</span>
               </span>
             </a>
           </span>
-          <!-- <span class="description-container">
-            <span class="label-description">2sec</span>
-          </span> -->
+          {#if data.type === 'rules' && data.item.duration}
+            <span class="description-container">
+              <span class="label-description">2sec</span>
+            </span>
+          {/if}
         </div>
-        <div class="result-container">
-          <div class="result">SUCCESS</div>
-        </div>
+        {#if data.type === 'callstack'}
+          <div class="result-container">
+            <div class="result">SUCCESS</div>
+          </div>
+        {/if}
         <div class="actions">
           <Toolbar {actions} />
         </div>
@@ -73,14 +105,32 @@
 </div>
 
 {#if isExpanded && hasChildren}
-  {#each item.childrenList as child, i}
-    <svelte:self
-      item={child}
-      level={level + 1}
-      setSize={item.childrenList.length}
-      posinset={i}
-    />
-  {/each}
+  {#if data.type === 'rules'}
+    {#each data.item.childrenList as child, i}
+      <svelte:self
+        data={{
+          type: 'rules',
+          item: child,
+        }}
+        level={level + 1}
+        setSize={data.item.childrenList.length}
+        posinset={i}
+      />
+    {/each}
+  {/if}
+  {#if data.type === 'callstack'}
+    {#each data.item.childrenList as child, i}
+      <svelte:self
+        data={{
+          type: 'callstack',
+          item: child,
+        }}
+        level={level + 1}
+        setSize={data.item.childrenList.length}
+        posinset={i}
+      />
+    {/each}
+  {/if}
 {/if}
 
 <style lang="postcss">
