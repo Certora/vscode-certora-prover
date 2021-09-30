@@ -4,14 +4,13 @@
   import type { TreeItem as TreeItemType } from '../types'
 
   export let data: TreeItemType[]
-  export let setsize: number
 </script>
 
 <div class="tree">
   {#each data as item, i}
     <TreeItem
       {item}
-      {setsize}
+      setsize={data.length}
       posinset={i + 1}
       actions={[
         { title: 'Action1', icon: '\\ea60', onClick: () => console.log(123) },

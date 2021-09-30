@@ -15,10 +15,7 @@
 />
 <Pane title="Smart contract B" />
 <Pane title="Call traces">
-  <Tree
-    data={certoraScriptOutput.callTrace}
-    setsize={certoraScriptOutput.callTrace.length}
-  />
+  <Tree data={certoraScriptOutput.callTrace} />
 </Pane>
 <Pane title="Variables">
   <CodeItemList
