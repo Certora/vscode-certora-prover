@@ -2,15 +2,14 @@
   import Pane from './components/Pane.svelte'
   import CodeItemList from './components/CodeItemList.svelte'
   import Tree from './components/Tree.svelte'
-
   import certoraScriptOutput from './mocks/certora-script-output.json'
 </script>
 
 <Pane
   title="Smart contract A"
   actions={[
-    { title: 'Action1', icon: '\\ea60', onClick: () => console.log(123) },
-    { title: 'Action2', icon: '\\ea97', onClick: () => console.log(456) },
+    { title: 'Action1', icon: 'add', onClick: () => console.log(123) },
+    { title: 'Action2', icon: 'activate-breakpoints', onClick: () => console.log(456) },
   ]}
 />
 <Pane title="Smart contract B" />

@@ -1,7 +1,7 @@
 <script lang="ts">
   import Toolbar from './Toolbar.svelte'
-  import type { TreeItem, Action } from '../types'
   import { getIconPath } from '../getIconPath'
+  import type { TreeItem, Action } from '../types'
 
   export let setSize = 1
   export let posinset = 1
