@@ -10,7 +10,7 @@
   {#each data as item, i}
     <TreeItem
       {item}
-      setsize={data.length}
+      setSize={data.length}
       posinset={i + 1}
       actions={[
         { title: 'Action1', icon: '\\ea60', onClick: () => console.log(123) },

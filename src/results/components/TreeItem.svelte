@@ -3,7 +3,7 @@
   import type { TreeItem, Action } from '../types'
   import { getIconPath } from '../getIconPath'
 
-  export let setsize = 1
+  export let setSize = 1
   export let posinset = 1
   export let actions: Action[] = []
   export let level = 1
@@ -21,7 +21,7 @@
   class:focused={isFocused}
   class:selected={isFocused}
   role="treeitem"
-  aria-setsize={setsize}
+  aria-setsize={setSize}
   aria-posinset={posinset}
   aria-selected="false"
   aria-label={item.name}
@@ -77,7 +77,7 @@
     <svelte:self
       item={child}
       level={level + 1}
-      setsize={item.childrenList.length}
+      setSize={item.childrenList.length}
       posinset={i}
     />
   {/each}
