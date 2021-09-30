@@ -5,8 +5,6 @@
 
   export let data: TreeItemType[]
   export let setsize: number
-
-  $: console.log(data)
 </script>
 
 <div class="tree">
