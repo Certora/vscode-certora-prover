@@ -3,7 +3,7 @@
   import CodeItemList from './components/CodeItemList.svelte'
   import Tree from './components/Tree.svelte'
 
-  import mock1 from './mocks/mock1.json'
+  import certoraScriptOutput from './mocks/certora-script-output.json'
 </script>
 
 <Pane
@@ -15,7 +15,10 @@
 />
 <Pane title="Smart contract B" />
 <Pane title="Call traces">
-  <Tree data={mock1.callTrace} setsize={mock1.callTrace.length} />
+  <Tree
+    data={certoraScriptOutput.callTrace}
+    setsize={certoraScriptOutput.callTrace.length}
+  />
 </Pane>
 <Pane title="Variables">
   <CodeItemList
