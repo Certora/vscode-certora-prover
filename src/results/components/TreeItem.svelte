@@ -3,14 +3,12 @@
   import type { TreeItem, Action } from '../types'
   import { getIconPath } from '../getIconPath'
 
-  export let setsize: number = 1
-  export let posinset: number = 1
-  export let indent = 0
+  export let setsize = 1
+  export let posinset = 1
   export let actions: Action[] = []
+  export let level = 1
 
   export let item: TreeItem
-
-  const indentSize = 8
 
   $: hasChildren = Boolean(item.childrenList?.length)
 
@@ -27,22 +25,22 @@
   aria-posinset={posinset}
   aria-selected="false"
   aria-label={item.name}
-  aria-level={indent / 8 + 1}
+  aria-level={level}
   aria-expanded={isExpanded}
   draggable="false"
   tabindex="0"
   title={item.name}
+  style="--indent: calc({level} * 8px)"
   on:click={() => (isExpanded = !isExpanded)}
   on:focus={() => (isFocused = true)}
   on:blur={() => (isFocused = false)}
 >
   <div class="row">
-    <div class="indent" style="width: {indent}px" />
+    <div class="indent" />
     <div
-      class="twistie {hasChildren || indent === 0
+      class="twistie {hasChildren || level === 1
         ? `codicon codicon-chevron-${isExpanded ? 'down' : 'right'}`
         : ''}"
-      style="padding-left: {indent}px;"
     />
     <div class="contents">
       <div
@@ -78,7 +76,7 @@
   {#each item.childrenList as child, i}
     <svelte:self
       item={child}
-      indent={indent + indentSize}
+      level={level + 1}
       setsize={item.childrenList.length}
       posinset={i}
     />
@@ -139,6 +137,7 @@
     top: 0;
     left: 16px;
     pointer-events: none;
+    width: var(--indent);
   }
 
   .twistie {
@@ -149,6 +148,7 @@
     justify-content: center;
     flex-shrink: 0;
     transform: translateX(3px);
+    padding-left: var(--indent);
     padding-right: 6px;
     width: 16px;
     height: 100%;
