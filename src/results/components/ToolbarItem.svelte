@@ -5,8 +5,7 @@
 
 <li class="action-item menu-entry" role="presentation">
   <a
-    style="--icon: '{icon}'"
-    class="action-label codicon codicon-action"
+    class="action-label codicon codicon-action codicon-{icon}"
     role="button"
     {title}
     tabindex="0"
@@ -44,10 +43,6 @@
 
     &:hover {
       background-color: rgba(184, 184, 184, 0.31);
-    }
-
-    &:before {
-      content: var(--icon);
     }
   }
 </style>

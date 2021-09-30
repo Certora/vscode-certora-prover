@@ -12,7 +12,7 @@
   }
 </script>
 
-<div class="pane {isExpanded ? 'expanded' : ''}">
+<div class="pane" class:expanded={isExpanded}>
   <div
     class="pane-header"
     on:click={toggleExpand}
@@ -22,9 +22,7 @@
     aria-expanded={isExpanded}
   >
     <div
-      class="arrow-icon codicon {isExpanded
-        ? 'codicon-view-pane-container-expanded'
-        : 'codicon-view-pane-container-collapsed'}"
+      class="arrow-icon codicon codicon-chevron-{isExpanded ? 'down' : 'right'}"
     />
     <h3 class="title" {title}>{title}</h3>
     <div class="actions">
@@ -50,7 +48,7 @@
     flex-direction: column;
     -webkit-user-select: none;
 
-    &.expanded:hover .actions {
+    &:hover .actions {
       display: initial;
     }
   }
@@ -69,14 +67,6 @@
 
     .arrow-icon {
       margin: 0 2px;
-
-      &.codicon-view-pane-container-collapsed::before {
-        content: '\eab6';
-      }
-
-      &.codicon-view-pane-container-expanded::before {
-        content: '\eab4';
-      }
     }
 
     .title {

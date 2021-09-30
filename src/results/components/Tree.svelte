@@ -1,6 +1,5 @@
 <script lang="ts">
   import TreeItem from './TreeItem.svelte'
-
   import type { TreeItem as TreeItemType } from '../types'
 
   export let data: TreeItemType[]
