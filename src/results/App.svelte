@@ -2,7 +2,7 @@
   import Pane from './components/Pane.svelte'
   import CodeItemList from './components/CodeItemList.svelte'
   import Tree from './components/Tree.svelte'
-  import certoraScriptOutput from './mocks/certora-script-output.json'
+  import certoraScriptOutput from './mocks/certora-script-output-example-1.json'
 </script>
 
 <Pane
