@@ -40,7 +40,7 @@ export enum CallTraceFunctionStatuses {
 export type CallTraceFunction = {
   name: string
   returnValue: string
-  status: CallTraceFunctionStatuses
+  status: CallTraceFunctionStatuses | ''
   childrenList: CallTraceFunction[]
   jumpToDefinition: JumpToDefinition[]
 }
@@ -61,16 +61,40 @@ export type CallResolutionItem = {
 export type Rule = {
   name: string
   parent_rule?: string
-  graph_link: string
-  result: RuleResults
+  graph_link?: string
+  result?: RuleResults
+  duration?: number
   variables?: Variable[]
   assertMessage?: string[]
   failureCauses?: {
     expr: string
     jumpToDefinition: JumpToDefinition[]
   }
-  callTrace: CallTraceFunction[]
-  callResolution: CallResolutionItem[]
-  callResolutionWarnings: CallResolutionItem[]
-  jumpToDefinition: JumpToDefinition[]
+  callTrace?: CallTraceFunction[]
+  callResolution?: CallResolutionItem[]
+  callResolutionWarnings?: CallResolutionItem[]
+  jumpToDefinition?: JumpToDefinition[]
+  childrenList?: Rule[]
 }
+
+export type RuleTreeChildren =
+  | (Rule & { childrenList: Rule[] })
+  | { assertMessage?: string[] }
+
+export type RuleTree = {
+  name: string
+  graph_link?: string
+  result?: RuleResults
+  duration?: number
+  variables?: Variable[]
+  assertMessage?: string[]
+  failureCauses?: {
+    expr: string
+    jumpToDefinition: JumpToDefinition[]
+  }
+  callTrace?: CallTraceFunction[]
+  callResolution?: CallResolutionItem[]
+  callResolutionWarnings?: CallResolutionItem[]
+  jumpToDefinition?: JumpToDefinition[]
+  childrenList: RuleTreeChildren[]
+}[]

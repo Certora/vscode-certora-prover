@@ -1,0 +1,171 @@
+{
+  "name": "eMsgSender(uint)",
+  "parent_rule": "ifExitedIsTrueThenMethodsRevertExceptOwner",
+  "graph_link": "Report-ifExitedIsTrueThenMethodsRevertExceptOwner-checkAplusBeqCLPU256Cint256CU256RP.html",
+  "result": "VIOLATED",
+  "variables": [
+    {
+      "e.msg.sender": "0",
+      "jumpToDefinition": [
+        {
+          "file": "spec/compoundStrategy.spec",
+          "line": 102,
+          "col": 0
+        }
+      ]
+    },
+    {
+      "e.msg.value": "0",
+      "jumpToDefinition": [
+        {
+          "file": "spec/compoundStrategy.spec",
+          "line": 102,
+          "col": 0
+        }
+      ]
+    },
+    {
+      "e.msg.address": "0",
+      "jumpToDefinition": [
+        {
+          "file": "spec/compoundStrategy.spec",
+          "line": 102,
+          "col": 0
+        }
+      ]
+    },
+    {
+      "lastReverted": false,
+      "jumpToDefinition": [
+        {
+          "file": "spec/compoundStrategy.spec",
+          "line": 112,
+          "col": 12
+        }
+      ]
+    }
+  ],
+  "assertMessage": ["Methods didn't revert"],
+  "failureCauses": {
+    "expr": "false",
+    "jumpToDefinition": [
+      {
+        "file": "spec/compoundStrategy.spec",
+        "line": 112,
+        "col": 12
+      }
+    ]
+  },
+  "callTrace": [
+    {
+      "name": "CompoundStrategyHarness.exited",
+      "returnValue": "1",
+      "status": "SUCCESS",
+      "childrenList": [],
+      "jumpToDefinition": [
+        {
+          "file": "contracts/strategies/CompoundStrategy.sol",
+          "line": 66,
+          "col": 0
+        },
+        {
+          "file": "spec/compoundStrategy.spec",
+          "line": 104,
+          "col": 13
+        }
+      ]
+    },
+    {
+      "name": "CompoundStrategyHarness.owner",
+      "returnValue": "1",
+      "status": "SUCCESS",
+      "childrenList": [],
+      "jumpToDefinition": [
+        {
+          "file": "node_modules/@boringcrypto/boring-solidity/contracts/BoringOwnable.sol",
+          "line": 9,
+          "col": 0
+        },
+        {
+          "file": "spec/compoundStrategy.spec",
+          "line": 109,
+          "col": 29
+        }
+      ]
+    },
+    {
+      "name": "CompoundStrategyHarness.checkAplusBeqC(0,0,0)",
+      "returnValue": "true",
+      "status": "SUCCESS",
+      "childrenList": [
+        {
+          "name": "add(uint256,uint256) (internal)",
+          "returnValue": "",
+          "status": "",
+          "childrenList": [
+            {
+              "name": "add(uint256,uint256) (internal)",
+              "returnValue": "",
+              "status": "",
+              "childrenList": [
+                {
+                  "name": "add(uint256,uint256) (internal)",
+                  "returnValue": "",
+                  "status": "",
+                  "childrenList": [],
+                  "jumpToDefinition": [
+                    {
+                      "file": "spec/harness/StrategyHarness.sol",
+                      "line": 31,
+                      "col": 22
+                    }
+                  ]
+                }
+              ],
+              "jumpToDefinition": [
+                {
+                  "file": "spec/harness/StrategyHarness.sol",
+                  "line": 31,
+                  "col": 22
+                }
+              ]
+            }
+          ],
+          "jumpToDefinition": [
+            {
+              "file": "spec/harness/StrategyHarness.sol",
+              "line": 31,
+              "col": 22
+            }
+          ]
+        }
+      ],
+      "jumpToDefinition": [
+        {
+          "file": "spec/harness/StrategyHarness.sol",
+          "line": 28,
+          "col": 0
+        },
+        {
+          "file": "spec/compoundStrategy.spec",
+          "line": 110,
+          "col": 0
+        }
+      ]
+    }
+  ],
+  "callResolution": [],
+  "callResolutionWarnings": [],
+  "jumpToDefinition": [
+    {
+      "file": "spec/harness/StrategyHarness.sol",
+      "line": 28,
+      "col": 0
+    },
+    {
+      "file": "spec/compoundStrategy.spec",
+      "line": 29,
+      "col": 0
+    }
+  ]
+}
