@@ -87,7 +87,9 @@
     "extends": [
       "standard",
       "prettier",
-      "plugin:prettier/recommended"
+      "plugin:prettier/recommended",
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:@typescript-eslint/recommended"
     ],
     "plugins": [
       "security",
@@ -108,6 +110,9 @@
     "globals": {
       "vscode": "readonly",
       "mediaPath": "readonly"
+    },
+    "rules": {
+      "camelcase": "off"
     }
   },
   "eslintIgnore": [
