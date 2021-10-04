@@ -67,11 +67,13 @@
         : ''}"
     />
     <div class="contents">
-      {#if data.type === 'rules' && data.item.isAssertMessageNode}
-        <div class="icon" style="background-image: url({messageIcon});" />
-      {/if}
-      {#if data.type === 'rules' && !data.item.isAssertMessageNode}
-        <div class="icon" style="background-image: url({statusIcon});" />
+      {#if data.type === 'rules'}
+        <div
+          class="icon"
+          style="background-image: url({data.item.isAssertMessageNode
+            ? messageIcon
+            : statusIcon});"
+        />
       {/if}
       {#if data.type === 'callstack'}
         <div class="icon codicon codicon-debug-stackframe" />
@@ -87,13 +89,13 @@
           </span>
           {#if data.type === 'rules' && data.item.duration}
             <span class="description-container">
-              <span class="label-description">2sec</span>
+              <span class="label-description">{data.item.duration}</span>
             </span>
           {/if}
         </div>
-        {#if data.type === 'callstack'}
+        {#if data.type === 'callstack' && data.item.status}
           <div class="result-container">
-            <div class="result">SUCCESS</div>
+            <div class="result">{data.item.status}</div>
           </div>
         {/if}
         <div class="actions">
@@ -105,32 +107,17 @@
 </div>
 
 {#if isExpanded && hasChildren}
-  {#if data.type === 'rules'}
-    {#each data.item.childrenList as child, i}
-      <svelte:self
-        data={{
-          type: 'rules',
-          item: child,
-        }}
-        level={level + 1}
-        setSize={data.item.childrenList.length}
-        posinset={i}
-      />
-    {/each}
-  {/if}
-  {#if data.type === 'callstack'}
-    {#each data.item.childrenList as child, i}
-      <svelte:self
-        data={{
-          type: 'callstack',
-          item: child,
-        }}
-        level={level + 1}
-        setSize={data.item.childrenList.length}
-        posinset={i}
-      />
-    {/each}
-  {/if}
+  {#each data.item.childrenList as child, i}
+    <svelte:self
+      data={{
+        type: data.type,
+        item: child,
+      }}
+      level={level + 1}
+      setSize={data.item.childrenList.length}
+      posinset={i}
+    />
+  {/each}
 {/if}
 
 <style lang="postcss">
