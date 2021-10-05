@@ -26,14 +26,14 @@
   $: hasChildren = Boolean(data.item.childrenList?.length)
   $: statusIcon =
     data.type === TreeType.Rules && data.item.result
-      ? `/${data.item.result}-status.svg`
-      : `/unknown-status.svg`
+      ? `${data.item.result}-status.svg`
+      : `unknown-status.svg`
   $: messageIcon =
     data.type === TreeType.Rules &&
     data.item.isAssertMessageNode &&
     data.item.result === RuleResults.Success
-      ? '/success-message.svg'
-      : '/error-message.svg'
+      ? 'success-message.svg'
+      : 'error-message.svg'
 
   let isExpanded = false
   let isFocused = false
