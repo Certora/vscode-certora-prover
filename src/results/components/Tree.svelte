@@ -23,7 +23,7 @@
           item,
         }}
         setSize={data.tree.length}
-        posinset={i + 1}
+        posInset={i + 1}
       />
     {/each}
   {/if}
@@ -35,7 +35,7 @@
           item,
         }}
         setSize={data.tree.length}
-        posinset={i + 1}
+        posInset={i + 1}
       />
     {/each}
   {/if}

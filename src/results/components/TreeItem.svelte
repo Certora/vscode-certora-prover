@@ -1,7 +1,6 @@
 <script lang="ts">
   import Toolbar from './Toolbar.svelte'
   import TreeIcon from './TreeIcon.svelte'
-  import { getIconPath } from '../getIconPath'
   import {
     Action,
     RuleTreeItem,
@@ -20,7 +19,7 @@
         item: CallTraceFunction
       }
   export let setSize = 1
-  export let posinset = 1
+  export let posInset = 1
   export let actions: Action[] = []
   export let level = 1
 
@@ -46,7 +45,7 @@
   class:selected={isFocused}
   role="treeitem"
   aria-setsize={setSize}
-  aria-posinset={posinset}
+  aria-posinset={posInset}
   aria-selected="false"
   aria-label={data.item.name}
   aria-level={level}
@@ -112,7 +111,7 @@
       }}
       level={level + 1}
       setSize={data.item.childrenList.length}
-      posinset={i}
+      posInset={i}
     />
   {/each}
 {/if}
