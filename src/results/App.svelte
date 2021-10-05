@@ -7,6 +7,7 @@
   import certoraScriptOutput3 from './mocks/certora-script-output-example-3.json'
   import certoraScriptOutput4 from './mocks/certora-script-output-example-4.json'
   import type { RuleTree, Rule, RuleTreeItem, CallTraceFunction } from './types'
+  import { TreeType } from './types'
 
   const outputs = [
     certoraScriptOutput1,
@@ -74,7 +75,7 @@
 <Pane title="Rules">
   <Tree
     data={{
-      type: 'rules',
+      type: TreeType.Rules,
       tree,
     }}
   />
@@ -82,7 +83,7 @@
 <Pane title="Call traces">
   <Tree
     data={{
-      type: 'callstack',
+      type: TreeType.Calltrace,
       tree: calltrace,
     }}
   />

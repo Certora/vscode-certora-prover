@@ -6,15 +6,16 @@
     RuleTreeItem,
     CallTraceFunction,
     RuleResults,
+    TreeType,
   } from '../types'
 
   export let data:
     | {
-        type: 'rules'
+        type: TreeType.Rules
         item: RuleTreeItem
       }
     | {
-        type: 'callstack'
+        type: TreeType.Calltrace
         item: CallTraceFunction
       }
   export let setSize = 1
@@ -24,12 +25,12 @@
 
   $: hasChildren = Boolean(data.item.childrenList?.length)
   $: statusIcon = getIconPath(
-    data.type === 'rules' && data.item.result
+    data.type === TreeType.Rules && data.item.result
       ? `/${data.item.result}-status.svg`
       : `/unknown-status.svg`,
   )
   $: messageIcon = getIconPath(
-    data.type === 'rules' &&
+    data.type === TreeType.Rules &&
       data.item.isAssertMessageNode &&
       data.item.result === RuleResults.Success
       ? '/success-message.svg'
@@ -67,7 +68,7 @@
         : ''}"
     />
     <div class="contents">
-      {#if data.type === 'rules'}
+      {#if data.type === TreeType.Rules}
         <div
           class="icon"
           style="background-image: url({data.item.isAssertMessageNode
@@ -75,7 +76,7 @@
             : statusIcon});"
         />
       {/if}
-      {#if data.type === 'callstack'}
+      {#if data.type === TreeType.Calltrace}
         <div class="icon codicon codicon-debug-stackframe" />
       {/if}
       <div class="label">
@@ -87,13 +88,13 @@
               </span>
             </a>
           </span>
-          {#if data.type === 'rules' && data.item.duration}
+          {#if data.type === TreeType.Rules && data.item.duration}
             <span class="description-container">
               <span class="label-description">{data.item.duration}</span>
             </span>
           {/if}
         </div>
-        {#if data.type === 'callstack' && data.item.status}
+        {#if data.type === TreeType.Calltrace && data.item.status}
           <div class="result-container">
             <div class="result">{data.item.status}</div>
           </div>

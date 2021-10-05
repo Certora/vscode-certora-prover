@@ -95,3 +95,8 @@ export type RuleTreeItem = {
 }
 
 export type RuleTree = RuleTreeItem[]
+
+export enum TreeType {
+  Rules = 'rules',
+  Calltrace = 'calltrace',
+}
