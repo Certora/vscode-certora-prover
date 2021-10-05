@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
-import { navigateToCode, JumpToDefinition } from './utils/navigateToCode'
+import { navigateToCode } from './utils/navigateToCode'
 import { getNonce } from './utils/getNonce'
+import { JumpToDefinition } from '../results/types'
 
 export enum Commands {
   NavigateToCode = 'navigate-to-code',
