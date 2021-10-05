@@ -1,13 +1,14 @@
 import * as vscode from 'vscode'
+import { navigateToCode, JumpToDefinition } from './utils/navigateToCode'
+import { getNonce } from './utils/getNonce'
 
-function getNonce() {
-  let text = ''
-  const possible =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-  for (let i = 0; i < 32; i++) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length))
-  }
-  return text
+export enum Commands {
+  NavigateToCode = 'navigate-to-code',
+}
+
+type EventFromWebview = {
+  command: Commands.NavigateToCode
+  payload: JumpToDefinition[]
 }
 
 export class WebviewProvider implements vscode.WebviewViewProvider {
@@ -17,13 +18,26 @@ export class WebviewProvider implements vscode.WebviewViewProvider {
     this._extensionUri = _extensionUri
   }
 
-  resolveWebviewView({ webview }: vscode.WebviewView) {
+  resolveWebviewView({ webview }: vscode.WebviewView): void {
     webview.options = {
       enableScripts: true,
       localResourceRoots: [this._extensionUri],
     }
 
     webview.html = this._getHtmlForWebview(webview)
+    webview.onDidReceiveMessage(
+      (e: EventFromWebview) => {
+        switch (e.command) {
+          case Commands.NavigateToCode:
+            navigateToCode(e.payload)
+            break
+          default:
+            break
+        }
+      },
+      null,
+      [],
+    )
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {

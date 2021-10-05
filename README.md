@@ -53,3 +53,25 @@ In progress
 In review
 Done
 ```
+
+7. Naming
+
+Use kebab-case for directories
+```
+mock-files
+```
+
+Use case same exported entity
+```ts
+export function getIconPath(path: string) {
+  return mediaPath + path
+}
+```
+```
+getIconPath.ts
+```
+
+Use PascalCase for UI components
+```
+TreeItem.svelte
+```
