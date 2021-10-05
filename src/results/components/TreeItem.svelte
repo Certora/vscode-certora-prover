@@ -1,5 +1,6 @@
 <script lang="ts">
   import Toolbar from './Toolbar.svelte'
+  import TreeIcon from './TreeIcon.svelte'
   import { getIconPath } from '../getIconPath'
   import {
     Action,
@@ -24,18 +25,16 @@
   export let level = 1
 
   $: hasChildren = Boolean(data.item.childrenList?.length)
-  $: statusIcon = getIconPath(
+  $: statusIcon =
     data.type === TreeType.Rules && data.item.result
       ? `/${data.item.result}-status.svg`
-      : `/unknown-status.svg`,
-  )
-  $: messageIcon = getIconPath(
+      : `/unknown-status.svg`
+  $: messageIcon =
     data.type === TreeType.Rules &&
-      data.item.isAssertMessageNode &&
-      data.item.result === RuleResults.Success
+    data.item.isAssertMessageNode &&
+    data.item.result === RuleResults.Success
       ? '/success-message.svg'
-      : '/error-message.svg',
-  )
+      : '/error-message.svg'
 
   let isExpanded = false
   let isFocused = false
@@ -69,15 +68,12 @@
     />
     <div class="contents">
       {#if data.type === TreeType.Rules}
-        <div
-          class="icon"
-          style="background-image: url({data.item.isAssertMessageNode
-            ? messageIcon
-            : statusIcon});"
+        <TreeIcon
+          path={data.item.isAssertMessageNode ? messageIcon : statusIcon}
         />
       {/if}
       {#if data.type === TreeType.Calltrace}
-        <div class="icon codicon codicon-debug-stackframe" />
+        <TreeIcon codicon="codicon-debug-stackframe" />
       {/if}
       <div class="label">
         <div class="label-container">
@@ -205,19 +201,6 @@
     overflow: hidden;
     flex-wrap: nowrap;
     padding-left: 3px;
-  }
-
-  .icon {
-    background-size: 16px;
-    background-position: 0;
-    background-repeat: no-repeat;
-    padding-right: 6px;
-    width: 16px;
-    height: 22px;
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    -webkit-font-smoothing: antialiased;
   }
 
   .label {

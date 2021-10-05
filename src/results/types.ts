@@ -12,6 +12,7 @@ export enum RuleResults {
   Error = 'ERROR',
   Unknown = 'UNKNOWN',
   Skip = 'SKIP',
+  Timeout = 'TIMEOUT',
 }
 
 export type Variable = Record<string, string | boolean> & {
