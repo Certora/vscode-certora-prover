@@ -1,0 +1,227 @@
+{
+  "name": "deposit(address,address,address,uint256,uint256)",
+  "assertMessage": ["someMessage"],
+  "parent_rule": "preserveTotalAssetsOfUser",
+  "result": "TIMEOUT",
+  "graph_link": "Report-preserveTotalAssetsOfUser-depositLPADRCADRCADRCU256CU256RP.html",
+  "callResolution": [
+    {
+      "caller": {
+        "name": "BentoBoxHarness.tokenBalanceOfUser",
+        "jumpToDefinition": [
+          {
+            "file": "spec/harness/BentoBoxHarness.sol",
+            "line": 23,
+            "col": 14
+          },
+          {
+            "file": "spec/bentobox.spec",
+            "line": 51,
+            "col": 0
+          }
+        ]
+      },
+      "callee": {
+        "name": "token.balanceOf(user)",
+        "jumpToDefinition": [
+          {
+            "file": "spec/harness/BentoBoxHarness.sol",
+            "line": 24,
+            "col": 16
+          },
+          {
+            "file": "spec/bentobox.spec",
+            "line": 21,
+            "col": 0
+          }
+        ]
+      },
+      "summary": "UNRESOLVED optimistic Dispatcher summary",
+      "comments": [
+        {
+          "alternatives": "[DummyERC20A.balanceOf, DummyWeth.balanceOf]"
+        },
+        {
+          "use decision": "specification"
+        }
+      ]
+    },
+    {
+      "caller": {
+        "name": "BentoBoxHarness.deposit",
+        "jumpToDefinition": [
+          {
+            "file": "spec/BentoBox.sol",
+            "line": 174,
+            "col": 14
+          },
+          {
+            "file": "spec/bentobox.spec",
+            "line": 276,
+            "col": 9
+          }
+        ]
+      },
+      "callee": {
+        "name": "token.transferFrom(from, address(this), amount)",
+        "jumpToDefinition": [
+          {
+            "file": "spec/BentoBox.sol",
+            "line": 224,
+            "col": 13
+          },
+          {
+            "file": "spec/bentobox.spec",
+            "line": 23,
+            "col": 0
+          }
+        ]
+      },
+      "summary": "UNRESOLVED optimistic Dispatcher summary",
+      "comments": [
+        {
+          "alternatives": "[DummyERC20A.transferFrom, DummyWeth.transferFrom]"
+        },
+        {
+          "use decision": "specification"
+        }
+      ]
+    },
+    {
+      "caller": {
+        "name": "BentoBoxHarness.deposit",
+        "jumpToDefinition": [
+          {
+            "file": "spec/BentoBox.sol",
+            "line": 174,
+            "col": 14
+          },
+          {
+            "file": "spec/bentobox.spec",
+            "line": 276,
+            "col": 9
+          }
+        ]
+      },
+      "callee": {
+        "name": "IWETH(address(wethToken)).deposit{value: amount}()",
+        "jumpToDefinition": [
+          {
+            "file": "spec/BentoBox.sol",
+            "line": 220,
+            "col": 13
+          },
+          {
+            "file": "spec/bentobox.spec",
+            "line": 28,
+            "col": 0
+          }
+        ]
+      },
+      "summary": "UNRESOLVED optimistic Dispatcher summary",
+      "comments": [
+        {
+          "alternatives": "[DummyWeth.deposit]"
+        },
+        {
+          "use decision": "specification"
+        }
+      ]
+    },
+    {
+      "caller": {
+        "name": "BentoBoxHarness.deposit",
+        "jumpToDefinition": [
+          {
+            "file": "spec/BentoBox.sol",
+            "line": 174,
+            "col": 14
+          },
+          {
+            "file": "spec/bentobox.spec",
+            "line": 276,
+            "col": 9
+          }
+        ]
+      },
+      "callee": {
+        "name": "token.balanceOf(address(this))",
+        "jumpToDefinition": [
+          {
+            "file": "spec/BentoBox.sol",
+            "line": 133,
+            "col": 18
+          },
+          {
+            "file": "spec/bentobox.spec",
+            "line": 21,
+            "col": 0
+          }
+        ]
+      },
+      "summary": "UNRESOLVED optimistic Dispatcher summary",
+      "comments": [
+        {
+          "alternatives": "[DummyERC20A.balanceOf, DummyWeth.balanceOf]"
+        },
+        {
+          "use decision": "specification"
+        }
+      ]
+    },
+    {
+      "caller": {
+        "name": "BentoBoxHarness.deposit",
+        "jumpToDefinition": [
+          {
+            "file": "spec/BentoBox.sol",
+            "line": 174,
+            "col": 14
+          },
+          {
+            "file": "spec/bentobox.spec",
+            "line": 276,
+            "col": 9
+          }
+        ]
+      },
+      "callee": {
+        "name": "token.totalSupply()",
+        "jumpToDefinition": [
+          {
+            "file": "spec/BentoBox.sol",
+            "line": 189,
+            "col": 39
+          },
+          {
+            "file": "spec/bentobox.spec",
+            "line": 22,
+            "col": 0
+          }
+        ]
+      },
+      "summary": "UNRESOLVED optimistic Dispatcher summary",
+      "comments": [
+        {
+          "alternatives": "[DummyERC20A.totalSupply, DummyWeth.totalSupply]"
+        },
+        {
+          "use decision": "specification"
+        }
+      ]
+    }
+  ],
+  "callResolutionWarnings": [],
+  "jumpToDefinition": [
+    {
+      "file": "contracts/BentoBox.sol",
+      "line": 174,
+      "col": 0
+    },
+    {
+      "file": "spec/bentobox.spec",
+      "line": 227,
+      "col": 0
+    }
+  ]
+}

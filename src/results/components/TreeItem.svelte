@@ -1,16 +1,40 @@
 <script lang="ts">
   import Toolbar from './Toolbar.svelte'
-  import { getIconPath } from '../getIconPath'
-  import type { TreeItem, Action } from '../types'
+  import TreeIcon from './TreeIcon.svelte'
+  import {
+    Action,
+    RuleTreeItem,
+    CallTraceFunction,
+    RuleResults,
+    TreeType,
+  } from '../types'
 
+  export let data:
+    | {
+        type: TreeType.Rules
+        item: RuleTreeItem
+      }
+    | {
+        type: TreeType.Calltrace
+        item: CallTraceFunction
+      }
   export let setSize = 1
-  export let posinset = 1
+  export let posInset = 1
   export let actions: Action[] = []
   export let level = 1
 
-  export let item: TreeItem
-
-  $: hasChildren = Boolean(item.childrenList?.length)
+  $: hasChildren = Boolean(data.item.childrenList?.length)
+  $: statusIcon =
+    data.type === TreeType.Rules && data.item.result
+      ? `${data.item.result}-status.svg`
+      : `unknown-status.svg`
+  $: messageIcon =
+    data.type === TreeType.Rules &&
+    data.item.isAssertMessageNode &&
+    data.item.result === RuleResults.Success
+      ? 'success-message.svg'
+      : 'error-message.svg'
+  $: indent = `${level * 8}px`
 
   let isExpanded = false
   let isFocused = false
@@ -22,15 +46,15 @@
   class:selected={isFocused}
   role="treeitem"
   aria-setsize={setSize}
-  aria-posinset={posinset}
+  aria-posinset={posInset}
   aria-selected="false"
-  aria-label={item.name}
+  aria-label={data.item.name}
   aria-level={level}
   aria-expanded={isExpanded}
   draggable="false"
   tabindex="0"
-  title={item.name}
-  style="--indent: calc({level} * 8px)"
+  title={data.item.name}
+  style="--indent: {indent}"
   on:click={() => (isExpanded = !isExpanded)}
   on:focus={() => (isFocused = true)}
   on:blur={() => (isFocused = false)}
@@ -43,27 +67,34 @@
         : ''}"
     />
     <div class="contents">
-      <div
-        class="icon"
-        style="background-image: url({getIconPath('/error-message.svg')});"
-      />
-      <!-- <div class="icon codicon codicon-debug-stackframe" /> -->
+      {#if data.type === TreeType.Rules}
+        <TreeIcon
+          path={data.item.isAssertMessageNode ? messageIcon : statusIcon}
+        />
+      {/if}
+      {#if data.type === TreeType.Calltrace}
+        <TreeIcon codicon="codicon-debug-stackframe" />
+      {/if}
       <div class="label">
         <div class="label-container">
           <span class="name-container">
             <a class="label-name">
               <span class="highlighted-label">
-                <span>{item.name}</span>
+                <span>{data.item.name}</span>
               </span>
             </a>
           </span>
-          <!-- <span class="description-container">
-            <span class="label-description">2sec</span>
-          </span> -->
+          {#if data.type === TreeType.Rules && data.item.duration}
+            <span class="description-container">
+              <span class="label-description">{data.item.duration}</span>
+            </span>
+          {/if}
         </div>
-        <div class="result-container">
-          <div class="result">SUCCESS</div>
-        </div>
+        {#if data.type === TreeType.Calltrace && data.item.status}
+          <div class="result-container">
+            <div class="result">{data.item.status}</div>
+          </div>
+        {/if}
         <div class="actions">
           <Toolbar {actions} />
         </div>
@@ -73,12 +104,15 @@
 </div>
 
 {#if isExpanded && hasChildren}
-  {#each item.childrenList as child, i}
+  {#each data.item.childrenList as child, i}
     <svelte:self
-      item={child}
+      data={{
+        type: data.type,
+        item: child,
+      }}
       level={level + 1}
-      setSize={item.childrenList.length}
-      posinset={i}
+      setSize={data.item.childrenList.length}
+      posInset={i}
     />
   {/each}
 {/if}
@@ -167,19 +201,6 @@
     overflow: hidden;
     flex-wrap: nowrap;
     padding-left: 3px;
-  }
-
-  .icon {
-    background-size: 16px;
-    background-position: 0;
-    background-repeat: no-repeat;
-    padding-right: 6px;
-    width: 16px;
-    height: 22px;
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    -webkit-font-smoothing: antialiased;
   }
 
   .label {

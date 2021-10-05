@@ -1,9 +1,9 @@
 <script lang="ts">
   import Toolbar from './Toolbar.svelte'
+  import type { Action } from '../types'
 
   export let title: string
-  export let actions: { title: string; onClick: () => void; icon: string }[] =
-    []
+  export let actions: Action[] = []
 
   let isExpanded = false
 

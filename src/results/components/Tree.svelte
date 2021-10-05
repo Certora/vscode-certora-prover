@@ -1,21 +1,44 @@
 <script lang="ts">
   import TreeItem from './TreeItem.svelte'
-  import type { TreeItem as TreeItemType } from '../types'
+  import type { RuleTree, CallTraceFunction } from '../types'
+  import { TreeType } from '../types'
 
-  export let data: TreeItemType[]
+  export let data:
+    | {
+        type: TreeType.Rules
+        tree: RuleTree
+      }
+    | {
+        type: TreeType.Calltrace
+        tree: CallTraceFunction[]
+      }
 </script>
 
 <div class="tree">
-  {#each data as item, i}
-    <TreeItem
-      {item}
-      setSize={data.length}
-      posinset={i + 1}
-      actions={[
-        { title: 'Action1', icon: '\\ea60', onClick: () => console.log(123) },
-      ]}
-    />
-  {/each}
+  {#if data.type === TreeType.Rules}
+    {#each data.tree as item, i}
+      <TreeItem
+        data={{
+          type: TreeType.Rules,
+          item,
+        }}
+        setSize={data.tree.length}
+        posInset={i + 1}
+      />
+    {/each}
+  {/if}
+  {#if data.type === TreeType.Calltrace}
+    {#each data.tree as item, i}
+      <TreeItem
+        data={{
+          type: TreeType.Calltrace,
+          item,
+        }}
+        setSize={data.tree.length}
+        posInset={i + 1}
+      />
+    {/each}
+  {/if}
 </div>
 
 <style>
