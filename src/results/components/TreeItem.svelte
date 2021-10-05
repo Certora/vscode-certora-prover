@@ -34,6 +34,7 @@
     data.item.result === RuleResults.Success
       ? 'success-message.svg'
       : 'error-message.svg'
+  $: indent = `${level * 8}px`
 
   let isExpanded = false
   let isFocused = false
@@ -53,7 +54,7 @@
   draggable="false"
   tabindex="0"
   title={data.item.name}
-  style="--indent: calc({level} * 8px)"
+  style="--indent: {indent}"
   on:click={() => (isExpanded = !isExpanded)}
   on:focus={() => (isFocused = true)}
   on:blur={() => (isFocused = false)}
