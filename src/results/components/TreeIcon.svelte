@@ -9,8 +9,8 @@
 
 {#if codicon}
   <div class="icon codicon {codicon}" />
-{:else if path}
-  <div class="icon" style="background-image: var({fullPath})" />
+{:else if fullPath}
+  <div class="icon" style="background-image: url({fullPath})" />
 {/if}
 
 <style lang="postcss">

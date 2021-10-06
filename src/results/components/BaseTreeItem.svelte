@@ -1,42 +1,13 @@
 <script lang="ts">
-  import Toolbar from './Toolbar.svelte'
-  import TreeIcon from './TreeIcon.svelte'
-  import {
-    Action,
-    RuleTreeItem,
-    CallTraceFunction,
-    RuleResults,
-    TreeType,
-  } from '../types'
+  export let hasChildren: boolean
+  export let label: string
+  export let setSize: number
+  export let posInset: number
+  export let level: number
+  export let isExpanded = false
 
-  export let data:
-    | {
-        type: TreeType.Rules
-        item: RuleTreeItem
-      }
-    | {
-        type: TreeType.Calltrace
-        item: CallTraceFunction
-      }
-  export let setSize = 1
-  export let posInset = 1
-  export let actions: Action[] = []
-  export let level = 1
-
-  $: hasChildren = Boolean(data.item.childrenList?.length)
-  $: statusIcon =
-    data.type === TreeType.Rules && data.item.result
-      ? `${data.item.result}-status.svg`
-      : `unknown-status.svg`
-  $: messageIcon =
-    data.type === TreeType.Rules &&
-    data.item.isAssertMessageNode &&
-    data.item.result === RuleResults.Success
-      ? 'success-message.svg'
-      : 'error-message.svg'
   $: indent = `${level * 8}px`
 
-  let isExpanded = false
   let isFocused = false
 </script>
 
@@ -48,12 +19,12 @@
   aria-setsize={setSize}
   aria-posinset={posInset}
   aria-selected="false"
-  aria-label={data.item.name}
+  aria-label={label}
   aria-level={level}
   aria-expanded={isExpanded}
   draggable="false"
   tabindex="0"
-  title={data.item.name}
+  title={label}
   style="--indent: {indent}"
   on:click={() => (isExpanded = !isExpanded)}
   on:focus={() => (isFocused = true)}
@@ -67,55 +38,10 @@
         : ''}"
     />
     <div class="contents">
-      {#if data.type === TreeType.Rules}
-        <TreeIcon
-          path={data.item.isAssertMessageNode ? messageIcon : statusIcon}
-        />
-      {/if}
-      {#if data.type === TreeType.Calltrace}
-        <TreeIcon codicon="codicon-debug-stackframe" />
-      {/if}
-      <div class="label">
-        <div class="label-container">
-          <span class="name-container">
-            <a class="label-name">
-              <span class="highlighted-label">
-                <span>{data.item.name}</span>
-              </span>
-            </a>
-          </span>
-          {#if data.type === TreeType.Rules && data.item.duration}
-            <span class="description-container">
-              <span class="label-description">{data.item.duration}</span>
-            </span>
-          {/if}
-        </div>
-        {#if data.type === TreeType.Calltrace && data.item.status}
-          <div class="result-container">
-            <div class="result">{data.item.status}</div>
-          </div>
-        {/if}
-        <div class="actions">
-          <Toolbar {actions} />
-        </div>
-      </div>
+      <slot />
     </div>
   </div>
 </div>
-
-{#if isExpanded && hasChildren}
-  {#each data.item.childrenList as child, i}
-    <svelte:self
-      data={{
-        type: data.type,
-        item: child,
-      }}
-      level={level + 1}
-      setSize={data.item.childrenList.length}
-      posInset={i}
-    />
-  {/each}
-{/if}
 
 <style lang="postcss">
   .tree-item {
@@ -208,23 +134,6 @@
     text-overflow: ellipsis;
     overflow: hidden;
     flex: 1;
-  }
-
-  .result-container {
-    display: inline-flex;
-    align-items: center;
-    flex: 1;
-    margin-right: 6px;
-    margin-left: 6px;
-
-    .result {
-      font-size: 9px;
-      line-height: 10px;
-      padding: 2px 4px;
-      color: #fff;
-      background-color: #40a040;
-      border-radius: 2px;
-    }
   }
 
   .label-container {

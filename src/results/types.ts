@@ -6,13 +6,50 @@ export type JumpToDefinition = {
   col: number
 }
 
-export enum RuleResults {
-  Success = 'SUCCESS',
+export enum RuleStatuses {
+  Verified = 'VERIFIED',
   Violated = 'VIOLATED',
   Error = 'ERROR',
+  Skipped = 'SKIPPED',
   Unknown = 'UNKNOWN',
-  Skip = 'SKIP',
+  Running = 'RUNNING',
   Timeout = 'TIMEOUT',
+}
+
+export type Assert = {
+  message: string
+  status: RuleStatuses
+  id: number
+  duration: number
+  jumpToDefinition: JumpToDefinition[]
+  output: string
+}
+
+export type Rule = {
+  name: string
+  children: Rule[]
+  status: RuleStatuses
+  asserts: Assert[]
+}
+
+export type Tree = {
+  spec: string
+  contract: string
+  rules: Rule[]
+  timestamp: number
+}
+
+export type CallResolution = {
+  caller: {
+    name: string
+    jumpToDefinition: JumpToDefinition[]
+  }
+  callee: {
+    name: string
+    jumpToDefinition: JumpToDefinition[]
+  }
+  summary: string
+  comments: Record<string, string>[]
 }
 
 export type Variable = Record<string, string | boolean> & {
@@ -33,69 +70,24 @@ export enum CallTraceFunctionStatuses {
 export type CallTraceFunction = {
   name: string
   returnValue: string
-  status: CallTraceFunctionStatuses | ''
+  status: CallTraceFunctionStatuses
   childrenList: CallTraceFunction[]
   jumpToDefinition: JumpToDefinition[]
+  variables: Variable[]
 }
 
-export type CallResolutionItem = {
-  caller: {
-    name: string
-    jumpToDefinition: JumpToDefinition[]
-  }
-  callee: {
-    name: string
-    jumpToDefinition: JumpToDefinition[]
-  }
-  summary: string
-  comments: Record<string, string>[]
-}
-
-export type Rule = {
+export type Output = {
   name: string
-  parent_rule?: string
-  graph_link?: string
-  result?: RuleResults
-  duration?: number
-  variables?: Variable[]
+  assertId: number
+  graph_link: string
+  jumpToDefinition: JumpToDefinition[]
+  result: RuleStatuses
   assertMessage?: string[]
-  failureCauses?: {
-    expr: string
-    jumpToDefinition: JumpToDefinition[]
-  }
+  callResolution: CallResolution[]
+  callResolutionWarnings: CallResolution[]
   callTrace?: CallTraceFunction[]
-  callResolution?: CallResolutionItem[]
-  callResolutionWarnings?: CallResolutionItem[]
-  jumpToDefinition?: JumpToDefinition[]
-  childrenList?: Rule[]
-}
-
-export type RuleTreeChildren =
-  | (Rule & { childrenList: Rule[] })
-  | {
-      isAssertMessageNode?: boolean
-    }
-
-export type RuleTreeItem = {
-  name: string
-  graph_link?: string
-  result?: RuleResults
-  duration?: number
   variables?: Variable[]
-  assertMessage?: string[]
-  isAssertMessageNode?: boolean
-  failureCauses?: {
-    expr: string
-    jumpToDefinition: JumpToDefinition[]
-  }
-  callTrace?: CallTraceFunction[]
-  callResolution?: CallResolutionItem[]
-  callResolutionWarnings?: CallResolutionItem[]
-  jumpToDefinition?: JumpToDefinition[]
-  childrenList: RuleTreeChildren[]
 }
-
-export type RuleTree = RuleTreeItem[]
 
 export enum TreeType {
   Rules = 'rules',

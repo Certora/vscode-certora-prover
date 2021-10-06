@@ -1,0 +1,49 @@
+{
+  "rules": [
+    {
+      "name": "additivity",
+      "jumpToDefinition": [
+        {
+          "file": "spec/bentobox.spec",
+          "line": 153,
+          "col": 0
+        }
+      ],
+      "status": "VIOLATED",
+      "asserts": [
+        {
+          "message": "\"function is not additive for argument address\"",
+          "status": "VIOLATED",
+          "id": 172,
+          "duration": 84,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 172,
+              "col": 5
+            }
+          ],
+          "output": "output172.json"
+        },
+        {
+          "message": "\"function is not additive for sender\"",
+          "status": "VERIFIED",
+          "id": 173,
+          "duration": 158,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
+          "output": "output173.json"
+        }
+      ],
+      "children": []
+    }
+  ],
+  "spec": "bentobox",
+  "contract": "BentoBoxHarness",
+  "timestamp": 1633020088389
+}
