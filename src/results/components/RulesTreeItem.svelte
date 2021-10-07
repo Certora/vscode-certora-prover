@@ -13,10 +13,18 @@
 
   $: label = rule?.name || assert?.message
   $: icon = (rule || assert)?.status
-    ? `${(rule || assert).status}-status.svg`
-    : `unknown-status.svg`
+    ? `${(rule || assert).status}-rule-status.svg`
+    : `unknown-rule-status.svg`
+  $: ruleIcon = rule?.status
+    ? `${rule.status}-rule-status.svg`
+    : `unknown-rule-status.svg`
+  $: assertIcon = assert?.status
+    ? `${assert.status}-assert-message.svg`
+    : `unknown-assert-message.svg`
 
   let isExpanded = false
+
+  $: console.log(rule)
 </script>
 
 <BaseTreeItem
@@ -24,10 +32,10 @@
   {setSize}
   {posInset}
   {level}
-  hasChildren={rule?.children.length > 0}
+  hasChildren={rule?.children.length > 0 || rule?.asserts.length > 0}
   bind:isExpanded
 >
-  <TreeIcon path={icon} />
+  <TreeIcon path={rule ? ruleIcon : assertIcon} />
   <div class="label">
     <div class="label-container">
       <span class="name-container">
