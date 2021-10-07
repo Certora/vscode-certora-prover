@@ -12,9 +12,6 @@
   export let level = 1
 
   $: label = rule?.name || assert?.message
-  $: icon = (rule || assert)?.status
-    ? `${(rule || assert).status}-rule-status.svg`
-    : `unknown-rule-status.svg`
   $: ruleIcon = rule?.status
     ? `${rule.status}-rule-status.svg`
     : `unknown-rule-status.svg`
@@ -23,8 +20,6 @@
     : `unknown-assert-message.svg`
 
   let isExpanded = false
-
-  $: console.log(rule)
 </script>
 
 <BaseTreeItem
