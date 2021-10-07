@@ -9,13 +9,13 @@ export async function navigateToCode(
   if (!base) return
 
   const openedFiles = vscode.workspace.textDocuments.map(doc => doc.uri.path)
-  const filesForOpen = jumpToDefinition.filter(
+  const filesToOpen = jumpToDefinition.filter(
     ({ file }) => !openedFiles.includes(vscode.Uri.joinPath(base, file).path),
   )
 
-  if (filesForOpen.length === 0) return
+  if (filesToOpen.length === 0) return
 
-  for (const item of filesForOpen) {
+  for (const item of filesToOpen) {
     const { file, line, col } = item
     const pathToFile = vscode.Uri.joinPath(base, file).toString()
     const document = await vscode.workspace.openTextDocument(
