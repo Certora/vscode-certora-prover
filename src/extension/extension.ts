@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
-import { WebviewProvider } from './webview-provider'
+import { WebviewProvider } from './WebviewProvider'
 
-export function activate(context: vscode.ExtensionContext) {
+export function activate(context: vscode.ExtensionContext): void {
   const webviewProvider = new WebviewProvider(context.extensionUri)
 
   context.subscriptions.push(
@@ -11,5 +11,3 @@ export function activate(context: vscode.ExtensionContext) {
     ),
   )
 }
-
-export function deactivate() {}
