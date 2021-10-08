@@ -1,12 +1,13 @@
 <script lang="ts">
-  import TreeItem from './TreeItem.svelte'
-  import type { RuleTree, CallTraceFunction } from '../types'
+  import RulesTreeItem from './RulesTreeItem.svelte'
+  import CalltraceTreeItem from './CalltraceTreeItem.svelte'
+  import type { Rule, CallTraceFunction } from '../types'
   import { TreeType } from '../types'
 
   export let data:
     | {
         type: TreeType.Rules
-        tree: RuleTree
+        tree: Rule[]
       }
     | {
         type: TreeType.Calltrace
@@ -16,24 +17,14 @@
 
 <div class="tree">
   {#if data.type === TreeType.Rules}
-    {#each data.tree as item, i}
-      <TreeItem
-        data={{
-          type: TreeType.Rules,
-          item,
-        }}
-        setSize={data.tree.length}
-        posInset={i + 1}
-      />
+    {#each data.tree as rule, i}
+      <RulesTreeItem {rule} setSize={data.tree.length} posInset={i + 1} />
     {/each}
   {/if}
   {#if data.type === TreeType.Calltrace}
-    {#each data.tree as item, i}
-      <TreeItem
-        data={{
-          type: TreeType.Calltrace,
-          item,
-        }}
+    {#each data.tree as callTraceFunction, i}
+      <CalltraceTreeItem
+        {callTraceFunction}
         setSize={data.tree.length}
         posInset={i + 1}
       />

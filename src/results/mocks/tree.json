@@ -1,0 +1,1016 @@
+{
+  "rules": [
+    {
+      "name": "rule1 (verified)",
+      "jumpToDefinition": [
+        {
+          "file": "spec/bentobox.spec",
+          "line": 0,
+          "col": 0
+        }
+      ],
+      "status": "VERIFIED",
+      "asserts": [
+        {
+          "message": "verified",
+          "status": "VERIFIED",
+          "id": 172,
+          "duration": 84,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 172,
+              "col": 5
+            }
+          ],
+          "output": "output172.json"
+        },
+        {
+          "message": "violated",
+          "status": "VIOLATED",
+          "id": 173,
+          "duration": 158,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
+          "output": "output173.json"
+        },
+        {
+          "message": "error",
+          "status": "ERROR",
+          "id": 172,
+          "duration": 84,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 172,
+              "col": 5
+            }
+          ],
+          "output": "output172.json"
+        },
+        {
+          "message": "skipped",
+          "status": "SKIPPED",
+          "id": 173,
+          "duration": 158,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
+          "output": "output173.json"
+        },
+        {
+          "message": "unknown",
+          "status": "UNKNOWN",
+          "id": 172,
+          "duration": 84,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 172,
+              "col": 5
+            }
+          ],
+          "output": "output172.json"
+        },
+        {
+          "message": "running",
+          "status": "RUNNING",
+          "id": 173,
+          "duration": 158,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
+          "output": "output173.json"
+        },
+        {
+          "message": "timeout",
+          "status": "TIMEOUT",
+          "id": 173,
+          "duration": 158,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
+          "output": "output173.json"
+        }
+      ],
+      "children": [
+        {
+          "name": "child rule1 (verified)",
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 0,
+              "col": 0
+            }
+          ],
+          "status": "VERIFIED",
+          "asserts": [
+            {
+              "message": "verified",
+              "status": "VERIFIED",
+              "id": 172,
+              "duration": 84,
+              "jumpToDefinition": [
+                {
+                  "file": "spec/bentobox.spec",
+                  "line": 172,
+                  "col": 5
+                }
+              ],
+              "output": "output172.json"
+            },
+            {
+              "message": "violated",
+              "status": "VIOLATED",
+              "id": 173,
+              "duration": 158,
+              "jumpToDefinition": [
+                {
+                  "file": "spec/bentobox.spec",
+                  "line": 173,
+                  "col": 5
+                }
+              ],
+              "output": "output173.json"
+            },
+            {
+              "message": "error",
+              "status": "ERROR",
+              "id": 172,
+              "duration": 84,
+              "jumpToDefinition": [
+                {
+                  "file": "spec/bentobox.spec",
+                  "line": 172,
+                  "col": 5
+                }
+              ],
+              "output": "output172.json"
+            },
+            {
+              "message": "skipped",
+              "status": "SKIPPED",
+              "id": 173,
+              "duration": 158,
+              "jumpToDefinition": [
+                {
+                  "file": "spec/bentobox.spec",
+                  "line": 173,
+                  "col": 5
+                }
+              ],
+              "output": "output173.json"
+            },
+            {
+              "message": "unknown",
+              "status": "UNKNOWN",
+              "id": 172,
+              "duration": 84,
+              "jumpToDefinition": [
+                {
+                  "file": "spec/bentobox.spec",
+                  "line": 172,
+                  "col": 5
+                }
+              ],
+              "output": "output172.json"
+            },
+            {
+              "message": "running",
+              "status": "RUNNING",
+              "id": 173,
+              "duration": 158,
+              "jumpToDefinition": [
+                {
+                  "file": "spec/bentobox.spec",
+                  "line": 173,
+                  "col": 5
+                }
+              ],
+              "output": "output173.json"
+            },
+            {
+              "message": "timeout",
+              "status": "TIMEOUT",
+              "id": 173,
+              "duration": 158,
+              "jumpToDefinition": [
+                {
+                  "file": "spec/bentobox.spec",
+                  "line": 173,
+                  "col": 5
+                }
+              ],
+              "output": "output173.json"
+            }
+          ],
+          "children": []
+        },
+        {
+          "name": "child rule2 (verified)",
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 0,
+              "col": 0
+            }
+          ],
+          "status": "VERIFIED",
+          "asserts": [
+            {
+              "message": "verified",
+              "status": "VERIFIED",
+              "id": 172,
+              "duration": 84,
+              "jumpToDefinition": [
+                {
+                  "file": "spec/bentobox.spec",
+                  "line": 172,
+                  "col": 5
+                }
+              ],
+              "output": "output172.json"
+            },
+            {
+              "message": "violated",
+              "status": "VIOLATED",
+              "id": 173,
+              "duration": 158,
+              "jumpToDefinition": [
+                {
+                  "file": "spec/bentobox.spec",
+                  "line": 173,
+                  "col": 5
+                }
+              ],
+              "output": "output173.json"
+            },
+            {
+              "message": "error",
+              "status": "ERROR",
+              "id": 172,
+              "duration": 84,
+              "jumpToDefinition": [
+                {
+                  "file": "spec/bentobox.spec",
+                  "line": 172,
+                  "col": 5
+                }
+              ],
+              "output": "output172.json"
+            },
+            {
+              "message": "skipped",
+              "status": "SKIPPED",
+              "id": 173,
+              "duration": 158,
+              "jumpToDefinition": [
+                {
+                  "file": "spec/bentobox.spec",
+                  "line": 173,
+                  "col": 5
+                }
+              ],
+              "output": "output173.json"
+            },
+            {
+              "message": "unknown",
+              "status": "UNKNOWN",
+              "id": 172,
+              "duration": 84,
+              "jumpToDefinition": [
+                {
+                  "file": "spec/bentobox.spec",
+                  "line": 172,
+                  "col": 5
+                }
+              ],
+              "output": "output172.json"
+            },
+            {
+              "message": "running",
+              "status": "RUNNING",
+              "id": 173,
+              "duration": 158,
+              "jumpToDefinition": [
+                {
+                  "file": "spec/bentobox.spec",
+                  "line": 173,
+                  "col": 5
+                }
+              ],
+              "output": "output173.json"
+            },
+            {
+              "message": "timeout",
+              "status": "TIMEOUT",
+              "id": 173,
+              "duration": 158,
+              "jumpToDefinition": [
+                {
+                  "file": "spec/bentobox.spec",
+                  "line": 173,
+                  "col": 5
+                }
+              ],
+              "output": "output173.json"
+            }
+          ],
+          "children": []
+        }
+      ]
+    },
+    {
+      "name": "rule2 (violated)",
+      "jumpToDefinition": [
+        {
+          "file": "spec/bentobox.spec",
+          "line": 0,
+          "col": 0
+        }
+      ],
+      "status": "VIOLATED",
+      "asserts": [
+        {
+          "message": "verified",
+          "status": "VERIFIED",
+          "id": 172,
+          "duration": 84,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 172,
+              "col": 5
+            }
+          ],
+          "output": "output172.json"
+        },
+        {
+          "message": "violated",
+          "status": "VIOLATED",
+          "id": 173,
+          "duration": 158,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
+          "output": "output173.json"
+        },
+        {
+          "message": "error",
+          "status": "ERROR",
+          "id": 172,
+          "duration": 84,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 172,
+              "col": 5
+            }
+          ],
+          "output": "output172.json"
+        },
+        {
+          "message": "skipped",
+          "status": "SKIPPED",
+          "id": 173,
+          "duration": 158,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
+          "output": "output173.json"
+        },
+        {
+          "message": "unknown",
+          "status": "UNKNOWN",
+          "id": 172,
+          "duration": 84,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 172,
+              "col": 5
+            }
+          ],
+          "output": "output172.json"
+        },
+        {
+          "message": "running",
+          "status": "RUNNING",
+          "id": 173,
+          "duration": 158,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
+          "output": "output173.json"
+        },
+        {
+          "message": "timeout",
+          "status": "TIMEOUT",
+          "id": 173,
+          "duration": 158,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
+          "output": "output173.json"
+        }
+      ],
+      "children": []
+    },
+    {
+      "name": "rule3 (error)",
+      "jumpToDefinition": [
+        {
+          "file": "spec/bentobox.spec",
+          "line": 0,
+          "col": 0
+        }
+      ],
+      "status": "ERROR",
+      "asserts": [
+        {
+          "message": "verified",
+          "status": "VERIFIED",
+          "id": 172,
+          "duration": 84,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 172,
+              "col": 5
+            }
+          ],
+          "output": "output172.json"
+        },
+        {
+          "message": "violated",
+          "status": "VIOLATED",
+          "id": 173,
+          "duration": 158,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
+          "output": "output173.json"
+        },
+        {
+          "message": "error",
+          "status": "ERROR",
+          "id": 172,
+          "duration": 84,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 172,
+              "col": 5
+            }
+          ],
+          "output": "output172.json"
+        },
+        {
+          "message": "skipped",
+          "status": "SKIPPED",
+          "id": 173,
+          "duration": 158,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
+          "output": "output173.json"
+        },
+        {
+          "message": "unknown",
+          "status": "UNKNOWN",
+          "id": 172,
+          "duration": 84,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 172,
+              "col": 5
+            }
+          ],
+          "output": "output172.json"
+        },
+        {
+          "message": "running",
+          "status": "RUNNING",
+          "id": 173,
+          "duration": 158,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
+          "output": "output173.json"
+        },
+        {
+          "message": "timeout",
+          "status": "TIMEOUT",
+          "id": 173,
+          "duration": 158,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
+          "output": "output173.json"
+        }
+      ],
+      "children": []
+    },
+    {
+      "name": "rule4 (skipped)",
+      "jumpToDefinition": [
+        {
+          "file": "spec/bentobox.spec",
+          "line": 0,
+          "col": 0
+        }
+      ],
+      "status": "SKIPPED",
+      "asserts": [
+        {
+          "message": "verified",
+          "status": "VERIFIED",
+          "id": 172,
+          "duration": 84,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 172,
+              "col": 5
+            }
+          ],
+          "output": "output172.json"
+        },
+        {
+          "message": "violated",
+          "status": "VIOLATED",
+          "id": 173,
+          "duration": 158,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
+          "output": "output173.json"
+        },
+        {
+          "message": "error",
+          "status": "ERROR",
+          "id": 172,
+          "duration": 84,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 172,
+              "col": 5
+            }
+          ],
+          "output": "output172.json"
+        },
+        {
+          "message": "skipped",
+          "status": "SKIPPED",
+          "id": 173,
+          "duration": 158,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
+          "output": "output173.json"
+        },
+        {
+          "message": "unknown",
+          "status": "UNKNOWN",
+          "id": 172,
+          "duration": 84,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 172,
+              "col": 5
+            }
+          ],
+          "output": "output172.json"
+        },
+        {
+          "message": "running",
+          "status": "RUNNING",
+          "id": 173,
+          "duration": 158,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
+          "output": "output173.json"
+        },
+        {
+          "message": "timeout",
+          "status": "TIMEOUT",
+          "id": 173,
+          "duration": 158,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
+          "output": "output173.json"
+        }
+      ],
+      "children": []
+    },
+    {
+      "name": "rule5 (unknown)",
+      "jumpToDefinition": [
+        {
+          "file": "spec/bentobox.spec",
+          "line": 0,
+          "col": 0
+        }
+      ],
+      "status": "UNKNOWN",
+      "asserts": [
+        {
+          "message": "verified",
+          "status": "VERIFIED",
+          "id": 172,
+          "duration": 84,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 172,
+              "col": 5
+            }
+          ],
+          "output": "output172.json"
+        },
+        {
+          "message": "violated",
+          "status": "VIOLATED",
+          "id": 173,
+          "duration": 158,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
+          "output": "output173.json"
+        },
+        {
+          "message": "error",
+          "status": "ERROR",
+          "id": 172,
+          "duration": 84,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 172,
+              "col": 5
+            }
+          ],
+          "output": "output172.json"
+        },
+        {
+          "message": "skipped",
+          "status": "SKIPPED",
+          "id": 173,
+          "duration": 158,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
+          "output": "output173.json"
+        },
+        {
+          "message": "unknown",
+          "status": "UNKNOWN",
+          "id": 172,
+          "duration": 84,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 172,
+              "col": 5
+            }
+          ],
+          "output": "output172.json"
+        },
+        {
+          "message": "running",
+          "status": "RUNNING",
+          "id": 173,
+          "duration": 158,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
+          "output": "output173.json"
+        },
+        {
+          "message": "timeout",
+          "status": "TIMEOUT",
+          "id": 173,
+          "duration": 158,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
+          "output": "output173.json"
+        }
+      ],
+      "children": []
+    },
+    {
+      "name": "rule6 (running)",
+      "jumpToDefinition": [
+        {
+          "file": "spec/bentobox.spec",
+          "line": 0,
+          "col": 0
+        }
+      ],
+      "status": "RUNNING",
+      "asserts": [
+        {
+          "message": "verified",
+          "status": "VERIFIED",
+          "id": 172,
+          "duration": 84,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 172,
+              "col": 5
+            }
+          ],
+          "output": "output172.json"
+        },
+        {
+          "message": "violated",
+          "status": "VIOLATED",
+          "id": 173,
+          "duration": 158,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
+          "output": "output173.json"
+        },
+        {
+          "message": "error",
+          "status": "ERROR",
+          "id": 172,
+          "duration": 84,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 172,
+              "col": 5
+            }
+          ],
+          "output": "output172.json"
+        },
+        {
+          "message": "skipped",
+          "status": "SKIPPED",
+          "id": 173,
+          "duration": 158,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
+          "output": "output173.json"
+        },
+        {
+          "message": "unknown",
+          "status": "UNKNOWN",
+          "id": 172,
+          "duration": 84,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 172,
+              "col": 5
+            }
+          ],
+          "output": "output172.json"
+        },
+        {
+          "message": "running",
+          "status": "RUNNING",
+          "id": 173,
+          "duration": 158,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
+          "output": "output173.json"
+        },
+        {
+          "message": "timeout",
+          "status": "TIMEOUT",
+          "id": 173,
+          "duration": 158,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
+          "output": "output173.json"
+        }
+      ],
+      "children": []
+    },
+    {
+      "name": "rule7 (timeout)",
+      "jumpToDefinition": [
+        {
+          "file": "spec/bentobox.spec",
+          "line": 0,
+          "col": 0
+        }
+      ],
+      "status": "TIMEOUT",
+      "asserts": [
+        {
+          "message": "verified",
+          "status": "VERIFIED",
+          "id": 172,
+          "duration": 84,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 172,
+              "col": 5
+            }
+          ],
+          "output": "output172.json"
+        },
+        {
+          "message": "violated",
+          "status": "VIOLATED",
+          "id": 173,
+          "duration": 158,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
+          "output": "output173.json"
+        },
+        {
+          "message": "error",
+          "status": "ERROR",
+          "id": 172,
+          "duration": 84,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 172,
+              "col": 5
+            }
+          ],
+          "output": "output172.json"
+        },
+        {
+          "message": "skipped",
+          "status": "SKIPPED",
+          "id": 173,
+          "duration": 158,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
+          "output": "output173.json"
+        },
+        {
+          "message": "unknown",
+          "status": "UNKNOWN",
+          "id": 172,
+          "duration": 84,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 172,
+              "col": 5
+            }
+          ],
+          "output": "output172.json"
+        },
+        {
+          "message": "running",
+          "status": "RUNNING",
+          "id": 173,
+          "duration": 158,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
+          "output": "output173.json"
+        },
+        {
+          "message": "timeout",
+          "status": "TIMEOUT",
+          "id": 173,
+          "duration": 158,
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
+          "output": "output173.json"
+        }
+      ],
+      "children": []
+    }
+  ],
+  "spec": "bentobox",
+  "contract": "BentoBoxHarness",
+  "timestamp": 1633020088389
+}
