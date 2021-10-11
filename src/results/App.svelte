@@ -5,10 +5,10 @@
   import type { Tree as TreeJson, Output } from './types'
   import { TreeType } from './types'
 
-  import tree from './mocks/tree.json'
-  import output from './mocks/output.json'
+  import allStatusesTree from './mocks/all-statuses-tree.json'
+  import output from './mocks/output1.json'
 
-  const typedTree = tree as TreeJson
+  const typedTree = allStatusesTree as TreeJson
   const typedOutput = output as Output
 </script>
 

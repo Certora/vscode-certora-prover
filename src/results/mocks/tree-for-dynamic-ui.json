@@ -1,0 +1,39 @@
+{
+  "spec": "bentobox",
+  "contract": "BentoBoxHarness",
+  "rules": [
+    {
+      "name": "rule0",
+      "jumpToDefinition": [],
+      "status": "VIOLATED",
+      "asserts": [
+        {
+          "message": "message0",
+          "status": "VIOLATED",
+          "id": 0,
+          "duration": 90,
+          "jumpToDefinition": [],
+          "output": "output0.json"
+        }
+      ],
+      "children": []
+    },
+    {
+      "name": "rule1",
+      "jumpToDefinition": [],
+      "status": "VERIFIED",
+      "asserts": [
+        {
+          "message": "message1",
+          "status": "VERIFIED",
+          "id": 1,
+          "duration": 34,
+          "jumpToDefinition": [],
+          "output": "output1.json"
+        }
+      ],
+      "children": []
+    }
+  ],
+  "timestamp": 1633020088389
+}
