@@ -52,8 +52,8 @@ export type CallResolution = {
   comments: Record<string, string>[]
 }
 
-export type Variable = Record<string, string | boolean> & {
-  jumpToDefinition: JumpToDefinition[]
+export type Variable = {
+  [x: string]: string | boolean | JumpToDefinition[]
 }
 
 export enum CallTraceFunctionStatuses {
