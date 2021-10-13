@@ -26,7 +26,7 @@
   tabindex="0"
   title={label}
   style="--indent: {indent}"
-  on:click={() => (isExpanded = !isExpanded)}
+  on:click
   on:focus={() => (isFocused = true)}
   on:blur={() => (isFocused = false)}
 >

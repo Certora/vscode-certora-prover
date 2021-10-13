@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte'
   import BaseTreeItem from './BaseTreeItem.svelte'
   import Toolbar from './Toolbar.svelte'
   import TreeIcon from './TreeIcon.svelte'
@@ -10,6 +11,8 @@
   export let posInset = 1
   export let actions: Action[] = []
   export let level = 1
+
+  const dispatch = createEventDispatcher<{ selectAssert: any }>()
 
   $: label = rule?.name || assert?.message
   $: ruleIcon = rule?.status
@@ -29,6 +32,13 @@
   {level}
   hasChildren={rule?.children.length > 0 || rule?.asserts.length > 0}
   bind:isExpanded
+  on:click={() => {
+    if (assert) {
+      dispatch('selectAssert', assert)
+    } else {
+      isExpanded = !isExpanded
+    }
+  }}
 >
   <TreeIcon path={rule ? ruleIcon : assertIcon} />
   <div class="label">
@@ -69,6 +79,7 @@
       level={level + 1}
       setSize={rule.children.length}
       posInset={i}
+      on:selectAssert
     />
   {/each}
 {/if}

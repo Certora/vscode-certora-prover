@@ -22,6 +22,7 @@
   {posInset}
   {level}
   bind:isExpanded
+  on:click={() => (isExpanded = !isExpanded)}
 >
   <TreeIcon codicon="codicon-debug-stackframe" />
   <div class="label">

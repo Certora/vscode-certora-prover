@@ -18,7 +18,12 @@
 <div class="tree">
   {#if data.type === TreeType.Rules}
     {#each data.tree as rule, i}
-      <RulesTreeItem {rule} setSize={data.tree.length} posInset={i + 1} />
+      <RulesTreeItem
+        {rule}
+        setSize={data.tree.length}
+        posInset={i + 1}
+        on:selectAssert
+      />
     {/each}
   {/if}
   {#if data.type === TreeType.Calltrace}
