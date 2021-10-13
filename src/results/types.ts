@@ -63,7 +63,7 @@ export enum CallTraceFunctionStatuses {
   Havoc = 'HAVOC',
   Throw = 'THROW',
   Dispatcher = 'DISPATCHER',
-  RevertCause = 'REVERT_CAUSE',
+  RevertCause = 'REVERT CAUSE',
   Dump = 'DUMP',
 }
 

@@ -10,6 +10,17 @@
   export let actions: Action[] = []
   export let level = 1
 
+  const STATUSES_DICT = {
+    SUCCESS: '#40A040',
+    REVERT: '#D58511',
+    SUMMARIZED: '#0050EF',
+    HAVOC: '#C04040',
+    THROW: '#C04040',
+    DISPATCHER: '#A30057',
+    'REVERT CAUSE': '#732626',
+    DUMP: '#732626',
+  }
+
   $: hasChildren = callTraceFunction.childrenList.length > 0
 
   let isExpanded = false
@@ -36,7 +47,12 @@
       </span>
     </div>
     <div class="result-container">
-      <div class="result">{callTraceFunction.status}</div>
+      <div
+        class="result"
+        style="background-color: {STATUSES_DICT[callTraceFunction.status]}"
+      >
+        {callTraceFunction.status}
+      </div>
     </div>
     <div class="actions">
       <Toolbar {actions} />
@@ -75,7 +91,6 @@
       line-height: 10px;
       padding: 2px 4px;
       color: #fff;
-      background-color: #40a040;
       border-radius: 2px;
     }
   }
