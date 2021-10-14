@@ -32,6 +32,7 @@
         {callTraceFunction}
         setSize={data.tree.length}
         posInset={i + 1}
+        on:selectCalltraceFunction
       />
     {/each}
   {/if}

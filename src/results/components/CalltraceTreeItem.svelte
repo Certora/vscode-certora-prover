@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte'
   import BaseTreeItem from './BaseTreeItem.svelte'
   import Toolbar from './Toolbar.svelte'
   import TreeIcon from './TreeIcon.svelte'
@@ -9,6 +10,9 @@
   export let posInset = 1
   export let actions: Action[] = []
   export let level = 1
+
+  const dispatch =
+    createEventDispatcher<{ selectCalltraceFunction: CallTraceFunction }>()
 
   const STATUSES_DICT = {
     SUCCESS: '#40A040',
@@ -33,7 +37,10 @@
   {posInset}
   {level}
   bind:isExpanded
-  on:click={() => (isExpanded = !isExpanded)}
+  on:click={() => {
+    isExpanded = !isExpanded
+    dispatch('selectCalltraceFunction', callTraceFunction)
+  }}
 >
   <TreeIcon codicon="codicon-debug-stackframe" />
   <div class="label">
@@ -67,6 +74,7 @@
       level={level + 1}
       setSize={callTraceFunction.childrenList.length}
       posInset={i}
+      on:selectCalltraceFunction
     />
   {/each}
 {/if}

@@ -12,7 +12,7 @@
   export let actions: Action[] = []
   export let level = 1
 
-  const dispatch = createEventDispatcher<{ selectAssert: any }>()
+  const dispatch = createEventDispatcher<{ selectAssert: Assert }>()
 
   $: label = rule?.name || assert?.message
   $: ruleIcon = rule?.status
