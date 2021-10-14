@@ -2,6 +2,7 @@
   import Pane from './components/Pane.svelte'
   import CodeItemList from './components/CodeItemList.svelte'
   import Tree from './components/Tree.svelte'
+  import ContractCallResolution from './components/ContractCallResolution.svelte'
   import type { Tree as TreeJson, Assert, Output } from './types'
   import { TreeType, CallTraceFunction } from './types'
 
@@ -72,12 +73,16 @@
         title={`Contract call resolution warnings`}
         initialExpandedState={true}
       >
-        <CodeItemList codeItems={[]} />
+        {#each output.callResolutionWarnings as resolution}
+          <ContractCallResolution contractCallResolution={resolution} />
+        {/each}
       </Pane>
     {/if}
     {#if output.callResolution && output.callResolution.length > 0}
       <Pane title={`Contract call resolution`} initialExpandedState={true}>
-        <CodeItemList codeItems={[]} />
+        {#each output.callResolution as resolution}
+          <ContractCallResolution contractCallResolution={resolution} />
+        {/each}
       </Pane>
     {/if}
   {/await}
@@ -86,6 +91,10 @@
 <style lang="postcss">
   :global(body) {
     padding: 0;
+  }
+
+  :global(:root) {
+    --monospace-font: Consolas, Menlo, 'Courier New', monospace;
   }
 
   :global(body.vscode-light) {

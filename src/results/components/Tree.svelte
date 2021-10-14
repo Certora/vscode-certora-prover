@@ -22,6 +22,10 @@
         {rule}
         setSize={data.tree.length}
         posInset={i + 1}
+        actions={[
+          { title: 'Go to code', icon: 'go-to-file', onClick: () => {} },
+          { title: 'Set the flags', icon: 'settings', onClick: () => {} },
+        ]}
         on:selectAssert
       />
     {/each}
@@ -32,6 +36,10 @@
         {callTraceFunction}
         setSize={data.tree.length}
         posInset={i + 1}
+        actions={[
+          { title: 'Go to code', icon: 'go-to-file', onClick: () => {} },
+          { title: 'Set the flags', icon: 'settings', onClick: () => {} },
+        ]}
         on:selectCalltraceFunction
       />
     {/each}

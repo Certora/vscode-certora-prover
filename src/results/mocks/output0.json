@@ -24,6 +24,44 @@
           "comment2": "text comment 2"
         }
       ]
+    },
+    {
+      "caller": {
+        "name": "cr 2 caller",
+        "jumpToDefinition": []
+      },
+      "callee": {
+        "name": "cr 2 callee",
+        "jumpToDefinition": []
+      },
+      "summary": "text",
+      "comments": [
+        {
+          "comment1": "text comment 1"
+        },
+        {
+          "comment2": "text comment 2"
+        }
+      ]
+    },
+    {
+      "caller": {
+        "name": "cr 3 caller",
+        "jumpToDefinition": []
+      },
+      "callee": {
+        "name": "cr 3 callee",
+        "jumpToDefinition": []
+      },
+      "summary": "text",
+      "comments": [
+        {
+          "comment1": "text comment 1"
+        },
+        {
+          "comment2": "text comment 2"
+        }
+      ]
     }
   ],
   "callResolutionWarnings": [

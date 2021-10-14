@@ -1,7 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte'
   import BaseTreeItem from './BaseTreeItem.svelte'
-  import Toolbar from './Toolbar.svelte'
   import TreeIcon from './TreeIcon.svelte'
   import type { Action, Rule, Assert } from '../types'
 
@@ -30,6 +29,7 @@
   {setSize}
   {posInset}
   {level}
+  {actions}
   hasChildren={rule?.children.length > 0 || rule?.asserts.length > 0}
   bind:isExpanded
   on:click={() => {
@@ -56,9 +56,6 @@
         </span>
       {/if}
     </div>
-    <div class="actions">
-      <Toolbar {actions} />
-    </div>
   </div>
 </BaseTreeItem>
 
@@ -69,6 +66,7 @@
       level={level + 1}
       setSize={rule.children.length}
       posInset={i}
+      {actions}
     />
   {/each}
 {/if}
@@ -79,6 +77,7 @@
       level={level + 1}
       setSize={rule.children.length}
       posInset={i}
+      {actions}
       on:selectAssert
     />
   {/each}
@@ -118,10 +117,5 @@
     margin-left: 0.5em;
     font-size: 0.9em;
     white-space: pre;
-  }
-
-  .actions {
-    display: none;
-    margin-left: auto;
   }
 </style>

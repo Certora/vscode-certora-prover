@@ -1,7 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte'
   import BaseTreeItem from './BaseTreeItem.svelte'
-  import Toolbar from './Toolbar.svelte'
   import TreeIcon from './TreeIcon.svelte'
   import type { Action, CallTraceFunction } from '../types'
 
@@ -36,6 +35,7 @@
   {setSize}
   {posInset}
   {level}
+  {actions}
   bind:isExpanded
   on:click={() => {
     isExpanded = !isExpanded
@@ -61,9 +61,6 @@
         {callTraceFunction.status}
       </div>
     </div>
-    <div class="actions">
-      <Toolbar {actions} />
-    </div>
   </div>
 </BaseTreeItem>
 
@@ -74,6 +71,7 @@
       level={level + 1}
       setSize={callTraceFunction.childrenList.length}
       posInset={i}
+      {actions}
       on:selectCalltraceFunction
     />
   {/each}
@@ -122,10 +120,5 @@
     color: inherit;
     white-space: pre;
     text-decoration: none;
-  }
-
-  .actions {
-    display: none;
-    margin-left: auto;
   }
 </style>
