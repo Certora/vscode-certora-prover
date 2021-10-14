@@ -28,7 +28,7 @@
         {
           "id": "results",
           "title": "Results",
-          "icon": ""
+          "icon": "/media/extension-icon.svg"
         }
       ]
     }
