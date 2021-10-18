@@ -4,8 +4,9 @@
 
   export let title: string
   export let actions: Action[] = []
+  export let initialExpandedState: boolean = false
 
-  let isExpanded = false
+  let isExpanded = initialExpandedState
 
   function toggleExpand() {
     isExpanded = !isExpanded
@@ -51,6 +52,10 @@
     &:hover .actions {
       display: initial;
     }
+
+    &:first-of-type .pane-header {
+      border-top: none;
+    }
   }
 
   .pane-header {
@@ -64,6 +69,7 @@
     cursor: pointer;
     align-items: center;
     box-sizing: border-box;
+    border-top: 1px solid var(--pane-border-color);
 
     .arrow-icon {
       margin: 0 2px;

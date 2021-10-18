@@ -1,19 +1,19 @@
 <script lang="ts">
-  export let name: string
-  export let value: any
-  export let jumpToDefinition: any
+  import type { ContractCallResolution } from '../types'
+
+  export let contractCallResolution: ContractCallResolution
 </script>
 
-<div class="code-item" tabindex="0" role="button" on:click>
-  <div class="name">{name}</div>
-  <div class="value">{value}</div>
+<div class="contract-call-resolution" tabindex="0" role="button">
+  <div class="caller">{contractCallResolution.caller.name}</div>
+  <div class="callee">{contractCallResolution.callee.name}</div>
 </div>
 
 <style lang="postcss">
-  .code-item {
+  .contract-call-resolution {
     display: flex;
-    flex-flow: wrap;
-    align-items: center;
+    flex-direction: column;
+    align-items: baseline;
     gap: 2px;
     cursor: pointer;
     font-family: var(--monospace-font);
@@ -21,16 +21,17 @@
     line-height: 18px;
     padding: 6px 0 6px 16px;
 
-    &:hover:not(.selected) {
+    &:hover {
       background-color: var(--code-item-background-color-hover);
     }
   }
 
-  .name {
+  .caller {
     color: var(--code-item-name-color);
   }
 
-  .value {
+  .callee {
+    display: inline-block;
     color: var(--code-item-value-color);
     background-color: var(--code-item-value-background-color);
     padding: 2px;

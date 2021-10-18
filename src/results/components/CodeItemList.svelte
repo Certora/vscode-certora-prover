@@ -1,19 +1,23 @@
 <script lang="ts">
   import CodeItem from './CodeItem.svelte'
+  import type { Variable } from '../types'
 
-  export let codeItems: { name: string; value: string; selected: boolean }[] =
-    []
+  export let codeItems: Variable[] = []
 </script>
 
 <ul class="list">
   {#each codeItems as codeItem}
-    <li>
-      <CodeItem
-        name={codeItem.name}
-        value={codeItem.value}
-        selected={codeItem.selected}
-      />
-    </li>
+    {#each Object.keys(codeItem) as varName}
+      {#if varName !== 'jumpToDefinition'}
+        <li>
+          <CodeItem
+            name={varName}
+            value={codeItem[varName]}
+            jumpToDefinition={codeItem.jumpToDefinition}
+          />
+        </li>
+      {/if}
+    {/each}
   {/each}
 </ul>
 

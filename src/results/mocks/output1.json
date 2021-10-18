@@ -1,0 +1,131 @@
+{
+  "name": "rule1",
+  "assertId": 0,
+  "graph_link": "",
+  "jumpToDefinition": [],
+  "result": "VERIFIED",
+  "assertMessage": ["message1"],
+  "callResolution": [
+    {
+      "caller": {
+        "name": "cr 1 caller",
+        "jumpToDefinition": []
+      },
+      "callee": {
+        "name": "cr 1 callee",
+        "jumpToDefinition": []
+      },
+      "summary": "text",
+      "comments": [
+        {
+          "comment1": "text comment 1"
+        },
+        {
+          "comment2": "text comment 2"
+        }
+      ]
+    }
+  ],
+  "callResolutionWarnings": [
+    {
+      "caller": {
+        "name": "cr w 1 caller",
+        "jumpToDefinition": []
+      },
+      "callee": {
+        "name": "cr w 1 callee",
+        "jumpToDefinition": []
+      },
+      "summary": "text",
+      "comments": [
+        {
+          "comment1": "text comment 1"
+        },
+        {
+          "comment2": "text comment 2"
+        }
+      ]
+    }
+  ],
+  "callTrace": [
+    {
+      "name": "function1()",
+      "returnValue": "value1",
+      "status": "THROW",
+      "childrenList": [
+        {
+          "name": "child function lvl2()",
+          "returnValue": "child function lvl2 value",
+          "status": "DISPATCHER",
+          "childrenList": [
+            {
+              "name": "child function lvl3()",
+              "returnValue": "child function lvl3 value",
+              "status": "REVERT CAUSE",
+              "childrenList": [],
+              "jumpToDefinition": [],
+              "variables": [
+                {
+                  "child_function_lvl3()_variable_1": "value1",
+                  "jumpToDefinition": []
+                }
+              ]
+            }
+          ],
+          "jumpToDefinition": [],
+          "variables": []
+        }
+      ],
+      "jumpToDefinition": [],
+      "variables": [
+        {
+          "function1()_variable_1": "value1",
+          "jumpToDefinition": []
+        },
+        {
+          "function1()_variable_2": "value2",
+          "jumpToDefinition": []
+        }
+      ]
+    },
+    {
+      "name": "function2()",
+      "returnValue": "value2",
+      "status": "DUMP",
+      "childrenList": [],
+      "jumpToDefinition": [],
+      "variables": [
+        {
+          "function2()_variable_1": "value1",
+          "jumpToDefinition": []
+        },
+        {
+          "function2()_variable_2": "value2",
+          "jumpToDefinition": []
+        },
+        {
+          "function2()_variable_3": "value3",
+          "jumpToDefinition": []
+        }
+      ]
+    }
+  ],
+  "variables": [
+    {
+      "rule_1_variable_1": "value1",
+      "jumpToDefinition": []
+    },
+    {
+      "rule_1_variable_2": "value2",
+      "jumpToDefinition": []
+    },
+    {
+      "rule_1_variable_3": "value3",
+      "jumpToDefinition": []
+    },
+    {
+      "rule_1_variable_4": "value4",
+      "jumpToDefinition": []
+    }
+  ]
+}

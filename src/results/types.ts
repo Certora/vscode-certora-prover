@@ -39,7 +39,7 @@ export type Tree = {
   timestamp: number
 }
 
-export type CallResolution = {
+export type ContractCallResolution = {
   caller: {
     name: string
     jumpToDefinition: JumpToDefinition[]
@@ -52,8 +52,8 @@ export type CallResolution = {
   comments: Record<string, string>[]
 }
 
-export type Variable = Record<string, string | boolean> & {
-  jumpToDefinition: JumpToDefinition[]
+export type Variable = {
+  [x: string]: string | boolean | JumpToDefinition[]
 }
 
 export enum CallTraceFunctionStatuses {
@@ -63,7 +63,7 @@ export enum CallTraceFunctionStatuses {
   Havoc = 'HAVOC',
   Throw = 'THROW',
   Dispatcher = 'DISPATCHER',
-  RevertCause = 'REVERT_CAUSE',
+  RevertCause = 'REVERT CAUSE',
   Dump = 'DUMP',
 }
 
@@ -83,8 +83,8 @@ export type Output = {
   jumpToDefinition: JumpToDefinition[]
   result: RuleStatuses
   assertMessage?: string[]
-  callResolution: CallResolution[]
-  callResolutionWarnings: CallResolution[]
+  callResolution: ContractCallResolution[]
+  callResolutionWarnings: ContractCallResolution[]
   callTrace?: CallTraceFunction[]
   variables?: Variable[]
 }

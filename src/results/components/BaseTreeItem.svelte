@@ -1,10 +1,14 @@
 <script lang="ts">
+  import Toolbar from './Toolbar.svelte'
+  import type { Action } from '../types'
+
   export let hasChildren: boolean
   export let label: string
   export let setSize: number
   export let posInset: number
   export let level: number
   export let isExpanded = false
+  export let actions: Action[] = []
 
   $: indent = `${level * 8}px`
 
@@ -26,7 +30,7 @@
   tabindex="0"
   title={label}
   style="--indent: {indent}"
-  on:click={() => (isExpanded = !isExpanded)}
+  on:click
   on:focus={() => (isFocused = true)}
   on:blur={() => (isFocused = false)}
 >
@@ -39,6 +43,9 @@
     />
     <div class="contents">
       <slot />
+      <div class="actions">
+        <Toolbar {actions} />
+      </div>
     </div>
   </div>
 </div>

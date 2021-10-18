@@ -18,7 +18,16 @@
 <div class="tree">
   {#if data.type === TreeType.Rules}
     {#each data.tree as rule, i}
-      <RulesTreeItem {rule} setSize={data.tree.length} posInset={i + 1} />
+      <RulesTreeItem
+        {rule}
+        setSize={data.tree.length}
+        posInset={i + 1}
+        actions={[
+          { title: 'Go to code', icon: 'go-to-file', onClick: () => {} },
+          { title: 'Set the flags', icon: 'settings', onClick: () => {} },
+        ]}
+        on:selectAssert
+      />
     {/each}
   {/if}
   {#if data.type === TreeType.Calltrace}
@@ -27,6 +36,11 @@
         {callTraceFunction}
         setSize={data.tree.length}
         posInset={i + 1}
+        actions={[
+          { title: 'Go to code', icon: 'go-to-file', onClick: () => {} },
+          { title: 'Set the flags', icon: 'settings', onClick: () => {} },
+        ]}
+        on:selectCalltraceFunction
       />
     {/each}
   {/if}
