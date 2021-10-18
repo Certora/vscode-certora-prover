@@ -16,7 +16,7 @@
     align-items: center;
     gap: 2px;
     cursor: pointer;
-    font-family: Consolas, Menlo, 'Courier New', monospace;
+    font-family: var(--monospace-font);
     font-size: 12px;
     line-height: 18px;
     padding: 6px 0 6px 16px;
@@ -24,19 +24,6 @@
     &:hover:not(.selected) {
       background-color: var(--code-item-background-color-hover);
     }
-
-    /* &.selected {
-      background-color: var(--code-item-background-color-selected);
-
-      .name,
-      .value {
-        color: #fff;
-      }
-
-      .value {
-        background-color: transparent;
-      }
-    } */
   }
 
   .name {

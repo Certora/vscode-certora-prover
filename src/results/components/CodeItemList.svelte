@@ -1,10 +1,8 @@
 <script lang="ts">
   import CodeItem from './CodeItem.svelte'
-  import type { JumpToDefinition } from '../types'
+  import type { Variable } from '../types'
 
-  export let codeItems: {
-    [x: string]: string | boolean | JumpToDefinition[]
-  }[] = []
+  export let codeItems: Variable[] = []
 </script>
 
 <ul class="list">
