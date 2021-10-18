@@ -1,10 +1,18 @@
 <script lang="ts">
+  import { navigateToCode } from '../utils/navigateToCode'
   import type { ContractCallResolution } from '../types'
 
   export let contractCallResolution: ContractCallResolution
 </script>
 
-<div class="contract-call-resolution" tabindex="0" role="button">
+<div
+  class="contract-call-resolution"
+  tabindex="0"
+  role="button"
+  on:click={() => {
+    navigateToCode(contractCallResolution.caller.jumpToDefinition)
+  }}
+>
   <div class="caller">{contractCallResolution.caller.name}</div>
   <div class="callee">{contractCallResolution.callee.name}</div>
 </div>

@@ -1,23 +1,22 @@
 <script lang="ts">
   import CodeItem from './CodeItem.svelte'
-  import type { Variable } from '../types'
+  import { variablesAdapter } from '../utils/variablesAdapter'
+  import type { SourceVariable } from '../types'
 
-  export let codeItems: Variable[] = []
+  export let codeItems: SourceVariable[] = []
+
+  $: variables = codeItems.map(variablesAdapter)
 </script>
 
 <ul class="list">
-  {#each codeItems as codeItem}
-    {#each Object.keys(codeItem) as varName}
-      {#if varName !== 'jumpToDefinition'}
-        <li>
-          <CodeItem
-            name={varName}
-            value={codeItem[varName]}
-            jumpToDefinition={codeItem.jumpToDefinition}
-          />
-        </li>
-      {/if}
-    {/each}
+  {#each variables as variable}
+    <li>
+      <CodeItem
+        name={variable.name}
+        value={variable.value}
+        jumpToDefinition={variable.jumpToDefinition}
+      />
+    </li>
   {/each}
 </ul>
 

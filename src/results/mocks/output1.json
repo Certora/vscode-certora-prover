@@ -2,7 +2,13 @@
   "name": "rule1",
   "assertId": 0,
   "graph_link": "",
-  "jumpToDefinition": [],
+  "jumpToDefinition": [
+    {
+      "file": "spec/bentobox.spec",
+      "line": 226,
+      "col": 0
+    }
+  ],
   "result": "VERIFIED",
   "assertMessage": ["message1"],
   "callResolution": [

@@ -4,7 +4,13 @@
   "rules": [
     {
       "name": "rule0",
-      "jumpToDefinition": [],
+      "jumpToDefinition": [
+        {
+          "file": "spec/bentobox.spec",
+          "line": 153,
+          "col": 0
+        }
+      ],
       "status": "VIOLATED",
       "asserts": [
         {
@@ -12,7 +18,13 @@
           "status": "VIOLATED",
           "id": 0,
           "duration": 90,
-          "jumpToDefinition": [],
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 172,
+              "col": 5
+            }
+          ],
           "output": "output0.json"
         }
       ],
@@ -20,7 +32,13 @@
     },
     {
       "name": "rule1",
-      "jumpToDefinition": [],
+      "jumpToDefinition": [
+        {
+          "file": "spec/bentobox.spec",
+          "line": 226,
+          "col": 0
+        }
+      ],
       "status": "VERIFIED",
       "asserts": [
         {
@@ -28,7 +46,13 @@
           "status": "VERIFIED",
           "id": 1,
           "duration": 34,
-          "jumpToDefinition": [],
+          "jumpToDefinition": [
+            {
+              "file": "spec/bentobox.spec",
+              "line": 173,
+              "col": 5
+            }
+          ],
           "output": "output1.json"
         }
       ],

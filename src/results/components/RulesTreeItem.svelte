@@ -2,6 +2,7 @@
   import { createEventDispatcher } from 'svelte'
   import BaseTreeItem from './BaseTreeItem.svelte'
   import TreeIcon from './TreeIcon.svelte'
+  import { navigateToCode } from '../utils/navigateToCode'
   import type { Action, Rule, Assert } from '../types'
 
   export let rule: Rule = null
@@ -66,7 +67,16 @@
       level={level + 1}
       setSize={rule.children.length}
       posInset={i}
-      {actions}
+      actions={[
+        {
+          title: 'Go to code',
+          icon: 'go-to-file',
+          onClick: () => {
+            navigateToCode(child.jumpToDefinition)
+          },
+        },
+        { title: 'Set the flags', icon: 'settings', onClick: () => {} },
+      ]}
     />
   {/each}
 {/if}
@@ -77,7 +87,16 @@
       level={level + 1}
       setSize={rule.children.length}
       posInset={i}
-      {actions}
+      actions={[
+        {
+          title: 'Go to code',
+          icon: 'go-to-file',
+          onClick: () => {
+            navigateToCode(child.jumpToDefinition)
+          },
+        },
+        { title: 'Set the flags', icon: 'settings', onClick: () => {} },
+      ]}
       on:selectAssert
     />
   {/each}

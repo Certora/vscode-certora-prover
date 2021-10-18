@@ -1,6 +1,7 @@
 <script lang="ts">
   import RulesTreeItem from './RulesTreeItem.svelte'
   import CalltraceTreeItem from './CalltraceTreeItem.svelte'
+  import { navigateToCode } from '../utils/navigateToCode'
   import type { Rule, CallTraceFunction } from '../types'
   import { TreeType } from '../types'
 
@@ -23,7 +24,13 @@
         setSize={data.tree.length}
         posInset={i + 1}
         actions={[
-          { title: 'Go to code', icon: 'go-to-file', onClick: () => {} },
+          {
+            title: 'Go to code',
+            icon: 'go-to-file',
+            onClick: () => {
+              navigateToCode(rule.jumpToDefinition)
+            },
+          },
           { title: 'Set the flags', icon: 'settings', onClick: () => {} },
         ]}
         on:selectAssert
@@ -37,7 +44,13 @@
         setSize={data.tree.length}
         posInset={i + 1}
         actions={[
-          { title: 'Go to code', icon: 'go-to-file', onClick: () => {} },
+          {
+            title: 'Go to code',
+            icon: 'go-to-file',
+            onClick: () => {
+              navigateToCode(callTraceFunction.jumpToDefinition)
+            },
+          },
           { title: 'Set the flags', icon: 'settings', onClick: () => {} },
         ]}
         on:selectCalltraceFunction
