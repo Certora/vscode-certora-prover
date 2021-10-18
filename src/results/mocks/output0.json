@@ -2,18 +2,46 @@
   "name": "rule0",
   "assertId": 0,
   "graph_link": "",
-  "jumpToDefinition": [],
+  "jumpToDefinition": [
+    {
+      "file": "spec/bentobox.spec",
+      "line": 153,
+      "col": 0
+    }
+  ],
   "result": "VIOLATED",
   "assertMessage": ["message0"],
   "callResolution": [
     {
       "caller": {
         "name": "cr 1 caller",
-        "jumpToDefinition": []
+        "jumpToDefinition": [
+          {
+            "file": "spec/bentobox.spec",
+            "line": 159,
+            "col": 5
+          },
+          {
+            "file": "contracts/BentoBox.sol",
+            "line": 174,
+            "col": 0
+          }
+        ]
       },
       "callee": {
         "name": "cr 1 callee",
-        "jumpToDefinition": []
+        "jumpToDefinition": [
+          {
+            "file": "spec/bentobox.spec",
+            "line": 23,
+            "col": 60
+          },
+          {
+            "file": "spec/BentoBox.sol",
+            "line": 224,
+            "col": 13
+          }
+        ]
       },
       "summary": "text",
       "comments": [

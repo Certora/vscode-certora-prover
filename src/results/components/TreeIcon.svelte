@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getIconPath } from '../getIconPath'
+  import { getIconPath } from '../utils/getIconPath'
 
   export let path: string = ''
   export let codicon: string = ''

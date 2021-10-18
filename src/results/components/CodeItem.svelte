@@ -1,10 +1,20 @@
 <script lang="ts">
+  import { navigateToCode } from '../utils/navigateToCode'
+  import type { JumpToDefinition } from '../types'
+
   export let name: string
-  export let value: any
-  export let jumpToDefinition: any
+  export let value: string | boolean
+  export let jumpToDefinition: JumpToDefinition[]
 </script>
 
-<div class="code-item" tabindex="0" role="button" on:click>
+<div
+  class="code-item"
+  tabindex="0"
+  role="button"
+  on:click={() => {
+    navigateToCode(jumpToDefinition)
+  }}
+>
   <div class="name">{name}</div>
   <div class="value">{value}</div>
 </div>

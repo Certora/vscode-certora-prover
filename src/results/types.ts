@@ -30,6 +30,7 @@ export type Rule = {
   children: Rule[]
   status: RuleStatuses
   asserts: Assert[]
+  jumpToDefinition: JumpToDefinition[]
 }
 
 export type Tree = {
@@ -52,8 +53,14 @@ export type ContractCallResolution = {
   comments: Record<string, string>[]
 }
 
-export type Variable = {
+export type SourceVariable = {
   [x: string]: string | boolean | JumpToDefinition[]
+}
+
+export type ResultVariable = {
+  name: string
+  value: string | boolean
+  jumpToDefinition: JumpToDefinition[]
 }
 
 export enum CallTraceFunctionStatuses {
@@ -73,7 +80,7 @@ export type CallTraceFunction = {
   status: CallTraceFunctionStatuses
   childrenList: CallTraceFunction[]
   jumpToDefinition: JumpToDefinition[]
-  variables: Variable[]
+  variables: SourceVariable[]
 }
 
 export type Output = {
@@ -86,7 +93,7 @@ export type Output = {
   callResolution: ContractCallResolution[]
   callResolutionWarnings: ContractCallResolution[]
   callTrace?: CallTraceFunction[]
-  variables?: Variable[]
+  variables?: SourceVariable[]
 }
 
 export enum TreeType {

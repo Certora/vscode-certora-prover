@@ -2,7 +2,7 @@
 
 interface VSCodeWebApi {
   getState: <S>() => S
-  postMessage: (message: Record<string, string>) => void
+  postMessage: (message: Record<string, unknown>) => void
   setState: <S>(state: S) => void
 }
 
