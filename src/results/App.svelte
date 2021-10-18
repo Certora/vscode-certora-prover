@@ -100,9 +100,9 @@
   :global(body.vscode-light) {
     --code-item-name-color: #00f;
     --code-item-value-color: #454545;
-    --code-item-value-background-color: #f0f0f0;
+    --code-item-value-background-color: #e4e6f1;
     --code-item-background-color-selected: #0060c0;
-    --code-item-background-color-hover: #f0f0f0;
+    --code-item-background-color-hover: #e4e6f1;
     --pane-border-color: rgba(97, 97, 97, 0.19);
   }
 
