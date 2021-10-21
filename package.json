@@ -14,6 +14,18 @@
   ],
   "main": "./out/extension/extension.js",
   "contributes": {
+    "configuration": [
+      {
+        "title": "Certora",
+        "properties": {
+          "vscode-certora-prover.apiKey.publicKey": {
+            "type": "string",
+            "default": "",
+            "description": "By default you have 20 runs for your smart-contracts. For unlimited options you use private key."
+          }
+        }
+      }
+    ],
     "views": {
       "results": [
         {
