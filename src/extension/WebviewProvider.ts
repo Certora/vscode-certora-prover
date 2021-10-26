@@ -1,4 +1,5 @@
 import * as vscode from 'vscode'
+import { SolFilesWatcher } from './SolFilesWatcher'
 import { navigateToCode, JumpToDefinition } from './utils/navigateToCode'
 import { getNonce } from './utils/getNonce'
 
@@ -38,6 +39,9 @@ export class WebviewProvider implements vscode.WebviewViewProvider {
       null,
       [],
     )
+
+    const solFilesWatcher = new SolFilesWatcher()
+    solFilesWatcher.init(webview)
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {
