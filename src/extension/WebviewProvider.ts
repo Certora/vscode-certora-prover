@@ -1,5 +1,5 @@
 import * as vscode from 'vscode'
-import { SolFilesWatcher } from './SolFilesWatcher'
+import { SmartContractsFilesWatcher } from './SmartContractsFilesWatcher'
 import { navigateToCode, JumpToDefinition } from './utils/navigateToCode'
 import { getNonce } from './utils/getNonce'
 
@@ -40,8 +40,8 @@ export class WebviewProvider implements vscode.WebviewViewProvider {
       [],
     )
 
-    const solFilesWatcher = new SolFilesWatcher()
-    solFilesWatcher.init(webview)
+    const smartContractsFilesWatcher = new SmartContractsFilesWatcher()
+    smartContractsFilesWatcher.init(webview)
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {
