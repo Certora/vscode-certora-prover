@@ -66,7 +66,7 @@ export class WebviewProvider implements vscode.WebviewViewProvider {
       vscode.Uri.joinPath(this._extensionUri, 'media'),
     )
 
-    return `<!DOCTYPE html>
+    return /* html */ `<!DOCTYPE html>
     <html>
       <head>
         <meta charset="UTF-8">

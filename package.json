@@ -14,18 +14,6 @@
   ],
   "main": "./out/extension/extension.js",
   "contributes": {
-    "configuration": [
-      {
-        "title": "Certora",
-        "properties": {
-          "vscode-certora-prover.apiKey.publicKey": {
-            "type": "string",
-            "default": "",
-            "description": "By default you have 20 runs for your smart-contracts. For unlimited options you use private key."
-          }
-        }
-      }
-    ],
     "views": {
       "results": [
         {
@@ -43,7 +31,14 @@
           "icon": "/media/extension-icon.svg"
         }
       ]
-    }
+    },
+    "commands": [
+      {
+        "command": "certora.showSettings",
+        "title": "Settings",
+        "category": "Certora"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
@@ -149,5 +144,8 @@
   },
   "simple-git-hooks": {
     "pre-commit": "npx lint-staged"
+  },
+  "dependencies": {
+    "@vscode/webview-ui-toolkit": "^0.8.3"
   }
 }
