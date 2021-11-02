@@ -1,5 +1,4 @@
 import * as vscode from 'vscode'
-import { SmartContractsFilesWatcher } from './SmartContractsFilesWatcher'
 import { navigateToCode, JumpToDefinition } from './utils/navigateToCode'
 import { getNonce } from './utils/getNonce'
 
@@ -12,7 +11,7 @@ type EventFromWebview = {
   payload: JumpToDefinition[]
 }
 
-export class WebviewProvider implements vscode.WebviewViewProvider {
+export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   viewType = 'results'
 
   constructor(private readonly _extensionUri: vscode.Uri) {
@@ -39,9 +38,6 @@ export class WebviewProvider implements vscode.WebviewViewProvider {
       null,
       [],
     )
-
-    const smartContractsFilesWatcher = new SmartContractsFilesWatcher()
-    smartContractsFilesWatcher.init(webview)
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {
@@ -55,7 +51,8 @@ export class WebviewProvider implements vscode.WebviewViewProvider {
       vscode.Uri.joinPath(
         this._extensionUri,
         'node_modules',
-        '@vscode/codicons',
+        '@vscode',
+        'codicons',
         'dist',
         'codicon.css',
       ),
@@ -73,7 +70,7 @@ export class WebviewProvider implements vscode.WebviewViewProvider {
         <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; font-src ${webview.cspSource}; img-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="${styleUri}" rel="stylesheet">
-        <link href="${codiconsUri}" rel="stylesheet" />
+        <link href="${codiconsUri}" rel="stylesheet">
       </head>
       <body>
         <script nonce="${nonce}">

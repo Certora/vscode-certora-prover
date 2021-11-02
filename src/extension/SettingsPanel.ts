@@ -1,4 +1,5 @@
 import * as vscode from 'vscode'
+import { getNonce } from './utils/getNonce'
 
 export class SettingsPanel {
   public static currentPanel?: SettingsPanel
@@ -26,6 +27,7 @@ export class SettingsPanel {
         {
           retainContextWhenHidden: true,
           enableScripts: true,
+          localResourceRoots: [extensionUri],
         },
       )
 
@@ -37,6 +39,12 @@ export class SettingsPanel {
     webview: vscode.Webview,
     extensionUri: vscode.Uri,
   ): string {
+    const scriptUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(extensionUri, 'out', 'settings', 'bundle.js'),
+    )
+    const styleUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(extensionUri, 'out', 'settings', 'bundle.css'),
+    )
     const toolkitUri = webview.asWebviewUri(
       vscode.Uri.joinPath(
         extensionUri,
@@ -47,17 +55,35 @@ export class SettingsPanel {
         'toolkit.js',
       ),
     )
+    const codiconsUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        extensionUri,
+        'node_modules',
+        '@vscode',
+        'codicons',
+        'dist',
+        'codicon.css',
+      ),
+    )
+
+    const nonce = getNonce()
 
     return /* html */ `
       <!DOCTYPE html>
       <html lang="en">
         <head>
           <meta charset="UTF-8">
+          <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; font-src ${webview.cspSource}; img-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <script type="module" src="${toolkitUri}"></script>
-          <title>Certora IDE Settings</title>
+          <link href="${styleUri}" rel="stylesheet">
+          <link href="${codiconsUri}" rel="stylesheet">
         </head>
         <body>
+          <script nonce="${nonce}">
+            const vscode = acquireVsCodeApi();
+          </script>
+          <script nonce="${nonce}" src="${scriptUri}"></script>
         </body>
       </html>
     `
