@@ -1,10 +1,13 @@
 import * as vscode from 'vscode'
+import { SmartContractsFilesWatcher } from './SmartContractsFilesWatcher'
 import { getNonce } from './utils/getNonce'
+import { createConfFile, Form } from './utils/createConfFile'
 
 export class SettingsPanel {
   public static currentPanel?: SettingsPanel
   private readonly _panel: vscode.WebviewPanel
   private _disposables: vscode.Disposable[] = []
+  private watcher: SmartContractsFilesWatcher
 
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
     this._panel = panel
@@ -13,6 +16,27 @@ export class SettingsPanel {
       this._panel.webview,
       extensionUri,
     )
+
+    this.watcher = new SmartContractsFilesWatcher()
+    this.watcher.init(this._panel.webview)
+
+    this._panel.webview.onDidReceiveMessage(
+      e => {
+        switch (e.command) {
+          case 'smart-contracts-files-refresh':
+            this.watcher.init(this._panel.webview)
+            break
+          case 'create-conf-file':
+            createConfFile(e.payload as Form)
+            break
+          default:
+            break
+        }
+      },
+      null,
+      [],
+    )
+
     this._panel.onDidDispose(this.dispose, null, this._disposables)
   }
 
@@ -73,9 +97,9 @@ export class SettingsPanel {
       <html lang="en">
         <head>
           <meta charset="UTF-8">
-          <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; font-src ${webview.cspSource}; img-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
+          <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; font-src ${webview.cspSource}; img-src ${webview.cspSource}; script-src 'nonce-${nonce}'; script-src-elem 'nonce-${nonce}';">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <script type="module" src="${toolkitUri}"></script>
+          <script type="module" nonce="${nonce}" src="${toolkitUri}"></script>
           <link href="${styleUri}" rel="stylesheet">
           <link href="${codiconsUri}" rel="stylesheet">
         </head>

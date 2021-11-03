@@ -55,11 +55,24 @@ export class SmartContractsFilesWatcher {
   }
 
   private nofifyWebviewAboutSolFilesUpdated() {
-    console.log(this.webview, this.files)
     if (this.webview) {
+      const sol: string[] = []
+      const spec: string[] = []
+
+      this.files.forEach(file => {
+        if (file.path.endsWith('.sol')) {
+          sol.push(vscode.workspace.asRelativePath(file))
+        } else {
+          spec.push(vscode.workspace.asRelativePath(file))
+        }
+      })
+
       this.webview.postMessage({
         type: 'smart-contracts-files-updated',
-        payload: this.files,
+        payload: {
+          sol,
+          spec,
+        },
       })
     }
   }
