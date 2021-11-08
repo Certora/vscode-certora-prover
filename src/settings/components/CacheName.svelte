@@ -5,7 +5,7 @@
 </script>
 
 <Setting
-  title="Cache name"
+  title="Cache Name"
   description="Optimize the pre-analysis by using cache"
 >
   <vscode-text-field on:change={e => (cacheName = e.target.value)} />

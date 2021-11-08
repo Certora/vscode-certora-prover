@@ -12,7 +12,7 @@
   }
 </script>
 
-<Setting title="Main solidity file" description="Pick Solidity File">
+<Setting title="Main Solidity File" description="Pick solidity file">
   <div class="files-dropdown">
     <vscode-dropdown on:change={e => (mainSolidityFile = e.target.value)}>
       {#each sol as file}

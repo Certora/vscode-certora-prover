@@ -19,7 +19,7 @@
   }
 </script>
 
-<Setting title="Verify additional contract" description="Pick Solidity file(s)">
+<Setting title="Verify Additional Contract" description="Pick solidity file(s)">
   <div class="additional-contracts">
     <vscode-checkbox
       on:change={e => (useAdditionalContracts = e.target.checked)}

@@ -9,7 +9,7 @@
 </script>
 
 <Setting
-  title="Additional settings"
+  title="Additional Settings"
   description="If a flag is given with no value, it is treated as a boolean and set to true"
 >
   <div class="settings">
