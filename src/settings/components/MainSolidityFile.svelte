@@ -3,7 +3,7 @@
   import VsCodeButton from './VSCodeButton.svelte'
 
   export let sol: string[]
-  export let mainSolidityFile: string
+  export let mainSolidityFile: string = sol[0] || ''
 
   function refresh() {
     vscode.postMessage({

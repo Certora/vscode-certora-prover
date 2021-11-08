@@ -3,7 +3,7 @@
   import VsCodeButton from './VSCodeButton.svelte'
 
   export let spec: string[]
-  export let specFile: string
+  export let specFile: string = spec[0] || ''
 
   function refresh() {
     vscode.postMessage({
