@@ -102,6 +102,18 @@
     padding: 26px 24px;
   }
 
+  :global(body.vscode-light) {
+    --dropdown-text-color: #000;
+  }
+
+  :global(body.vscode-dark) {
+    --dropdown-text-color: var(--dropdown-foreground);
+  }
+
+  :global(vscode-dropdown) {
+    color: var(--dropdown-text-color);
+  }
+
   .settings {
     display: flex;
     flex-direction: column;

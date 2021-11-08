@@ -35,4 +35,8 @@
     align-items: flex-start;
     gap: 9px;
   }
+
+  vscode-dropdown {
+    color: black;
+  }
 </style>
