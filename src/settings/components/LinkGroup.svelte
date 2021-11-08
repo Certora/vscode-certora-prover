@@ -6,38 +6,35 @@
   export let group: Link
 </script>
 
-<div class="link">
-  <vscode-text-field on:change={e => (group.contractName = e.target.value)}>
-    Contract Name
-  </vscode-text-field>
-  <vscode-text-field on:change={e => (group.fieldName = e.target.value)}>
-    Field Name
-  </vscode-text-field>
-  <vscode-text-field
-    on:change={e => (group.associatedContractName = e.target.value)}
-  >
-    Associated Contract Name
-  </vscode-text-field>
+<div class="link-group">
+  <div class="link-group-fields">
+    <vscode-text-field on:change={e => (group.contractName = e.target.value)}>
+      Contract Name
+    </vscode-text-field>
+    <vscode-text-field on:change={e => (group.fieldName = e.target.value)}>
+      Field Name
+    </vscode-text-field>
+    <vscode-text-field
+      on:change={e => (group.associatedContractName = e.target.value)}
+    >
+      Associated Contract Name
+    </vscode-text-field>
+  </div>
   {#if showDeleteButton}
     <LinkButton title="Delete link group" icon="trash" red on:click />
   {/if}
 </div>
 
 <style>
-  .link {
-    position: relative;
+  .link-group {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
     gap: 14px;
   }
 
-  .link::before {
-    position: absolute;
-    left: -6px;
-    width: 2px;
-    height: 100%;
-    background-color: rgba(204, 204, 204, 0.2);
-    content: '';
+  .link-group-fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
   }
 </style>

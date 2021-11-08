@@ -14,12 +14,14 @@
 >
   <div class="settings">
     {#each settings as setting, index (setting.id)}
-      <vscode-text-field on:change={e => (setting.option = e.target.value)}>
-        Option (flag)
-      </vscode-text-field>
-      <vscode-text-field on:change={e => (setting.value = e.target.value)}>
-        Value (optional)
-      </vscode-text-field>
+      <div class="settings-fields">
+        <vscode-text-field on:change={e => (setting.option = e.target.value)}>
+          Option (flag)
+        </vscode-text-field>
+        <vscode-text-field on:change={e => (setting.value = e.target.value)}>
+          Value (optional)
+        </vscode-text-field>
+      </div>
       {#if index !== 0}
         <LinkButton
           title="Delete flag"
@@ -57,9 +59,13 @@
   .settings {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
     gap: 14px;
     margin-bottom: 14px;
+  }
+
+  .settings-fields {
+    display: flex;
+    gap: 14px;
   }
 
   .info {

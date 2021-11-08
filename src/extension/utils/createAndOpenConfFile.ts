@@ -1,4 +1,4 @@
-import { workspace, Uri } from 'vscode'
+import { workspace, Uri, window } from 'vscode'
 
 export type AdditionalContract = {
   file: string
@@ -105,7 +105,7 @@ function convertSourceForm(form: Form): string {
   return JSON.stringify(config, null, 2)
 }
 
-export function createConfFile(form: Form): void {
+export async function createAndOpenConfFile(form: Form): Promise<void> {
   const basePath = workspace.workspaceFolders?.[0]
 
   if (!basePath) return
@@ -113,15 +113,15 @@ export function createConfFile(form: Form): void {
   const encoder = new TextEncoder()
   const content = encoder.encode(convertSourceForm(form))
   const parsedSpecFilePath = form.specFile.split('/')
-
-  workspace.fs.writeFile(
-    Uri.joinPath(
-      basePath.uri,
-      'conf',
-      `${form.mainContractName}.${parsedSpecFilePath[
-        parsedSpecFilePath.length - 1
-      ].replace('.spec', '')}.conf`,
-    ),
-    content,
+  const path = Uri.joinPath(
+    basePath.uri,
+    'conf',
+    `${form.mainContractName}.${parsedSpecFilePath[
+      parsedSpecFilePath.length - 1
+    ].replace('.spec', '')}.conf`,
   )
+
+  await workspace.fs.writeFile(path, content)
+  const document = await workspace.openTextDocument(path)
+  await window.showTextDocument(document)
 }
