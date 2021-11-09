@@ -21,7 +21,7 @@
     </vscode-text-field>
   </div>
   {#if showDeleteButton}
-    <LinkButton title="Delete link group" icon="trash" red on:click />
+    <LinkButton title="Delete link" icon="trash" red on:click />
   {/if}
 </div>
 

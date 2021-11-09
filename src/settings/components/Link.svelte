@@ -24,7 +24,7 @@
       {/each}
     </div>
     <VsCodeButton
-      title="Add link group"
+      title="Add link"
       icon="add"
       isSmall
       on:click={() =>
