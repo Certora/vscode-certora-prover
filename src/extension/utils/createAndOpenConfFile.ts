@@ -95,9 +95,16 @@ function convertSourceForm(form: Form): string {
   }
 
   if (form.additionalSettings?.length) {
-    form.additionalSettings.forEach(({ option, value = '' }) => {
+    function setValue(val?: string) {
+      if (val === 'true' || !val) return true
+      if (val === 'false') return false
+
+      return val
+    }
+
+    form.additionalSettings.forEach(({ option, value }) => {
       if (option) {
-        config[option] = value
+        config[option] = setValue(value)
       }
     })
   }
