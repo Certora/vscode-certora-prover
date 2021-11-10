@@ -1,15 +1,12 @@
 <script lang="ts">
   import Setting from './Setting.svelte'
   import VsCodeButton from './VSCodeButton.svelte'
+  import { refreshFiles } from '../utils/refreshFiles'
 
   export let sol: string[]
-  export let mainSolidityFile: string = sol[0] || ''
+  export let mainSolidityFile: string = ''
 
-  function refresh() {
-    vscode.postMessage({
-      command: 'smart-contracts-files-refresh',
-    })
-  }
+  $: mainSolidityFile = mainSolidityFile || sol[0] // Initial value
 </script>
 
 <Setting title="Main Solidity File" description="Pick solidity file">
@@ -23,7 +20,7 @@
       isSmall
       title="Update list of contracts"
       icon="refresh"
-      on:click={refresh}
+      on:click={refreshFiles}
     />
   </div>
 </Setting>

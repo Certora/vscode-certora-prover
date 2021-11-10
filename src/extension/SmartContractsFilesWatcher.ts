@@ -34,7 +34,7 @@ export class SmartContractsFilesWatcher {
     this.webview = webview
     this.files = await vscode.workspace.findFiles(
       '**/*.{sol,spec}',
-      '/{node_modules,.git}/**',
+      '/{.certora_config,.git}/**',
     )
     this.nofifyWebviewAboutSolFilesUpdated()
   }
@@ -60,10 +60,12 @@ export class SmartContractsFilesWatcher {
       const spec: string[] = []
 
       this.files.forEach(file => {
+        const path = vscode.workspace.asRelativePath(file)
+
         if (file.path.endsWith('.sol')) {
-          sol.push(vscode.workspace.asRelativePath(file))
+          sol.push(path)
         } else {
-          spec.push(vscode.workspace.asRelativePath(file))
+          spec.push(path)
         }
       })
 

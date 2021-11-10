@@ -1,15 +1,12 @@
 <script lang="ts">
   import Setting from './Setting.svelte'
   import VsCodeButton from './VSCodeButton.svelte'
+  import { refreshFiles } from '../utils/refreshFiles'
 
   export let spec: string[]
-  export let specFile: string = spec[0] || ''
+  export let specFile: string = ''
 
-  function refresh() {
-    vscode.postMessage({
-      command: 'smart-contracts-files-refresh',
-    })
-  }
+  $: specFile = specFile || spec[0] // Initial value
 </script>
 
 <Setting title="Spec File" description="Spec file path">
@@ -23,7 +20,7 @@
       isSmall
       title="Update list of spec files"
       icon="refresh"
-      on:click={refresh}
+      on:click={refreshFiles}
     />
   </div>
 </Setting>

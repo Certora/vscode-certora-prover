@@ -3,6 +3,7 @@
   import LinkButton from './LinkButton.svelte'
   import AdditionalContract from './AdditionalContract.svelte'
   import VsCodeButton from './VSCodeButton.svelte'
+  import { refreshFiles } from '../utils/refreshFiles'
   import type { AdditionalContract as AdditionalContractType } from '../types'
 
   export let sol: string[]
@@ -11,12 +12,6 @@
 
   $: showedAdditionalContracts =
     sol.length > 4 ? sol.filter((_, i) => i <= 3) : sol
-
-  function refresh() {
-    vscode.postMessage({
-      command: 'smart-contracts-files-refresh',
-    })
-  }
 </script>
 
 <Setting title="Verify Additional Contract" description="Pick solidity file(s)">
@@ -44,7 +39,7 @@
         title="Update list of contracts"
         icon="refresh"
         isSmall
-        on:click={refresh}
+        on:click={refreshFiles}
       />
     {/if}
   </div>
