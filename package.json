@@ -31,7 +31,14 @@
           "icon": "/media/extension-icon.svg"
         }
       ]
-    }
+    },
+    "commands": [
+      {
+        "command": "certora.showSettings",
+        "title": "Settings",
+        "category": "Certora"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
@@ -137,5 +144,9 @@
   },
   "simple-git-hooks": {
     "pre-commit": "npx lint-staged"
+  },
+  "dependencies": {
+    "@vscode/webview-ui-toolkit": "^0.8.3",
+    "nanoid": "^3.1.30"
   }
 }
