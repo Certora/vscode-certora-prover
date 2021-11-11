@@ -74,6 +74,7 @@
 </script>
 
 <div class="settings">
+  <h2 class="title">General</h2>
   <MainSolidityFile {sol} bind:mainSolidityFile={form.mainSolidityFile} />
   <MainContractName bind:mainContractName={form.mainContractName} />
   <SpecFile {spec} bind:specFile={form.specFile} />
@@ -87,6 +88,7 @@
     useAdditionalContracts={form.useAdditionalContracts}
     bind:link={form.link}
   />
+  <h2 class="title">Advanced</h2>
   <ExtendedSettings bind:flags={form.extendedSettings} />
   <Staging bind:useStaging={form.useStaging} bind:branch={form.branch} />
   <CacheName bind:cacheName={form.cacheName} />
@@ -118,5 +120,13 @@
     display: flex;
     flex-direction: column;
     gap: 26px;
+  }
+
+  .title {
+    font-weight: 600;
+    font-size: 26px;
+    line-height: 31px;
+    margin-top: 0;
+    margin-bottom: -8px; /* because we have `gap: 26px;` in settings */
   }
 </style>
