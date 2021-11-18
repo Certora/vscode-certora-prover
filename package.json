@@ -37,6 +37,11 @@
         "command": "certora.showSettings",
         "title": "Settings",
         "category": "Certora"
+      },
+      {
+        "command": "certora.runScript",
+        "title": "Run Script",
+        "category": "Certora"
       }
     ]
   },
