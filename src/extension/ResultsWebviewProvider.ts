@@ -1,22 +1,13 @@
 import * as vscode from 'vscode'
-import { navigateToCode, JumpToDefinition } from './utils/navigateToCode'
+import { navigateToCode } from './utils/navigateToCode'
 import { getNonce } from './utils/getNonce'
 
-export enum Commands {
-  NavigateToCode = 'navigate-to-code',
-}
-
-type EventFromWebview = {
-  command: Commands.NavigateToCode
-  payload: JumpToDefinition[]
-}
-
 export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
-  viewType = 'results'
-  private _panel: vscode.Webview | null
+  public viewType = 'results'
+  private _panel: vscode.Webview | null = null
+  public stopScript: null | (() => void) = null
 
   constructor(private readonly _extensionUri: vscode.Uri) {
-    this._panel = null
     this._extensionUri = _extensionUri
   }
 
@@ -29,11 +20,17 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
 
     webview.html = this._getHtmlForWebview(webview)
     webview.onDidReceiveMessage(
-      (e: EventFromWebview) => {
+      e => {
         switch (e.command) {
-          case Commands.NavigateToCode:
+          case 'navigate-to-code':
             navigateToCode(e.payload)
             break
+          case 'stop-script': {
+            if (this.stopScript) {
+              this.stopScript()
+            }
+            break
+          }
           default:
             break
         }
