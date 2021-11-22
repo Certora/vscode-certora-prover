@@ -2,11 +2,17 @@ import * as vscode from 'vscode'
 import { spawn } from 'child_process'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { SettingsPanel } from './SettingsPanel'
+import {
+  ScriptProgressLongPolling,
+  ProgressResponse,
+} from './utils/ScriptProgressLongPolling'
+import { getProgressUrl } from './utils/getProgressUrl'
 
 export function activate(context: vscode.ExtensionContext): void {
   const resultsWebviewProvider = new ResultsWebviewProvider(
     context.extensionUri,
   )
+  const polling = new ScriptProgressLongPolling()
 
   context.subscriptions.push(
     vscode.commands.registerCommand('certora.showSettings', () => {
@@ -42,8 +48,20 @@ export function activate(context: vscode.ExtensionContext): void {
               cwd: path.uri.fsPath,
             })
 
-            certoraRun.stdout.on('data', data => {
-              channel.appendLine(data.toString())
+            certoraRun.stdout.on('data', async data => {
+              const str = data.toString()
+              channel.appendLine(str)
+
+              const progressUrl = getProgressUrl(str)
+
+              if (progressUrl) {
+                await polling.run(progressUrl, data => {
+                  resultsWebviewProvider.postMessage<ProgressResponse>({
+                    type: 'receive-new-job-result',
+                    payload: data,
+                  })
+                })
+              }
             })
 
             certoraRun.stderr.on('data', data => {
@@ -55,6 +73,7 @@ export function activate(context: vscode.ExtensionContext): void {
             })
 
             certoraRun.on('close', code => {
+              polling.stop()
               vscode.window.showInformationMessage(
                 `certoraRun script exited with code ${code}`,
               )

@@ -75,7 +75,6 @@
             navigateToCode(child.jumpToDefinition)
           },
         },
-        { title: 'Set the flags', icon: 'settings', onClick: () => {} },
       ]}
     />
   {/each}
@@ -95,7 +94,6 @@
             navigateToCode(child.jumpToDefinition)
           },
         },
-        { title: 'Set the flags', icon: 'settings', onClick: () => {} },
       ]}
       on:selectAssert
     />

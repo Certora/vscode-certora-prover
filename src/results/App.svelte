@@ -1,18 +1,26 @@
 <script lang="ts">
+  import { onMount, onDestroy } from 'svelte'
+  import uniqBy from 'lodash.uniqby'
   import Pane from './components/Pane.svelte'
   import CodeItemList from './components/CodeItemList.svelte'
   import Tree from './components/Tree.svelte'
   import ContractCallResolution from './components/ContractCallResolution.svelte'
-  import type { Tree as TreeJson, Assert, Output } from './types'
+  import type {
+    Assert,
+    Output,
+    Job,
+    ProgressResponse,
+    Tree as TreeJson,
+  } from './types'
   import { TreeType, CallTraceFunction } from './types'
 
-  import treeForDynamicUI from './mocks/tree-for-dynamic-ui.json'
   import output0 from './mocks/output0.json'
   import output1 from './mocks/output1.json'
 
-  let tree = treeForDynamicUI as TreeJson
   let selectedAssert: Assert
   let selectedCalltraceFunction: CallTraceFunction
+
+  let results: Job[] = []
 
   const outputs = {
     'output0.json': output0,
@@ -30,17 +38,49 @@
   async function getOutput(assert: Assert): Promise<Output> {
     return outputs[assert.output]
   }
+
+  const progressUrlsListener = (
+    e: MessageEvent<{
+      type: string
+      payload: ProgressResponse
+    }>,
+  ) => {
+    if (e.data.type === 'receive-new-job-result') {
+      results = uniqBy(
+        [
+          ...results,
+          {
+            ...e.data.payload,
+            verificationProgress: JSON.parse(
+              e.data.payload.verificationProgress,
+            ) as TreeJson,
+          },
+        ],
+        job => job.verificationProgress.contract,
+      )
+    }
+  }
+
+  onMount(() => {
+    window.addEventListener('message', progressUrlsListener)
+  })
+
+  onDestroy(() => {
+    window.removeEventListener('message', progressUrlsListener)
+  })
 </script>
 
-<Pane title={treeForDynamicUI.contract}>
-  <Tree
-    data={{
-      type: TreeType.Rules,
-      tree: tree.rules,
-    }}
-    on:selectAssert={selectAssert}
-  />
-</Pane>
+{#each results as job}
+  <Pane title={job.verificationProgress.contract}>
+    <Tree
+      data={{
+        type: TreeType.Rules,
+        tree: job.verificationProgress.rules,
+      }}
+      on:selectAssert={selectAssert}
+    />
+  </Pane>
+{/each}
 
 {#if selectedAssert}
   {#await getOutput(selectedAssert) then output}

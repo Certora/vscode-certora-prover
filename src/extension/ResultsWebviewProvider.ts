@@ -13,12 +13,15 @@ type EventFromWebview = {
 
 export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   viewType = 'results'
+  private _panel: vscode.Webview | null
 
   constructor(private readonly _extensionUri: vscode.Uri) {
+    this._panel = null
     this._extensionUri = _extensionUri
   }
 
   resolveWebviewView({ webview }: vscode.WebviewView): void {
+    this._panel = webview
     webview.options = {
       enableScripts: true,
       localResourceRoots: [this._extensionUri],
@@ -38,6 +41,11 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
       null,
       [],
     )
+  }
+
+  public postMessage<T>(message: { type: string; payload: T }): void {
+    if (!this._panel) return
+    this._panel.postMessage(message)
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {

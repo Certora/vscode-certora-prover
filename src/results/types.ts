@@ -100,3 +100,19 @@ export enum TreeType {
   Rules = 'rules',
   Calltrace = 'calltrace',
 }
+
+export type Job = {
+  jobId: string
+  jobStatus: string
+  jobEnded: boolean
+  cloudErrorMessages: string[]
+  verificationProgress: Tree
+}
+
+export type ProgressResponse = {
+  jobId: string
+  jobStatus: string
+  jobEnded: boolean
+  cloudErrorMessages: string[]
+  verificationProgress: string
+}

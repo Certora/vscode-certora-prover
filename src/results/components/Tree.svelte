@@ -31,7 +31,6 @@
               navigateToCode(rule.jumpToDefinition)
             },
           },
-          { title: 'Set the flags', icon: 'settings', onClick: () => {} },
         ]}
         on:selectAssert
       />
@@ -51,7 +50,6 @@
               navigateToCode(callTraceFunction.jumpToDefinition)
             },
           },
-          { title: 'Set the flags', icon: 'settings', onClick: () => {} },
         ]}
         on:selectCalltraceFunction
       />
