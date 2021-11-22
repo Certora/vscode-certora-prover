@@ -1,5 +1,6 @@
 import { workspace, window, OutputChannel } from 'vscode'
-import { spawn, ChildProcessWithoutNullStreams } from 'child_process'
+import { spawn, exec, ChildProcessWithoutNullStreams } from 'child_process'
+import * as os from 'os'
 import {
   ScriptProgressLongPolling,
   ProgressResponse,
@@ -79,10 +80,11 @@ export class ScriptRunner {
     }
   }
 
-  public stop(): void {
-    if (this.script) {
-      this.removeRunningScript(this.script.pid)
-      this.script.kill()
+  public stop = (pid: number): void => {
+    if (os.platform() === 'win32') {
+      exec(`taskkill -F -T -PID ${pid}`)
+    } else {
+      exec(`kill -9 ${pid}`)
     }
   }
 

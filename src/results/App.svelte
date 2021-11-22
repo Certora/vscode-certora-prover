@@ -9,10 +9,10 @@
     Assert,
     Output,
     Job,
-    ProgressResponse,
     Tree as TreeJson,
+    EventsFromExtension,
   } from './types'
-  import { TreeType, CallTraceFunction } from './types'
+  import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
 
   import output0 from './mocks/output0.json'
   import output1 from './mocks/output1.json'
@@ -21,6 +21,9 @@
   let selectedCalltraceFunction: CallTraceFunction
 
   let results: Job[] = []
+  let runningScripts: { pid: number; confFile: string }[] = []
+
+  $: hasRunningScripts = runningScripts.length > 0
 
   const outputs = {
     'output0.json': output0,
@@ -39,34 +42,44 @@
     return outputs[assert.output]
   }
 
-  const progressUrlsListener = (
-    e: MessageEvent<{
-      type: string
-      payload: ProgressResponse
-    }>,
-  ) => {
-    if (e.data.type === 'receive-new-job-result') {
-      results = uniqBy(
-        [
-          ...results,
-          {
-            ...e.data.payload,
-            verificationProgress: JSON.parse(
-              e.data.payload.verificationProgress,
-            ) as TreeJson,
-          },
-        ],
-        job => job.verificationProgress.contract,
-      )
+  const listener = (e: MessageEvent<EventsFromExtension>) => {
+    switch (e.data.type) {
+      case EventTypesFromExtension.ReceiveNewJobResult: {
+        results = uniqBy(
+          [
+            ...results,
+            {
+              ...e.data.payload,
+              verificationProgress: JSON.parse(
+                e.data.payload.verificationProgress,
+              ) as TreeJson,
+            },
+          ],
+          job => job.verificationProgress.contract,
+        )
+        break
+      }
+      case EventTypesFromExtension.RunningScriptChanged: {
+        runningScripts = e.data.payload
+      }
+      default:
+        break
     }
   }
 
+  function stopScript(pid: number) {
+    vscode.postMessage({
+      command: 'stop-script',
+      payload: pid,
+    })
+  }
+
   onMount(() => {
-    window.addEventListener('message', progressUrlsListener)
+    window.addEventListener('message', listener)
   })
 
   onDestroy(() => {
-    window.removeEventListener('message', progressUrlsListener)
+    window.removeEventListener('message', listener)
   })
 </script>
 
@@ -126,6 +139,22 @@
       </Pane>
     {/if}
   {/await}
+{/if}
+{#if hasRunningScripts}
+  <Pane title="Scripts" initialExpandedState={true}>
+    <ul>
+      {#each runningScripts as script (script.pid)}
+        <li>
+          {script.confFile}
+          <button
+            on:click={() => {
+              stopScript(script.pid)
+            }}>stop</button
+          >
+        </li>
+      {/each}
+    </ul>
+  </Pane>
 {/if}
 
 <style lang="postcss">

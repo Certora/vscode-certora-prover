@@ -116,3 +116,18 @@ export type ProgressResponse = {
   cloudErrorMessages: string[]
   verificationProgress: string
 }
+
+export enum EventTypesFromExtension {
+  ReceiveNewJobResult = 'receive-new-job-result',
+  RunningScriptChanged = 'running-scripts-changed',
+}
+
+export type EventsFromExtension =
+  | {
+      type: EventTypesFromExtension.ReceiveNewJobResult
+      payload: ProgressResponse
+    }
+  | {
+      type: EventTypesFromExtension.RunningScriptChanged
+      payload: { pid: number; confFile: string }[]
+    }

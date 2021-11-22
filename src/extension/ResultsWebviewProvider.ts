@@ -5,7 +5,7 @@ import { getNonce } from './utils/getNonce'
 export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   public viewType = 'results'
   private _panel: vscode.Webview | null = null
-  public stopScript: null | (() => void) = null
+  public stopScript: null | ((pid: number) => void) = null
 
   constructor(private readonly _extensionUri: vscode.Uri) {
     this._extensionUri = _extensionUri
@@ -26,8 +26,9 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
             navigateToCode(e.payload)
             break
           case 'stop-script': {
+            console.log(typeof this.stopScript)
             if (this.stopScript) {
-              this.stopScript()
+              this.stopScript(e.payload)
             }
             break
           }
