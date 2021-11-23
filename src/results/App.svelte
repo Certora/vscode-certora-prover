@@ -5,6 +5,7 @@
   import CodeItemList from './components/CodeItemList.svelte'
   import Tree from './components/Tree.svelte'
   import ContractCallResolution from './components/ContractCallResolution.svelte'
+  import RunningScript from './components/RunningScript.svelte'
   import type {
     Assert,
     Output,
@@ -140,22 +141,24 @@
     {/if}
   {/await}
 {/if}
-{#if hasRunningScripts}
-  <Pane title="Scripts" initialExpandedState={true}>
-    <ul>
-      {#each runningScripts as script (script.pid)}
-        <li>
-          {script.confFile}
-          <button
-            on:click={() => {
-              stopScript(script.pid)
-            }}>stop</button
-          >
-        </li>
-      {/each}
-    </ul>
+<div class="running-scripts-wrapper">
+  <Pane title="Running Scripts" initialExpandedState={true}>
+    {#if hasRunningScripts}
+      <ul class="running-scripts">
+        {#each runningScripts as script (script.pid)}
+          <li>
+            <RunningScript
+              confFile={script.confFile}
+              on:click={() => {
+                stopScript(script.pid)
+              }}
+            />
+          </li>
+        {/each}
+      </ul>
+    {/if}
   </Pane>
-{/if}
+</div>
 
 <style lang="postcss">
   :global(body) {
@@ -182,5 +185,17 @@
     --code-item-background-color-selected: #094771;
     --code-item-background-color-hover: #37373d;
     --pane-border-color: rgba(204, 204, 204, 0.2);
+  }
+
+  .running-scripts-wrapper {
+    position: absolute;
+    bottom: 12px;
+    width: 100%;
+  }
+
+  .running-scripts {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
   }
 </style>

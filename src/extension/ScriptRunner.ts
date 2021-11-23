@@ -1,4 +1,4 @@
-import { workspace, window, OutputChannel } from 'vscode'
+import { workspace, window } from 'vscode'
 import { spawn, exec, ChildProcessWithoutNullStreams } from 'child_process'
 import * as os from 'os'
 import {
@@ -16,13 +16,14 @@ type RunningScript = {
 export class ScriptRunner {
   private readonly polling: ScriptProgressLongPolling
   private readonly resultsWebviewProvider: ResultsWebviewProvider
-  private channel: OutputChannel | null = null
   private script: ChildProcessWithoutNullStreams | null = null
   private runningScripts: RunningScript[] = []
 
   constructor(resultsWebviewProvider: ResultsWebviewProvider) {
     this.polling = new ScriptProgressLongPolling()
     this.resultsWebviewProvider = resultsWebviewProvider
+
+    // TODO: Find better solution
     this.resultsWebviewProvider.stopScript = this.stop
   }
 
@@ -31,7 +32,7 @@ export class ScriptRunner {
 
     if (!path) return
 
-    this.channel = window.createOutputChannel(`certoraRun ${confFile}`)
+    // this.channel = window.createOutputChannel(`certoraRun ${confFile}`)
     this.script = spawn(`certoraRun`, [confFile], {
       cwd: path.uri.fsPath,
     })
@@ -41,7 +42,6 @@ export class ScriptRunner {
     if (this.script) {
       this.script.stdout.on('data', async data => {
         const str = data.toString()
-        if (this.channel) this.channel.appendLine(str)
 
         const progressUrl = getProgressUrl(str)
 
@@ -71,11 +71,6 @@ export class ScriptRunner {
         window.showInformationMessage(
           `certoraRun script exited with code ${code}`,
         )
-
-        if (this.channel) {
-          this.channel.clear()
-          this.channel.dispose()
-        }
       })
     }
   }
