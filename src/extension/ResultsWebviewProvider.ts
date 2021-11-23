@@ -26,7 +26,6 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
             navigateToCode(e.payload)
             break
           case 'stop-script': {
-            console.log(typeof this.stopScript)
             if (this.stopScript) {
               this.stopScript(e.payload)
             }
