@@ -32,7 +32,6 @@ export class ScriptRunner {
 
     if (!path) return
 
-    // this.channel = window.createOutputChannel(`certoraRun ${confFile}`)
     this.script = spawn(`certoraRun`, [confFile], {
       cwd: path.uri.fsPath,
     })
