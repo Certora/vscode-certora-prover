@@ -141,24 +141,22 @@
     {/if}
   {/await}
 {/if}
-<div class="running-scripts-wrapper">
-  <Pane title="Running Scripts" initialExpandedState={true}>
-    {#if hasRunningScripts}
-      <ul class="running-scripts">
-        {#each runningScripts as script (script.pid)}
-          <li>
-            <RunningScript
-              confFile={script.confFile}
-              on:click={() => {
-                stopScript(script.pid)
-              }}
-            />
-          </li>
-        {/each}
-      </ul>
-    {/if}
-  </Pane>
-</div>
+<Pane title="Running Scripts" initialExpandedState={true}>
+  {#if hasRunningScripts}
+    <ul class="running-scripts">
+      {#each runningScripts as script (script.pid)}
+        <li>
+          <RunningScript
+            confFile={script.confFile}
+            on:click={() => {
+              stopScript(script.pid)
+            }}
+          />
+        </li>
+      {/each}
+    </ul>
+  {/if}
+</Pane>
 
 <style lang="postcss">
   :global(body) {
@@ -185,12 +183,6 @@
     --code-item-background-color-selected: #094771;
     --code-item-background-color-hover: #37373d;
     --pane-border-color: rgba(204, 204, 204, 0.2);
-  }
-
-  .running-scripts-wrapper {
-    position: absolute;
-    bottom: 12px;
-    width: 100%;
   }
 
   .running-scripts {
