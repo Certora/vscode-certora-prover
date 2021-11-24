@@ -1,24 +1,18 @@
 import * as vscode from 'vscode'
-import { navigateToCode, JumpToDefinition } from './utils/navigateToCode'
+import { navigateToCode } from './utils/navigateToCode'
 import { getNonce } from './utils/getNonce'
 
-export enum Commands {
-  NavigateToCode = 'navigate-to-code',
-}
-
-type EventFromWebview = {
-  command: Commands.NavigateToCode
-  payload: JumpToDefinition[]
-}
-
 export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
-  viewType = 'results'
+  public viewType = 'results'
+  private _panel: vscode.Webview | null = null
+  public stopScript: null | ((pid: number) => void) = null
 
   constructor(private readonly _extensionUri: vscode.Uri) {
     this._extensionUri = _extensionUri
   }
 
   resolveWebviewView({ webview }: vscode.WebviewView): void {
+    this._panel = webview
     webview.options = {
       enableScripts: true,
       localResourceRoots: [this._extensionUri],
@@ -26,11 +20,17 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
 
     webview.html = this._getHtmlForWebview(webview)
     webview.onDidReceiveMessage(
-      (e: EventFromWebview) => {
+      e => {
         switch (e.command) {
-          case Commands.NavigateToCode:
+          case 'navigate-to-code':
             navigateToCode(e.payload)
             break
+          case 'stop-script': {
+            if (this.stopScript) {
+              this.stopScript(e.payload)
+            }
+            break
+          }
           default:
             break
         }
@@ -38,6 +38,11 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
       null,
       [],
     )
+  }
+
+  public postMessage<T>(message: { type: string; payload: T }): void {
+    if (!this._panel) return
+    this._panel.postMessage(message)
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {

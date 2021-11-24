@@ -1,12 +1,13 @@
 import * as vscode from 'vscode'
-import { spawn } from 'child_process'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { SettingsPanel } from './SettingsPanel'
+import { ScriptRunner } from './ScriptRunner'
 
 export function activate(context: vscode.ExtensionContext): void {
   const resultsWebviewProvider = new ResultsWebviewProvider(
     context.extensionUri,
   )
+  const scriptRunner = new ScriptRunner(resultsWebviewProvider)
 
   context.subscriptions.push(
     vscode.commands.registerCommand('certora.showSettings', () => {
@@ -34,34 +35,7 @@ export function activate(context: vscode.ExtensionContext): void {
         quickPick.onDidChangeSelection(selection => {
           if (selection[0]) {
             const confFile = selection[0].label
-            const channel = vscode.window.createOutputChannel(
-              `certoraRun ${confFile}`,
-            )
-
-            const certoraRun = spawn(`certoraRun`, [confFile], {
-              cwd: path.uri.fsPath,
-            })
-
-            certoraRun.stdout.on('data', data => {
-              channel.appendLine(data.toString())
-            })
-
-            certoraRun.stderr.on('data', data => {
-              vscode.window.showErrorMessage(`${data}`)
-            })
-
-            certoraRun.on('error', error => {
-              vscode.window.showErrorMessage(`${error}`)
-            })
-
-            certoraRun.on('close', code => {
-              vscode.window.showInformationMessage(
-                `certoraRun script exited with code ${code}`,
-              )
-              channel.clear()
-              channel.dispose()
-            })
-
+            scriptRunner.run(confFile)
             quickPick.hide()
           }
         })

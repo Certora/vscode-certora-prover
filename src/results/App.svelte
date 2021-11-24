@@ -1,18 +1,30 @@
 <script lang="ts">
+  import { onMount, onDestroy } from 'svelte'
+  import uniqBy from 'lodash.uniqby'
   import Pane from './components/Pane.svelte'
   import CodeItemList from './components/CodeItemList.svelte'
   import Tree from './components/Tree.svelte'
   import ContractCallResolution from './components/ContractCallResolution.svelte'
-  import type { Tree as TreeJson, Assert, Output } from './types'
-  import { TreeType, CallTraceFunction } from './types'
+  import RunningScript from './components/RunningScript.svelte'
+  import type {
+    Assert,
+    Output,
+    Job,
+    Tree as TreeJson,
+    EventsFromExtension,
+  } from './types'
+  import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
 
-  import treeForDynamicUI from './mocks/tree-for-dynamic-ui.json'
   import output0 from './mocks/output0.json'
   import output1 from './mocks/output1.json'
 
-  let tree = treeForDynamicUI as TreeJson
   let selectedAssert: Assert
   let selectedCalltraceFunction: CallTraceFunction
+
+  let results: Job[] = []
+  let runningScripts: { pid: number; confFile: string }[] = []
+
+  $: hasRunningScripts = runningScripts.length > 0
 
   const outputs = {
     'output0.json': output0,
@@ -30,17 +42,59 @@
   async function getOutput(assert: Assert): Promise<Output> {
     return outputs[assert.output]
   }
+
+  const listener = (e: MessageEvent<EventsFromExtension>) => {
+    switch (e.data.type) {
+      case EventTypesFromExtension.ReceiveNewJobResult: {
+        results = uniqBy(
+          [
+            ...results,
+            {
+              ...e.data.payload,
+              verificationProgress: JSON.parse(
+                e.data.payload.verificationProgress,
+              ) as TreeJson,
+            },
+          ],
+          job => job.verificationProgress.contract,
+        )
+        break
+      }
+      case EventTypesFromExtension.RunningScriptChanged: {
+        runningScripts = e.data.payload
+      }
+      default:
+        break
+    }
+  }
+
+  function stopScript(pid: number) {
+    vscode.postMessage({
+      command: 'stop-script',
+      payload: pid,
+    })
+  }
+
+  onMount(() => {
+    window.addEventListener('message', listener)
+  })
+
+  onDestroy(() => {
+    window.removeEventListener('message', listener)
+  })
 </script>
 
-<Pane title={treeForDynamicUI.contract}>
-  <Tree
-    data={{
-      type: TreeType.Rules,
-      tree: tree.rules,
-    }}
-    on:selectAssert={selectAssert}
-  />
-</Pane>
+{#each results as job}
+  <Pane title={job.verificationProgress.contract}>
+    <Tree
+      data={{
+        type: TreeType.Rules,
+        tree: job.verificationProgress.rules,
+      }}
+      on:selectAssert={selectAssert}
+    />
+  </Pane>
+{/each}
 
 {#if selectedAssert}
   {#await getOutput(selectedAssert) then output}
@@ -87,6 +141,22 @@
     {/if}
   {/await}
 {/if}
+<Pane title="Running Scripts" initialExpandedState={true}>
+  {#if hasRunningScripts}
+    <ul class="running-scripts">
+      {#each runningScripts as script (script.pid)}
+        <li>
+          <RunningScript
+            confFile={script.confFile}
+            on:click={() => {
+              stopScript(script.pid)
+            }}
+          />
+        </li>
+      {/each}
+    </ul>
+  {/if}
+</Pane>
 
 <style lang="postcss">
   :global(body) {
@@ -113,5 +183,11 @@
     --code-item-background-color-selected: #094771;
     --code-item-background-color-hover: #37373d;
     --pane-border-color: rgba(204, 204, 204, 0.2);
+  }
+
+  .running-scripts {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
   }
 </style>
