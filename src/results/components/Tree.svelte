@@ -1,7 +1,7 @@
 <script lang="ts">
   import RulesTreeItem from './RulesTreeItem.svelte'
   import CalltraceTreeItem from './CalltraceTreeItem.svelte'
-  import { navigateToCode } from '../utils/navigateToCode'
+  import { navigateToCode } from '../extension-actions'
   import type { Rule, CallTraceFunction } from '../types'
   import { TreeType } from '../types'
 

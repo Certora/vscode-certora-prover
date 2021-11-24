@@ -2,7 +2,7 @@
   import { createEventDispatcher } from 'svelte'
   import BaseTreeItem from './BaseTreeItem.svelte'
   import TreeIcon from './TreeIcon.svelte'
-  import { navigateToCode } from '../utils/navigateToCode'
+  import { navigateToCode } from '../extension-actions'
   import type { Action, Rule, Assert } from '../types'
 
   export let rule: Rule = null

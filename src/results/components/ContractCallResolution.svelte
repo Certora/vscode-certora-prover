@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { navigateToCode } from '../utils/navigateToCode'
+  import { navigateToCode } from '../extension-actions'
   import type { ContractCallResolution } from '../types'
 
   export let contractCallResolution: ContractCallResolution
