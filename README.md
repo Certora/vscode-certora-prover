@@ -21,8 +21,10 @@ yarn dev:svelte
 Possible types:
 
 - Results - it is Results tab in activity bar
+- Settings - webview with form for settings
 - Extension - tasks related to VSCode Extension
 - Infrastructure - linters, tasks, githooks, etc.
+- All - tasks related to project
 
 For example:
 
@@ -35,14 +37,14 @@ Without format. Write as needed
 4. Branch name format
 
 ```
-feature/{issue number}
-bug/{issue number}
+feature/{short description}
+bug/{short description}
 ```
 
 5. Commit name format
 
 ```
-#{issue number}: what did you do
+#{issue number}: What did you do
 ```
 
 6. Issue labels (task status)
