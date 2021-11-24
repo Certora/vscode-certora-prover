@@ -7,8 +7,14 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   private _panel: vscode.Webview | null = null
   public stopScript: null | ((pid: number) => void) = null
 
-  constructor(private readonly _extensionUri: vscode.Uri) {
+  constructor(
+    private readonly _extensionUri: vscode.Uri,
+    private readonly runScript: () => Promise<void>,
+    private readonly openSettings: () => void,
+  ) {
     this._extensionUri = _extensionUri
+    this.runScript = runScript
+    this.openSettings = openSettings
   }
 
   resolveWebviewView({ webview }: vscode.WebviewView): void {
@@ -26,11 +32,18 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
             navigateToCode(e.payload)
             break
           case 'stop-script': {
-            if (this.stopScript) {
+            // this.stopScript is set in ScriptRunner.ts constructor
+            if (typeof this.stopScript === 'function') {
               this.stopScript(e.payload)
             }
             break
           }
+          case 'run-script':
+            this.runScript()
+            break
+          case 'open-settings':
+            this.openSettings()
+            break
           default:
             break
         }
@@ -62,6 +75,16 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
         'codicon.css',
       ),
     )
+    const toolkitUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this._extensionUri,
+        'node_modules',
+        '@vscode',
+        'webview-ui-toolkit',
+        'dist',
+        'toolkit.js',
+      ),
+    )
 
     const nonce = getNonce()
     const mediaPath = webview.asWebviewUri(
@@ -74,6 +97,7 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
         <meta charset="UTF-8">
         <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; font-src ${webview.cspSource}; img-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script type="module" nonce="${nonce}" src="${toolkitUri}"></script>
         <link href="${styleUri}" rel="stylesheet">
         <link href="${codiconsUri}" rel="stylesheet">
       </head>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { navigateToCode } from '../utils/navigateToCode'
+  import { navigateToCode } from '../extension-actions'
   import type { JumpToDefinition } from '../types'
 
   export let name: string
