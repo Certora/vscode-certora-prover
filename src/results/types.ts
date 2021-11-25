@@ -125,7 +125,7 @@ export enum EventTypesFromExtension {
 export type EventsFromExtension =
   | {
       type: EventTypesFromExtension.ReceiveNewJobResult
-      payload: ProgressResponse
+      payload: Job
     }
   | {
       type: EventTypesFromExtension.RunningScriptChanged

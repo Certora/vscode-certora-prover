@@ -1,13 +1,6 @@
 import { window } from 'vscode'
 import axios from 'axios'
-
-export type ProgressResponse = {
-  jobId: string
-  jobStatus: string
-  jobEnded: boolean
-  cloudErrorMessages: string[]
-  verificationProgress: string
-}
+import type { Job, ProgressResponse } from './types'
 
 export class ScriptProgressLongPolling {
   private needStop: boolean
@@ -16,10 +9,29 @@ export class ScriptProgressLongPolling {
     this.needStop = false
   }
 
-  public async run(
+  private async rerun(
     url: string,
-    callback: (data: ProgressResponse) => void,
+    callback: (data: Job) => void,
+    ms = 5000,
   ): Promise<void> {
+    await new Promise(resolve => setTimeout(resolve, ms))
+    this.run(url, callback)
+  }
+
+  private prepareDataToUI(data: ProgressResponse): Job | undefined {
+    try {
+      return {
+        ...data,
+        verificationProgress: data.verificationProgress
+          ? JSON.parse(data.verificationProgress)
+          : {},
+      }
+    } catch (e) {
+      throw new Error()
+    }
+  }
+
+  public async run(url: string, callback: (data: Job) => void): Promise<void> {
     if (this.needStop) {
       this.needStop = false
       return
@@ -27,15 +39,27 @@ export class ScriptProgressLongPolling {
 
     try {
       const { data } = await axios.get<ProgressResponse>(url)
+      const dataToUI = this.prepareDataToUI(data)
 
-      if (data.jobEnded) {
-        callback(data)
+      if (data.jobEnded && dataToUI) {
+        callback(dataToUI)
+        return
+      }
+
+      if (
+        data.verificationProgress &&
+        data.verificationProgress !== '{}' &&
+        dataToUI
+      ) {
+        callback(dataToUI)
+        this.rerun(url, callback)
       } else {
-        await new Promise(resolve => setTimeout(resolve, 5000))
-        this.run(url, callback)
+        this.rerun(url, callback)
       }
     } catch (e) {
-      window.showErrorMessage(`${e}`)
+      window.showErrorMessage(
+        `Certora verification service is currently unavailable. Please, try again later.`,
+      )
     }
   }
 

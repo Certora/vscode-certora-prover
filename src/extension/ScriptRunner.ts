@@ -1,12 +1,10 @@
 import { workspace, window } from 'vscode'
 import { spawn, exec, ChildProcessWithoutNullStreams } from 'child_process'
 import * as os from 'os'
-import {
-  ScriptProgressLongPolling,
-  ProgressResponse,
-} from './ScriptProgressLongPolling'
+import { ScriptProgressLongPolling } from './ScriptProgressLongPolling'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { getProgressUrl } from './utils/getProgressUrl'
+import type { Job } from './types'
 
 type RunningScript = {
   pid: number
@@ -46,7 +44,7 @@ export class ScriptRunner {
 
         if (progressUrl) {
           await this.polling.run(progressUrl, data => {
-            this.resultsWebviewProvider.postMessage<ProgressResponse>({
+            this.resultsWebviewProvider.postMessage<Job>({
               type: 'receive-new-job-result',
               payload: data,
             })
