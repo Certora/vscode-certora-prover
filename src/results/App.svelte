@@ -1,19 +1,13 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
-  import uniqBy from 'lodash.uniqby'
   import Pane from './components/Pane.svelte'
   import CodeItemList from './components/CodeItemList.svelte'
   import Tree from './components/Tree.svelte'
   import ContractCallResolution from './components/ContractCallResolution.svelte'
   import RunningScript from './components/RunningScript.svelte'
   import { runScript, stopScript, openSettings } from './extension-actions'
-  import type {
-    Assert,
-    Output,
-    Job,
-    Tree as TreeJson,
-    EventsFromExtension,
-  } from './types'
+  import { mergeResults } from './utils/mergeResults'
+  import type { Assert, Output, Job, EventsFromExtension } from './types'
   import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
 
   import output0 from './mocks/output0.json'
@@ -48,18 +42,7 @@
   const listener = (e: MessageEvent<EventsFromExtension>) => {
     switch (e.data.type) {
       case EventTypesFromExtension.ReceiveNewJobResult: {
-        results = uniqBy(
-          [
-            ...results,
-            {
-              ...e.data.payload,
-              verificationProgress: JSON.parse(
-                e.data.payload.verificationProgress,
-              ) as TreeJson,
-            },
-          ],
-          job => job.verificationProgress.contract,
-        )
+        results = mergeResults(results, e.data.payload)
         break
       }
       case EventTypesFromExtension.RunningScriptChanged: {
@@ -101,7 +84,7 @@
   </div>
 {:else}
   {#each results as job}
-    <Pane title={job.verificationProgress.contract}>
+    <Pane title={job.verificationProgress.contract} initialExpandedState={true}>
       <Tree
         data={{
           type: TreeType.Rules,

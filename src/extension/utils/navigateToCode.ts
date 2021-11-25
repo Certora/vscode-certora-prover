@@ -1,10 +1,5 @@
 import * as vscode from 'vscode'
-
-export type JumpToDefinition = {
-  file: string
-  line: number
-  col: number
-}
+import type { JumpToDefinition } from '../types'
 
 export async function navigateToCode(
   jumpToDefinition: JumpToDefinition[],
