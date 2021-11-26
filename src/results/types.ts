@@ -107,6 +107,7 @@ export type Job = {
   jobEnded: boolean
   cloudErrorMessages: string[]
   verificationProgress: Tree
+  progressUrl: string
 }
 
 export type ProgressResponse = {
@@ -120,6 +121,7 @@ export type ProgressResponse = {
 export enum EventTypesFromExtension {
   ReceiveNewJobResult = 'receive-new-job-result',
   RunningScriptChanged = 'running-scripts-changed',
+  SetOutput = 'set-output',
 }
 
 export type EventsFromExtension =
@@ -130,4 +132,8 @@ export type EventsFromExtension =
   | {
       type: EventTypesFromExtension.RunningScriptChanged
       payload: { pid: number; confFile: string }[]
+    }
+  | {
+      type: EventTypesFromExtension.SetOutput
+      payload: Output
     }

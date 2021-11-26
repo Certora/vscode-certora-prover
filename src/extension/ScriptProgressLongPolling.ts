@@ -18,13 +18,17 @@ export class ScriptProgressLongPolling {
     this.run(url, callback)
   }
 
-  private prepareDataToUI(data: ProgressResponse): Job | undefined {
+  private prepareDataToUI(
+    data: ProgressResponse,
+    url: string,
+  ): Job | undefined {
     try {
       return {
         ...data,
         verificationProgress: data.verificationProgress
           ? JSON.parse(data.verificationProgress)
           : {},
+        progressUrl: url,
       }
     } catch (e) {
       throw new Error()
@@ -39,7 +43,7 @@ export class ScriptProgressLongPolling {
 
     try {
       const { data } = await axios.get<ProgressResponse>(url)
-      const dataToUI = this.prepareDataToUI(data)
+      const dataToUI = this.prepareDataToUI(data, url)
 
       if (data.jobEnded && dataToUI) {
         callback(dataToUI)

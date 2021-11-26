@@ -1,6 +1,8 @@
 import * as vscode from 'vscode'
+import axios from 'axios'
 import { navigateToCode } from './utils/navigateToCode'
 import { getNonce } from './utils/getNonce'
+import { Output } from './types'
 
 export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   public viewType = 'results'
@@ -44,6 +46,9 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
           case 'open-settings':
             this.openSettings()
             break
+          case 'get-output':
+            this.getOutput(e.payload)
+            break
           default:
             break
         }
@@ -56,6 +61,14 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   public postMessage<T>(message: { type: string; payload: T }): void {
     if (!this._panel) return
     this._panel.postMessage(message)
+  }
+
+  private async getOutput(outputUrl: string): Promise<void> {
+    try {
+      const { data } = await axios.get<Output>(outputUrl)
+
+      this.postMessage<Output>({ type: 'set-output', payload: data })
+    } catch (e) {}
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {

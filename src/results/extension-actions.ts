@@ -5,6 +5,7 @@ enum Commands {
   RunScript = 'run-script',
   OpenSettings = 'open-settings',
   NavigateToCode = 'navigate-to-code',
+  GetOutput = 'get-output',
 }
 
 export function stopScript(pid: number): void {
@@ -32,5 +33,12 @@ export function navigateToCode(jumpToDefinition: JumpToDefinition[]): void {
   vscode.postMessage({
     command: Commands.NavigateToCode,
     payload: jumpToDefinition,
+  })
+}
+
+export function getOutput(url: string): void {
+  vscode.postMessage({
+    command: Commands.GetOutput,
+    payload: url,
   })
 }

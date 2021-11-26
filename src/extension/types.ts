@@ -44,6 +44,7 @@ export type Job = {
   jobEnded: boolean
   cloudErrorMessages: string[]
   verificationProgress: Tree
+  progressUrl: string
 }
 
 export type ProgressResponse = {
@@ -52,4 +53,54 @@ export type ProgressResponse = {
   jobEnded: boolean
   cloudErrorMessages: string[]
   verificationProgress: string
+}
+
+export type ContractCallResolution = {
+  caller: {
+    name: string
+    jumpToDefinition: JumpToDefinition[]
+  }
+  callee: {
+    name: string
+    jumpToDefinition: JumpToDefinition[]
+  }
+  summary: string
+  comments: Record<string, string>[]
+}
+
+export type Variable = {
+  [x: string]: string | boolean | JumpToDefinition[]
+}
+
+export enum CallTraceFunctionStatuses {
+  Success = 'SUCCESS',
+  Revert = 'REVERT',
+  Summarized = 'SUMMARIZED',
+  Havoc = 'HAVOC',
+  Throw = 'THROW',
+  Dispatcher = 'DISPATCHER',
+  RevertCause = 'REVERT CAUSE',
+  Dump = 'DUMP',
+}
+
+export type CallTraceFunction = {
+  name: string
+  returnValue: string
+  status: CallTraceFunctionStatuses
+  childrenList: CallTraceFunction[]
+  jumpToDefinition: JumpToDefinition[]
+  variables: Variable[]
+}
+
+export type Output = {
+  name: string
+  assertId: number
+  graph_link: string
+  jumpToDefinition: JumpToDefinition[]
+  result: RuleStatuses
+  assertMessage?: string[]
+  callResolution: ContractCallResolution[]
+  callResolutionWarnings: ContractCallResolution[]
+  callTrace?: CallTraceFunction[]
+  variables?: Variable[]
 }
