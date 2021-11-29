@@ -68,7 +68,11 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
       const { data } = await axios.get<Output>(outputUrl)
 
       this.postMessage<Output>({ type: 'set-output', payload: data })
-    } catch (e) {}
+    } catch (e) {
+      vscode.window.showErrorMessage(
+        `Certora verification service is currently unavailable. Please, try again later.`,
+      )
+    }
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {

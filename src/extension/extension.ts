@@ -16,7 +16,7 @@ export function activate(context: vscode.ExtensionContext): void {
     const quickPick = vscode.window.createQuickPick()
     const confFiles = await vscode.workspace.findFiles(
       '**/*.{conf}',
-      '/{.certora_config,.git,.last_confs,node_modules}/**',
+      '**/{.certora_config,.git,.last_confs,node_modules}/**',
     )
 
     if (!confFiles?.length) {

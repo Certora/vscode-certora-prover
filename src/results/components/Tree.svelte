@@ -32,7 +32,7 @@
             },
           },
         ]}
-        on:selectAssert
+        on:fetchOutput
       />
     {/each}
   {/if}

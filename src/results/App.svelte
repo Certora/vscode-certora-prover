@@ -12,7 +12,7 @@
     getOutput,
   } from './extension-actions'
   import { mergeResults } from './utils/mergeResults'
-  import type { Assert, Output, Job, EventsFromExtension } from './types'
+  import type { Assert, Output, Job, EventsFromExtension, Rule } from './types'
   import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
 
   let output: Output
@@ -24,7 +24,7 @@
   $: hasRunningScripts = runningScripts.length > 0
   $: hasResults = results.length > 0
 
-  function selectAssert(e: CustomEvent<Assert>, job: Job) {
+  function fetchOutput(e: CustomEvent<Assert | Rule>, job: Job) {
     if (!e.detail.output) return
 
     const outputUrl = `${job.progressUrl.replace(
@@ -39,8 +39,6 @@
     selectedCalltraceFunction = e.detail
   }
 
-  $: console.log(results)
-
   const listener = (e: MessageEvent<EventsFromExtension>) => {
     switch (e.data.type) {
       case EventTypesFromExtension.ReceiveNewJobResult: {
@@ -53,6 +51,7 @@
       }
       case EventTypesFromExtension.SetOutput: {
         output = e.data.payload
+        break
       }
       default:
         break
@@ -96,7 +95,7 @@
           type: TreeType.Rules,
           tree: job.verificationProgress.rules,
         }}
-        on:selectAssert={e => selectAssert(e, job)}
+        on:fetchOutput={e => fetchOutput(e, job)}
       />
     </Pane>
   {/each}

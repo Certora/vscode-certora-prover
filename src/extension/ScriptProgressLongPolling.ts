@@ -45,6 +45,11 @@ export class ScriptProgressLongPolling {
       const { data } = await axios.get<ProgressResponse>(url)
       const dataToUI = this.prepareDataToUI(data, url)
 
+      if (data.jobStatus === 'FAILED') {
+        window.showErrorMessage(data.cloudErrorMessages.join('. '))
+        return
+      }
+
       if (data.jobEnded && dataToUI) {
         callback(dataToUI)
         return
