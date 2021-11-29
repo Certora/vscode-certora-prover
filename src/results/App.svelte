@@ -5,15 +5,17 @@
   import Tree from './components/Tree.svelte'
   import ContractCallResolution from './components/ContractCallResolution.svelte'
   import RunningScript from './components/RunningScript.svelte'
-  import { runScript, stopScript, openSettings } from './extension-actions'
+  import {
+    runScript,
+    stopScript,
+    openSettings,
+    getOutput,
+  } from './extension-actions'
   import { mergeResults } from './utils/mergeResults'
-  import type { Assert, Output, Job, EventsFromExtension } from './types'
+  import type { Assert, Output, Job, EventsFromExtension, Rule } from './types'
   import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
 
-  import output0 from './mocks/output0.json'
-  import output1 from './mocks/output1.json'
-
-  let selectedAssert: Assert
+  let output: Output
   let selectedCalltraceFunction: CallTraceFunction
 
   let results: Job[] = []
@@ -22,21 +24,19 @@
   $: hasRunningScripts = runningScripts.length > 0
   $: hasResults = results.length > 0
 
-  const outputs = {
-    'output0.json': output0,
-    'output1.json': output1,
-  }
+  function fetchOutput(e: CustomEvent<Assert | Rule>, job: Job) {
+    if (!e.detail.output) return
 
-  function selectAssert(e: CustomEvent<Assert>) {
-    selectedAssert = e.detail
+    const outputUrl = `${job.progressUrl.replace(
+      'progress',
+      'result',
+    )}&output=${e.detail.output}`
+
+    getOutput(outputUrl)
   }
 
   function selectCalltraceFunction(e: CustomEvent<CallTraceFunction>) {
     selectedCalltraceFunction = e.detail
-  }
-
-  async function getOutput(assert: Assert): Promise<Output> {
-    return outputs[assert.output]
   }
 
   const listener = (e: MessageEvent<EventsFromExtension>) => {
@@ -47,6 +47,11 @@
       }
       case EventTypesFromExtension.RunningScriptChanged: {
         runningScripts = e.data.payload
+        break
+      }
+      case EventTypesFromExtension.SetOutput: {
+        output = e.data.payload
+        break
       }
       default:
         break
@@ -90,54 +95,52 @@
           type: TreeType.Rules,
           tree: job.verificationProgress.rules,
         }}
-        on:selectAssert={selectAssert}
+        on:fetchOutput={e => fetchOutput(e, job)}
       />
     </Pane>
   {/each}
-  {#if selectedAssert}
-    {#await getOutput(selectedAssert) then output}
-      {#if output.variables && output.variables.length > 0}
-        <Pane title={`${output.name} variables`} initialExpandedState={true}>
-          <CodeItemList codeItems={output.variables} />
-        </Pane>
-      {/if}
-      {#if output.callTrace && output.callTrace.length > 0}
-        <Pane title={`Call traces`} initialExpandedState={true}>
-          <Tree
-            data={{
-              type: TreeType.Calltrace,
-              tree: output.callTrace,
-            }}
-            on:selectCalltraceFunction={selectCalltraceFunction}
-          />
-        </Pane>
-      {/if}
-      {#if selectedCalltraceFunction && selectedCalltraceFunction.variables && selectedCalltraceFunction.variables.length > 0}
-        <Pane
-          title={`${selectedCalltraceFunction.name} variables`}
-          initialExpandedState={true}
-        >
-          <CodeItemList codeItems={selectedCalltraceFunction.variables} />
-        </Pane>
-      {/if}
-      {#if output.callResolutionWarnings && output.callResolutionWarnings.length > 0}
-        <Pane
-          title={`Contract call resolution warnings`}
-          initialExpandedState={true}
-        >
-          {#each output.callResolutionWarnings as resolution}
-            <ContractCallResolution contractCallResolution={resolution} />
-          {/each}
-        </Pane>
-      {/if}
-      {#if output.callResolution && output.callResolution.length > 0}
-        <Pane title={`Contract call resolution`} initialExpandedState={true}>
-          {#each output.callResolution as resolution}
-            <ContractCallResolution contractCallResolution={resolution} />
-          {/each}
-        </Pane>
-      {/if}
-    {/await}
+  {#if output}
+    {#if output.variables && output.variables.length > 0}
+      <Pane title={`${output.name} variables`} initialExpandedState={true}>
+        <CodeItemList codeItems={output.variables} />
+      </Pane>
+    {/if}
+    {#if output.callTrace && output.callTrace.length > 0}
+      <Pane title={`Call traces`} initialExpandedState={true}>
+        <Tree
+          data={{
+            type: TreeType.Calltrace,
+            tree: output.callTrace,
+          }}
+          on:selectCalltraceFunction={selectCalltraceFunction}
+        />
+      </Pane>
+    {/if}
+    {#if selectedCalltraceFunction && selectedCalltraceFunction.variables && selectedCalltraceFunction.variables.length > 0}
+      <Pane
+        title={`${selectedCalltraceFunction.name} variables`}
+        initialExpandedState={true}
+      >
+        <CodeItemList codeItems={selectedCalltraceFunction.variables} />
+      </Pane>
+    {/if}
+    {#if output.callResolutionWarnings && output.callResolutionWarnings.length > 0}
+      <Pane
+        title={`Contract call resolution warnings`}
+        initialExpandedState={true}
+      >
+        {#each output.callResolutionWarnings as resolution}
+          <ContractCallResolution contractCallResolution={resolution} />
+        {/each}
+      </Pane>
+    {/if}
+    {#if output.callResolution && output.callResolution.length > 0}
+      <Pane title={`Contract call resolution`} initialExpandedState={true}>
+        {#each output.callResolution as resolution}
+          <ContractCallResolution contractCallResolution={resolution} />
+        {/each}
+      </Pane>
+    {/if}
   {/if}
 {/if}
 <Pane title="Running Scripts" initialExpandedState={true}>

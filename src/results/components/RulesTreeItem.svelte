@@ -12,7 +12,7 @@
   export let actions: Action[] = []
   export let level = 1
 
-  const dispatch = createEventDispatcher<{ selectAssert: Assert }>()
+  const dispatch = createEventDispatcher<{ fetchOutput: Assert | Rule }>()
 
   $: label = rule?.name || assert?.message
   $: ruleIcon = rule?.status
@@ -35,10 +35,15 @@
   bind:isExpanded
   on:click={() => {
     if (assert) {
-      dispatch('selectAssert', assert)
-    } else {
-      isExpanded = !isExpanded
+      dispatch('fetchOutput', assert)
+      return
     }
+
+    if (!isExpanded && rule) {
+      dispatch('fetchOutput', rule)
+    }
+
+    isExpanded = !isExpanded
   }}
 >
   <TreeIcon path={rule ? ruleIcon : assertIcon} />
@@ -95,7 +100,7 @@
           },
         },
       ]}
-      on:selectAssert
+      on:fetchOutput
     />
   {/each}
 {/if}
