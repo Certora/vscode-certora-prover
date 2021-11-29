@@ -43,6 +43,7 @@ export class ScriptRunner {
         const progressUrl = getProgressUrl(str)
 
         if (progressUrl) {
+          this.polling.clearNeedStop()
           await this.polling.run(progressUrl, data => {
             this.resultsWebviewProvider.postMessage<Job>({
               type: 'receive-new-job-result',
@@ -54,11 +55,13 @@ export class ScriptRunner {
 
       this.script.stderr.on('data', data => {
         window.showErrorMessage(`${data}`)
+        this.polling.stop()
         this.removeRunningScript(pid)
       })
 
       this.script.on('error', error => {
         window.showErrorMessage(`${error}`)
+        this.polling.stop()
         this.removeRunningScript(pid)
       })
 

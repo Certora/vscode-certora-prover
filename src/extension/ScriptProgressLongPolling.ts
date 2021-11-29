@@ -35,11 +35,12 @@ export class ScriptProgressLongPolling {
     }
   }
 
+  public clearNeedStop(): void {
+    if (this.needStop) this.needStop = false
+  }
+
   public async run(url: string, callback: (data: Job) => void): Promise<void> {
-    if (this.needStop) {
-      this.needStop = false
-      return
-    }
+    if (this.needStop) return
 
     try {
       const { data } = await axios.get<ProgressResponse>(url)
