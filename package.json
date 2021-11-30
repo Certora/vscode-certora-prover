@@ -41,9 +41,19 @@
       {
         "command": "certora.runScript",
         "title": "Run Script",
-        "category": "Certora"
+        "category": "Certora",
+        "icon": "$(play)"
       }
-    ]
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "certora.runScript",
+          "when": "view == results",
+          "group": "navigation"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
