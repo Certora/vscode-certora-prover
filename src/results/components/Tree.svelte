@@ -23,15 +23,17 @@
         {rule}
         setSize={data.tree.length}
         posInset={i + 1}
-        actions={[
-          {
-            title: 'Go to code',
-            icon: 'go-to-file',
-            onClick: () => {
-              navigateToCode(rule.jumpToDefinition)
-            },
-          },
-        ]}
+        actions={rule.jumpToDefinition.length > 0
+          ? [
+              {
+                title: 'Go to code',
+                icon: 'go-to-file',
+                onClick: () => {
+                  navigateToCode(rule.jumpToDefinition)
+                },
+              },
+            ]
+          : []}
         on:fetchOutput
       />
     {/each}
@@ -42,15 +44,17 @@
         {callTraceFunction}
         setSize={data.tree.length}
         posInset={i + 1}
-        actions={[
-          {
-            title: 'Go to code',
-            icon: 'go-to-file',
-            onClick: () => {
-              navigateToCode(callTraceFunction.jumpToDefinition)
-            },
-          },
-        ]}
+        actions={callTraceFunction.jumpToDefinition.length > 0
+          ? [
+              {
+                title: 'Go to code',
+                icon: 'go-to-file',
+                onClick: () => {
+                  navigateToCode(callTraceFunction.jumpToDefinition)
+                },
+              },
+            ]
+          : []}
         on:selectCalltraceFunction
       />
     {/each}

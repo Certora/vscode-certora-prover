@@ -13,7 +13,7 @@
       src={getIconPath('running-rule-status.svg')}
       alt=""
     />
-    <span>{confFile}</span>
+    <span title={confFile}>{confFile}</span>
   </div>
   <div
     tabindex="0"
@@ -31,7 +31,8 @@
     justify-content: space-between;
     align-items: center;
     padding-left: 16px;
-    padding-right: 2px;
+    padding-right: 14px;
+    height: 23px;
   }
 
   .name {

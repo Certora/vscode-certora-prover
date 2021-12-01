@@ -3,12 +3,6 @@ import axios from 'axios'
 import type { Job, ProgressResponse } from './types'
 
 export class ScriptProgressLongPolling {
-  private needStop: boolean
-
-  constructor() {
-    this.needStop = false
-  }
-
   private async rerun(
     url: string,
     callback: (data: Job) => void,
@@ -35,13 +29,7 @@ export class ScriptProgressLongPolling {
     }
   }
 
-  public clearNeedStop(): void {
-    if (this.needStop) this.needStop = false
-  }
-
   public async run(url: string, callback: (data: Job) => void): Promise<void> {
-    if (this.needStop) return
-
     try {
       const { data } = await axios.get<ProgressResponse>(url)
       const dataToUI = this.prepareDataToUI(data, url)
@@ -51,8 +39,11 @@ export class ScriptProgressLongPolling {
         return
       }
 
-      if (data.jobEnded && dataToUI) {
+      if (data.jobEnded && data.jobStatus === 'SUCCEEDED' && dataToUI) {
         callback(dataToUI)
+        window.showInformationMessage(
+          `Job ${dataToUI.jobId} completed successfully. Checked spec file: ${dataToUI.verificationProgress.spec}`,
+        )
         return
       }
 
@@ -71,9 +62,5 @@ export class ScriptProgressLongPolling {
         `Certora verification service is currently unavailable. Please, try again later.`,
       )
     }
-  }
-
-  public stop(): void {
-    this.needStop = true
   }
 }

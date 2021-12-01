@@ -72,15 +72,18 @@
       level={level + 1}
       setSize={rule.children.length}
       posInset={i}
-      actions={[
-        {
-          title: 'Go to code',
-          icon: 'go-to-file',
-          onClick: () => {
-            navigateToCode(child.jumpToDefinition)
-          },
-        },
-      ]}
+      actions={child.jumpToDefinition.length > 0
+        ? [
+            {
+              title: 'Go to code',
+              icon: 'go-to-file',
+              onClick: () => {
+                navigateToCode(child.jumpToDefinition)
+              },
+            },
+          ]
+        : []}
+      on:fetchOutput
     />
   {/each}
 {/if}
@@ -91,15 +94,17 @@
       level={level + 1}
       setSize={rule.children.length}
       posInset={i}
-      actions={[
-        {
-          title: 'Go to code',
-          icon: 'go-to-file',
-          onClick: () => {
-            navigateToCode(child.jumpToDefinition)
-          },
-        },
-      ]}
+      actions={child.jumpToDefinition.length > 0
+        ? [
+            {
+              title: 'Go to code',
+              icon: 'go-to-file',
+              onClick: () => {
+                navigateToCode(child.jumpToDefinition)
+              },
+            },
+          ]
+        : []}
       on:fetchOutput
     />
   {/each}

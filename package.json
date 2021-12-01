@@ -34,21 +34,38 @@
     },
     "commands": [
       {
-        "command": "certora.showSettings",
-        "title": "Settings",
-        "category": "Certora"
-      },
-      {
         "command": "certora.runScript",
         "title": "Run Script",
         "category": "Certora",
         "icon": "$(play)"
+      },
+      {
+        "command": "certora.showSettings",
+        "title": "Show Settings",
+        "category": "Certora",
+        "icon": "$(settings)"
+      },
+      {
+        "command": "certora.clearResults",
+        "title": "Clear Results",
+        "category": "Certora",
+        "icon": "$(close)"
       }
     ],
     "menus": {
       "view/title": [
         {
           "command": "certora.runScript",
+          "when": "view == results",
+          "group": "navigation"
+        },
+        {
+          "command": "certora.clearResults",
+          "when": "view == results",
+          "group": "navigation"
+        },
+        {
+          "command": "certora.showSettings",
           "when": "view == results",
           "group": "navigation"
         }

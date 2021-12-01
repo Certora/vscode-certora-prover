@@ -25,7 +25,10 @@
   $: hasResults = results.length > 0
 
   function fetchOutput(e: CustomEvent<Assert | Rule>, job: Job) {
-    if (!e.detail.output) return
+    if (!e.detail.output) {
+      clearOutput()
+      return
+    }
 
     const outputUrl = `${job.progressUrl.replace(
       'progress',
@@ -39,10 +42,16 @@
     selectedCalltraceFunction = e.detail
   }
 
+  function clearOutput() {
+    if (output) output = undefined
+    if (selectedCalltraceFunction) selectedCalltraceFunction = undefined
+  }
+
   const listener = (e: MessageEvent<EventsFromExtension>) => {
     switch (e.data.type) {
       case EventTypesFromExtension.ReceiveNewJobResult: {
-        results = mergeResults(results, e.data.payload)
+        mergeResults(results, e.data.payload)
+        results = results
         break
       }
       case EventTypesFromExtension.RunningScriptChanged: {
@@ -51,6 +60,11 @@
       }
       case EventTypesFromExtension.SetOutput: {
         output = e.data.payload
+        break
+      }
+      case EventTypesFromExtension.ClearAllJobs: {
+        if (hasResults) results = []
+        clearOutput()
         break
       }
       default:
@@ -88,8 +102,20 @@
     </div>
   </div>
 {:else}
-  {#each results as job}
-    <Pane title={job.verificationProgress.contract} initialExpandedState={true}>
+  {#each results as job (job.jobId)}
+    <Pane
+      title={job.verificationProgress.contract}
+      initialExpandedState={true}
+      actions={[
+        {
+          title: 'Delete Job',
+          icon: 'close',
+          onClick: () => {
+            results = results.filter(item => item.jobId !== job.jobId)
+          },
+        },
+      ]}
+    >
       <Tree
         data={{
           type: TreeType.Rules,
@@ -101,7 +127,17 @@
   {/each}
   {#if output}
     {#if output.variables && output.variables.length > 0}
-      <Pane title={`${output.name} variables`} initialExpandedState={true}>
+      <Pane
+        title={`${output.name} variables`}
+        initialExpandedState={true}
+        actions={[
+          {
+            title: 'Close Output',
+            icon: 'close',
+            onClick: clearOutput,
+          },
+        ]}
+      >
         <CodeItemList codeItems={output.variables} />
       </Pane>
     {/if}
