@@ -58,7 +58,7 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
     )
   }
 
-  public postMessage<T>(message: { type: string; payload: T }): void {
+  public postMessage<T>(message: { type: string; payload?: T }): void {
     if (!this._panel) return
     this._panel.postMessage(message)
   }

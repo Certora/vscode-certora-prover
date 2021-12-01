@@ -124,6 +124,7 @@ export enum EventTypesFromExtension {
   ReceiveNewJobResult = 'receive-new-job-result',
   RunningScriptChanged = 'running-scripts-changed',
   SetOutput = 'set-output',
+  ClearAllJobs = 'clear-all-jobs',
 }
 
 export type EventsFromExtension =
@@ -138,4 +139,7 @@ export type EventsFromExtension =
   | {
       type: EventTypesFromExtension.SetOutput
       payload: Output
+    }
+  | {
+      type: EventTypesFromExtension.ClearAllJobs
     }

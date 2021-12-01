@@ -47,6 +47,19 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.commands.registerCommand('certora.showSettings', showSettings),
     vscode.commands.registerCommand('certora.runScript', runScript),
+    vscode.commands.registerCommand('certora.clearResults', async () => {
+      const action = await vscode.window.showInformationMessage(
+        'Clear all jobs?',
+        'Clear All',
+        'Cancel',
+      )
+
+      if (action === 'Clear All') {
+        resultsWebviewProvider.postMessage({
+          type: 'clear-all-jobs',
+        })
+      }
+    }),
     vscode.window.registerWebviewViewProvider(
       resultsWebviewProvider.viewType,
       resultsWebviewProvider,
