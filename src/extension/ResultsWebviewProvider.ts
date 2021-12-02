@@ -114,6 +114,7 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
         <meta charset="UTF-8">
         <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; font-src ${webview.cspSource}; img-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta data-media-path="${mediaPath}">
         <script type="module" nonce="${nonce}" src="${toolkitUri}"></script>
         <link href="${styleUri}" rel="stylesheet">
         <link href="${codiconsUri}" rel="stylesheet">
@@ -121,9 +122,6 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
       <body>
         <script nonce="${nonce}">
           const vscode = acquireVsCodeApi();
-        </script>
-        <script nonce="${nonce}">
-          const mediaPath = '${mediaPath}';
         </script>
         <script nonce="${nonce}" src="${scriptUri}"></script>
       </body>
