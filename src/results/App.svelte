@@ -224,20 +224,15 @@
   }
 
   .zero-state {
-    padding: 0 15px 0 24px;
+    padding: 0 8px 0 20px;
 
     .command {
       margin-bottom: 27px;
     }
 
     .command-description {
-      font-size: 13px;
       line-height: 16px;
       margin-bottom: 8px;
-    }
-
-    .command-button {
-      width: 100%;
     }
   }
 
