@@ -1,20 +1,27 @@
 <script lang="ts">
-  import Setting from './Setting.svelte'
+  import BaseSetting from './BaseSetting.svelte'
   import LinkButton from './LinkButton.svelte'
   import AdditionalContract from './AdditionalContract.svelte'
   import VsCodeButton from './VSCodeButton.svelte'
   import { refreshFiles } from '../utils/refreshFiles'
   import type { AdditionalContract as AdditionalContractType } from '../types'
 
-  export let sol: string[]
+  export let solidityFiles: string[]
   export let useAdditionalContracts: boolean
   export let additionalContracts: AdditionalContractType[]
 
+  const visibleContractsCount = 4
+
   $: showedAdditionalContracts =
-    sol.length > 4 ? sol.filter((_, i) => i <= 3) : sol
+    solidityFiles.length > visibleContractsCount
+      ? solidityFiles.filter((_, i) => i < visibleContractsCount)
+      : solidityFiles
 </script>
 
-<Setting title="Verify Additional Contract" description="Pick solidity file(s)">
+<BaseSetting
+  title="Verify Additional Contract"
+  description="Pick solidity file(s)"
+>
   <div class="additional-contracts">
     <vscode-checkbox
       on:change={e => (useAdditionalContracts = e.target.checked)}
@@ -28,11 +35,11 @@
           bind:selectedContracts={additionalContracts}
         />
       {/each}
-      {#if sol.length > 4 && showedAdditionalContracts.length === 4}
+      {#if solidityFiles.length > visibleContractsCount && showedAdditionalContracts.length === visibleContractsCount}
         <LinkButton
           title="Show more contracts"
           icon="chevron-down"
-          on:click={() => (showedAdditionalContracts = sol)}
+          on:click={() => (showedAdditionalContracts = solidityFiles)}
         />
       {/if}
       <VsCodeButton
@@ -43,13 +50,13 @@
       />
     {/if}
   </div>
-</Setting>
+</BaseSetting>
 
 <style>
   .additional-contracts {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 18px;
+    gap: var(--space-lg);
   }
 </style>

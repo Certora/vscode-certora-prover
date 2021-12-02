@@ -179,7 +179,7 @@
     "pre-commit": "npx lint-staged"
   },
   "dependencies": {
-    "@vscode/webview-ui-toolkit": "^0.8.3",
+    "@vscode/webview-ui-toolkit": "^0.8.4",
     "axios": "^0.24.0",
     "lodash.uniqby": "^4.7.0",
     "nanoid": "^3.1.30"

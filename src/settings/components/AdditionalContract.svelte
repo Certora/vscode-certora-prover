@@ -41,7 +41,7 @@
   </vscode-text-field>
 </div>
 
-<style>
+<style lang="postcss">
   vscode-checkbox {
     margin: 0;
   }
@@ -51,15 +51,15 @@
     display: flex;
     flex-direction: column;
     align-items: self-start;
-    gap: 9px;
-  }
+    gap: var(--space-sm);
 
-  .additional-contract::before {
-    position: absolute;
-    left: -6px;
-    width: 2px;
-    height: 100%;
-    background-color: rgba(204, 204, 204, 0.2);
-    content: '';
+    &::before {
+      position: absolute;
+      left: -6px;
+      width: 2px;
+      height: 100%;
+      background-color: rgba(204, 204, 204, 0.2);
+      content: '';
+    }
   }
 </style>

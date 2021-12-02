@@ -1,14 +1,17 @@
 <script lang="ts">
   import { nanoid } from 'nanoid'
-  import Setting from './Setting.svelte'
+  import BaseSetting from './BaseSetting.svelte'
   import LinkButton from './LinkButton.svelte'
   import VsCodeButton from './VSCodeButton.svelte'
   import type { AdditionalSetting } from '../types'
 
   export let settings: AdditionalSetting[]
+
+  const cliWikiLink =
+    'https://certora.atlassian.net/wiki/spaces/CPD/pages/7340043/Certora+Prover+CLI+Options'
 </script>
 
-<Setting
+<BaseSetting
   title="Additional Settings"
   description="If a flag is given with no value, it is treated as a boolean and set to true"
 >
@@ -48,30 +51,29 @@
       ])}
   />
   <p class="info">
-    Full list with advanced settings:&nbsp;<vscode-link
-      href="https://certora.atlassian.net/wiki/spaces/CPD/pages/7340043/Certora+Prover+CLI+Options"
+    Full list with advanced settings:&nbsp;<vscode-link href={cliWikiLink}
       >Certora Prover CLI Options</vscode-link
     >
   </p>
-</Setting>
+</BaseSetting>
 
 <style>
   .settings {
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    margin-bottom: 14px;
+    gap: var(--space-md);
+    margin-bottom: var(--space-md);
   }
 
   .settings-fields {
     display: flex;
-    gap: 14px;
+    gap: var(--space-md);
   }
 
   .info {
     display: flex;
     align-items: center;
-    margin-top: 14px;
-    margin-bottom: 26px;
+    margin-top: var(--space-md);
+    margin-bottom: var(--space-xl);
   }
 </style>

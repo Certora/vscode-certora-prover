@@ -12,21 +12,18 @@
 </div>
 
 <style>
-  h3,
-  p {
+  .title,
+  .description {
     margin: 0;
+    line-height: 16px;
   }
 
   .title {
-    margin-bottom: 4px;
-    font-weight: bold;
-    font-size: 13px;
-    line-height: 16px;
+    margin-bottom: var(--space-xs);
+    font-size: var(--vscode-font-size);
   }
 
   .description {
-    margin-bottom: 9px;
-    font-size: 13px;
-    line-height: 16px;
+    margin-bottom: var(--space-sm);
   }
 </style>
