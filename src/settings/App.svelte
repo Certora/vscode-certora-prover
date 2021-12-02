@@ -1,28 +1,24 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
   import { nanoid } from 'nanoid'
-  import MainSolidityFile from './components/MainSolidityFile.svelte'
-  import MainContractName from './components/MainContractName.svelte'
-  import SpecFile from './components/SpecFile.svelte'
-  import SolidityCompiler from './components/SolidityCompiler.svelte'
   import VerifyAdditionalContract from './components/VerifyAdditionalContract.svelte'
   import Link from './components/Link.svelte'
   import ExtendedSettings from './components/ExtendedSettings.svelte'
-  import Staging from './components/Staging.svelte'
-  import CacheName from './components/CacheName.svelte'
-  import Message from './components/Message.svelte'
+  import BaseSetting from './components/BaseSetting.svelte'
   import AdditionalSettings from './components/AdditionalSettings.svelte'
+  import OneFieldSetting from './components/OneFieldSetting.svelte'
+  import SettingWithFilePicker from './components/SettingWithFilePicker.svelte'
   import type { Form } from './types'
 
-  let sol: string[] = []
-  let spec: string[] = []
+  let solidityFiles: string[] = []
+  let specFiles: string[] = []
   let form: Form = {
     mainSolidityFile: '',
     mainContractName: '',
     specFile: '',
     solidityCompiler: '',
     useAdditionalContracts: false,
-    additionalContracts: sol.map(file => ({ file, name: '' })),
+    additionalContracts: solidityFiles.map(file => ({ file, name: '' })),
     link: [
       {
         id: nanoid(),
@@ -52,8 +48,8 @@
     }>,
   ) => {
     if (e.data.type === 'smart-contracts-files-updated') {
-      sol = e.data.payload.sol
-      spec = e.data.payload.spec
+      solidityFiles = e.data.payload.sol
+      specFiles = e.data.payload.spec
     }
   }
 
@@ -74,13 +70,33 @@
 </script>
 
 <div class="settings">
-  <h2 class="title">General</h2>
-  <MainSolidityFile {sol} bind:mainSolidityFile={form.mainSolidityFile} />
-  <MainContractName bind:mainContractName={form.mainContractName} />
-  <SpecFile {spec} bind:specFile={form.specFile} />
-  <SolidityCompiler bind:solidityCompiler={form.solidityCompiler} />
+  <h2 class="section-title">General</h2>
+  <SettingWithFilePicker
+    title="Main Solidity File"
+    description="Pick solidity file"
+    refreshButtonTitle="Update list of contracts"
+    files={solidityFiles}
+    bind:file={form.mainSolidityFile}
+  />
+  <OneFieldSetting
+    title="Main Contract Name"
+    description="Contract name"
+    bind:value={form.mainContractName}
+  />
+  <SettingWithFilePicker
+    title="Spec File"
+    description="Spec file path"
+    refreshButtonTitle="Update list of spec files"
+    files={specFiles}
+    bind:file={form.specFile}
+  />
+  <OneFieldSetting
+    title="Solidity Compiler"
+    description="Solidity compiler executable file (expected to be added to the $PATH environment variable). By default, solc (or solc.exe on Windows) is used"
+    bind:value={form.solidityCompiler}
+  />
   <VerifyAdditionalContract
-    {sol}
+    {solidityFiles}
     bind:useAdditionalContracts={form.useAdditionalContracts}
     bind:additionalContracts={form.additionalContracts}
   />
@@ -88,11 +104,36 @@
     useAdditionalContracts={form.useAdditionalContracts}
     bind:link={form.link}
   />
-  <h2 class="title">Advanced</h2>
+
+  <h2 class="section-title">Advanced</h2>
   <ExtendedSettings bind:flags={form.extendedSettings} />
-  <Staging bind:useStaging={form.useStaging} bind:branch={form.branch} />
-  <CacheName bind:cacheName={form.cacheName} />
-  <Message bind:message={form.message} />
+  <BaseSetting title="Staging">
+    <div class="staging">
+      <vscode-checkbox
+        checked={form.useStaging}
+        on:change={e => (form.useStaging = e.target.checked)}
+      >
+        Run on the Staging Environment
+      </vscode-checkbox>
+      <vscode-text-field
+        disabled={!form.useStaging}
+        value={form.branch}
+        on:change={e => (form.branch = e.target.value)}
+      >
+        Branch name
+      </vscode-text-field>
+    </div>
+  </BaseSetting>
+  <OneFieldSetting
+    title="Cache Name"
+    description="Optimize the pre-analysis by using cache"
+    bind:value={form.cacheName}
+  />
+  <OneFieldSetting
+    title="Message"
+    description="Adds a message description to your run, similar to a commit message. This message will appear in the title of the completion email sent to you"
+    bind:value={form.message}
+  />
   <AdditionalSettings bind:settings={form.additionalSettings} />
   <div>
     <vscode-button on:click={createConfFile}>Create conf file</vscode-button>
@@ -100,6 +141,15 @@
 </div>
 
 <style lang="postcss">
+  :global(:root) {
+    --space-xs: 4px;
+    --space-sm: 9px;
+    --space-md: 14px;
+    --space-lg: 18px;
+    --space-xl: 26px;
+    --space-xxl: 30px;
+  }
+
   :global(body) {
     padding: 26px 24px;
   }
@@ -119,14 +169,23 @@
   .settings {
     display: flex;
     flex-direction: column;
-    gap: 26px;
+    gap: var(--space-xl);
   }
 
-  .title {
+  .section-title {
     font-weight: 600;
     font-size: 26px;
     line-height: 31px;
     margin-top: 0;
-    margin-bottom: -8px; /* because we have `gap: 26px;` in settings */
+    margin-bottom: calc(
+      var(--space-lg) - var(--space-xl)
+    ); /* because we have `gap: var(--space-xl);` in .settings */
+  }
+
+  .staging {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-sm);
   }
 </style>

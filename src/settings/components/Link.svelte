@@ -1,6 +1,6 @@
 <script lang="ts">
   import { nanoid } from 'nanoid'
-  import Setting from './Setting.svelte'
+  import BaseSetting from './BaseSetting.svelte'
   import LinkGroup from './LinkGroup.svelte'
   import VsCodeButton from './VSCodeButton.svelte'
   import type { Link as LinkType } from '../types'
@@ -10,7 +10,7 @@
 </script>
 
 {#if useAdditionalContracts}
-  <Setting
+  <BaseSetting
     title="Link"
     description="Make a storage field of a Solidity contract point to another contract"
   >
@@ -38,7 +38,7 @@
           },
         ])}
     />
-  </Setting>
+  </BaseSetting>
 {/if}
 
 <style>
@@ -46,7 +46,7 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 18px;
-    margin-bottom: 18px;
+    gap: var(--space-lg);
+    margin-bottom: var(--space-lg);
   }
 </style>

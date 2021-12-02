@@ -545,10 +545,10 @@
   resolved "https://registry.yarnpkg.com/@vscode/codicons/-/codicons-0.0.22.tgz#33417524996737b3de469336171b38829f683bc6"
   integrity sha512-Cl3s2vgRhoJJ5nY2qC3JXCF0uoSw4zaMi0ZJIIcyOQTeeQCXIirE522cIRlcIo8cJDspQY9PMgALGvD0afZ5Mg==
 
-"@vscode/webview-ui-toolkit@^0.8.3":
-  version "0.8.3"
-  resolved "https://registry.yarnpkg.com/@vscode/webview-ui-toolkit/-/webview-ui-toolkit-0.8.3.tgz#a5564c707ac7076979f600b3297e7c482d0e0e87"
-  integrity sha512-un0uaFWEckI5k8oL8keUmwySftP2nQwmg3SquCwzvSTwQjKNGWF070Zkp4AdKeHkOKG0nd5zcZiN3IQEZcRJVQ==
+"@vscode/webview-ui-toolkit@^0.8.4":
+  version "0.8.4"
+  resolved "https://registry.yarnpkg.com/@vscode/webview-ui-toolkit/-/webview-ui-toolkit-0.8.4.tgz#89e157ace8048a64b34a30a86a97727cd3d3de4b"
+  integrity sha512-hIbC/awoqCA+dPDGcFGxPH6OGVF/vsgrol9tv5P+eAdc7YMGvZmtezBgRmdGesJmI6Hvv+Buw8qtXwxSj215Jg==
   dependencies:
     "@microsoft/fast-element" "^1.6.0"
     "@microsoft/fast-foundation" "^2.21.0"

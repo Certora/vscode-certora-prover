@@ -29,12 +29,12 @@
   .link-group {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: var(--space-md);
   }
 
   .link-group-fields {
     display: flex;
     flex-wrap: wrap;
-    gap: 14px;
+    gap: var(--space-md);
   }
 </style>
