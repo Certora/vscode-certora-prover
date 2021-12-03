@@ -31,7 +31,6 @@
     padding: 2px;
     border-radius: 5px;
     text-decoration: none;
-    color: #424242;
 
     &:focus {
       outline-color: rgba(255, 255, 255, 0);

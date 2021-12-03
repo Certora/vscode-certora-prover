@@ -223,6 +223,10 @@
     --pane-border-color: rgba(204, 204, 204, 0.2);
   }
 
+  :global(a, a:hover) {
+    color: unset;
+  }
+
   .zero-state {
     padding: 0 8px 0 20px;
 
