@@ -37,7 +37,8 @@
         "command": "certora.runScript",
         "title": "Run Script",
         "category": "Certora",
-        "icon": "$(play)"
+        "icon": "$(play)",
+        "enablement": "view == results"
       },
       {
         "command": "certora.showSettings",
@@ -49,7 +50,8 @@
         "command": "certora.clearResults",
         "title": "Clear Results",
         "category": "Certora",
-        "icon": "$(close)"
+        "icon": "$(close)",
+        "enablement": "view == results"
       }
     ],
     "menus": {
