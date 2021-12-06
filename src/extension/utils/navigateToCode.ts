@@ -4,6 +4,10 @@ import type { JumpToDefinition } from '../types'
 export async function navigateToCode(
   jumpToDefinition: JumpToDefinition[],
 ): Promise<void> {
+  const jtd = jumpToDefinition.map(item => ({
+    ...item,
+    line: item.line - 1,
+  }))
   const base = vscode.workspace.workspaceFolders?.[0].uri
 
   if (!base) return
@@ -16,7 +20,7 @@ export async function navigateToCode(
   const documentsToOpen: JumpToDefinition[] = []
   const openedDocuments = vscode.workspace.textDocuments
 
-  jumpToDefinition.forEach(item => {
+  jtd.forEach(item => {
     const documentAlreadyOpened = openedDocuments.find(
       doc => doc.uri.path === vscode.Uri.joinPath(base, item.file).path,
     )

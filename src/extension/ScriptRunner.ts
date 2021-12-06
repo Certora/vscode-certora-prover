@@ -1,4 +1,4 @@
-import { workspace, window } from 'vscode'
+import { workspace, window, Uri } from 'vscode'
 import { spawn, exec, ChildProcessWithoutNullStreams } from 'child_process'
 import * as os from 'os'
 import { ScriptProgressLongPolling } from './ScriptProgressLongPolling'
@@ -25,11 +25,48 @@ export class ScriptRunner {
     this.resultsWebviewProvider.stopScript = this.stop
   }
 
+  private async log(
+    str: string,
+    pathToConfFile: string,
+    ts: number,
+  ): Promise<void> {
+    const path = workspace.workspaceFolders?.[0]
+
+    if (!path) return
+
+    const splitedPathToConfFile = pathToConfFile.split('/')
+    const name = splitedPathToConfFile[splitedPathToConfFile.length - 1]
+    const logFilePath = Uri.joinPath(
+      path.uri,
+      'certora-logs',
+      `${name}-${ts}.log`,
+    )
+    const encoder = new TextEncoder()
+    const content = encoder.encode(str)
+
+    let file
+
+    try {
+      file = await workspace.fs.readFile(logFilePath)
+    } catch (e) {
+    } finally {
+      if (file) {
+        await workspace.fs.writeFile(
+          logFilePath,
+          new Uint8Array([...file, ...content]),
+        )
+      } else {
+        await workspace.fs.writeFile(logFilePath, content)
+      }
+    }
+  }
+
   public run(confFile: string): void {
     const path = workspace.workspaceFolders?.[0]
 
     if (!path) return
 
+    const ts = Date.now()
     this.script = spawn(`certoraRun`, [confFile], {
       cwd: path.uri.fsPath,
     })
@@ -39,6 +76,7 @@ export class ScriptRunner {
     if (this.script) {
       this.script.stdout.on('data', async data => {
         const str = data.toString() as string
+        this.log(str, confFile, ts)
 
         const progressUrl = getProgressUrl(str)
 
@@ -69,11 +107,12 @@ export class ScriptRunner {
   }
 
   public stop = (pid: number): void => {
-    if (os.platform() === 'win32') {
-      exec(`taskkill -F -T -PID ${pid}`)
-    } else {
-      exec(`kill -9 ${pid}`)
-    }
+    const command =
+      os.platform() === 'win32'
+        ? `taskkill -F -T -PID ${pid}`
+        : `kill -SIGTERM ${pid}`
+
+    exec(command)
   }
 
   private addRunningScript(confFile: string, pid: number): void {
