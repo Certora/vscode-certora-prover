@@ -30,35 +30,33 @@ To start, you need to install and set the script. It helps to start checking the
 
 ### Create a conf file
 
-When starting the verification, you will be prompted to set the configurations, such as the main contract name, solidity compiler version, and more. These configurations will be stored in a local configuration file in the `conf` subfolder. You can edit the configuration file manually or create a new one (by clicking on the {create_conf_file_button name} button).
+When starting the verification, you will be prompted to set the configurations, such as the main contract name, solidity compiler version, and more. These configurations will be stored in a local configuration file in the `conf` subfolder. You can edit the configuration file manually or create a new one (by clicking on the {`create_conf_file_button name`} button).
 
-You can add additional flags to specify the testing area for smart contrast. The list of available options you can find under the documents link: [Certora Prover CLI Options](https://certora.atlassian.net/wiki/spaces/CPD/pages/7340043/Certora+Prover+CLI+Options)
+You can add additional flags to specify the testing area. You can find the list of available options in the document [Certora Prover CLI Options](https://certora.atlassian.net/wiki/spaces/CPD/pages/7340043/Certora+Prover+CLI+Options)
 
 ### Start a verification
 
-Prover script will use the conf file info and option and will start the verification process. The user uses VS Code Command Palette (Ctrl/Cmd + Shift + P) to run the Certora Run script (the same way it works now, but the user will be using VS Command Palette instead of CLI).
-
-Users can run multiple jobs for checking. Users will have a special section where the system will show all ongoing processes and stop the process. After stopping the job, the process will be hidden from the list.
+The Prover script will use the `conf` file information to start the verification process. Use the VS Code Command Palette (`Ctrl/Cmd + Shift + P`) to run the Certora Run script. You can verify multiple contracts. A special section shows all ongoing processes. You can stop a process to remove it from the list.
 
 ### Results
 
-After the script finishes, the checking process under the activity bar system will show a tree with jobs. The user can see a list of jobs (functions), call traces, connected variables, and assertion messages.
+After the script finishes, the checking process under the activity bar system will show a tree of verification jobs. You will see a list of all the jobs, along with their call traces, connected variables, and assertion messages.
 
 ## Commands
 
-This extension contributes the following commands and can be accessed via [Command Palette](https://code.visualstudio.com/docs/getstarted/userinterface#_command-palette):
+The following commands can be accessed via [Command Palette](https://code.visualstudio.com/docs/getstarted/userinterface#_command-palette):
 
-| command                | description                                      | availability   |
-| ---------------------- | ------------------------------------------------ | -------------- |
-| Certora: Run Script    | Choose a conf-file to run a job & start checking | On Results Tab |
-| Certora: Show Settings | Shows settings window                            | Always         |
-| Certora: Clear Results | Clears results list                              | On Results Tab |
+| command                | description                                       | availability   |
+| ---------------------- | ------------------------------------------------- | -------------- |
+| Certora: Run Script    | Choose a conf-file to run a job & start verifying | On Results Tab |
+| Certora: Show Settings | Shows the `settings` window                       | Always         |
+| Certora: Clear Results | Clears the results list                           | On Results Tab |
 
 ## Troubleshooting
 
-If you have any questions about the tool and way how you can setup it for your needed you can use our FAQ: https://www.certora.com/#FAQ
+If you have any questions about the tool and how to set it up for your needs, see our FAQ: https://www.certora.com/#FAQ
 
-(We need text here about logs directory and support email address)
+(We need a text here about logs directory and support email address)
 
 ## License
 
