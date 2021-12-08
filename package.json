@@ -13,7 +13,75 @@
     "*"
   ],
   "main": "./out/extension/extension.js",
-  "contributes": {},
+  "contributes": {
+    "views": {
+      "results": [
+        {
+          "type": "webview",
+          "id": "results",
+          "name": "Results"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "results",
+          "title": "Results",
+          "icon": "/media/extension-icon.svg"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "certora.runScript",
+        "title": "Run Script",
+        "category": "Certora",
+        "icon": "$(play)"
+      },
+      {
+        "command": "certora.showSettings",
+        "title": "Show Settings",
+        "category": "Certora",
+        "icon": "$(settings)"
+      },
+      {
+        "command": "certora.clearResults",
+        "title": "Clear Results",
+        "category": "Certora",
+        "icon": "$(close)"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "certora.runScript",
+          "when": "focusedView == results"
+        },
+        {
+          "command": "certora.clearResults",
+          "when": "focusedView == results"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "certora.runScript",
+          "when": "view == results",
+          "group": "navigation"
+        },
+        {
+          "command": "certora.clearResults",
+          "when": "view == results",
+          "group": "navigation"
+        },
+        {
+          "command": "certora.showSettings",
+          "when": "view == results",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
     "compile": "tsc -p ./src/extension",
@@ -25,15 +93,18 @@
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^20.0.0",
+    "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^13.0.4",
     "@rollup/plugin-typescript": "^8.2.5",
     "@tsconfig/svelte": "^2.0.1",
     "@types/glob": "^7.1.3",
+    "@types/lodash.uniqby": "^4.7.6",
     "@types/mocha": "^8.2.2",
     "@types/node": "14.x",
     "@types/vscode": "^1.60.0",
     "@typescript-eslint/eslint-plugin": "^4.31.2",
     "@typescript-eslint/parser": "^4.31.2",
+    "@vscode/codicons": "^0.0.22",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-config-standard": "^16.0.3",
@@ -52,7 +123,6 @@
     "prettier-plugin-svelte": "^2.4.0",
     "rollup": "^2.56.3",
     "rollup-plugin-css-only": "^3.1.0",
-    "rollup-plugin-livereload": "^2.0.5",
     "rollup-plugin-svelte": "^7.1.0",
     "rollup-plugin-terser": "^7.0.2",
     "simple-git-hooks": "^2.6.1",
@@ -67,7 +137,9 @@
     "extends": [
       "standard",
       "prettier",
-      "plugin:prettier/recommended"
+      "plugin:prettier/recommended",
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:@typescript-eslint/recommended"
     ],
     "plugins": [
       "security",
@@ -86,7 +158,11 @@
       "sourceType": "module"
     },
     "globals": {
-      "vscode": "readonly"
+      "vscode": "readonly",
+      "mediaPath": "readonly"
+    },
+    "rules": {
+      "camelcase": "off"
     }
   },
   "eslintIgnore": [
@@ -105,11 +181,17 @@
     "svelteSortOrder": "options-scripts-markup-styles",
     "svelteBracketNewLine": true
   },
-  "simple-git-hooks": {
-    "pre-commit": "lint-staged"
-  },
   "lint-staged": {
     "*.{js,ts}": "eslint --fix",
     "*.{js,ts,svelte}": "prettier --write"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "npx lint-staged"
+  },
+  "dependencies": {
+    "@vscode/webview-ui-toolkit": "^0.8.4",
+    "axios": "^0.24.0",
+    "lodash.uniqby": "^4.7.0",
+    "nanoid": "^3.1.30"
   }
 }

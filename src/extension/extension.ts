@@ -1,5 +1,73 @@
 import * as vscode from 'vscode'
+import { ResultsWebviewProvider } from './ResultsWebviewProvider'
+import { SettingsPanel } from './SettingsPanel'
+import { ScriptRunner } from './ScriptRunner'
 
-export function activate(context: vscode.ExtensionContext) {}
+export function activate(context: vscode.ExtensionContext): void {
+  function showSettings() {
+    SettingsPanel.render(context.extensionUri)
+  }
 
-export function deactivate() {}
+  async function runScript() {
+    const path = vscode.workspace.workspaceFolders?.[0]
+
+    if (!path) return
+
+    const quickPick = vscode.window.createQuickPick()
+    const confFiles = await vscode.workspace.findFiles(
+      '**/*.{conf}',
+      '**/{.certora_config,.git,.last_confs,node_modules}/**',
+    )
+
+    if (!confFiles?.length) {
+      SettingsPanel.render(context.extensionUri)
+    } else {
+      quickPick.items = confFiles.map(file => ({
+        label: vscode.workspace.asRelativePath(file),
+      }))
+      quickPick.onDidHide(() => quickPick.dispose())
+      quickPick.show()
+      quickPick.onDidChangeSelection(selection => {
+        if (selection[0]) {
+          const confFile = selection[0].label
+          scriptRunner.run(confFile)
+          quickPick.hide()
+        }
+      })
+    }
+  }
+
+  const resultsWebviewProvider = new ResultsWebviewProvider(
+    context.extensionUri,
+    runScript,
+    showSettings,
+  )
+  const scriptRunner = new ScriptRunner(resultsWebviewProvider)
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('certora.showSettings', showSettings),
+    vscode.commands.registerCommand('certora.runScript', runScript),
+    vscode.commands.registerCommand('certora.clearResults', async () => {
+      const action = await vscode.window.showInformationMessage(
+        'Clear all jobs?',
+        'Clear All',
+        'Cancel',
+      )
+
+      if (action === 'Clear All') {
+        resultsWebviewProvider.postMessage({
+          type: 'clear-all-jobs',
+        })
+      }
+    }),
+    vscode.window.registerWebviewViewProvider(
+      resultsWebviewProvider.viewType,
+      resultsWebviewProvider,
+      {
+        webviewOptions: {
+          retainContextWhenHidden: true,
+        },
+      },
+    ),
+  )
+}
