@@ -84,7 +84,7 @@
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
-    "compile": "tsc -p ./src/extension",
+    "compile": "npm run build:svelte && tsc -p ./src/extension",
     "watch": "tsc -watch -p ./src/extension",
     "pretest": "yarn run compile",
     "build:svelte": "rollup -c",
