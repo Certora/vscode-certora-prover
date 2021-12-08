@@ -1,7 +1,7 @@
 # Certora IDE
 
-Certora provides security analysis tools for Smart Contracts. Certora has unique technology called Certora Prover capable of checking at compile-time that all executions of a Smart Contract fulfill a set of security rules.
-Certora Prover technology is available as a tool that complements existing compilers and debuggers of Smart Contracts. It checks that the contracts adhere to the interface requirements of other contracts. Certora’s blockchain independent and language-agnostic Prover technology precisely identifies bugs in Smart Contracts and proves their absence.
+Certora provides security analysis tools for Smart Contracts. Certora has unique technology called Certora Prover capable of checking at compile-time that all Smart COntract executions fulfill a set of security rules.
+Certora Prover technology is available as a tool that complements existing compilers and debuggers of Smart Contracts. It checks that the contracts adhere to the interface requirements of other contracts. Certora’s blockchain-independent and language-agnostic Prover technology precisely identifies bugs in Smart Contracts and proves their absence.
 
 Content
 
@@ -24,13 +24,13 @@ Content
 
 ## Prerequisites
 
-To start, you need to install and set the script. The script is an important part of the process. It helps to start checking the contract. [Please follow the installation instructions](https://certora.atlassian.net/wiki/spaces/CPD/pages/7274497/Installation+of+Certora+Prover).
+To start, you need to install and set the script. It helps to start checking the contract. [Please follow the installation instructions](https://certora.atlassian.net/wiki/spaces/CPD/pages/7274497/Installation+of+Certora+Prover).
 
 ## Usage
 
 ### Create a conf file
 
-When starting the verification, user will be prompted forthe configurations, such as the main contract name, solidity compiler version, and more. These configurations will be stored in a local configuration file in the conf subfolder. User can edit the configuration file manually or create a new one (by clicking on the {create_conf_file_button name} button).
+When starting the verification, you will be prompted to set the configurations, such as the main contract name, solidity compiler version, and more. These configurations will be stored in a local configuration file in the `conf` subfolder. You can edit the configuration file manually or create a new one (by clicking on the {create_conf_file_button name} button).
 
 You can add additional flags to specify the testing area for smart contrast. The list of available options you can find under the documents link: [Certora Prover CLI Options](https://certora.atlassian.net/wiki/spaces/CPD/pages/7340043/Certora+Prover+CLI+Options)
 
