@@ -70,7 +70,9 @@ export class ScriptRunner {
     if (!path) return
 
     const ts = Date.now()
-    const channel = window.createOutputChannel(`${confFile}-${ts}`)
+    const channel = window.createOutputChannel(
+      `Certora IDE - ${confFile}-${ts}`,
+    )
     this.script = spawn(`certoraRun`, [confFile], {
       cwd: path.uri.fsPath,
     })
@@ -80,7 +82,7 @@ export class ScriptRunner {
     if (this.script) {
       window
         .showInformationMessage(
-          'The script with the configuration file has been launched',
+          `The script with the conf file ${confFile} has been launched`,
           'Show The Script Output',
         )
         .then(action => {
@@ -120,7 +122,7 @@ export class ScriptRunner {
         this.removeRunningScript(pid)
 
         const action = await window.showInformationMessage(
-          `The script for the config file ${confFile} exited with code ${code}.`,
+          `The script for the conf file ${confFile} exited with code ${code}.`,
           'Open Execution Log File',
         )
 

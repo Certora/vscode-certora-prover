@@ -193,6 +193,18 @@
         </li>
       {/each}
     </ul>
+  {:else}
+    <div class="zero-state">
+      <div class="command">
+        <div class="command-description">
+          You don’t have any running scripts. To check you smart contract start
+          Certora IDE tool in command palette or with button.
+        </div>
+        <vscode-button class="command-button" on:click={runScript}>
+          Run Certora IDE
+        </vscode-button>
+      </div>
+    </div>
   {/if}
 </Pane>
 
@@ -221,10 +233,6 @@
     --code-item-background-color-selected: #094771;
     --code-item-background-color-hover: #37373d;
     --pane-border-color: rgba(204, 204, 204, 0.2);
-  }
-
-  :global(a, a:hover) {
-    color: unset;
   }
 
   .zero-state {
