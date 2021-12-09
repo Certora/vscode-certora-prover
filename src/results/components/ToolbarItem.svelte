@@ -4,7 +4,7 @@
 </script>
 
 <li class="action-item menu-entry" role="presentation">
-  <a
+  <div
     class="action-label codicon codicon-action codicon-{icon}"
     role="button"
     {title}

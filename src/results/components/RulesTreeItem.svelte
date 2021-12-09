@@ -15,6 +15,7 @@
   const dispatch = createEventDispatcher<{ fetchOutput: Assert | Rule }>()
 
   $: label = rule?.name || assert?.message
+  $: formattedLabel = label === null || label === 'null' ? 'No message' : label
   $: ruleIcon = rule?.status
     ? `${rule.status}-rule-status.svg`
     : `unknown-rule-status.svg`
@@ -52,7 +53,7 @@
       <span class="name-container">
         <a class="label-name">
           <span class="highlighted-label">
-            <span>{label}</span>
+            <span>{formattedLabel}</span>
           </span>
         </a>
       </span>
