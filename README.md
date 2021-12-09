@@ -38,6 +38,9 @@ You can add additional flags to specify the testing area. You can find the list 
 
 The Prover script will use the `conf` file information to start the verification process. Use the VS Code Command Palette (`Ctrl/Cmd + Shift + P`) to run the Certora Run script. You can verify multiple contracts. A special section shows all ongoing processes. You can stop a process to remove it from the list.
 
+#### Stop process
+After user stopped the script job will comntinue checking in the cloud.
+
 ### Results
 
 After the script finishes, the checking process under the activity bar system will show a tree of verification jobs. You will see a list of all the jobs, along with their call traces, connected variables, and assertion messages.
@@ -53,6 +56,9 @@ The following commands can be accessed via [Command Palette](https://code.visual
 | Certora: Clear Results | Clears the results list                           | On Results Tab |
 
 ## Troubleshooting
+
+### Freeze
+If the user experiences a frozen state (buttons don't work), the user needs to use hotkey 'cmd/ctrl + shift + p' and find the command 'Developer: Open Webview Developer Tools'. In the devtool window, press 'Console' and copy (or make a screenshot) of the logs. Next, press 'cmd/ctrl + shift + p' and find 'Developer: Reload Window command', which restarts the window.
 
 If you have any questions about the tool and how to set it up for your needs, see our FAQ: https://www.certora.com/#FAQ
 
