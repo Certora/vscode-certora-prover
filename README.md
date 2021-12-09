@@ -39,7 +39,7 @@ You can add additional flags to specify the testing area. You can find the list 
 The Prover script will use the `conf` file information to start the verification process. Use the VS Code Command Palette (`Ctrl/Cmd + Shift + P`) to run the Certora Run script. You can verify multiple contracts. A special section shows all ongoing processes. You can stop a process to remove it from the list.
 
 #### Stop process
-After user stopped the script job will comntinue checking in the cloud.
+After the user stops the script, the script job will continue to check in the cloud. The script, in that case, works as a trigger for the job in the cloud.
 
 ### Results
 
