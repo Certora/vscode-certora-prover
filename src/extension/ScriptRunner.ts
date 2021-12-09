@@ -25,6 +25,11 @@ export class ScriptRunner {
     this.resultsWebviewProvider.stopScript = this.stop
   }
 
+  private getConfFileName(path: string): string {
+    const splitedPathToConfFile = path.split('/')
+    return splitedPathToConfFile[splitedPathToConfFile.length - 1]
+  }
+
   private async log(
     str: string,
     pathToConfFile: string,
@@ -34,12 +39,10 @@ export class ScriptRunner {
 
     if (!path) return
 
-    const splitedPathToConfFile = pathToConfFile.split('/')
-    const name = splitedPathToConfFile[splitedPathToConfFile.length - 1]
     const logFilePath = Uri.joinPath(
       path.uri,
       'certora-logs',
-      `${name}-${ts}.log`,
+      `${this.getConfFileName(pathToConfFile)}-${ts}.log`,
     )
     const encoder = new TextEncoder()
     const content = encoder.encode(str)
@@ -67,6 +70,7 @@ export class ScriptRunner {
     if (!path) return
 
     const ts = Date.now()
+    const channel = window.createOutputChannel(`${confFile}-${ts}`)
     this.script = spawn(`certoraRun`, [confFile], {
       cwd: path.uri.fsPath,
     })
@@ -74,9 +78,21 @@ export class ScriptRunner {
     this.addRunningScript(confFile, pid)
 
     if (this.script) {
+      window
+        .showInformationMessage(
+          'The script with the configuration file has been launched',
+          'Show The Script Output',
+        )
+        .then(action => {
+          if (action === 'Show The Script Output') {
+            channel.show()
+          }
+        })
+
       this.script.stdout.on('data', async data => {
         const str = data.toString() as string
         this.log(str, confFile, ts)
+        channel.appendLine(str)
 
         const progressUrl = getProgressUrl(str)
 
@@ -100,8 +116,23 @@ export class ScriptRunner {
         this.removeRunningScript(pid)
       })
 
-      this.script.on('close', () => {
+      this.script.on('close', async code => {
         this.removeRunningScript(pid)
+
+        const action = await window.showInformationMessage(
+          `The script for the config file ${confFile} exited with code ${code}.`,
+          'Open Execution Log File',
+        )
+
+        if (action === 'Open Execution Log File') {
+          const logFilePath = Uri.joinPath(
+            path.uri,
+            'certora-logs',
+            `${this.getConfFileName(confFile)}-${ts}.log`,
+          )
+          const document = await workspace.openTextDocument(logFilePath)
+          await window.showTextDocument(document)
+        }
       })
     }
   }
