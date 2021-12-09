@@ -19,16 +19,18 @@ export async function navigateToCode(
       col: number
     }[] = []
     const documentsToOpen: JumpToDefinition[] = []
-    const openedDocuments = vscode.workspace.textDocuments
+    const openedEditors = vscode.window.visibleTextEditors
 
     jtd.forEach(item => {
-      const documentAlreadyOpened = openedDocuments.find(
-        doc => doc.uri.path === vscode.Uri.joinPath(base, item.file).path,
+      const editorAlreadyOpened = openedEditors.find(
+        editor =>
+          editor.document.uri.path ===
+          vscode.Uri.joinPath(base, item.file).path,
       )
 
-      if (documentAlreadyOpened) {
+      if (editorAlreadyOpened) {
         documentsToUpdateFocus.push({
-          document: documentAlreadyOpened,
+          document: editorAlreadyOpened.document,
           line: item.line,
           col: item.col,
         })
