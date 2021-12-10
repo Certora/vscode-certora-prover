@@ -2,7 +2,7 @@
 
 Certora provides security analysis tools for Smart Contracts. Certora has unique technology called Certora Prover capable of checking at compile-time that all Smart COntract executions fulfill a set of security rules.
 Certora Prover technology is available as a tool that complements existing compilers and debuggers of Smart Contracts. It checks that the contracts adhere to the interface requirements of other contracts. Certora’s blockchain-independent and language-agnostic Prover technology precisely identifies bugs in Smart Contracts and proves their absence.
-![A test image](assets/overview.png)
+![overview](assets/overview.png)
 
 Content
 
@@ -34,6 +34,8 @@ To start, you need to install and set the script. It helps to start checking the
 When starting the verification, you will be prompted to set the configurations, such as the main contract name, solidity compiler version, and more. These configurations will be stored in a local configuration file in the `conf` subfolder. You can edit the configuration file manually or create a new one (by clicking on the {`create_conf_file_button name`} button).
 
 You can add additional flags to specify the testing area. You can find the list of available options in the document [Certora Prover CLI Options](https://certora.atlassian.net/wiki/spaces/CPD/pages/7340043/Certora+Prover+CLI+Options)
+
+![overview](assets/conf file.png)
 
 ### Start a verification
 
