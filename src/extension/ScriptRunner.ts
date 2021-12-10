@@ -143,7 +143,7 @@ export class ScriptRunner {
     const command =
       os.platform() === 'win32'
         ? `taskkill -F -T -PID ${pid}`
-        : `kill -SIGTERM ${pid}`
+        : `kill -15 ${pid}`
 
     exec(command)
   }
