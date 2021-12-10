@@ -3,7 +3,7 @@
 Certora provides security analysis tools for Smart Contracts. Certora has unique technology called Certora Prover capable of checking at compile-time that all Smart COntract executions fulfill a set of security rules.
 Certora Prover technology is available as a tool that complements existing compilers and debuggers of Smart Contracts. It checks that the contracts adhere to the interface requirements of other contracts. Certora’s blockchain-independent and language-agnostic Prover technology precisely identifies bugs in Smart Contracts and proves their absence.
 
-[](https://user-images.githubusercontent.com/891093/136676501-45ea5fa2-0bc5-496e-9c70-971700d954e8.png)
+[Overview](https://user-images.githubusercontent.com/891093/136676501-45ea5fa2-0bc5-496e-9c70-971700d954e8.png)
 
 Content
 
