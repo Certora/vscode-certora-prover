@@ -58,11 +58,23 @@ The following commands can be accessed via [Command Palette](https://code.visual
 ## Troubleshooting
 
 ### Freeze
+
 If the user experiences a frozen state (buttons don't work), the user needs to use hotkey `cmd/ctrl + shift + p` and find the command `Developer: Open Webview Developer Tools`. In the devtool window, press `Console` and copy (or make a screenshot) of the logs. Next, press `cmd/ctrl + shift + p` and find `Developer: Reload Window command`, which restarts the window.
+
+### CERTORAKEY missing
+
+If the user does not see CERTORAKEY installed globally, it can be installed at the VS Code level. To do this, in the VS Code setting `terminal.integrated.env.`
+you need to set it as an environment variable:
+```
+"env": {
+        "CERTORAKEY": "place_your_certora_key_here",
+      }
+```
 
 If you have any questions about the tool and how to set it up for your needs, see our FAQ: https://www.certora.com/#FAQ
 
 (We need a text here about logs directory and support email address)
+
 
 ## License
 
