@@ -35,11 +35,12 @@ When starting the verification, you will be prompted to set the configurations, 
 
 You can add additional flags to specify the testing area. You can find the list of available options in the document [Certora Prover CLI Options](https://certora.atlassian.net/wiki/spaces/CPD/pages/7340043/Certora+Prover+CLI+Options)
 
-![overview](assets/conf_file.png)
+![create_conf_file](assets/conf_file.png)
 
 ### Start a verification
 
 The Prover script will use the `conf` file information to start the verification process. Use the VS Code Command Palette (`Ctrl/Cmd + Shift + P`) to run the Certora Run script. You can verify multiple contracts. A special section shows all ongoing processes. You can stop a process to remove it from the list.
+![start](assets/run-the-script.gif)
 
 #### Stop process
 After the user stops the script, the script job will continue to check in the cloud. The script, in that case, works as a trigger for the job in the cloud.
@@ -47,6 +48,7 @@ After the user stops the script, the script job will continue to check in the cl
 ### Results
 
 After the script finishes, the checking process under the activity bar system will show a tree of verification jobs. You will see a list of all the jobs, along with their call traces, connected variables, and assertion messages.
+![go-to-code](assets/go-to-code.gif)
 
 ## Commands
 
