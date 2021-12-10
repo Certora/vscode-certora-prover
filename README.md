@@ -35,7 +35,7 @@ When starting the verification, you will be prompted to set the configurations, 
 
 You can add additional flags to specify the testing area. You can find the list of available options in the document [Certora Prover CLI Options](https://certora.atlassian.net/wiki/spaces/CPD/pages/7340043/Certora+Prover+CLI+Options)
 
-![overview](assets/conf file.png)
+![overview](assets/conf_file.png)
 
 ### Start a verification
 
