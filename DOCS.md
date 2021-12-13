@@ -1,6 +1,65 @@
 # Certora Prover for Visual Studio Code
 
+## About
+
+The extension contains three parts:
+
+- extension core
+- results tab
+- settings page
+
+#### Extension core
+
+This part of the extension contains business logic. Init webview for results and settings, run `certoraRun` script, watch `*.sol`, `*.spec` and `*.conf` files, function for creating `*.conf` file, navigate to code.
+
+**Technologies:**
+
+TypeScript, [VSCode API](https://code.visualstudio.com/api), Axios.
+
+**Used parts of VSCode API:**
+
+- [API for create Results tab webview](https://code.visualstudio.com/api/references/vscode-api#window.registerWebviewViewProvider)
+- [API for create Settings page webview](https://code.visualstudio.com/api/references/vscode-api#window.createWebviewPanel)
+- APIs for navigate to code: [openTextDocument](https://code.visualstudio.com/api/references/vscode-api/#workspace.openTextDocument), [showTextDocument](https://code.visualstudio.com/api/references/vscode-api/#workspace.showTextDocument), [revealRange](https://code.visualstudio.com/api/references/vscode-api/#TextEditor.revealRange)
+- [API for watching files](https://code.visualstudio.com/api/references/vscode-api/#workspace.createFileSystemWatcher)
+- [API for find files](https://code.visualstudio.com/api/references/vscode-api/#workspace.findFiles)
+- [QuickPick API (the dropdown for select .conf file before run the script)](https://code.visualstudio.com/api/references/vscode-api#window.createQuickPick)
+- [Webview Documentation](https://code.visualstudio.com/api/extension-guides/webview)
+
+#### Results and Settings
+
+Built with [Svelte](https://svelte.dev/docs) + TypeScript + PostCSS, [@vscode/codicons](https://github.com/microsoft/vscode-codicons), [@vscode/webview-ui-toolkit](https://github.com/microsoft/vscode-webview-ui-toolkit)
+
+## Fragile parts of extension
+
+1. The function for getting progress url
+
+```ts
+export function getProgressUrl(text: string): string | null {
+  if (!text.includes('You can follow up on the status:')) return null
+
+  const urlRegex = /(https?:\/\/[^\s]+)/g
+  const urlMatches = text.match(urlRegex)
+
+  if (urlMatches) {
+    const [url] = urlMatches
+
+    return url.includes('jobStatus')
+      ? url.replace('jobStatus', 'progress')
+      : null
+  }
+
+  return null
+}
+```
+
+If stdout in `certoraRun` script is changed, then the extension will break.
+
+2. We don't have validation of the Settings form, so user can create incorrect conf file.
+
 ## Usage
+
+#### Dev
 
 1. Install dependencies and build svelte files
 ```sh
@@ -10,7 +69,14 @@ yarn dev:svelte
 
 2. Press F5 for run extension
 
-## Development
+#### Prod
+
+1. Build `*.vsix` file
+```sh
+npx vsco package
+```
+
+## Development processes
 
 1. Issue tracker — GitHub Issues
 2. Issue title format
