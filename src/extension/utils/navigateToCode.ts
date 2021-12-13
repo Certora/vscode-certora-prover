@@ -8,6 +8,7 @@ export async function navigateToCode(
     const jtd = jumpToDefinition.map(item => ({
       ...item,
       line: item.line - 1,
+      col: item.col - 1,
     }))
     const base = vscode.workspace.workspaceFolders?.[0].uri
 
