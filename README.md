@@ -19,8 +19,8 @@ Content
 ## Features
 
 - Go To Definition
-- Calltrace & Variables watch
-- Simultaneous scripts checking
+- View Calltraces & Variables
+- Simultaneous contracts checking
 - Easy to read status of contract checking
 
 ## Prerequisites
