@@ -62,11 +62,11 @@ The following commands can be accessed via the [Command Palette](https://code.vi
 
 ### Freeze
 
-If you experience a frozen state (buttons don't work), you need to use hotkey `cmd/ctrl + shift + p` and find the command `Developer: Open Webview Developer Tools`. In the devtool window, press `Console` and copy (or make a screenshot) the logs. Next, press `cmd/ctrl + shift + p` and find `Developer: Reload Window command`, which restarts the window.
+If you experience a frozen state (buttons don't work), you need to use `cmd/ctrl + shift + p` and find the `Developer: Open Webview Developer Tools` command. Go to the `console` in the devtool window, and copy (or make a screenshot of) the logs. Next, press `cmd/ctrl + shift + p` and type `Developer: Reload Window`.
 
 ### CERTORAKEY is missing
 
-The following error message - `Couldn't find Certora Key` may indicate that `CERTORAKEY` variable was not defined globally. You can try to install it at the VS Code level. For doing this, please go to the VS Code setting, `terminal.integrated.env.` and set it as an environment variable:
+The following error message - `Couldn't find Certora Key` may indicate that `CERTORAKEY` variable was not defined globally. You can try to fix it at the VS Code level. For doing this, please go to the VS Code setting, `terminal.integrated.env.` and set it as an environment variable:
 ```
 "env": {
     "CERTORAKEY": "place_your_certora_key_here",
@@ -75,9 +75,9 @@ The following error message - `Couldn't find Certora Key` may indicate that `CER
 
 ### Logs & Notifications
 
-Every time you start a verification, the extension creates a new log file and stores it in the `certora-logs` subfolder. Notifications will be presented on the verification completion or in case of an error (in such a case, you will get a link to a related log file).
+Every time you start a verification, the extension creates a new log file and stores it in the `certora-logs` subfolder. Notifications will be presented on the verification completion or in case of an error (in such a case, you will get a link to the related log file).
 
-If you have any questions about the tool and how to set it up for your needs, see our FAQ: https://www.certora.com/#FAQ
+If you have any questions about the tool and how to set it up for your needs, see our FAQ: https://www.certora.com/#FAQ.
 You can also contact us by email: [support@certora.com](support@certora.com).
 
 
