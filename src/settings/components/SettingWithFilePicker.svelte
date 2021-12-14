@@ -10,6 +10,9 @@
   export let file: string = ''
 
   $: file = file || files[0] // Initial value
+  $: sortedFiles = [...files].sort((a, b) =>
+    a.toLowerCase().localeCompare(b.toLowerCase()),
+  )
 
   function onSelect(
     e: Event & {
@@ -23,7 +26,7 @@
 <BaseSetting {title} {description}>
   <div class="files-dropdown">
     <vscode-dropdown on:change={onSelect}>
-      {#each files as path}
+      {#each sortedFiles as path}
         <vscode-option>{path}</vscode-option>
       {/each}
     </vscode-dropdown>

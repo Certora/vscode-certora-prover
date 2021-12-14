@@ -30,6 +30,15 @@ export function activate(context: vscode.ExtensionContext): void {
       quickPick.onDidChangeSelection(selection => {
         if (selection[0]) {
           const confFile = selection[0].label
+
+          if (confFile.includes(' ')) {
+            vscode.window.showErrorMessage(
+              'The extension does not support path to conf file with spaces. Correct the conf file path and run the script again',
+            )
+            quickPick.hide()
+            return
+          }
+
           scriptRunner.run(confFile)
           quickPick.hide()
         }
