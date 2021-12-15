@@ -5,6 +5,10 @@ import { ScriptRunner } from './ScriptRunner'
 
 export function activate(context: vscode.ExtensionContext): void {
   function showSettings() {
+    const path = vscode.workspace.workspaceFolders?.[0]
+
+    if (!path) return
+
     SettingsPanel.render(context.extensionUri)
   }
 

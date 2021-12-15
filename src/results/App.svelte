@@ -200,9 +200,11 @@
           You don’t have any running scripts. To check you smart contract start
           Certora IDE tool in command palette or with button.
         </div>
-        <vscode-button class="command-button" on:click={runScript}>
-          Run Certora IDE
-        </vscode-button>
+        {#if hasResults}
+          <vscode-button class="command-button" on:click={runScript}>
+            Run Certora IDE
+          </vscode-button>
+        {/if}
       </div>
     </div>
   {/if}

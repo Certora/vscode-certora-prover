@@ -76,6 +76,22 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {
+    const path = vscode.workspace.workspaceFolders?.[0]
+
+    if (!path) {
+      return /* html */ `<!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource};">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body>
+          <p>You don't have any opened projects yet.</p>
+        </body>
+      </html>`
+    }
+
     const scriptUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this._extensionUri, 'out', 'results', 'bundle.js'),
     )
