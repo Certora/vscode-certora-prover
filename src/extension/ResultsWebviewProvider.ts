@@ -88,6 +88,7 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
         </head>
         <body>
           <p>You don't have any opened projects yet.</p>
+          <p>Open the project to use the extension.</p>
         </body>
       </html>`
     }
