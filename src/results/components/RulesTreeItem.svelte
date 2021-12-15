@@ -114,19 +114,19 @@
 <style lang="postcss">
   .label {
     display: flex;
-    text-overflow: ellipsis;
     overflow: hidden;
     flex: 1;
+    text-overflow: ellipsis;
   }
 
   .label-container {
-    min-width: 0;
     overflow: hidden;
+    min-width: 0;
     text-overflow: ellipsis;
 
     &::after {
-      content: '';
       display: block;
+      content: "";
     }
   }
 
@@ -136,14 +136,14 @@
 
   .label-name {
     color: inherit;
-    white-space: pre;
     text-decoration: none;
+    white-space: pre;
   }
 
   .label-description {
-    opacity: 0.7;
     margin-left: 0.5em;
     font-size: 0.9em;
+    opacity: 0.7;
     white-space: pre;
   }
 </style>

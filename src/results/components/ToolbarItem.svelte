@@ -15,25 +15,25 @@
 
 <style lang="postcss">
   .action-item {
-    margin-right: 4px;
+    position: relative;
     display: block;
     align-items: center;
     justify-content: center;
+    margin-right: 4px;
     cursor: pointer;
-    position: relative;
   }
 
   .action-label {
     display: flex;
-    align-items: center;
     width: 16px;
     height: 16px;
+    align-items: center;
     padding: 2px;
     border-radius: 5px;
     text-decoration: none;
 
     &:focus {
-      outline-color: rgba(255, 255, 255, 0);
+      outline-color: rgb(255 255 255 / 0%);
     }
 
     &:active {
@@ -41,7 +41,7 @@
     }
 
     &:hover {
-      background-color: rgba(184, 184, 184, 0.31);
+      background-color: rgb(184 184 184 / 31%);
     }
   }
 </style>

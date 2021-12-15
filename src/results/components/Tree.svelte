@@ -64,10 +64,10 @@
 <style>
   .tree {
     position: relative;
-    transform: translate3d(0px, 0px, 0px);
-    overflow: hidden;
-    left: 0;
     top: 0;
+    left: 0;
+    overflow: hidden;
+    transform: translate3d(0, 0, 0);
     user-select: none;
   }
 </style>

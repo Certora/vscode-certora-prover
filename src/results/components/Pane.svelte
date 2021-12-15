@@ -38,57 +38,57 @@
 </div>
 
 <style lang="postcss">
-  .pane {
-    --height: 22px;
-    --font-size: 11px;
-
-    overflow: hidden;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    -webkit-user-select: none;
-
-    &:hover .actions {
-      display: initial;
-    }
-
-    &:first-of-type .pane-header {
-      border-top: none;
-    }
-  }
-
   .pane-header {
     position: relative;
+    display: flex;
+    overflow: hidden;
     height: var(--height);
+    box-sizing: border-box;
+    align-items: center;
+    border-top: 1px solid var(--pane-border-color);
+    cursor: pointer;
     font-size: var(--font-size);
     font-weight: 700;
     text-transform: uppercase;
-    overflow: hidden;
-    display: flex;
-    cursor: pointer;
-    align-items: center;
-    box-sizing: border-box;
-    border-top: 1px solid var(--pane-border-color);
 
     .arrow-icon {
       margin: 0 2px;
     }
 
     .title {
-      white-space: nowrap;
-      text-overflow: ellipsis;
       overflow: hidden;
-      font-size: var(--font-size);
       min-width: 3ch;
+      font-size: var(--font-size);
       line-height: var(--height);
-      -webkit-margin-before: 0;
       -webkit-margin-after: 0;
+      -webkit-margin-before: 0;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .actions {
       display: none;
       margin-left: auto;
+    }
+  }
+
+  .pane {
+    --height: 22px;
+    --font-size: 11px;
+
+    display: flex;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    user-select: none;
+
+    &:hover .pane-header .actions {
+      display: initial;
+    }
+
+    &:first-of-type .pane-header {
+      border-top: none;
     }
   }
 

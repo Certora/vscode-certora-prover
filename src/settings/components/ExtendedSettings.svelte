@@ -47,7 +47,7 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--space-lg);
     margin-bottom: var(--space-lg);
+    gap: var(--space-lg);
   }
 </style>

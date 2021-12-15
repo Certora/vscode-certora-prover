@@ -25,16 +25,16 @@
   }
 
   .action-bar {
-    white-space: nowrap;
     height: 100%;
+    white-space: nowrap;
   }
 
   .actions-container {
     display: flex;
-    margin: 0 auto;
-    padding: 0;
-    height: 100%;
     width: 100%;
+    height: 100%;
     align-items: center;
+    padding: 0;
+    margin: 0 auto;
   }
 </style>

@@ -28,25 +28,25 @@
 <style lang="postcss">
   .running-script {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-left: 16px;
-    padding-right: 14px;
     height: 23px;
+    align-items: center;
+    justify-content: space-between;
+    padding-right: 14px;
+    padding-left: 16px;
   }
 
   .name {
     display: flex;
-    align-items: center;
-    flex: 1;
     min-width: 0;
+    flex: 1;
+    align-items: center;
     font-size: 13px;
     line-height: 16px;
 
     > span {
-      white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      white-space: nowrap;
     }
   }
 

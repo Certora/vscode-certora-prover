@@ -58,8 +58,8 @@
       left: -6px;
       width: 2px;
       height: 100%;
-      background-color: rgba(204, 204, 204, 0.2);
-      content: '';
+      background-color: rgb(204 204 204 / 20%);
+      content: "";
     }
   }
 </style>

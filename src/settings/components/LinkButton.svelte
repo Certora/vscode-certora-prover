@@ -13,8 +13,8 @@
   .button {
     display: inline-flex;
     align-items: center;
-    font-weight: 500;
     cursor: pointer;
+    font-weight: 500;
   }
 
   .red {

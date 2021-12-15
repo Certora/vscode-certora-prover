@@ -141,6 +141,14 @@
 </div>
 
 <style lang="postcss">
+  :global(vscode-dropdown) {
+    color: var(--dropdown-text-color);
+  }
+
+  :global(body) {
+    padding: 26px 24px;
+  }
+
   :global(:root) {
     --space-xs: 4px;
     --space-sm: 9px;
@@ -148,10 +156,6 @@
     --space-lg: 18px;
     --space-xl: 26px;
     --space-xxl: 30px;
-  }
-
-  :global(body) {
-    padding: 26px 24px;
   }
 
   :global(body.vscode-light) {
@@ -162,10 +166,6 @@
     --dropdown-text-color: var(--dropdown-foreground);
   }
 
-  :global(vscode-dropdown) {
-    color: var(--dropdown-text-color);
-  }
-
   .settings {
     display: flex;
     flex-direction: column;
@@ -173,13 +173,14 @@
   }
 
   .section-title {
-    font-weight: 600;
-    font-size: 26px;
-    line-height: 31px;
     margin-top: 0;
     margin-bottom: calc(
       var(--space-lg) - var(--space-xl)
     ); /* because we have `gap: var(--space-xl);` in .settings */
+
+    font-size: 26px;
+    font-weight: 600;
+    line-height: 31px;
   }
 
   .staging {

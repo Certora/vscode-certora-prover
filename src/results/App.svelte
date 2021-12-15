@@ -216,7 +216,7 @@
   }
 
   :global(:root) {
-    --monospace-font: Consolas, Menlo, 'Courier New', monospace;
+    --monospace-font: consolas, menlo, 'Courier New', monospace;
   }
 
   :global(body.vscode-light) {
@@ -225,7 +225,7 @@
     --code-item-value-background-color: #e4e6f1;
     --code-item-background-color-selected: #0060c0;
     --code-item-background-color-hover: #e4e6f1;
-    --pane-border-color: rgba(97, 97, 97, 0.19);
+    --pane-border-color: rgb(97 97 97 / 19%);
   }
 
   :global(body.vscode-dark) {
@@ -234,7 +234,7 @@
     --code-item-value-background-color: #37373d;
     --code-item-background-color-selected: #094771;
     --code-item-background-color-hover: #37373d;
-    --pane-border-color: rgba(204, 204, 204, 0.2);
+    --pane-border-color: rgb(204 204 204 / 20%);
   }
 
   .zero-state {
@@ -245,14 +245,14 @@
     }
 
     .command-description {
-      line-height: 16px;
       margin-bottom: 8px;
+      line-height: 16px;
     }
   }
 
   .running-scripts {
-    margin: 0;
     padding: 0;
+    margin: 0;
     list-style-type: none;
   }
 </style>

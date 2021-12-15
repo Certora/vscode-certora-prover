@@ -14,12 +14,12 @@
     createEventDispatcher<{ selectCalltraceFunction: CallTraceFunction }>()
 
   const STATUSES_DICT = {
-    SUCCESS: '#40A040',
-    REVERT: '#D58511',
-    SUMMARIZED: '#0050EF',
-    HAVOC: '#C04040',
-    THROW: '#C04040',
-    DISPATCHER: '#A30057',
+    SUCCESS: '#40a040',
+    REVERT: '#d58511',
+    SUMMARIZED: '#0050ef',
+    HAVOC: '#c04040',
+    THROW: '#c04040',
+    DISPATCHER: '#a30057',
     'REVERT CAUSE': '#732626',
     DUMP: '#732626',
   }
@@ -56,7 +56,7 @@
     <div class="result-container">
       <div
         class="result"
-        style="background-color: {STATUSES_DICT[callTraceFunction.status]}"
+        style="background-color: {STATUSES_DICT[callTraceFunction.status]};"
       >
         {callTraceFunction.status}
       </div>
@@ -80,35 +80,35 @@
 <style lang="postcss">
   .label {
     display: flex;
-    text-overflow: ellipsis;
     overflow: hidden;
     flex: 1;
+    text-overflow: ellipsis;
   }
 
   .result-container {
     display: inline-flex;
-    align-items: center;
     flex: 1;
+    align-items: center;
     margin-right: 6px;
     margin-left: 6px;
 
     .result {
+      padding: 2px 4px;
+      border-radius: 2px;
+      color: #fff;
       font-size: 9px;
       line-height: 10px;
-      padding: 2px 4px;
-      color: #fff;
-      border-radius: 2px;
     }
   }
 
   .label-container {
-    min-width: 0;
     overflow: hidden;
+    min-width: 0;
     text-overflow: ellipsis;
 
     &::after {
-      content: '';
       display: block;
+      content: "";
     }
   }
 
@@ -118,7 +118,7 @@
 
   .label-name {
     color: inherit;
-    white-space: pre;
     text-decoration: none;
+    white-space: pre;
   }
 </style>

@@ -24,12 +24,12 @@
     display: flex;
     flex-flow: wrap;
     align-items: center;
-    gap: 2px;
+    padding: 6px 0 6px 16px;
     cursor: pointer;
     font-family: var(--monospace-font);
     font-size: 12px;
+    gap: 2px;
     line-height: 18px;
-    padding: 6px 0 6px 16px;
 
     &:hover:not(.selected) {
       background-color: var(--code-item-background-color-hover);
@@ -41,9 +41,9 @@
   }
 
   .value {
-    color: var(--code-item-value-color);
-    background-color: var(--code-item-value-background-color);
     padding: 2px;
+    background-color: var(--code-item-value-background-color);
     border-radius: 2px;
+    color: var(--code-item-value-color);
   }
 </style>

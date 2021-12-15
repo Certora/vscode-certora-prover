@@ -29,7 +29,7 @@
   draggable="false"
   tabindex="0"
   title={label}
-  style="--indent: {indent}"
+  style="--indent: {indent};"
   on:click
   on:focus={() => (isFocused = true)}
   on:blur={() => (isFocused = false)}
@@ -52,73 +52,75 @@
 
 <style lang="postcss">
   .tree-item {
-    box-sizing: border-box;
     overflow: hidden;
     width: 100%;
     height: 22px;
-    line-height: 22px;
+    box-sizing: border-box;
     padding-right: 12px;
     padding-left: 0;
     cursor: pointer;
+    font-size: 13px;
+    line-height: 22px;
     touch-action: none;
     white-space: nowrap;
-    font-size: 13px;
 
+    .actions {
+      display: none;
+      margin-left: auto;
+    }
+
+    &.focused,
+    &:focus {
+      outline: 1px solid var(--vscode-focusBorder);
+      outline-offset: -1px;
+    }
+
+    &.focused,
+    &:focus,
+    &.selected,
     &:hover:not(&.focused):not(&.selected) {
-      background-color: var(--vscode-list-hoverBackground);
-
       .actions {
         display: initial;
       }
     }
 
-    &:focus,
-    &.focused {
-      outline: 1px solid var(--vscode-focusBorder);
-      outline-offset: -1px;
-
-      .actions {
-        display: initial;
-      }
+    &:hover:not(&.focused):not(&.selected) {
+      background-color: var(--vscode-list-hoverBackground);
     }
 
     &.selected {
       background-color: var(--vscode-list-inactiveSelectionBackground);
-
-      .actions {
-        display: initial;
-      }
     }
   }
 
   .row {
     position: relative;
     display: flex;
-    align-items: center;
     height: 100%;
+    align-items: center;
   }
 
   .indent {
-    height: 100%;
     position: absolute;
     top: 0;
     left: 16px;
-    pointer-events: none;
     width: var(--indent);
+    height: 100%;
+    pointer-events: none;
   }
 
   .twistie {
     display: flex !important;
-    font-size: 16px;
-    text-align: right;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transform: translateX(3px);
-    padding-left: var(--indent);
-    padding-right: 6px;
     width: 16px;
     height: 100%;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    padding-right: 6px;
+    padding-left: var(--indent);
+    font-size: 16px;
+    text-align: right;
+    transform: translateX(3px);
 
     &::before {
       border-radius: 20px;
@@ -127,30 +129,30 @@
 
   .contents {
     display: flex;
-    height: 22px;
-    line-height: 22px;
-    flex: 1;
-    text-overflow: ellipsis;
     overflow: hidden;
+    height: 22px;
+    flex: 1;
     flex-wrap: nowrap;
     padding-left: 3px;
+    line-height: 22px;
+    text-overflow: ellipsis;
   }
 
   .label {
     display: flex;
-    text-overflow: ellipsis;
     overflow: hidden;
     flex: 1;
+    text-overflow: ellipsis;
   }
 
   .label-container {
-    min-width: 0;
     overflow: hidden;
+    min-width: 0;
     text-overflow: ellipsis;
 
     &::after {
-      content: '';
       display: block;
+      content: "";
     }
   }
 
@@ -160,19 +162,14 @@
 
   .label-name {
     color: inherit;
-    white-space: pre;
     text-decoration: none;
+    white-space: pre;
   }
 
   .label-description {
-    opacity: 0.7;
     margin-left: 0.5em;
     font-size: 0.9em;
+    opacity: 0.7;
     white-space: pre;
-  }
-
-  .actions {
-    display: none;
-    margin-left: auto;
   }
 </style>

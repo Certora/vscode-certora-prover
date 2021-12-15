@@ -61,8 +61,8 @@
   .settings {
     display: flex;
     flex-direction: column;
-    gap: var(--space-md);
     margin-bottom: var(--space-md);
+    gap: var(--space-md);
   }
 
   .settings-fields {
