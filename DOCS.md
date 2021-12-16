@@ -73,7 +73,7 @@ yarn dev:svelte
 
 1. Build `*.vsix` file
 ```sh
-npx vsco package
+npx vsce package
 ```
 
 ## Development processes
