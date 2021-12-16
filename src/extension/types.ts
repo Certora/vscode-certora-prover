@@ -104,3 +104,31 @@ export type Output = {
   callTrace?: CallTraceFunction[]
   variables?: Variable[]
 }
+
+export enum CommandFromResultsWebview {
+  NavigateToCode = 'navigate-to-code',
+  StopScript = 'stop-script',
+  RunScript = 'run-script',
+  OpenSettings = 'open-settings',
+  GetOutput = 'get-output',
+}
+
+export type EventFromResultsWebview =
+  | {
+      command: CommandFromResultsWebview.NavigateToCode
+      payload: JumpToDefinition[]
+    }
+  | {
+      command: CommandFromResultsWebview.StopScript
+      payload: number
+    }
+  | {
+      command: CommandFromResultsWebview.RunScript
+    }
+  | {
+      command: CommandFromResultsWebview.OpenSettings
+    }
+  | {
+      command: CommandFromResultsWebview.GetOutput
+      payload: string
+    }

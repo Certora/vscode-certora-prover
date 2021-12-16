@@ -2,7 +2,11 @@ import * as vscode from 'vscode'
 import axios from 'axios'
 import { navigateToCode } from './utils/navigateToCode'
 import { getNonce } from './utils/getNonce'
-import { Output } from './types'
+import {
+  Output,
+  CommandFromResultsWebview,
+  EventFromResultsWebview,
+} from './types'
 
 export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   public viewType = 'results'
@@ -28,25 +32,25 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
 
     webview.html = this._getHtmlForWebview(webview)
     webview.onDidReceiveMessage(
-      e => {
+      (e: EventFromResultsWebview) => {
         switch (e.command) {
-          case 'navigate-to-code':
+          case CommandFromResultsWebview.NavigateToCode:
             navigateToCode(e.payload)
             break
-          case 'stop-script': {
+          case CommandFromResultsWebview.StopScript: {
             // this.stopScript is set in ScriptRunner.ts constructor
             if (typeof this.stopScript === 'function') {
               this.stopScript(e.payload)
             }
             break
           }
-          case 'run-script':
+          case CommandFromResultsWebview.RunScript:
             this.runScript()
             break
-          case 'open-settings':
+          case CommandFromResultsWebview.OpenSettings:
             this.openSettings()
             break
-          case 'get-output':
+          case CommandFromResultsWebview.GetOutput:
             this.getOutput(e.payload)
             break
           default:

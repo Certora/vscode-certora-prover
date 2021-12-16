@@ -23,7 +23,7 @@ export type Flag = {
   flag: string
 }
 
-export type Form = {
+export type InputFormData = {
   mainSolidityFile: string
   mainContractName: string
   specFile: string
@@ -39,103 +39,127 @@ export type Form = {
   additionalSettings: AdditionalSetting[]
 }
 
-function convertSourceForm(form: Form): string {
-  const config: Record<string, any> = {
-    files: [],
+type ConfFile = {
+  files?: string[]
+  verify?: [string]
+  solc?: string
+  link?: string[]
+  settings?: string[]
+  staging?: string
+  cache?: string
+  msg?: string
+  send_only: true
+} & Record<string, boolean | string>
+
+function setAdditionalSetting(val?: string) {
+  if (val === 'true' || !val) return true
+  if (val === 'false') return false
+
+  return val
+}
+
+function convertSourceFormDataToConfFileJSON(
+  inputFormData: InputFormData,
+): string {
+  const config: ConfFile = {
+    send_only: true,
   }
 
-  if (form.specFile && form.mainContractName) {
-    config.verify = [`${form.mainContractName}:${form.specFile}`]
+  if (!Array.isArray(config.files)) config.files = []
+
+  if (inputFormData.specFile && inputFormData.mainContractName) {
+    config.verify = [
+      `${inputFormData.mainContractName}:${inputFormData.specFile}`,
+    ]
   }
 
-  if (form.mainSolidityFile) {
-    config.files.push(form.mainSolidityFile)
+  if (inputFormData.mainSolidityFile) {
+    config.files.push(inputFormData.mainSolidityFile)
   }
 
-  if (form.useAdditionalContracts && form.additionalContracts?.length > 0) {
-    form.additionalContracts.forEach(contract => {
-      config.files.push(
+  if (
+    inputFormData.useAdditionalContracts &&
+    inputFormData.additionalContracts?.length > 0
+  ) {
+    inputFormData.additionalContracts.forEach(contract => {
+      config.files?.push(
         `${contract.file}${contract.name ? `:${contract.name}` : ''}`,
       )
     })
   }
 
-  if (form.solidityCompiler) {
-    config.solc = form.solidityCompiler
+  if (inputFormData.solidityCompiler) {
+    config.solc = inputFormData.solidityCompiler
   }
 
-  if (form.useAdditionalContracts && form.link?.length > 0) {
+  if (inputFormData.useAdditionalContracts && inputFormData.link?.length > 0) {
     config.link = []
 
-    form.link.forEach(group => {
-      config.link.push(
+    inputFormData.link.forEach(group => {
+      config.link?.push(
         `${group.contractName}:${group.fieldName}=${group.associatedContractName}`,
       )
     })
   }
 
-  if (form.extendedSettings?.filter(f => f.flag !== '').length > 0) {
+  if (
+    inputFormData.extendedSettings?.filter(({ flag }) => flag !== '').length > 0
+  ) {
     config.settings = []
 
-    form.extendedSettings.forEach(({ flag }) => {
-      config.settings.push(flag)
+    inputFormData.extendedSettings.forEach(({ flag }) => {
+      config.settings?.push(flag)
     })
   }
 
-  if (form.useStaging) {
-    config.staging = form.branch
+  if (inputFormData.useStaging) {
+    config.staging = inputFormData.branch
   }
 
-  if (form.cacheName) {
-    config.cache = form.cacheName
+  if (inputFormData.cacheName) {
+    config.cache = inputFormData.cacheName
   }
 
-  if (form.message) {
-    config.msg = form.message
+  if (inputFormData.message) {
+    config.msg = inputFormData.message
   }
 
-  if (form.additionalSettings?.length) {
-    function setValue(val?: string) {
-      if (val === 'true' || !val) return true
-      if (val === 'false') return false
-
-      return val
-    }
-
-    form.additionalSettings.forEach(({ option, value }) => {
+  if (inputFormData.additionalSettings?.length) {
+    inputFormData.additionalSettings.forEach(({ option, value }) => {
       if (option) {
-        config[option] = setValue(value)
+        config[option] = setAdditionalSetting(value)
       }
     })
   }
 
-  return JSON.stringify(
-    {
-      ...config,
-      send_only: true,
-    },
-    null,
-    2,
-  )
+  return JSON.stringify(config, null, 2)
 }
 
-export async function createAndOpenConfFile(form: Form): Promise<void> {
-  const basePath = workspace.workspaceFolders?.[0]
+export async function createAndOpenConfFile(
+  formData: InputFormData,
+): Promise<void> {
+  try {
+    const basePath = workspace.workspaceFolders?.[0]
 
-  if (!basePath) return
+    if (!basePath) return
 
-  const encoder = new TextEncoder()
-  const content = encoder.encode(convertSourceForm(form))
-  const parsedSpecFilePath = form.specFile.split('/')
-  const path = Uri.joinPath(
-    basePath.uri,
-    'conf',
-    `${form.mainContractName}.${parsedSpecFilePath[
-      parsedSpecFilePath.length - 1
-    ].replace('.spec', '')}.conf`,
-  )
+    const encoder = new TextEncoder()
+    const content = encoder.encode(
+      convertSourceFormDataToConfFileJSON(formData),
+    )
+    const parsedSpecFilePath = formData.specFile.split('/')
+    const path = Uri.joinPath(
+      basePath.uri,
+      'conf',
+      `${formData.mainContractName}.${parsedSpecFilePath[
+        parsedSpecFilePath.length - 1
+      ].replace('.spec', '')}.conf`,
+    )
 
-  await workspace.fs.writeFile(path, content)
-  const document = await workspace.openTextDocument(path)
-  await window.showTextDocument(document)
+    await workspace.fs.writeFile(path, content)
+    const document = await workspace.openTextDocument(path)
+    await window.showTextDocument(document)
+  } catch (e) {
+    window.showErrorMessage(`Can't create conf file. Error: ${e}`)
+  }
 }
