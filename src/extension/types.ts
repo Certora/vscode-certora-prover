@@ -105,12 +105,48 @@ export type Output = {
   variables?: Variable[]
 }
 
+export type InputFormData = {
+  mainSolidityFile: string
+  mainContractName: string
+  specFile: string
+  solidityCompiler: string
+  useAdditionalContracts: boolean
+  additionalContracts: {
+    file: string
+    name?: string
+  }[]
+  link: {
+    id: string
+    contractName: string
+    fieldName: string
+    associatedContractName: string
+  }[]
+  extendedSettings: {
+    id: string
+    flag: string
+  }[]
+  useStaging: boolean
+  branch: string
+  cacheName: string
+  message: string
+  additionalSettings: {
+    id: string
+    option: string
+    value: string
+  }[]
+}
+
 export enum CommandFromResultsWebview {
   NavigateToCode = 'navigate-to-code',
   StopScript = 'stop-script',
   RunScript = 'run-script',
   OpenSettings = 'open-settings',
   GetOutput = 'get-output',
+}
+
+export enum CommandFromSettingsWebview {
+  SmartContractsFilesRefresh = 'smart-contracts-files-refresh',
+  CreateConfFile = 'create-conf-file',
 }
 
 export type EventFromResultsWebview =
@@ -131,4 +167,13 @@ export type EventFromResultsWebview =
   | {
       command: CommandFromResultsWebview.GetOutput
       payload: string
+    }
+
+export type EventFromSettingsWebview =
+  | {
+      command: CommandFromSettingsWebview.SmartContractsFilesRefresh
+    }
+  | {
+      command: CommandFromSettingsWebview.CreateConfFile
+      payload: InputFormData
     }

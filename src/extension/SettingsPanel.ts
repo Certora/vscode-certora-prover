@@ -1,7 +1,8 @@
 import * as vscode from 'vscode'
 import { SmartContractsFilesWatcher } from './SmartContractsFilesWatcher'
 import { getNonce } from './utils/getNonce'
-import { createAndOpenConfFile, Form } from './utils/createAndOpenConfFile'
+import { createAndOpenConfFile } from './utils/createAndOpenConfFile'
+import { CommandFromSettingsWebview, EventFromSettingsWebview } from './types'
 
 export class SettingsPanel {
   public static currentPanel?: SettingsPanel
@@ -21,14 +22,14 @@ export class SettingsPanel {
     this.watcher.init(this._panel.webview)
 
     this._panel.webview.onDidReceiveMessage(
-      e => {
+      (e: EventFromSettingsWebview) => {
         switch (e.command) {
-          case 'smart-contracts-files-refresh':
+          case CommandFromSettingsWebview.SmartContractsFilesRefresh:
             this.watcher.init(this._panel.webview)
             break
-          case 'create-conf-file': {
-            createAndOpenConfFile(e.payload as Form)
-            this._panel.dispose()
+          case CommandFromSettingsWebview.CreateConfFile: {
+            createAndOpenConfFile(e.payload)
+            this._panel?.dispose()
             break
           }
           default:
