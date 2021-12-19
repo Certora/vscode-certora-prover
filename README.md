@@ -1,7 +1,6 @@
 # Certora IDE
 
-Certora provides security analysis tools for Smart Contracts. Certora has unique technology called Certora Prover capable of checking at compile-time that all Smart COntract executions fulfill a set of security rules.
-Certora Prover technology is available as a tool that complements existing compilers and debuggers of Smart Contracts. It checks that the contracts adhere to the interface requirements of other contracts. Certora’s blockchain-independent and language-agnostic Prover technology precisely identifies bugs in Smart Contracts and proves their absence.
+The Certora Prover checks at compile-time that all smart contract executions fulfill a set of security rules and interface requirements of other contracts. Certora’s blockchain-independent and language-agnostic Prover technology precisely identifies bugs in Smart Contracts and proves their absence.
 ![overview](assets/overview_comments.png)
 
 Content
@@ -25,15 +24,15 @@ Content
 
 ## Prerequisites
 
-To start, you need to install and set the script. It helps to start checking the contract. [Please follow the installation instructions](https://certora.atlassian.net/wiki/spaces/CPD/pages/7274497/Installation+of+Certora+Prover).
+To check the contract, you first need to install and set the script. [Please follow the installation instructions](https://certora.atlassian.net/wiki/spaces/CPD/pages/7274497/Installation+of+Certora+Prover).
 
 ## Usage
 
 ### Create a conf file
 
-When starting the verification, you will be prompted to set the configurations, such as the main contract name, solidity compiler version, and more. These configurations will be stored in a local configuration file in the `conf` subfolder. You can edit the configuration file manually or create a new one (by clicking on the {`create_conf_file_button name`} button).
+When starting a verification, you will be prompted to set the configurations, such as the main contract name, solidity compiler version, and more. These configurations will be stored in a local configuration file in the `conf` subfolder. You can edit the configuration file manually or create a new one (by clicking on the {`create_conf_file_button name`} button).
 
-You can add additional flags to specify the testing area. You can find the list of available options in the document [Certora Prover CLI Options](https://certora.atlassian.net/wiki/spaces/CPD/pages/7340043/Certora+Prover+CLI+Options)
+You can add additional flags to specify the testing area. You can find the list of available configuration options in the document [Certora Prover CLI Options](https://certora.atlassian.net/wiki/spaces/CPD/pages/7340043/Certora+Prover+CLI+Options)
 
 ![create_conf_file](assets/conf_file.png)
 
@@ -43,7 +42,7 @@ The Prover script will use the `conf` file information to start the verification
 ![start](assets/run-the-script.gif)
 
 #### Stop process
-After the user stops the script, the script job will continue to check in the cloud. The script, in that case, works as a trigger for the job in the cloud.
+After you stop the script, the script job will continue to check in the cloud. The script, in that case, works as a trigger for the job in the cloud.
 
 ### Results
 
@@ -52,11 +51,11 @@ After the script finishes, the checking process under the activity bar system wi
 
 ## Commands
 
-The following commands can be accessed via [Command Palette](https://code.visualstudio.com/docs/getstarted/userinterface#_command-palette):
+The following commands can be accessed via the [Command Palette](https://code.visualstudio.com/docs/getstarted/userinterface#_command-palette):
 
 | command                | description                                       | availability   |
 | ---------------------- | ------------------------------------------------- | -------------- |
-| Certora: Run Script    | Choose a conf-file to run a job & start verifying | On Results Tab |
+| Certora: Run Script    | Choose a conf file to run a job & start verifying | On Results Tab |
 | Certora: Show Settings | Shows the `settings` window                       | Always         |
 | Certora: Clear Results | Clears the results list                           | On Results Tab |
 
@@ -64,12 +63,11 @@ The following commands can be accessed via [Command Palette](https://code.visual
 
 ### Freeze
 
-If the user experiences a frozen state (buttons don't work), the user needs to use hotkey `cmd/ctrl + shift + p` and find the command `Developer: Open Webview Developer Tools`. In the devtool window, press `Console` and copy (or make a screenshot) of the logs. Next, press `cmd/ctrl + shift + p` and find `Developer: Reload Window command`, which restarts the window.
+If the extension freezes and buttons do not work, press the hotkey `cmd/ctrl + shift + p` and find the `Developer: Open Webview Developer Tools` command. In the `devtool` window, press `Console` and copy (or make a screenshot of) the logs. Next, press `cmd/ctrl + shift + p` and find `Developer: Reload Window command`, which restarts the window.
 
 ### CERTORAKEY missing
 
-If the user does not see CERTORAKEY installed globally, it can be installed at the VS Code level. To do this, in the VS Code setting `terminal.integrated.env.`
-you need to set it as an environment variable:
+If the CERTORAKEY is not installed globally, you can install it at the VS Code level. To do this, in the VS Code setting `terminal.integrated.env.`, you need to set it as an environment variable:
 ```
 "env": {
         "CERTORAKEY": "place_your_certora_key_here",
@@ -78,9 +76,9 @@ you need to set it as an environment variable:
 
 If you have any questions about the tool and how to set it up for your needs, see our FAQ: https://www.certora.com/#FAQ
 
-(We need a text here about logs directory and support email address)
+(Insert text here about logs directory and support email address)
 
 
 ## License
 
-(Do weed need it?)
+(MIT)
