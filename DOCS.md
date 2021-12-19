@@ -53,21 +53,21 @@ export function getProgressUrl(text: string): string | null {
 }
 ```
 
-If stdout in `certoraRun` script is changed, then the extension will break.
+If stdout in the `certoraRun` script changes, then the extension will break.
 
-2. We don't have validation of the Settings form, so user can create incorrect conf file.
+2. We don't validate of the Settings form, so a user can create an incorrect `conf` file.
 
 ## Usage
 
 #### Dev
 
-1. Install dependencies and build svelte files
+1. Install dependencies and build `svelte` files
 ```sh
 yarn
 yarn dev:svelte
 ```
 
-2. Press F5 for run extension
+2. Press F5 to run the extension
 
 #### Prod
 
@@ -86,11 +86,11 @@ npx vsce package
 
 Possible types:
 
-- Results - it is Results tab in activity bar
-- Settings - webview with form for settings
-- Extension - tasks related to VSCode Extension
+- Results - Results tab in the activity bar
+- Settings - Webview with form for creating a configuration file
+- Extension - Tasks related to the VSCode extension
 - Infrastructure - linters, tasks, githooks, etc.
-- All - tasks related to project
+- All - tasks related to the project
 
 For example:
 
