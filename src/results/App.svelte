@@ -124,8 +124,8 @@
   <div class="zero-state">
     <div class="command">
       <div class="command-description">
-        To check you smart contract start Certora IDE tool in command palette or
-        with button.
+        To check your smart contract start Certora IDE tool in command palette
+        or with button.
       </div>
       <vscode-button class="command-button" on:click={runScript}>
         Run Certora IDE
@@ -181,7 +181,7 @@
       </Pane>
     {/if}
     {#if output.callTrace && Object.keys(output.callTrace).length > 0}
-      <Pane title={`Call traces`} initialExpandedState={true}>
+      <Pane title={`Call Trace`} initialExpandedState={true}>
         <Tree
           data={{
             type: TreeType.Calltrace,
@@ -236,8 +236,8 @@
     <div class="zero-state">
       <div class="command">
         <div class="command-description">
-          You don’t have any running scripts. To check you smart contract start
-          Certora IDE tool in command palette or with button.
+          You don’t have any running scripts. To check your smart contract start
+          Certora IDE tool in command palette or click the button below.
         </div>
         {#if hasResults}
           <vscode-button class="command-button" on:click={runScript}>
