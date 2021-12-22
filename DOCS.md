@@ -83,7 +83,7 @@ npx vsce package
 1. Press `CTRL/CMD + Shift + P`
 2. Run command `Developer: Open Webview Developer Tools`
 
-![debug](assets/debug-commang.jpg)
+![debug](assets/debug-command.jpg)
 
 3. You will see log for any action
 
