@@ -11,7 +11,6 @@ type ConfFile = {
   staging?: string
   cache?: string
   msg?: string
-  send_only: true
 } & Record<string, boolean | string>
 
 function setAdditionalSetting(val?: string) {
@@ -24,9 +23,7 @@ function setAdditionalSetting(val?: string) {
 function convertSourceFormDataToConfFileJSON(
   inputFormData: InputFormData,
 ): string {
-  const config: ConfFile = {
-    send_only: true,
-  }
+  const config: ConfFile = {}
 
   if (!Array.isArray(config.files)) config.files = []
 
