@@ -2,6 +2,7 @@ import * as vscode from 'vscode'
 import { SmartContractsFilesWatcher } from './SmartContractsFilesWatcher'
 import { getNonce } from './utils/getNonce'
 import { createAndOpenConfFile } from './utils/createAndOpenConfFile'
+import { log, Sources } from './utils/log'
 import { CommandFromSettingsWebview, EventFromSettingsWebview } from './types'
 
 export class SettingsPanel {
@@ -25,9 +26,18 @@ export class SettingsPanel {
       (e: EventFromSettingsWebview) => {
         switch (e.command) {
           case CommandFromSettingsWebview.SmartContractsFilesRefresh:
+            log({
+              action: 'Received "smart-contracts-files-refresh" command',
+              source: Sources.Extension,
+            })
             this.watcher.init(this._panel.webview)
             break
           case CommandFromSettingsWebview.CreateConfFile: {
+            log({
+              action: 'Received "create-conf-file" command',
+              source: Sources.Extension,
+              info: e.payload,
+            })
             createAndOpenConfFile(e.payload)
             this._panel?.dispose()
             break
@@ -118,7 +128,10 @@ export class SettingsPanel {
 
   public dispose(): void {
     SettingsPanel.currentPanel = undefined
-    this._panel.dispose()
+
+    if (!this) return
+
+    this._panel?.dispose()
 
     while (this._disposables.length) {
       const disposable = this._disposables.pop()

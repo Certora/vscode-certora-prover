@@ -8,6 +8,7 @@
   import AdditionalSettings from './components/AdditionalSettings.svelte'
   import OneFieldSetting from './components/OneFieldSetting.svelte'
   import SettingWithFilePicker from './components/SettingWithFilePicker.svelte'
+  import { log, Sources } from './utils/log'
   import type { Form } from './types'
 
   let solidityFiles: string[] = []
@@ -48,12 +49,22 @@
     }>,
   ) => {
     if (e.data.type === 'smart-contracts-files-updated') {
+      log({
+        action: 'Received "smart-contracts-files-updated" command',
+        source: Sources.SettingsWebview,
+        info: e.data.payload,
+      })
       solidityFiles = e.data.payload.sol
       specFiles = e.data.payload.spec
     }
   }
 
   function createConfFile() {
+    log({
+      action: 'Send "create-conf-file" command',
+      source: Sources.SettingsWebview,
+      info: form,
+    })
     vscode.postMessage({
       command: 'create-conf-file',
       payload: form,

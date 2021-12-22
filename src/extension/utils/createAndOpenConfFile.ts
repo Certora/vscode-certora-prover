@@ -1,4 +1,5 @@
 import { workspace, Uri, window } from 'vscode'
+import { log, Sources } from '../utils/log'
 import { InputFormData } from '../types'
 
 type ConfFile = {
@@ -106,9 +107,8 @@ export async function createAndOpenConfFile(
     if (!basePath) return
 
     const encoder = new TextEncoder()
-    const content = encoder.encode(
-      convertSourceFormDataToConfFileJSON(formData),
-    )
+    const convertedData = convertSourceFormDataToConfFileJSON(formData)
+    const content = encoder.encode(convertedData)
     const parsedSpecFilePath = formData.specFile.split('/')
     const path = Uri.joinPath(
       basePath.uri,
@@ -119,6 +119,15 @@ export async function createAndOpenConfFile(
     )
 
     await workspace.fs.writeFile(path, content)
+    log({
+      action: `Conf file was created`,
+      source: Sources.Extension,
+      info: {
+        path,
+        formDataFromSettingsWebview: formData,
+        confFileContent: convertedData,
+      },
+    })
     const document = await workspace.openTextDocument(path)
     await window.showTextDocument(document)
   } catch (e) {
