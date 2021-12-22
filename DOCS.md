@@ -91,7 +91,7 @@ npx vsce package
 
 4. Log item structure
 
-```json
+```
 {
   action: string // action description
   source: 'Results webview' | 'Settings webview' | 'Extension' // The part of the extension in which the action was called
