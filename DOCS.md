@@ -62,6 +62,7 @@ If stdout in the `certoraRun` script changes, then the extension will break.
 #### Dev
 
 1. Install dependencies and build `svelte` files
+
 ```sh
 yarn
 yarn dev:svelte
@@ -72,8 +73,30 @@ yarn dev:svelte
 #### Prod
 
 1. Build `*.vsix` file
+
 ```sh
 npx vsce package
+```
+
+## Debug
+
+1. Press `CTRL/CMD + Shift + P`
+2. Run command `Developer: Open Webview Developer Tools`
+
+![debug](assets/debug-commang.jpg)
+
+3. You will see log for any action
+
+![logs](assets/logs.jpg)
+
+4. Log item structure
+
+```json
+{
+  action: string // action description
+  source: 'Results webview' | 'Settings webview' | 'Extension' // The part of the extension in which the action was called
+  info?: any // Any additional information
+}
 ```
 
 ## Development processes
@@ -96,6 +119,7 @@ For example:
 
 [Results] Realize VSCode Panel component
 ```
+
 3. Issue description format
 
 Without format. Write as needed
@@ -125,21 +149,25 @@ Done
 7. Naming
 
 Use kebab-case for directories
+
 ```
 mock-files
 ```
 
 Use case same exported entity
+
 ```ts
 export function getIconPath(path: string) {
   return mediaPath + path
 }
 ```
+
 ```
 getIconPath.ts
 ```
 
 Use PascalCase for UI components
+
 ```
 TreeItem.svelte
 ```
