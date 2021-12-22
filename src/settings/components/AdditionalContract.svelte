@@ -59,7 +59,7 @@
       width: 2px;
       height: 100%;
       background-color: rgb(204 204 204 / 20%);
-      content: "";
+      content: '';
     }
   }
 </style>

@@ -211,6 +211,7 @@
     "rules": {
       "custom-property-empty-line-before": "never",
       "declaration-colon-newline-after": null,
+      "string-quotes": "single",
       "selector-pseudo-class-no-unknown": [
         true,
         {

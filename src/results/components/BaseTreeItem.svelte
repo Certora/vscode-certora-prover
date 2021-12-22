@@ -152,7 +152,7 @@
 
     &::after {
       display: block;
-      content: "";
+      content: '';
     }
   }
 
