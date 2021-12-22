@@ -92,9 +92,14 @@ export type CallTraceFunction = {
   variables: Variable[]
 }
 
+type TreeViewPath = {
+  ruleName: string | null
+  assertId: number | null
+  next: TreeViewPath | null
+}
+
 export type Output = {
-  name: string
-  assertId: number
+  treeViewPath: TreeViewPath
   graph_link: string
   jumpToDefinition: JumpToDefinition[]
   result: RuleStatuses
