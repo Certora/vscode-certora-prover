@@ -40,6 +40,13 @@ export class ScriptProgressLongPolling {
       }
 
       if (data.jobEnded && data.jobStatus === 'SUCCEEDED' && dataToUI) {
+        if (Object.keys(dataToUI.verificationProgress).length === 0) {
+          window.showErrorMessage(
+            `Job ${dataToUI.jobId} completed successfully, with an empty output. Please contact Certora team`,
+          )
+          return
+        }
+
         callback(dataToUI)
         window.showInformationMessage(
           `Job ${dataToUI.jobId} completed successfully. Checked spec file: ${dataToUI.verificationProgress.spec}`,

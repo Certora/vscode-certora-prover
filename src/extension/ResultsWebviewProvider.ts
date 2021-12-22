@@ -2,6 +2,7 @@ import * as vscode from 'vscode'
 import axios from 'axios'
 import { navigateToCode } from './utils/navigateToCode'
 import { getNonce } from './utils/getNonce'
+import { log, Sources } from './utils/log'
 import {
   Output,
   CommandFromResultsWebview,
@@ -35,9 +36,19 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
       (e: EventFromResultsWebview) => {
         switch (e.command) {
           case CommandFromResultsWebview.NavigateToCode:
+            log({
+              action: 'Received "navigate-to-code" command',
+              source: Sources.Extension,
+              info: e.payload,
+            })
             navigateToCode(e.payload)
             break
           case CommandFromResultsWebview.StopScript: {
+            log({
+              action: 'Received "stop-script" command',
+              source: Sources.Extension,
+              info: e.payload,
+            })
             // this.stopScript is set in ScriptRunner.ts constructor
             if (typeof this.stopScript === 'function') {
               this.stopScript(e.payload)
@@ -45,12 +56,25 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
             break
           }
           case CommandFromResultsWebview.RunScript:
+            log({
+              action: 'Received "run-script" command',
+              source: Sources.Extension,
+            })
             this.runScript()
             break
           case CommandFromResultsWebview.OpenSettings:
+            log({
+              action: 'Received "open-settings" command',
+              source: Sources.Extension,
+            })
             this.openSettings()
             break
           case CommandFromResultsWebview.GetOutput:
+            log({
+              action: 'Received "get-output" command',
+              source: Sources.Extension,
+              info: e.payload,
+            })
             this.getOutput(e.payload)
             break
           default:
@@ -64,6 +88,12 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
 
   public postMessage<T>(message: { type: string; payload?: T }): void {
     if (!this._panel) return
+
+    log({
+      action: `Send "${message.type}" command`,
+      source: Sources.Extension,
+      info: message.payload,
+    })
     this._panel.postMessage(message)
   }
 
@@ -71,6 +101,11 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
     try {
       const { data } = await axios.get<Output>(outputUrl)
 
+      log({
+        action: 'Send "set-output" command',
+        source: Sources.Extension,
+        info: data,
+      })
       this.postMessage<Output>({ type: 'set-output', payload: data })
     } catch (e) {
       vscode.window.showErrorMessage(

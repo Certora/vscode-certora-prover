@@ -12,6 +12,7 @@
     getOutput,
   } from './extension-actions'
   import { mergeResults } from './utils/mergeResults'
+  import { log, Sources } from './utils/log'
   import type { Assert, Output, Job, EventsFromExtension, Rule } from './types'
   import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
 
@@ -25,6 +26,14 @@
   $: hasResults = results.length > 0
 
   function fetchOutput(e: CustomEvent<Assert | Rule>, job: Job) {
+    log({
+      action: 'Try to fetch output',
+      source: Sources.ResultsWebview,
+      info: {
+        outputField: e.detail.output,
+      },
+    })
+
     if (!e.detail.output) {
       clearOutput()
       return
@@ -50,19 +59,49 @@
   const listener = (e: MessageEvent<EventsFromExtension>) => {
     switch (e.data.type) {
       case EventTypesFromExtension.ReceiveNewJobResult: {
+        log({
+          action: 'Received "receive-new-job-result" command',
+          source: Sources.ResultsWebview,
+          info: {
+            currentResults: results,
+            newResult: e.data.payload,
+          },
+        })
         mergeResults(results, e.data.payload)
         results = results
+        log({
+          action: 'Smart merge current results with new result',
+          source: Sources.ResultsWebview,
+          info: results,
+        })
         break
       }
       case EventTypesFromExtension.RunningScriptChanged: {
+        log({
+          action: 'Received "running-scripts-changed" command',
+          source: Sources.ResultsWebview,
+          info: e.data.payload,
+        })
         runningScripts = e.data.payload
         break
       }
       case EventTypesFromExtension.SetOutput: {
+        log({
+          action: 'Received "set-output" command',
+          source: Sources.ResultsWebview,
+          info: e.data.payload,
+        })
         output = e.data.payload
         break
       }
       case EventTypesFromExtension.ClearAllJobs: {
+        log({
+          action: 'Received "clear-all-jobs" command',
+          source: Sources.ResultsWebview,
+          info: {
+            currentResults: results,
+          },
+        })
         if (hasResults) results = []
         clearOutput()
         break
@@ -128,7 +167,7 @@
   {#if output}
     {#if output.variables && output.variables.length > 0}
       <Pane
-        title={`${output.name} variables`}
+        title={`${output.treeViewPath.ruleName} variables`}
         initialExpandedState={true}
         actions={[
           {
@@ -141,12 +180,12 @@
         <CodeItemList codeItems={output.variables} />
       </Pane>
     {/if}
-    {#if output.callTrace && output.callTrace.length > 0}
+    {#if output.callTrace && Object.keys(output.callTrace).length > 0}
       <Pane title={`Call traces`} initialExpandedState={true}>
         <Tree
           data={{
             type: TreeType.Calltrace,
-            tree: output.callTrace,
+            tree: [output.callTrace],
           }}
           on:selectCalltraceFunction={selectCalltraceFunction}
         />
