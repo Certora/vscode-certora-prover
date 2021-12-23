@@ -36,3 +36,29 @@ export type Form = {
   message: string
   additionalSettings: AdditionalSetting[]
 }
+
+export enum EventTypesFromExtension {
+  SmartContractsFilesUpdated = 'smart-contracts-files-updated',
+  EditConfFile = 'edit-conf-file',
+}
+
+export type ConfFile = {
+  files?: string[]
+  verify?: [string]
+  solc?: string
+  link?: string[]
+  settings?: string[]
+  staging?: string
+  cache?: string
+  msg?: string
+} & Record<string, boolean | string>
+
+export type EventsFromExtension =
+  | {
+      type: EventTypesFromExtension.SmartContractsFilesUpdated
+      payload: { sol: string[]; spec: string[] }
+    }
+  | {
+      type: EventTypesFromExtension.EditConfFile
+      payload: ConfFile
+    }

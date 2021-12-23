@@ -15,5 +15,5 @@
 </script>
 
 <BaseSetting {title} {description}>
-  <vscode-text-field on:change={onChange} />
+  <vscode-text-field {value} on:change={onChange} />
 </BaseSetting>

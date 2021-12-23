@@ -14,7 +14,10 @@
 >
   <div class="flags">
     {#each flags as flag, index (flag.id)}
-      <vscode-text-field on:change={e => (flag.flag = e.target.value)}>
+      <vscode-text-field
+        value={flag.flag}
+        on:change={e => (flag.flag = e.target.value)}
+      >
         Option (-flag[=value])
       </vscode-text-field>
       {#if index !== 0}

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte'
   import BaseSetting from './BaseSetting.svelte'
   import VsCodeButton from './VSCodeButton.svelte'
   import { refreshFiles } from '../utils/refreshFiles'
@@ -7,9 +8,8 @@
   export let description: string
   export let refreshButtonTitle: string
   export let files: string[]
-  export let file: string = ''
+  export let file: string = files[0]
 
-  $: file = file || files[0] // Initial value
   $: sortedFiles = [...files].sort((a, b) =>
     a.toLowerCase().localeCompare(b.toLowerCase()),
   )
@@ -21,11 +21,21 @@
   ) {
     file = e.currentTarget.value
   }
+
+  onMount(() => {
+    // Yes, I know, it is really ugly code, but I couldn't find better solution
+    // for update selected value in edit conf file form
+    setTimeout(() => {
+      const correctValue = file
+      file = '' // for re-render
+      file = correctValue
+    }, 200)
+  })
 </script>
 
 <BaseSetting {title} {description}>
   <div class="files-dropdown">
-    <vscode-dropdown on:change={onSelect}>
+    <vscode-dropdown on:change={onSelect} value={file}>
       {#each sortedFiles as path}
         <vscode-option>{path}</vscode-option>
       {/each}

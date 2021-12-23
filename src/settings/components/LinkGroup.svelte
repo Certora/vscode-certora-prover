@@ -8,13 +8,20 @@
 
 <div class="link-group">
   <div class="link-group-fields">
-    <vscode-text-field on:change={e => (group.contractName = e.target.value)}>
+    <vscode-text-field
+      value={group.contractName}
+      on:change={e => (group.contractName = e.target.value)}
+    >
       Contract Name
     </vscode-text-field>
-    <vscode-text-field on:change={e => (group.fieldName = e.target.value)}>
+    <vscode-text-field
+      value={group.fieldName}
+      on:change={e => (group.fieldName = e.target.value)}
+    >
       Field Name
     </vscode-text-field>
     <vscode-text-field
+      value={group.associatedContractName}
       on:change={e => (group.associatedContractName = e.target.value)}
     >
       Associated Contract Name

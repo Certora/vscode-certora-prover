@@ -9,6 +9,7 @@
   export let solidityFiles: string[]
   export let useAdditionalContracts: boolean
   export let additionalContracts: AdditionalContractType[]
+  export let isShowOnlySelected = false
 
   const visibleContractsCount = 4
 
@@ -24,30 +25,46 @@
 >
   <div class="additional-contracts">
     <vscode-checkbox
+      checked={useAdditionalContracts}
       on:change={e => (useAdditionalContracts = e.target.checked)}
     >
       Use additional contract(s)
     </vscode-checkbox>
     {#if useAdditionalContracts}
-      {#each showedAdditionalContracts as file}
-        <AdditionalContract
-          {file}
-          bind:selectedContracts={additionalContracts}
-        />
-      {/each}
-      {#if solidityFiles.length > visibleContractsCount && showedAdditionalContracts.length === visibleContractsCount}
-        <LinkButton
-          title="Show more contracts"
-          icon="chevron-down"
-          on:click={() => (showedAdditionalContracts = solidityFiles)}
+      <vscode-checkbox
+        checked={isShowOnlySelected}
+        on:change={e => (isShowOnlySelected = e.target.checked)}
+      >
+        Show only selected contracts
+      </vscode-checkbox>
+      {#if isShowOnlySelected}
+        {#each additionalContracts as file}
+          <AdditionalContract
+            file={file.file}
+            bind:selectedContracts={additionalContracts}
+          />
+        {/each}
+      {:else}
+        {#each showedAdditionalContracts as file}
+          <AdditionalContract
+            {file}
+            bind:selectedContracts={additionalContracts}
+          />
+        {/each}
+        {#if solidityFiles.length > visibleContractsCount && showedAdditionalContracts.length === visibleContractsCount}
+          <LinkButton
+            title="Show more contracts"
+            icon="chevron-down"
+            on:click={() => (showedAdditionalContracts = solidityFiles)}
+          />
+        {/if}
+        <VsCodeButton
+          title="Update list of contracts"
+          icon="refresh"
+          isSmall
+          on:click={refreshFiles}
         />
       {/if}
-      <VsCodeButton
-        title="Update list of contracts"
-        icon="refresh"
-        isSmall
-        on:click={refreshFiles}
-      />
     {/if}
   </div>
 </BaseSetting>

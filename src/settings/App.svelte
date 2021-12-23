@@ -9,10 +9,13 @@
   import OneFieldSetting from './components/OneFieldSetting.svelte'
   import SettingWithFilePicker from './components/SettingWithFilePicker.svelte'
   import { log, Sources } from './utils/log'
+  import { confFileToFormData } from './utils/confFileToFormData'
   import type { Form } from './types'
+  import { EventTypesFromExtension, EventsFromExtension } from './types'
 
   let solidityFiles: string[] = []
   let specFiles: string[] = []
+  let submitButtonText = 'Create conf file'
   let form: Form = {
     mainSolidityFile: '',
     mainContractName: '',
@@ -42,20 +45,32 @@
     ],
   }
 
-  const fileListener = (
-    e: MessageEvent<{
-      type: string
-      payload: { sol: string[]; spec: string[] }
-    }>,
-  ) => {
-    if (e.data.type === 'smart-contracts-files-updated') {
-      log({
-        action: 'Received "smart-contracts-files-updated" command',
-        source: Sources.SettingsWebview,
-        info: e.data.payload,
-      })
-      solidityFiles = e.data.payload.sol
-      specFiles = e.data.payload.spec
+  const listener = (e: MessageEvent<EventsFromExtension>) => {
+    switch (e.data.type) {
+      case EventTypesFromExtension.SmartContractsFilesUpdated:
+        log({
+          action: 'Received "smart-contracts-files-updated" command',
+          source: Sources.SettingsWebview,
+          info: e.data.payload,
+        })
+        solidityFiles = e.data.payload.sol
+        specFiles = e.data.payload.spec
+        break
+      case EventTypesFromExtension.EditConfFile:
+        log({
+          action: 'Received "edit-conf-file" command',
+          source: Sources.SettingsWebview,
+          info: e.data.payload,
+        })
+        form = confFileToFormData(e.data.payload)
+        const parsedSpecFilePath = form.specFile.split('/')
+        const specFileName = parsedSpecFilePath[parsedSpecFilePath.length - 1]
+        submitButtonText = `Save ${
+          form.mainContractName
+        }.${specFileName.replace('.spec', '')}.conf`
+        break
+      default:
+        break
     }
   }
 
@@ -72,11 +87,11 @@
   }
 
   onMount(() => {
-    window.addEventListener('message', fileListener)
+    window.addEventListener('message', listener)
   })
 
   onDestroy(() => {
-    window.removeEventListener('message', fileListener)
+    window.removeEventListener('message', listener)
   })
 </script>
 
@@ -147,7 +162,7 @@
   />
   <AdditionalSettings bind:settings={form.additionalSettings} />
   <div>
-    <vscode-button on:click={createConfFile}>Create conf file</vscode-button>
+    <vscode-button on:click={createConfFile}>{submitButtonText}</vscode-button>
   </div>
 </div>
 

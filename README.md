@@ -52,11 +52,12 @@ While the verification process advances, you'll see each property (rule or invar
 
 The following commands can be accessed via the [Command Palette](https://code.visualstudio.com/docs/getstarted/userinterface#_command-palette):
 
-| command                | description                                       | availability   |
-| ---------------------- | ------------------------------------------------- | -------------- |
-| Certora: Run Script    | Choose a conf-file & start verifying              | On Results Tab |
-| Certora: Show Settings | Shows the `settings` window                       | Always         |
-| Certora: Clear Results | Clears the results list                           | On Results Tab |
+| command                   | description                                       | availability   |
+| ------------------------- | ------------------------------------------------- | -------------- |
+| Certora: Run Script       | Choose a conf-file & start verifying              | On Results Tab |
+| Certora: Create conf file | Shows the `settings` window                       | Always         |
+| Certora: Edit conf file   | Edit conf file in the `settings` window           | Always         |
+| Certora: Clear Results    | Clears the results list                           | On Results Tab |
 
 ## Troubleshooting
 

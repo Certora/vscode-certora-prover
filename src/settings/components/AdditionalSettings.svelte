@@ -18,10 +18,16 @@
   <div class="settings">
     {#each settings as setting, index (setting.id)}
       <div class="settings-fields">
-        <vscode-text-field on:change={e => (setting.option = e.target.value)}>
+        <vscode-text-field
+          value={setting.option}
+          on:change={e => (setting.option = e.target.value)}
+        >
           Option (flag)
         </vscode-text-field>
-        <vscode-text-field on:change={e => (setting.value = e.target.value)}>
+        <vscode-text-field
+          value={setting.value}
+          on:change={e => (setting.value = e.target.value)}
+        >
           Value (optional)
         </vscode-text-field>
       </div>

@@ -11,7 +11,11 @@ export class SettingsPanel {
   private _disposables: vscode.Disposable[] = []
   private watcher: SmartContractsFilesWatcher
 
-  private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
+  private constructor(
+    panel: vscode.WebviewPanel,
+    extensionUri: vscode.Uri,
+    editConfFile?: Record<string, unknown>,
+  ) {
     this._panel = panel
 
     this._panel.webview.html = this._getWebviewContent(
@@ -21,6 +25,13 @@ export class SettingsPanel {
 
     this.watcher = new SmartContractsFilesWatcher()
     this.watcher.init(this._panel.webview)
+
+    if (editConfFile) {
+      this._panel.webview.postMessage({
+        type: 'edit-conf-file',
+        payload: editConfFile,
+      })
+    }
 
     this._panel.webview.onDidReceiveMessage(
       (e: EventFromSettingsWebview) => {
@@ -53,7 +64,10 @@ export class SettingsPanel {
     this._panel.onDidDispose(this.dispose, null, this._disposables)
   }
 
-  public static render(extensionUri: vscode.Uri): void {
+  public static render(
+    extensionUri: vscode.Uri,
+    editConfFile?: Record<string, unknown>,
+  ): void {
     if (SettingsPanel.currentPanel) {
       SettingsPanel.currentPanel._panel.reveal(vscode.ViewColumn.One)
     } else {
@@ -68,7 +82,11 @@ export class SettingsPanel {
         },
       )
 
-      SettingsPanel.currentPanel = new SettingsPanel(panel, extensionUri)
+      SettingsPanel.currentPanel = new SettingsPanel(
+        panel,
+        extensionUri,
+        editConfFile,
+      )
     }
   }
 
@@ -104,13 +122,14 @@ export class SettingsPanel {
     )
 
     const nonce = getNonce()
+    const csp = `default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; font-src ${webview.cspSource}; img-src ${webview.cspSource}; script-src 'nonce-${nonce}'; script-src-elem 'nonce-${nonce}';`
 
     return /* html */ `
       <!DOCTYPE html>
       <html lang="en">
         <head>
           <meta charset="UTF-8">
-          <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; font-src ${webview.cspSource}; img-src ${webview.cspSource}; script-src 'nonce-${nonce}'; script-src-elem 'nonce-${nonce}';">
+          <meta http-equiv="Content-Security-Policy" content="${csp}">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <script type="module" nonce="${nonce}" src="${toolkitUri}"></script>
           <link href="${styleUri}" rel="stylesheet">
