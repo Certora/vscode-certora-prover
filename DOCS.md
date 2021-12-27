@@ -55,7 +55,7 @@ export function getProgressUrl(text: string): string | null {
 
 If stdout in the `certoraRun` script changes, then the extension will break.
 
-2. We don't validate of the Settings form, so a user can create an incorrect `conf` file.
+2. We don't validate the Settings form, so a user can create an incorrect `conf` file.
 
 ## Usage
 
