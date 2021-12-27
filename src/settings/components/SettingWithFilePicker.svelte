@@ -9,10 +9,14 @@
   export let refreshButtonTitle: string
   export let files: string[]
   export let file: string = files[0]
+  let query = ''
 
   $: sortedFiles = [...files].sort((a, b) =>
     a.toLowerCase().localeCompare(b.toLowerCase()),
   )
+  $: filteredFiles = query
+    ? sortedFiles.filter(file => file.includes(query))
+    : sortedFiles
 
   function onSelect(
     e: Event & {
@@ -35,8 +39,13 @@
 
 <BaseSetting {title} {description}>
   <div class="files-dropdown">
+    <vscode-text-field
+      placeholder="Filter files"
+      value={query}
+      on:change={e => (query = e.target.value)}
+    />
     <vscode-dropdown on:change={onSelect} value={file}>
-      {#each sortedFiles as path}
+      {#each filteredFiles as path}
         <vscode-option>{path}</vscode-option>
       {/each}
     </vscode-dropdown>
