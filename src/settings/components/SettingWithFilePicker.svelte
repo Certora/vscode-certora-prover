@@ -15,7 +15,9 @@
     a.toLowerCase().localeCompare(b.toLowerCase()),
   )
   $: filteredFiles = query
-    ? sortedFiles.filter(file => file.includes(query))
+    ? sortedFiles.filter(file =>
+        file.toLowerCase().includes(query.toLowerCase()),
+      )
     : sortedFiles
 
   function onSelect(
