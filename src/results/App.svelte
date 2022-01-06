@@ -11,19 +11,35 @@
     openSettings,
     getOutput,
   } from './extension-actions'
-  import { mergeResults } from './utils/mergeResults'
+  import {
+    mergeResults,
+    smartMergeVerificationResult,
+  } from './utils/mergeResults'
   import { log, Sources } from './utils/log'
-  import type { Assert, Output, Job, EventsFromExtension, Rule } from './types'
+  import type {
+    Assert,
+    Output,
+    Job,
+    EventsFromExtension,
+    Rule,
+    Verification,
+  } from './types'
   import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
 
   let output: Output
   let selectedCalltraceFunction: CallTraceFunction
 
   let results: Job[] = []
+  let verificationResults: Verification[] = []
   let runningScripts: { pid: number; confFile: string }[] = []
 
   $: hasRunningScripts = runningScripts.length > 0
   $: hasResults = results.length > 0
+
+  function newFetchOutput(e: CustomEvent<Assert | Rule>, vr: Verification) {
+    console.log(e.detail)
+    console.log(vr)
+  }
 
   function fetchOutput(e: CustomEvent<Assert | Rule>, job: Job) {
     log({
@@ -72,7 +88,19 @@
         log({
           action: 'Smart merge current results with new result',
           source: Sources.ResultsWebview,
-          info: results,
+          info: {
+            currentVerificationResults: verificationResults,
+            newResult: e.data.payload,
+          },
+        })
+        smartMergeVerificationResult(verificationResults, e.data.payload)
+        verificationResults = verificationResults
+        log({
+          action: 'After Smart merge current results with new result',
+          source: Sources.ResultsWebview,
+          info: {
+            updatedVerificationResults: verificationResults,
+          },
         })
         break
       }
@@ -118,6 +146,14 @@
   onDestroy(() => {
     window.removeEventListener('message', listener)
   })
+
+  function retrieveRules(jobs: Job[]): Rule[] {
+    // rulesArrays = [Rule[] A, Rule[]B,...]
+    const rulesArrays: Rule[][] = jobs.map(
+      job => job.verificationProgress.rules,
+    )
+    return [].concat(...rulesArrays)
+  }
 </script>
 
 {#if !hasResults}
@@ -141,6 +177,29 @@
     </div>
   </div>
 {:else}
+  {#each verificationResults as vr (vr.contract + '-' + vr.spec)}
+    <Pane
+      title={vr.contract + '-' + vr.spec}
+      initialExpandedState={true}
+      actions={[
+        {
+          title: 'Delete Verification Result',
+          icon: 'close',
+          onClick: () => {
+            console.log('clicked')
+          },
+        },
+      ]}
+    >
+      <Tree
+        data={{
+          type: TreeType.Rules,
+          tree: retrieveRules(vr.jobs),
+        }}
+        on:fetchOutput={e => newFetchOutput(e, vr)}
+      />
+    </Pane>
+  {/each}
   {#each results as job (job.jobId)}
     <Pane
       title={job.verificationProgress.contract}

@@ -45,6 +45,7 @@ export type Job = {
   cloudErrorMessages: string[]
   verificationProgress: Tree
   progressUrl: string
+  creationTime: string
 }
 
 export type ProgressResponse = {
@@ -147,6 +148,7 @@ export enum CommandFromResultsWebview {
   RunScript = 'run-script',
   OpenSettings = 'open-settings',
   GetOutput = 'get-output',
+  GetCreationTime = 'get-creation-time',
 }
 
 export enum CommandFromSettingsWebview {
@@ -171,6 +173,10 @@ export type EventFromResultsWebview =
     }
   | {
       command: CommandFromResultsWebview.GetOutput
+      payload: string
+    }
+  | {
+      command: CommandFromResultsWebview.GetCreationTime
       payload: string
     }
 

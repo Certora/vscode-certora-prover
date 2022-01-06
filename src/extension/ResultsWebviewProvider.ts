@@ -8,6 +8,7 @@ import {
   CommandFromResultsWebview,
   EventFromResultsWebview,
 } from './types'
+import type { CreationTime } from '../results/types'
 
 export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   public viewType = 'results'
@@ -77,6 +78,14 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
             })
             this.getOutput(e.payload)
             break
+          case CommandFromResultsWebview.GetCreationTime:
+            log({
+              action: 'Received "get-creation-time" command',
+              source: Sources.Extension,
+              info: e.payload,
+            })
+            this.getCreationTime(e.payload)
+            break
           default:
             break
         }
@@ -107,6 +116,26 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
         info: data,
       })
       this.postMessage<Output>({ type: 'set-output', payload: data })
+    } catch (e) {
+      vscode.window.showErrorMessage(
+        `Certora verification service is currently unavailable. Please, try again later.`,
+      )
+    }
+  }
+
+  private async getCreationTime(creationTimeUrl: string): Promise<void> {
+    try {
+      console.log('getCreationTime')
+      const { data } = await axios.get<CreationTime>(creationTimeUrl)
+      console.log(data)
+      const postTime = data.postTime
+      console.log(postTime)
+
+      log({
+        action: 'Send "set-creation-time" command',
+        source: Sources.Extension,
+        info: data,
+      })
     } catch (e) {
       vscode.window.showErrorMessage(
         `Certora verification service is currently unavailable. Please, try again later.`,

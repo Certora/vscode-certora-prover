@@ -1,6 +1,8 @@
 import { window } from 'vscode'
 import axios from 'axios'
 import type { Job, ProgressResponse } from './types'
+import { getCreationTimeUrl } from './utils/getProgressUrl'
+import type { CreationTime } from '../results/types'
 
 export class ScriptProgressLongPolling {
   private async rerun(
@@ -12,10 +14,29 @@ export class ScriptProgressLongPolling {
     this.run(url, callback)
   }
 
-  private prepareDataToUI(
+  private async prepareDataToUI(
     data: ProgressResponse,
     url: string,
-  ): Job | undefined {
+  ): Promise<Job | undefined> {
+    console.log('prepareDataToUI')
+    let postTime = ''
+    try {
+      if (url) {
+        const creationTimeUrl = getCreationTimeUrl(url)
+        if (creationTimeUrl) {
+          console.log('calling axios from prepareDataToUi')
+          console.log(creationTimeUrl)
+          const { data } = await axios.get<CreationTime>(creationTimeUrl)
+          console.log(data)
+          postTime = data.postTime
+          console.log(postTime)
+        }
+      }
+    } catch (e) {
+      console.log("axios didn't work")
+      console.log(e)
+      console.log('printed the axios error')
+    }
     try {
       return {
         ...data,
@@ -23,8 +44,10 @@ export class ScriptProgressLongPolling {
           ? JSON.parse(data.verificationProgress)
           : {},
         progressUrl: url,
+        creationTime: postTime,
       }
     } catch (e) {
+      console.log('error occurred on prepareDataToUI')
       throw new Error()
     }
   }
@@ -32,7 +55,7 @@ export class ScriptProgressLongPolling {
   public async run(url: string, callback: (data: Job) => void): Promise<void> {
     try {
       const { data } = await axios.get<ProgressResponse>(url)
-      const dataToUI = this.prepareDataToUI(data, url)
+      const dataToUI = await this.prepareDataToUI(data, url)
 
       if (data.jobStatus === 'FAILED') {
         window.showErrorMessage(data.cloudErrorMessages.join('. '))

@@ -115,6 +115,7 @@ export type Job = {
   cloudErrorMessages: string[]
   verificationProgress: Tree
   progressUrl: string
+  creationTime: string
 }
 
 export type ProgressResponse = {
@@ -125,11 +126,22 @@ export type ProgressResponse = {
   verificationProgress: string
 }
 
+export type Verification = {
+  spec: string
+  contract: string
+  jobs: Job[]
+}
+
+export type CreationTime = {
+  postTime: string
+}
+
 export enum EventTypesFromExtension {
   ReceiveNewJobResult = 'receive-new-job-result',
   RunningScriptChanged = 'running-scripts-changed',
   SetOutput = 'set-output',
   ClearAllJobs = 'clear-all-jobs',
+  SetCreationTime = 'set-creation-time',
 }
 
 export type EventsFromExtension =
@@ -147,4 +159,8 @@ export type EventsFromExtension =
     }
   | {
       type: EventTypesFromExtension.ClearAllJobs
+    }
+  | {
+      type: EventTypesFromExtension.SetCreationTime
+      payload: CreationTime
     }
