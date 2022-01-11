@@ -23,6 +23,7 @@ export type Assert = {
   duration: number
   jumpToDefinition: JumpToDefinition[]
   output: string | null
+  jobId: string | null
 }
 
 export type Rule = {
@@ -33,6 +34,7 @@ export type Rule = {
   jumpToDefinition: JumpToDefinition[]
   duration: number
   output: string | null
+  jobId: string | null
 }
 
 export type Tree = {
