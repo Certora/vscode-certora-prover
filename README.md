@@ -67,10 +67,10 @@ If you experience a frozen state (buttons don't work), you need to use `cmd/ctrl
 
 ### CERTORAKEY is missing
 
-The following error message - `Couldn't find Certora Key` may indicate that `CERTORAKEY` variable was not defined globally. You can try to fix it at the VS Code level. For doing this, please go to the VS Code setting, `terminal.integrated.env.` and set it as an environment variable:
+The following error message - `Couldn't find Certora Key` may indicate that the `CERTORAKEY` variable was not defined globally. You can try to fix it at the VS Code level. For doing this, please go to the VS Code Settings, in the `Search Settings` input type `integrated env`, and click the `edit in settings.json` based on your OS. Put the `CERTORAKEY` in the opened settings.json file in the following way (replace the `linux` with your OS):
 ```
-"env": {
-    "CERTORAKEY": "place_your_certora_key_here",
+"terminal.integrated.env.linux": {
+    "CERTORAKEY": "place_your_certora_key_here"
 }
 ```
 
