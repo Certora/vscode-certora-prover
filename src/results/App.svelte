@@ -39,6 +39,27 @@
   function newFetchOutput(e: CustomEvent<Assert | Rule>, vr: Verification) {
     console.log(e.detail)
     console.log(vr)
+    let clickedRuleOrAssert = e.detail
+
+    if (!clickedRuleOrAssert.output) {
+      clearOutput()
+      return
+    }
+
+    const index = vr.jobs.findIndex(
+      job => job.jobId === clickedRuleOrAssert.jobId,
+    )
+
+    if (index > -1) {
+      const outputUrl = `${vr.jobs[index].progressUrl.replace(
+        'progress',
+        'result',
+      )}&output=${clickedRuleOrAssert.output}`
+
+      getOutput(outputUrl)
+    } else {
+      console.log('UNEXPECTED ERROR OCCURED!')
+    }
   }
 
   function fetchOutput(e: CustomEvent<Assert | Rule>, job: Job) {
