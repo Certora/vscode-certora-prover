@@ -1,4 +1,4 @@
-import type { Job, Rule, Tree, Verification } from '../types'
+import type { Assert, Job, Rule, Tree, Verification } from '../types'
 
 export function mergeResults(results: Job[], newResult: Job): void {
   const index = results.findIndex(
@@ -13,6 +13,28 @@ export function mergeResults(results: Job[], newResult: Job): void {
   } else {
     results.push(newResult)
   }
+}
+
+function addJobIdToAsserts(jobId: string, asserts: Assert[]) {
+  asserts.forEach(assert => {
+    assert.jobId = jobId
+  })
+}
+
+function addJobIdToRules(jobId: string, rules: Rule[]) {
+  rules.forEach(rule => {
+    rule.jobId = jobId
+    addJobIdToAsserts(jobId, rule.asserts)
+    if (rule.children != null && rule.children.length > 0) {
+      addJobIdToRules(jobId, rule.children)
+    }
+  })
+}
+
+function addJobIdToProperties(job: Job) {
+  const tree: Tree = job.verificationProgress
+  const jobId: string = job.jobId
+  addJobIdToRules(jobId, tree.rules)
 }
 
 export function smartMergeVerificationResult(
@@ -35,6 +57,8 @@ export function smartMergeVerificationResult(
     console.log(results[index])
     mergeVerification(results[index], newResult)
   } else {
+    addJobIdToProperties(newResult)
+    console.log(newResult)
     // create a new Verification object and push to the Verification[]
     const newVerification: Verification = {
       contract: tree.contract,
@@ -99,6 +123,7 @@ async function smartRulesMerge(prevJobs: Job[], newJob: Job): Promise<void> {
       compareRulesCreationTime(commonRules, prevJob, newJob)
     }
   })
+  addJobIdToProperties(newJob)
   prevJobs.push(newJob)
   removeEmptyJobs(prevJobs)
 }
@@ -118,10 +143,10 @@ async function compareRulesCreationTime(
         'prevPostTime=' + prevPostTime + ', newPostTime=' + newPostTime,
       )
       const commonRulesNames: string[] = commonRules.map(rule => rule.name)
-      if (prevPostTime < newPostTime) {
+      if (prevPostTime <= newPostTime) {
         removeOutdatedRules(commonRulesNames, prevJob)
       } else {
-        // prevPostTime >= newPostTime
+        // prevPostTime > newPostTime
         removeOutdatedRules(commonRulesNames, newJob)
       }
     } catch (e) {
