@@ -11,10 +11,7 @@
     openSettings,
     getOutput,
   } from './extension-actions'
-  import {
-    mergeResults,
-    smartMergeVerificationResult,
-  } from './utils/mergeResults'
+  import { smartMergeVerificationResult } from './utils/mergeResults'
   import { log, Sources } from './utils/log'
   import type {
     Assert,
@@ -29,12 +26,11 @@
   let output: Output
   let selectedCalltraceFunction: CallTraceFunction
 
-  let results: Job[] = []
   let verificationResults: Verification[] = []
   let runningScripts: { pid: number; confFile: string }[] = []
 
   $: hasRunningScripts = runningScripts.length > 0
-  $: hasResults = results.length > 0
+  $: hasResults = verificationResults.length > 0
 
   function newFetchOutput(e: CustomEvent<Assert | Rule>, vr: Verification) {
     console.log(e.detail)
@@ -96,16 +92,16 @@
   const listener = (e: MessageEvent<EventsFromExtension>) => {
     switch (e.data.type) {
       case EventTypesFromExtension.ReceiveNewJobResult: {
-        log({
-          action: 'Received "receive-new-job-result" command',
-          source: Sources.ResultsWebview,
-          info: {
-            currentResults: results,
-            newResult: e.data.payload,
-          },
-        })
-        mergeResults(results, e.data.payload)
-        results = results
+        // log({
+        //   action: 'Received "receive-new-job-result" command',
+        //   source: Sources.ResultsWebview,
+        //   info: {
+        //     currentResults: results,
+        //     newResult: e.data.payload,
+        //   },
+        // })
+        // mergeResults(results, e.data.payload)
+        // results = results
         log({
           action: 'Smart merge current results with new result',
           source: Sources.ResultsWebview,
@@ -148,10 +144,10 @@
           action: 'Received "clear-all-jobs" command',
           source: Sources.ResultsWebview,
           info: {
-            currentResults: results,
+            currentVerificationResults: verificationResults,
           },
         })
-        if (hasResults) results = []
+        if (hasResults) verificationResults = []
         clearOutput()
         break
       }
@@ -218,29 +214,6 @@
           tree: retrieveRules(vr.jobs),
         }}
         on:fetchOutput={e => newFetchOutput(e, vr)}
-      />
-    </Pane>
-  {/each}
-  {#each results as job (job.jobId)}
-    <Pane
-      title={job.verificationProgress.contract}
-      initialExpandedState={true}
-      actions={[
-        {
-          title: 'Delete Job',
-          icon: 'close',
-          onClick: () => {
-            results = results.filter(item => item.jobId !== job.jobId)
-          },
-        },
-      ]}
-    >
-      <Tree
-        data={{
-          type: TreeType.Rules,
-          tree: job.verificationProgress.rules,
-        }}
-        on:fetchOutput={e => fetchOutput(e, job)}
       />
     </Pane>
   {/each}
