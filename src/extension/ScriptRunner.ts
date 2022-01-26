@@ -11,6 +11,8 @@ type RunningScript = {
   confFile: string
 }
 
+const re = /(\033)|(\[33m)|(\[32m)|(\[31m)|(\[0m)/g
+
 export class ScriptRunner {
   private readonly polling: ScriptProgressLongPolling
   private readonly resultsWebviewProvider: ResultsWebviewProvider
@@ -92,7 +94,9 @@ export class ScriptRunner {
         })
 
       this.script.stdout.on('data', async data => {
-        const str = data.toString() as string
+        let str = data.toString() as string
+        // remove all the bash color characters
+        str = str.replace(re, '')
         this.log(str, confFile, ts)
         channel.appendLine(str)
 
