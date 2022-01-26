@@ -65,6 +65,8 @@ export function smartMergeVerificationResult(
       spec: tree.spec,
       jobs: [newResult],
     }
+    // TODO: check if it can be replaced with
+    // results = results.concat(newVerification)
     results.push(newVerification)
   }
 }
@@ -120,6 +122,7 @@ async function smartRulesMerge(prevJobs: Job[], newJob: Job): Promise<void> {
     )
     if (commonRules.length > 0) {
       console.log('commonRules length is ' + commonRules.length)
+      console.log(commonRules)
       compareRulesCreationTime(commonRules, prevJob, newJob)
     }
   })
@@ -144,6 +147,7 @@ async function compareRulesCreationTime(
       )
       const commonRulesNames: string[] = commonRules.map(rule => rule.name)
       if (prevPostTime <= newPostTime) {
+        console.log('prevPostTime <= newPostTime')
         removeOutdatedRules(commonRulesNames, prevJob)
       } else {
         // prevPostTime > newPostTime
@@ -157,12 +161,18 @@ async function compareRulesCreationTime(
 
 function removeOutdatedRules(commonRulesNames: string[], job: Job) {
   console.log('removeOutdatedRules')
+  console.log(job)
   const rules: Rule[] = job.verificationProgress.rules
+  console.log(rules)
   for (let i = rules.length - 1; i >= 0; i--) {
-    if (rules[i].name in commonRulesNames) {
-      console.log('removeOutdatedRules')
+    console.log(rules[i].name)
+    console.log(commonRulesNames)
+    console.log(rules[i].name in commonRulesNames)
+    if (commonRulesNames.includes(rules[i].name)) {
+      console.log('removedOutdatedRules')
       console.log(rules[i].name)
       rules.splice(i, 1)
+      console.log(rules)
     }
   }
 }
@@ -172,6 +182,7 @@ function removeEmptyJobs(jobs: Job[]) {
   for (let i = jobs.length - 1; i >= 0; i--) {
     const tree: Tree = jobs[i].verificationProgress
     const rules = tree.rules
+    console.log(rules)
     if (rules.length === 0) {
       console.log(jobs[i].jobId)
       jobs.splice(i, 1)
