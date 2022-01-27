@@ -200,10 +200,13 @@
       initialExpandedState={true}
       actions={[
         {
-          title: 'Delete Verification Result',
+          title: 'Remove Current Verification Result',
           icon: 'close',
           onClick: () => {
             console.log('clicked')
+            verificationResults = verificationResults.filter(
+              res => res.contract !== vr.contract && res.spec !== vr.spec,
+            )
           },
         },
       ]}
