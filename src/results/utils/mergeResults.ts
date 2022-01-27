@@ -44,7 +44,7 @@ export function smartMergeVerificationResult(
   const tree: Tree = newResult.verificationProgress
   // look for Verification with the same contract name and spec file
   const index = results.findIndex(
-    item => item.contract === tree.contract || item.spec === tree.spec,
+    item => item.contract === tree.contract && item.spec === tree.spec,
   )
   // if found
   if (index > -1) {
@@ -65,8 +65,6 @@ export function smartMergeVerificationResult(
       spec: tree.spec,
       jobs: [newResult],
     }
-    // TODO: check if it can be replaced with
-    // results = results.concat(newVerification)
     results.push(newVerification)
   }
 }
