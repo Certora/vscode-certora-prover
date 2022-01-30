@@ -14,3 +14,9 @@ export function getProgressUrl(text: string): string | null {
 
   return null
 }
+
+export function getCreationTimeUrl(url: string): string | null {
+  return url.includes('progress')
+    ? url.replace('progress', 'jobData') + '&attr=postTime'
+    : null
+}

@@ -13,7 +13,9 @@
 
 <style>
   vscode-button.small {
-    --button-padding-vertical: 1px;
+    --button-padding-vertical: 2px;
     --button-padding-horizontal: 16px;
+
+    min-width: 212.3px;
   }
 </style>

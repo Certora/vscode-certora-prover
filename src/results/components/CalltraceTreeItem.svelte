@@ -26,11 +26,17 @@
 
   $: hasChildren = callTraceFunction.childrenList.length > 0
 
+  $: returnValue =
+    callTraceFunction.returnValue === '' ||
+    callTraceFunction.returnValue === undefined
+      ? ''
+      : ' / ' + callTraceFunction.returnValue
+
   let isExpanded = false
 </script>
 
 <BaseTreeItem
-  label={callTraceFunction.name}
+  label={callTraceFunction.name + returnValue}
   {hasChildren}
   {setSize}
   {posInset}
@@ -48,7 +54,7 @@
       <span class="name-container">
         <a class="label-name">
           <span class="highlighted-label">
-            <span>{callTraceFunction.name}</span>
+            <span>{callTraceFunction.name + returnValue}</span>
           </span>
         </a>
       </span>

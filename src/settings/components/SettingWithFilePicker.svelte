@@ -47,6 +47,7 @@
       on:change={e => (query = e.target.value)}
     />
     <vscode-dropdown on:change={onSelect} value={file}>
+      <vscode-option>Choose file</vscode-option>
       {#each filteredFiles as path}
         <vscode-option>{path}</vscode-option>
       {/each}
@@ -66,5 +67,13 @@
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-sm);
+  }
+
+  .files-dropdown vscode-dropdown {
+    min-width: 212.3px;
+  }
+
+  .files-dropdown vscode-text-field {
+    max-width: 212.3px;
   }
 </style>

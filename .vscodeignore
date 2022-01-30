@@ -15,3 +15,4 @@ assets/**
 DOCS.md
 rollup.config.js
 svelte.config.js
+.circleci/**

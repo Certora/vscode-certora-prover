@@ -11,19 +11,54 @@
     openSettings,
     getOutput,
   } from './extension-actions'
-  import { mergeResults } from './utils/mergeResults'
+  import { smartMergeVerificationResult } from './utils/mergeResults'
   import { log, Sources } from './utils/log'
-  import type { Assert, Output, Job, EventsFromExtension, Rule } from './types'
+  import type {
+    Assert,
+    Output,
+    Job,
+    EventsFromExtension,
+    Rule,
+    Verification,
+  } from './types'
   import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
 
   let output: Output
   let selectedCalltraceFunction: CallTraceFunction
 
-  let results: Job[] = []
+  let verificationResults: Verification[] = []
   let runningScripts: { pid: number; confFile: string }[] = []
 
   $: hasRunningScripts = runningScripts.length > 0
-  $: hasResults = results.length > 0
+  $: hasResults = verificationResults.length > 0
+
+  function newFetchOutput(e: CustomEvent<Assert | Rule>, vr: Verification) {
+    console.log(e.detail)
+    console.log(vr)
+    let clickedRuleOrAssert = e.detail
+
+    if (!clickedRuleOrAssert.output) {
+      clearOutput()
+      return
+    }
+
+    const index = vr.jobs.findIndex(
+      job => job.jobId === clickedRuleOrAssert.jobId,
+    )
+
+    if (index > -1) {
+      const outputUrl = `${vr.jobs[index].progressUrl.replace(
+        'progress',
+        'result',
+      )}&output=${clickedRuleOrAssert.output}`
+
+      getOutput(outputUrl)
+    } else {
+      console.log(
+        'Error occurred while fetching the output - job id is  undefined',
+      )
+    }
+  }
 
   function fetchOutput(e: CustomEvent<Assert | Rule>, job: Job) {
     log({
@@ -59,20 +94,32 @@
   const listener = (e: MessageEvent<EventsFromExtension>) => {
     switch (e.data.type) {
       case EventTypesFromExtension.ReceiveNewJobResult: {
-        log({
-          action: 'Received "receive-new-job-result" command',
-          source: Sources.ResultsWebview,
-          info: {
-            currentResults: results,
-            newResult: e.data.payload,
-          },
-        })
-        mergeResults(results, e.data.payload)
-        results = results
+        // log({
+        //   action: 'Received "receive-new-job-result" command',
+        //   source: Sources.ResultsWebview,
+        //   info: {
+        //     currentResults: results,
+        //     newResult: e.data.payload,
+        //   },
+        // })
+        // mergeResults(results, e.data.payload)
+        // results = results
         log({
           action: 'Smart merge current results with new result',
           source: Sources.ResultsWebview,
-          info: results,
+          info: {
+            currentVerificationResults: verificationResults,
+            newResult: e.data.payload,
+          },
+        })
+        smartMergeVerificationResult(verificationResults, e.data.payload)
+        verificationResults = verificationResults
+        log({
+          action: 'After Smart merge current results with new result',
+          source: Sources.ResultsWebview,
+          info: {
+            updatedVerificationResults: verificationResults,
+          },
         })
         break
       }
@@ -99,10 +146,10 @@
           action: 'Received "clear-all-jobs" command',
           source: Sources.ResultsWebview,
           info: {
-            currentResults: results,
+            currentVerificationResults: verificationResults,
           },
         })
-        if (hasResults) results = []
+        if (hasResults) verificationResults = []
         clearOutput()
         break
       }
@@ -118,6 +165,14 @@
   onDestroy(() => {
     window.removeEventListener('message', listener)
   })
+
+  function retrieveRules(jobs: Job[]): Rule[] {
+    // rulesArrays = [Rule[] A, Rule[]B,...]
+    const rulesArrays: Rule[][] = jobs.map(
+      job => job.verificationProgress.rules,
+    )
+    return [].concat(...rulesArrays)
+  }
 </script>
 
 {#if !hasResults}
@@ -141,16 +196,18 @@
     </div>
   </div>
 {:else}
-  {#each results as job (job.jobId)}
+  {#each verificationResults as vr (vr.contract + '-' + vr.spec)}
     <Pane
-      title={job.verificationProgress.contract}
+      title={vr.contract + '-' + vr.spec}
       initialExpandedState={true}
       actions={[
         {
-          title: 'Delete Job',
+          title: 'Remove Current Verification Result',
           icon: 'close',
           onClick: () => {
-            results = results.filter(item => item.jobId !== job.jobId)
+            verificationResults = verificationResults.filter(
+              res => res.contract !== vr.contract && res.spec !== vr.spec,
+            )
           },
         },
       ]}
@@ -158,9 +215,9 @@
       <Tree
         data={{
           type: TreeType.Rules,
-          tree: job.verificationProgress.rules,
+          tree: retrieveRules(vr.jobs),
         }}
-        on:fetchOutput={e => fetchOutput(e, job)}
+        on:fetchOutput={e => newFetchOutput(e, vr)}
       />
     </Pane>
   {/each}
