@@ -12,11 +12,10 @@ jobs:
 
       - run: echo "Circle branch is ${CIRCLE_BRANCH}"
       - run:
-          name: Install node_modules
-          command: yarn
-      - run:
-          name: Package vsix
-          command: npx vsce package
+          name: Install node_modules & Package vsix
+          command: |
+            yarn
+            npx vsce package
       - run:
           name: Copy vsix
           command: |
