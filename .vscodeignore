@@ -7,7 +7,6 @@ src/**
 .editorconfig
 .yarnrc
 vsc-extension-quickstart.md
-**/tsconfig.json
 **/.eslintrc.json
 **/*.map
 **/*.ts
@@ -15,3 +14,4 @@ assets/**
 DOCS.md
 rollup.config.js
 svelte.config.js
+.circleci/**
