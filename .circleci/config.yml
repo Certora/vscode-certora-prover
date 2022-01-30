@@ -9,31 +9,46 @@ jobs:
 
     steps:
       - checkout
-
-      - run: echo "Circle branch is ${CIRCLE_BRANCH}"
+      - run: |
+          echo "Circle branch is ${CIRCLE_BRANCH}"
+          echo $PWD
+          ls -l
+      - restore_cache:
+          keys:
+            - yarn-deps-{{ checksum "yarn.lock" }}
+            - yarn-deps
       - run:
-          name: Install node_modules & Package vsix
+          name: Install node_modules
           command: |
-            yarn
+            yarn install
+            ls -l
+      - save_cache:
+          paths:
+            - node_modules
+          key: yarn-deps-{{ checksum "yarn.lock" }}-{{ epoch }}
+      - run:
+          name: Package vsix
+          command: |
+            echo $PWD
+            ls -l
             npx vsce package
       - run:
           name: Copy vsix
           command: |
             mkdir artifacts
             cp *.vsix artifacts/
+      - store_artifacts:
+            path: yarn.lock
+      - persist_to_workspace:
+            root: .
+            paths:
+                - .
 
       # Save the artifacts
       - store_artifacts:
           path: artifacts/
 
-      # Persist if going to use in test job
-      - persist_to_workspace:
-            root: ~/repo
-            paths:
-              - .
-
 workflows:
-  version: 2
   build-test:
     jobs:
       - build
