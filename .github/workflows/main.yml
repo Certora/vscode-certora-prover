@@ -27,10 +27,8 @@ jobs:
       # Install node modules and create a vsix file
       - name: Run a multi-line script
         run: |
-          echo $GITHUB_WORKSPACE
           yarn
           npx vsce package
-          - name: Archive production artifacts
       - name: Archive an artifact
         uses: actions/upload-artifact@v2
         with:
