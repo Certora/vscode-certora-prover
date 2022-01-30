@@ -30,3 +30,14 @@ jobs:
           echo $GITHUB_WORKSPACE
           yarn
           npx vsce package
+          - name: Archive production artifacts
+      - name: Archive an artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: vsix_file
+          path: ./*.vsix
+      - name: Download a single artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: vsix_file
+
