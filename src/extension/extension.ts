@@ -5,7 +5,6 @@ import { ScriptRunner } from './ScriptRunner'
 
 export function activate(context: vscode.ExtensionContext): void {
   function showSettings() {
-    console.log('showSetting')
     const path = vscode.workspace.workspaceFolders?.[0]
 
     if (!path) return
@@ -45,7 +44,6 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   async function editConfFile() {
-    console.log('editConfFile')
     quickPickWithConfFiles(async (selection, quickPick, basePath) => {
       if (selection[0]) {
         quickPick.hide()

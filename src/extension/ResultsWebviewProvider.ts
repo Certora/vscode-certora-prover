@@ -125,11 +125,8 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
 
   private async getCreationTime(creationTimeUrl: string): Promise<void> {
     try {
-      console.log('getCreationTime')
       const { data } = await axios.get<CreationTime>(creationTimeUrl)
       console.log(data)
-      const postTime = data.postTime
-      console.log(postTime)
 
       log({
         action: 'Send "set-creation-time" command',

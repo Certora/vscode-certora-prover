@@ -18,24 +18,19 @@ export class ScriptProgressLongPolling {
     data: ProgressResponse,
     url: string,
   ): Promise<Job | undefined> {
-    console.log('prepareDataToUI')
     let postTime = ''
     try {
       if (url) {
         const creationTimeUrl = getCreationTimeUrl(url)
         if (creationTimeUrl) {
-          console.log('calling axios from prepareDataToUi')
           console.log(creationTimeUrl)
           const { data } = await axios.get<CreationTime>(creationTimeUrl)
           console.log(data)
           postTime = data.postTime
-          console.log(postTime)
         }
       }
     } catch (e) {
-      console.log("axios didn't work")
       console.log(e)
-      console.log('printed the axios error')
     }
     try {
       return {

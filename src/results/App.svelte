@@ -54,7 +54,9 @@
 
       getOutput(outputUrl)
     } else {
-      console.log('UNEXPECTED ERROR OCCURED!')
+      console.log(
+        'Error occurred while fetching the output - job id is  undefined',
+      )
     }
   }
 
@@ -203,7 +205,6 @@
           title: 'Remove Current Verification Result',
           icon: 'close',
           onClick: () => {
-            console.log('clicked')
             verificationResults = verificationResults.filter(
               res => res.contract !== vr.contract && res.spec !== vr.spec,
             )
