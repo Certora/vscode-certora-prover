@@ -82,13 +82,13 @@ function mergeVerification(prevResult: Verification, newJob: Job): void {
 
     const prevTree: Tree = prevJob.verificationProgress
     const newTree: Tree = newJob.verificationProgress
-    console.log('comparing the timestamps')
     console.log('prev=' + prevTree.timestamp + ' new=' + newTree.timestamp)
     // take the most recent result
     if (prevTree.timestamp <= newTree.timestamp) {
       console.log('prev is smaller')
       // TODO: check if we need to check equaility because
       // sometimes two different results can have the same timestamp
+      addJobIdToProperties(newJob)
       prevJobs[index] = newJob
     } else {
       console.log('prev is bigger')
