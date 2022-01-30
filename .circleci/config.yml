@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: circleci/node:latest
+      - image: cimg/node:latest
 
     working_directory: ~/repo
 
@@ -13,19 +13,21 @@ jobs:
           echo "Circle branch is ${CIRCLE_BRANCH}"
           echo $PWD
           ls -l
-      - restore_cache:
-          keys:
-            - yarn-deps-{{ checksum "yarn.lock" }}
-            - yarn-deps
+          node --version
+          yarn --version
+      # - restore_cache:
+      #     keys:
+      #       - yarn-deps-{{ checksum "yarn.lock" }}
+      #       - yarn-deps
       - run:
           name: Install node_modules
           command: |
             yarn install
             ls -l
-      - save_cache:
-          paths:
-            - node_modules
-          key: yarn-deps-{{ checksum "yarn.lock" }}-{{ epoch }}
+      # - save_cache:
+      #     paths:
+      #       - node_modules
+      #     key: yarn-deps-{{ checksum "yarn.lock" }}-{{ epoch }}
       - run:
           name: Package vsix
           command: |
