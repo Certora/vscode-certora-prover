@@ -1,0 +1,41 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: circleci/node:latest
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - run: echo "Circle branch is ${CIRCLE_BRANCH}"
+      - run:
+          name: Install node_modules
+          command: yarn
+      - run:
+          name: Package vsix
+          command: npx vsce package
+      - run:
+          name: Copy vsix
+          command: |
+            mkdir artifacts
+            cp *.vsix artifacts/
+
+      # Save the artifacts
+      - store_artifacts:
+          path: artifacts/
+
+      # Persist if going to use in test job
+      - persist_to_workspace:
+            root: ~/repo
+            paths:
+              - .
+
+workflows:
+  version: 2
+  build-test:
+    jobs:
+      - build
+      
