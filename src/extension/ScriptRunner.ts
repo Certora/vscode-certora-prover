@@ -1,4 +1,5 @@
-import { workspace, window, Uri } from 'vscode'
+import { workspace, window, Uri, Diagnostic, Position, Range } from 'vscode'
+import * as vscode from 'vscode'
 import { spawn, exec, ChildProcessWithoutNullStreams } from 'child_process'
 import * as os from 'os'
 import { ScriptProgressLongPolling } from './ScriptProgressLongPolling'
@@ -18,6 +19,8 @@ export class ScriptRunner {
   private readonly resultsWebviewProvider: ResultsWebviewProvider
   private script: ChildProcessWithoutNullStreams | null = null
   private runningScripts: RunningScript[] = []
+  private diagnosticCollection: vscode.DiagnosticCollection =
+    vscode.languages.createDiagnosticCollection()
 
   constructor(resultsWebviewProvider: ResultsWebviewProvider) {
     this.polling = new ScriptProgressLongPolling()
@@ -67,6 +70,8 @@ export class ScriptRunner {
   }
 
   public run(confFile: string): void {
+    this.diagnosticCollection.clear()
+
     const path = workspace.workspaceFolders?.[0]
 
     if (!path) return
@@ -101,6 +106,14 @@ export class ScriptRunner {
         channel.appendLine(str)
 
         const progressUrl = getProgressUrl(str)
+
+        if (
+          str.startsWith(
+            'CRITICAL: Encountered an error running Certora Prover;',
+          )
+        ) {
+          this.postProblem(str)
+        }
 
         if (progressUrl) {
           await this.polling.run(progressUrl, data => {
@@ -172,5 +185,21 @@ export class ScriptRunner {
       type: 'running-scripts-changed',
       payload: this.runningScripts,
     })
+  }
+
+  private postProblem(str: string): void {
+    const dataList = str.split('\n')
+    const diagnosticDataList = dataList[2].split(':')
+    const rowPosition = parseInt(diagnosticDataList[1]) - 1
+    const colStartPosition = parseInt(diagnosticDataList[2]) - 1
+    const startPosition = new Position(rowPosition, colStartPosition)
+    const colEndPosition = colStartPosition + dataList[3].length - 1
+    const endPosition = new Position(rowPosition, colEndPosition)
+    const range = new Range(startPosition, endPosition)
+    const errorMsg = diagnosticDataList[4]
+    const diagnostic = new Diagnostic(range, errorMsg)
+    const diagnostics: Diagnostic[] = [diagnostic]
+    const uri = Uri.parse(diagnosticDataList[0])
+    this.diagnosticCollection.set(uri, diagnostics)
   }
 }
