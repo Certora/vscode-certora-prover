@@ -196,7 +196,7 @@ export class ScriptRunner {
     const colEndPosition = colStartPosition + dataList[3].length - 1
     const endPosition = new Position(rowPosition, colEndPosition)
     const range = new Range(startPosition, endPosition)
-    const errorMsg = diagnosticDataList[4]
+    const errorMsg = diagnosticDataList[3] + ': ' + diagnosticDataList[4]
     const diagnostic = new Diagnostic(range, errorMsg)
     const diagnostics: Diagnostic[] = [diagnostic]
     const uri = Uri.parse(diagnosticDataList[0])
