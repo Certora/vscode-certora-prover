@@ -5,7 +5,8 @@ import * as os from 'os'
 import { ScriptProgressLongPolling } from './ScriptProgressLongPolling'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { getProgressUrl } from './utils/getProgressUrl'
-import type { Job } from './types'
+import type { Job, ResourceError, Topic, Message } from './types'
+import * as fs from 'fs'
 
 type RunningScript = {
   pid: number
@@ -19,8 +20,7 @@ export class ScriptRunner {
   private readonly resultsWebviewProvider: ResultsWebviewProvider
   private script: ChildProcessWithoutNullStreams | null = null
   private runningScripts: RunningScript[] = []
-  private diagnosticCollection: vscode.DiagnosticCollection =
-    vscode.languages.createDiagnosticCollection()
+  private diagnosticCollection: vscode.DiagnosticCollection[] = []
 
   constructor(resultsWebviewProvider: ResultsWebviewProvider) {
     this.polling = new ScriptProgressLongPolling()
@@ -70,7 +70,11 @@ export class ScriptRunner {
   }
 
   public run(confFile: string): void {
-    this.diagnosticCollection.clear()
+    this.diagnosticCollection.forEach(collection => {
+      collection.clear()
+      collection.dispose()
+    })
+    this.diagnosticCollection = []
 
     const path = workspace.workspaceFolders?.[0]
 
@@ -107,14 +111,6 @@ export class ScriptRunner {
 
         const progressUrl = getProgressUrl(str)
 
-        if (
-          str.startsWith(
-            'CRITICAL: Encountered an error running Certora Prover;',
-          )
-        ) {
-          this.postProblem(str)
-        }
-
         if (progressUrl) {
           await this.polling.run(progressUrl, data => {
             this.resultsWebviewProvider.postMessage<Job>({
@@ -137,6 +133,10 @@ export class ScriptRunner {
 
       this.script.on('close', async code => {
         this.removeRunningScript(pid)
+
+        if (code !== 0) {
+          this.postProblems(confFile)
+        }
 
         const action = await window.showInformationMessage(
           `The script for the conf file ${confFile} exited with code ${code}.`,
@@ -187,19 +187,126 @@ export class ScriptRunner {
     })
   }
 
-  private postProblem(str: string): void {
-    const dataList = str.split('\n')
-    const diagnosticDataList = dataList[2].split(':')
-    const rowPosition = parseInt(diagnosticDataList[1]) - 1
-    const colStartPosition = parseInt(diagnosticDataList[2]) - 1
-    const startPosition = new Position(rowPosition, colStartPosition)
-    const colEndPosition = colStartPosition + dataList[3].length - 1
-    const endPosition = new Position(rowPosition, colEndPosition)
-    const range = new Range(startPosition, endPosition)
-    const errorMsg = diagnosticDataList[3] + ': ' + diagnosticDataList[4]
-    const diagnostic = new Diagnostic(range, errorMsg)
-    const diagnostics: Diagnostic[] = [diagnostic]
-    const uri = Uri.parse(diagnosticDataList[0])
-    this.diagnosticCollection.set(uri, diagnostics)
+  private postProblems(confFile: string): void {
+    const ignoreFolderRegex = '{certora-logs,conf}'
+    const resourceErrorsFile = 'resource_errors.json'
+    vscode.workspace
+      .findFiles(resourceErrorsFile, ignoreFolderRegex, 1)
+      .then(data => {
+        workspace.fs.readFile(data[0]).then(data => {
+          const decoder = new TextDecoder()
+          const content = decoder.decode(data)
+          const resource_error = this.getResourceError(content)
+
+          const pathRegex = /((\\|\/)[a-z0-9\s_@\-^!#$%&+=.{}]+)+/i
+          const locationRegex = /\d+:\d+/g
+
+          resource_error.topics.forEach(topic => {
+            if (topic.messages.length > 0) {
+              topic.messages.forEach(message => {
+                const curMessage: string = message.message
+
+                const path = pathRegex.exec(curMessage)
+                const location = locationRegex.exec(curMessage)
+                const problemPath = this.getPath(path, confFile)
+
+                const descriptiveMessage = (topic.name + ':' + curMessage)
+                  .replace(pathRegex, '')
+                  .replace(locationRegex, '')
+                  .replace(/:{2,}/g, ':')
+
+                const position: Position = this.getPosition(
+                  location,
+                  path,
+                  confFile,
+                )
+                const range: Range = new Range(position, position)
+                const diagnostic = new Diagnostic(range, descriptiveMessage)
+
+                const diagnostics: Diagnostic[] = []
+                diagnostics.push(diagnostic)
+
+                const uri = Uri.parse(problemPath)
+
+                const curDiagnosticCollection: vscode.DiagnosticCollection =
+                  vscode.languages.createDiagnosticCollection()
+
+                curDiagnosticCollection.set(uri, diagnostics)
+                this.diagnosticCollection.push(curDiagnosticCollection)
+              })
+            }
+          })
+        })
+      })
+  }
+
+  private getResourceError(str: string): ResourceError {
+    const jsonContent: ResourceError = JSON.parse(str)
+
+    const resource_error: ResourceError = {
+      topics: [],
+    }
+
+    jsonContent.topics.forEach(topic => {
+      const curTopic: Topic = {
+        name: topic.name,
+        messages: [],
+      }
+      const curMessages: Message[] = []
+      topic.messages.forEach(message => {
+        const curMessage: Message = {
+          message: message.message,
+          location: message.location,
+        }
+        curMessages.push(curMessage)
+      })
+      curTopic.messages = curMessages
+      resource_error.topics.push(curTopic)
+    })
+
+    return resource_error
+  }
+
+  private getPosition(
+    location: RegExpExecArray | null,
+    path: RegExpExecArray | null,
+    confFilePath: string,
+  ): Position {
+    // TODO: if the path is to the configuration file, the position should be 0,0 anyway
+
+    if (path && !path.includes(confFilePath) && location) {
+      const rowPosition = parseInt(location[0].split(':')[0]) - 1
+      const colPosition = parseInt(location[0].split(':')[1]) - 1
+      return new Position(rowPosition, colPosition)
+    }
+    return new Position(0, 0)
+  }
+
+  private getPath(path: RegExpExecArray | null, confFile: string): string {
+    let workspaceFolderPath = ''
+    const workspaceFolders = workspace.workspaceFolders
+
+    if (workspaceFolders) {
+      workspaceFolderPath = workspaceFolders[0].uri.path + '/'
+    }
+
+    let pathToReturn = workspaceFolderPath + confFile
+
+    if (path) {
+      const relativePathRegex = /[0-9a-z_-]+\.[0-9a-z]+$/i
+      const relativePath = relativePathRegex.exec(path[0])
+
+      if (relativePath) {
+        const pathToCheck = (workspaceFolderPath + relativePath[0]).replace(
+          /\/{2,}"/i,
+          '/',
+        )
+
+        if (fs.existsSync(pathToCheck)) {
+          pathToReturn = pathToCheck
+        }
+      }
+    }
+    return pathToReturn
   }
 }
