@@ -6,11 +6,6 @@ import { ScriptProgressLongPolling } from './ScriptProgressLongPolling'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { getProgressUrl } from './utils/getProgressUrl'
 import type { Job, ResourceError, Topic, Message } from './types'
-import * as fs from 'fs'
-import { threadId } from 'worker_threads'
-import { off } from 'process'
-import { count } from 'console'
-import { worker } from 'cluster'
 
 type RunningScript = {
   pid: number
@@ -39,13 +34,14 @@ export class ScriptRunner {
     return splitedPathToConfFile[splitedPathToConfFile.length - 1]
   }
 
-  private async log(
-    str: string,
-    pathToConfFile: string,
-    ts: number,
-  ): Promise<void> {
+  /**
+   * returns a uri of the conf.log file if the workspace path exists, null otherwise
+   * @param pathToConfFile path to the .conf file (relative)
+   * @param ts the time the file was created
+   * @returns the full path to the conf.log file or null
+   */
+  private getConfFileUri(pathToConfFile: string, ts: number) {
     const path = workspace.workspaceFolders?.[0]
-
     if (!path) return
 
     const logFilePath = Uri.joinPath(
@@ -53,6 +49,18 @@ export class ScriptRunner {
       'certora-logs',
       `${this.getConfFileName(pathToConfFile)}-${ts}.log`,
     )
+    return logFilePath
+  }
+
+  private async log(
+    str: string,
+    pathToConfFile: string,
+    ts: number,
+  ): Promise<void> {
+    const logFilePath = this.getConfFileUri(pathToConfFile, ts)
+    if (!logFilePath) {
+      return
+    }
     const encoder = new TextEncoder()
     const content = encoder.encode(str)
 
@@ -230,7 +238,12 @@ export class ScriptRunner {
             .replace(pathRegex, '')
             .replace(locationRegex, '')
             .replace(/:{2,}/g, ':')
-          const position: Position = this.getPosition(location, path, confFile)
+          const position: Position = this.getPosition(
+            location,
+            uri.path,
+            confFile,
+            ts,
+          )
           const range: Range = new Range(position, position)
           const diagnostic = new Diagnostic(range, descriptiveMessage)
 
@@ -263,10 +276,12 @@ export class ScriptRunner {
 
   private getPosition(
     location: RegExpExecArray | null,
-    path: RegExpExecArray | null,
+    path: string,
     confFilePath: string,
+    ts: number,
   ): Position {
-    if (path && !path.includes(confFilePath) && location) {
+    const confFileUri = this.getConfFileUri(confFilePath, ts)
+    if (confFileUri && !(path === confFileUri.path) && location) {
       // Position object assumes the indexes given to it are starting with 0 while vscode code lines indexes are starting with 1.
       const [row, col] = location[0].split(':')
       const rowPosition = parseInt(row) - 1
@@ -288,13 +303,10 @@ export class ScriptRunner {
     confFile: string,
     ts: number,
   ): Promise<Uri> {
-    const workspaceFolderPath = workspace.workspaceFolders?.[0]
-    if (!workspaceFolderPath) return Uri.parse('') // no workspace folder? no conf file!
-    const logFilePath = Uri.joinPath(
-      workspaceFolderPath.uri,
-      'certora-logs',
-      `${this.getConfFileName(confFile)}-${ts}.log`,
-    )
+    const logFilePath = this.getConfFileUri(confFile, ts)
+    if (!logFilePath) {
+      return Uri.parse('')
+    }
 
     let pathToReturn = logFilePath
 
