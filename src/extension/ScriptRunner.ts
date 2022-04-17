@@ -193,8 +193,8 @@ export class ScriptRunner {
 
   private async postProblems(confFile: string, ts: number): Promise<void> {
     const ignoreFolderRegex = '{certora-logs,conf}'
-    // For testing purposes, changed resource_errors.json to test.json
-    const resourceErrorsFile = 'test.json'
+
+    const resourceErrorsFile = 'resource_errors.json'
     const found = await vscode.workspace.findFiles(
       resourceErrorsFile,
       ignoreFolderRegex,
@@ -274,8 +274,10 @@ export class ScriptRunner {
     confFilePath: string,
   ): Position {
     if (path && !path.includes(confFilePath) && location) {
-      const rowPosition = parseInt(location[0].split(':')[0]) - 1
-      const colPosition = parseInt(location[0].split(':')[1]) - 1
+      // Position object assumes the indexes given to it are starting with 0 while vscode code lines indexes are starting with 1.
+      const [row, col] = location[0].split(':')
+      const rowPosition = parseInt(row) - 1
+      const colPosition = parseInt(col) - 1
       return new Position(rowPosition, colPosition)
     }
     return new Position(0, 0)
