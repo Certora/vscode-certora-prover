@@ -208,7 +208,7 @@ export class ScriptRunner {
 
                 const path = pathRegex.exec(curMessage)
                 const location = locationRegex.exec(curMessage)
-                const problemPath = this.getPath(path, confFile)
+                const problemPath = this.getPathToProblem(path, confFile)
 
                 const descriptiveMessage = (topic.name + ':' + curMessage)
                   .replace(pathRegex, '')
@@ -282,7 +282,17 @@ export class ScriptRunner {
     return new Position(0, 0)
   }
 
-  private getPath(path: RegExpExecArray | null, confFile: string): string {
+  /**
+   * Returns a path to the file where the problem originated from. If the function did not get a file path in [path],
+   * the function returns a path to the .conf file of the current run.
+   * @param path RegExpExecArray contains a path to the file, as was received from the resource_file.json message
+   * @param confFile path to a .conf file of the certora IDE, of the current run.
+   * @returns a path to the file where the problem originated from, or a path to the .conf file
+   */
+  private getPathToProblem(
+    path: RegExpExecArray | null,
+    confFile: string,
+  ): string {
     let workspaceFolderPath = ''
     const workspaceFolders = workspace.workspaceFolders
 
