@@ -7,6 +7,10 @@ import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { getProgressUrl } from './utils/getProgressUrl'
 import type { Job, ResourceError, Topic, Message } from './types'
 import * as fs from 'fs'
+import { threadId } from 'worker_threads'
+import { off } from 'process'
+import { count } from 'console'
+import { worker } from 'cluster'
 
 type RunningScript = {
   pid: number
@@ -135,7 +139,7 @@ export class ScriptRunner {
         this.removeRunningScript(pid)
 
         if (code !== 0) {
-          this.postProblems(confFile)
+          this.postProblems(confFile, ts)
         }
 
         const action = await window.showInformationMessage(
@@ -187,57 +191,54 @@ export class ScriptRunner {
     })
   }
 
-  private postProblems(confFile: string): void {
+  private async postProblems(confFile: string, ts: number): Promise<void> {
     const ignoreFolderRegex = '{certora-logs,conf}'
-    const resourceErrorsFile = 'resource_errors.json'
-    vscode.workspace
-      .findFiles(resourceErrorsFile, ignoreFolderRegex, 1)
-      .then(data => {
-        workspace.fs.readFile(data[0]).then(data => {
-          const decoder = new TextDecoder()
-          const content = decoder.decode(data)
-          const resource_error = this.getResourceError(content)
+    // For testing purposes, changed resource_errors.json to test.json
+    const resourceErrorsFile = 'test.json'
+    const found = await vscode.workspace.findFiles(
+      resourceErrorsFile,
+      ignoreFolderRegex,
+      1,
+    )
+    if (!found || !found[0]) {
+      console.error('could not find the ' + resourceErrorsFile + ' file.')
+      return
+    }
+    const data = await vscode.workspace.fs.readFile(found[0])
+    const decoder = new TextDecoder()
+    const content = decoder.decode(data)
+    const resource_error = this.getResourceError(content)
+    const pathRegex = /((\\|\/)[a-z0-9_\-.]+)+/i
+    const locationRegex = /\d+:\d+/g
 
-          const pathRegex = /((\\|\/)[a-z0-9\s_@\-^!#$%&+=.{}]+)+/i
-          const locationRegex = /\d+:\d+/g
+    resource_error.topics.forEach(topic => {
+      if (topic.messages.length > 0) {
+        topic.messages.forEach(async message => {
+          const curMessage: string = message.message
+          const path = pathRegex.exec(curMessage)
 
-          resource_error.topics.forEach(topic => {
-            if (topic.messages.length > 0) {
-              topic.messages.forEach(message => {
-                const curMessage: string = message.message
+          const location = locationRegex.exec(curMessage)
+          const uri = await this.getPathToProblem(path, confFile, ts)
 
-                const path = pathRegex.exec(curMessage)
-                const location = locationRegex.exec(curMessage)
-                const problemPath = this.getPathToProblem(path, confFile)
+          const descriptiveMessage = (topic.name + ':' + curMessage)
+            .replace(pathRegex, '')
+            .replace(locationRegex, '')
+            .replace(/:{2,}/g, ':')
+          const position: Position = this.getPosition(location, path, confFile)
+          const range: Range = new Range(position, position)
+          const diagnostic = new Diagnostic(range, descriptiveMessage)
 
-                const descriptiveMessage = (topic.name + ':' + curMessage)
-                  .replace(pathRegex, '')
-                  .replace(locationRegex, '')
-                  .replace(/:{2,}/g, ':')
+          const diagnostics: Diagnostic[] = []
+          diagnostics.push(diagnostic)
 
-                const position: Position = this.getPosition(
-                  location,
-                  path,
-                  confFile,
-                )
-                const range: Range = new Range(position, position)
-                const diagnostic = new Diagnostic(range, descriptiveMessage)
+          const curDiagnosticCollection: vscode.DiagnosticCollection =
+            vscode.languages.createDiagnosticCollection()
 
-                const diagnostics: Diagnostic[] = []
-                diagnostics.push(diagnostic)
-
-                const uri = Uri.parse(problemPath)
-
-                const curDiagnosticCollection: vscode.DiagnosticCollection =
-                  vscode.languages.createDiagnosticCollection()
-
-                curDiagnosticCollection.set(uri, diagnostics)
-                this.diagnosticCollection.push(curDiagnosticCollection)
-              })
-            }
-          })
+          curDiagnosticCollection.set(uri, diagnostics)
+          this.diagnosticCollection.push(curDiagnosticCollection)
         })
-      })
+      }
+    })
   }
 
   private getResourceError(str: string): ResourceError {
@@ -272,8 +273,6 @@ export class ScriptRunner {
     path: RegExpExecArray | null,
     confFilePath: string,
   ): Position {
-    // TODO: if the path is to the configuration file, the position should be 0,0 anyway
-
     if (path && !path.includes(confFilePath) && location) {
       const rowPosition = parseInt(location[0].split(':')[0]) - 1
       const colPosition = parseInt(location[0].split(':')[1]) - 1
@@ -289,33 +288,31 @@ export class ScriptRunner {
    * @param confFile path to a .conf file of the certora IDE, of the current run.
    * @returns a path to the file where the problem originated from, or a path to the .conf file
    */
-  private getPathToProblem(
+  private async getPathToProblem(
     path: RegExpExecArray | null,
     confFile: string,
-  ): string {
-    let workspaceFolderPath = ''
-    const workspaceFolders = workspace.workspaceFolders
+    ts: number,
+  ): Promise<Uri> {
+    const workspaceFolderPath = workspace.workspaceFolders?.[0]
+    if (!workspaceFolderPath) return Uri.parse('') // no workspace folder? no conf file!
+    const logFilePath = Uri.joinPath(
+      workspaceFolderPath.uri,
+      'certora-logs',
+      `${this.getConfFileName(confFile)}-${ts}.log`,
+    )
 
-    if (workspaceFolders) {
-      workspaceFolderPath = workspaceFolders[0].uri.path + '/'
-    }
+    let pathToReturn = logFilePath
 
-    let pathToReturn = workspaceFolderPath + confFile
+    if (path && path[0]) {
+      const fileUri = Uri.parse(path[0])
 
-    if (path) {
-      const relativePathRegex = /[0-9a-z_-]+\.[0-9a-z]+$/i
-      const relativePath = relativePathRegex.exec(path[0])
+      // vscode API way to check if a file exists
+      try {
+        await workspace.fs.readFile(fileUri)
+        pathToReturn = fileUri
+      } catch (e) {}
 
-      if (relativePath) {
-        const pathToCheck = (workspaceFolderPath + relativePath[0]).replace(
-          /\/{2,}"/i,
-          '/',
-        )
-
-        if (fs.existsSync(pathToCheck)) {
-          pathToReturn = pathToCheck
-        }
-      }
+      // TODO: deal with relative paths?
     }
     return pathToReturn
   }
