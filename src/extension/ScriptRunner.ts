@@ -193,7 +193,6 @@ export class ScriptRunner {
 
   private async postProblems(confFile: string, ts: number): Promise<void> {
     const ignoreFolderRegex = '{certora-logs,conf}'
-
     const resourceErrorsFile = 'resource_errors.json'
     const found = await vscode.workspace.findFiles(
       resourceErrorsFile,
@@ -201,9 +200,14 @@ export class ScriptRunner {
       1,
     )
     if (!found || !found[0]) {
-      console.error('could not find the ' + resourceErrorsFile + ' file.')
+      console.error(
+        "Could't find the " +
+          resourceErrorsFile +
+          ' file. Please contact Certora team',
+      )
       return
     }
+
     const data = await vscode.workspace.fs.readFile(found[0])
     const decoder = new TextDecoder()
     const content = decoder.decode(data)
@@ -211,9 +215,11 @@ export class ScriptRunner {
     const pathRegex = /((\\|\/)[a-z0-9_\-.]+)+/i
     const locationRegex = /\d+:\d+/g
 
-    resource_error.topics.forEach(topic => {
+    const diagnosticMap: Map<string, vscode.Diagnostic[]> = new Map()
+
+    for (const topic of resource_error.topics) {
       if (topic.messages.length > 0) {
-        topic.messages.forEach(async message => {
+        for (const message of topic.messages) {
           const curMessage: string = message.message
           const path = pathRegex.exec(curMessage)
 
@@ -228,44 +234,31 @@ export class ScriptRunner {
           const range: Range = new Range(position, position)
           const diagnostic = new Diagnostic(range, descriptiveMessage)
 
-          const diagnostics: Diagnostic[] = []
+          const diagnostics: Diagnostic[] = diagnosticMap.get(uri.path) || []
           diagnostics.push(diagnostic)
-
-          const curDiagnosticCollection: vscode.DiagnosticCollection =
-            vscode.languages.createDiagnosticCollection()
-
-          curDiagnosticCollection.set(uri, diagnostics)
-          this.diagnosticCollection.push(curDiagnosticCollection)
-        })
+          diagnosticMap.set(uri.path, diagnostics)
+        }
       }
+    }
+    diagnosticMap.forEach((diagnosticList, uriObj) => {
+      const curDiagnosticCollection: vscode.DiagnosticCollection =
+        vscode.languages.createDiagnosticCollection()
+      curDiagnosticCollection.set(Uri.parse(uriObj), diagnosticList)
+      this.diagnosticCollection.push(curDiagnosticCollection)
     })
   }
 
   private getResourceError(str: string): ResourceError {
-    const jsonContent: ResourceError = JSON.parse(str)
-
-    const resource_error: ResourceError = {
-      topics: [],
-    }
-
-    jsonContent.topics.forEach(topic => {
-      const curTopic: Topic = {
-        name: topic.name,
-        messages: [],
+    try {
+      const jsonContent: ResourceError = JSON.parse(str)
+      return jsonContent
+    } catch (e) {
+      console.error("Couldn't read the error logs. Please contact Certora team")
+      const resource_error: ResourceError = {
+        topics: [],
       }
-      const curMessages: Message[] = []
-      topic.messages.forEach(message => {
-        const curMessage: Message = {
-          message: message.message,
-          location: message.location,
-        }
-        curMessages.push(curMessage)
-      })
-      curTopic.messages = curMessages
-      resource_error.topics.push(curTopic)
-    })
-
-    return resource_error
+      return resource_error
+    }
   }
 
   private getPosition(
