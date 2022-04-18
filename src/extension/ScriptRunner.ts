@@ -202,7 +202,7 @@ export class ScriptRunner {
   private async postProblems(confFile: string, ts: number): Promise<void> {
     const ignoreFolderRegex =
       '{**/certora-logs,**/conf,**/.github,cache,**/.last_confs,**/.certora_config,**/images}'
-    const resourceErrorsFile = 'resource_errors.json' // todo: changed back to resource_errors.json
+    const resourceErrorsFile = 'resource_errors.json'
     const found = await vscode.workspace.findFiles(
       '**/' + resourceErrorsFile,
       ignoreFolderRegex,
