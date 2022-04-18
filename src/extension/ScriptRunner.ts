@@ -200,18 +200,25 @@ export class ScriptRunner {
   }
 
   private async postProblems(confFile: string, ts: number): Promise<void> {
-    const ignoreFolderRegex = '{certora-logs,conf}'
-    const resourceErrorsFile = 'resource_errors.json'
+    const ignoreFolderRegex =
+      '{**/certora-logs,**/conf,**/.github,cache,**/.last_confs,**/.certora_config,**/images}'
+    const resourceErrorsFile = 'resource_errors.json' // todo: changed back to resource_errors.json
     const found = await vscode.workspace.findFiles(
-      resourceErrorsFile,
+      '**/' + resourceErrorsFile,
       ignoreFolderRegex,
       1,
     )
-    if (!found || !found[0]) {
+    if (!found) {
       console.error(
         "Could't find the " +
           resourceErrorsFile +
           ' file. Please contact Certora team',
+      )
+      return
+    }
+    if (!found[0]) {
+      console.error(
+        "Couldn't locate the error logs. Please contact Certora team",
       )
       return
     }
@@ -220,37 +227,44 @@ export class ScriptRunner {
     const decoder = new TextDecoder()
     const content = decoder.decode(data)
     const resource_error = this.getResourceError(content)
+    /**
+     * regex to find a file path in a string. example:
+     * string: "/BankLesson/Bank.sol:22:5: ParserError: Expected ';' but got 'function'"
+     * pathRegex will find: /BankLesson/Bank.sol
+     */
     const pathRegex = /((\\|\/)[a-z0-9_\-.]+)+/i
-    const locationRegex = /\d+:\d+/g
+    const locationRegex = /:\d+:\d+:/g
 
     const diagnosticMap: Map<string, vscode.Diagnostic[]> = new Map()
 
     for (const topic of resource_error.topics) {
-      if (topic.messages.length > 0) {
-        for (const message of topic.messages) {
-          const curMessage: string = message.message
-          const path = pathRegex.exec(curMessage)
+      for (const message of topic.messages) {
+        const curMessage: string = message.message
+        const path = pathRegex.exec(curMessage)
 
-          const location = locationRegex.exec(curMessage)
-          const uri = await this.getPathToProblem(path, confFile, ts)
+        const location = locationRegex.exec(curMessage)
+        const uri = await this.getPathToProblem(path, confFile, ts)
 
-          const descriptiveMessage = (topic.name + ':' + curMessage)
-            .replace(pathRegex, '')
-            .replace(locationRegex, '')
-            .replace(/:{2,}/g, ':')
-          const position: Position = this.getPosition(
-            location,
-            uri.path,
-            confFile,
-            ts,
-          )
-          const range: Range = new Range(position, position)
-          const diagnostic = new Diagnostic(range, descriptiveMessage)
+        const descriptiveMessage = curMessage
+          .replace(pathRegex, '')
+          .replace(locationRegex, '')
+        const position: Position = this.getPosition(
+          location,
+          uri.path,
+          confFile,
+          ts,
+        )
 
-          const diagnostics: Diagnostic[] = diagnosticMap.get(uri.path) || []
-          diagnostics.push(diagnostic)
-          diagnosticMap.set(uri.path, diagnostics)
-        }
+        /**
+         * right now we are only getting the start position from the resource_errors.json message
+         * vscode handles this range by emphasizing the words that start at position [position]
+         */
+        const range: Range = new Range(position, position)
+        const diagnostic = new Diagnostic(range, descriptiveMessage)
+
+        const diagnostics: Diagnostic[] = diagnosticMap.get(uri.path) || []
+        diagnostics.push(diagnostic)
+        diagnosticMap.set(uri.path, diagnostics)
       }
     }
     diagnosticMap.forEach((diagnosticList, uriObj) => {
