@@ -400,7 +400,7 @@ export class ScriptRunner {
    * Returns a path to the file where the problem originated from. If the function did not get a file path in [path],
    * the function returns a path to the .conf file of the current run.
    * @param path RegExpExecArray contains a path to the file, as was received from the resource_file.json message
-   * @param confFile path to a .conf file of the certora IDE, of the current run.
+   * @param logFilePath uri with path to a .conf file of the certora IDE, of the current run.
    * @returns a path to the file where the problem originated from, or a path to the .conf file
    */
   private async getPathToProblem(
