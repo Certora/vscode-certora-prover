@@ -34,7 +34,9 @@ function convertSourceFormDataToConfFileJSON(
   }
 
   if (inputFormData.mainSolidityFile) {
-    config.files.push(inputFormData.mainSolidityFile)
+    config.files.push(
+      `${inputFormData.mainSolidityFile}:${inputFormData.mainContractName}`,
+    )
   }
 
   if (
