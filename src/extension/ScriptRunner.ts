@@ -240,9 +240,6 @@ export class ScriptRunner {
     const decoder = new TextDecoder()
     const content = decoder.decode(data)
     const resource_error = this.getResourceError(content)
-    if (resource_error.topics.length === 0) {
-      return
-    }
 
     this.createAndPostDiagnostics(resource_error, confFile, ts)
   }
@@ -264,6 +261,7 @@ export class ScriptRunner {
      * regex to find a file path in a string. example:
      * string: "BankLesson/Bank.sol:22:5: ParserError: Expected ';' but got 'function'"
      * pathRegex will find: BankLesson/Bank.sol
+     * (changes to include relative paths)
      */
     const pathRegex = /([a-z0-9_\-\\/.]+)\.([a-z0-9]+)/i
     const locationRegex = /((:\d+:\d+:)|(:\d+:\d+))/g
