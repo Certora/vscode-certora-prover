@@ -208,7 +208,7 @@ export class ScriptRunner {
       ignoreFolderRegex,
       1,
     )
-    if (!found) {
+    if (!found || !found[0]) {
       console.error(
         "Could't find the " +
           resourceErrorsFile +
@@ -216,14 +216,15 @@ export class ScriptRunner {
       )
       return
     }
-    if (!found[0]) {
+
+    const data = await vscode.workspace.fs.readFile(found[0])
+    if (!data) {
       console.error(
         "Couldn't locate the error logs. Please contact Certora team",
       )
       return
     }
 
-    const data = await vscode.workspace.fs.readFile(found[0])
     const decoder = new TextDecoder()
     const content = decoder.decode(data)
     const resource_error = this.getResourceError(content)
