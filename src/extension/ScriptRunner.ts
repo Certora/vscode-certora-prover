@@ -40,7 +40,7 @@ export class ScriptRunner {
    * @param ts the time the file was created
    * @returns the full path to the conf.log file or null
    */
-  private getConfFileUri(pathToConfFile: string, ts: number) {
+  private getLogFilePath(pathToConfFile: string, ts: number) {
     const path = workspace.workspaceFolders?.[0]
     if (!path) return
 
@@ -57,7 +57,7 @@ export class ScriptRunner {
     pathToConfFile: string,
     ts: number,
   ): Promise<void> {
-    const logFilePath = this.getConfFileUri(pathToConfFile, ts)
+    const logFilePath = this.getLogFilePath(pathToConfFile, ts)
     if (!logFilePath) {
       return
     }
@@ -199,6 +199,17 @@ export class ScriptRunner {
     })
   }
 
+  private async findFile(filepath: string): Promise<Uri[]> {
+    const ignoreFolderRegex =
+      '{**/certora-logs,**/conf,**/.github,cache,**/.last_confs,**/.certora_config,**/images}'
+    const found = await vscode.workspace.findFiles(
+      '**/' + filepath,
+      ignoreFolderRegex,
+      1,
+    )
+    return found
+  }
+
   /**
    * This function is in charged of posting errors from 'resource_errors.json' to vscode 'PROBLEMS'
    * @param confFile relative path to the .conf file of the current run
@@ -206,14 +217,9 @@ export class ScriptRunner {
    * @returns an empty promise
    */
   private async postProblems(confFile: string, ts: number): Promise<void> {
-    const ignoreFolderRegex =
-      '{**/certora-logs,**/conf,**/.github,cache,**/.last_confs,**/.certora_config,**/images}'
     const resourceErrorsFile = 'resource_errors.json'
-    const found = await vscode.workspace.findFiles(
-      '**/' + resourceErrorsFile,
-      ignoreFolderRegex,
-      1,
-    )
+    const found = await this.findFile(resourceErrorsFile)
+
     if (!found || !found[0]) {
       console.error(
         "Could't find the " +
@@ -268,39 +274,83 @@ export class ScriptRunner {
       for (const message of topic.messages) {
         const curMessage: string = message.message
 
-        const path = pathRegex.exec(curMessage)
-        const location = locationRegex.exec(curMessage)
-        const uri = await this.getPathToProblem(path, confFile, ts)
+        const regexPathArray = pathRegex.exec(curMessage)
+        const regexLocationArray = locationRegex.exec(curMessage)
 
-        const confFileUri = this.getConfFileUri(confFile, ts)
+        const logFilePath = this.getLogFilePath(confFile, ts)
+        if (!logFilePath) {
+          return
+        }
+
+        const path = await this.getPathToProblem(regexPathArray, logFilePath)
 
         const descriptiveMessage = curMessage
           .replace(pathRegex, '')
           .replace(locationRegex, '')
-          .replace(' ()', '') // for dealing with spec file errors
-        const position: Position = this.getPosition(
-          location,
-          uri.path,
-          confFile,
-          ts,
-        )
+          .replace(' ()', '') // for dealing with spec file errors messages
 
+        const position: Position = this.getPosition(
+          regexLocationArray,
+          path,
+          logFilePath,
+        )
         /**
          * right now we are only getting the start position from the resource_errors.json message
          * vscode handles this range by emphasizing the words that start at position [position]
          */
-        const range: Range = new Range(position, position)
-        const diagnostic = new Diagnostic(range, descriptiveMessage)
-
-        const diagnostics: Diagnostic[] = diagnosticMap.get(uri.path) || []
-        diagnostics.push(diagnostic)
-        diagnosticMap.set(uri.path, diagnostics)
+        const diagnostic: Diagnostic = this.createDiagnostic(
+          position,
+          position,
+          descriptiveMessage,
+        )
+        this.setDiagnosticMap(diagnostic, path, diagnosticMap)
       }
     }
-    diagnosticMap.forEach((diagnosticList, uriObj) => {
+    this.postDiagnostics(diagnosticMap)
+  }
+
+  /**
+   * returns a new diagnostic object
+   * @param startPosition position where the problem starts
+   * @param endPosition position where the problem ends
+   * @param message message describing the problem
+   * @returns diagnostic object
+   */
+  private createDiagnostic(
+    startPosition: Position,
+    endPosition: Position,
+    message: string,
+  ): Diagnostic {
+    const range: Range = new Range(startPosition, endPosition)
+    const diagnostic = new Diagnostic(range, message)
+    return diagnostic
+  }
+
+  /**
+   * sets the diagnostic map [diagnosticMap] with the new value:
+   * @param diagnostic Diagnostic object
+   * @param path path to the file where problems originated from
+   * @param diagnosticMap maps paths (string) to diagnostic lists
+   */
+  private setDiagnosticMap(
+    diagnostic: Diagnostic,
+    path: string,
+    diagnosticMap: Map<string, Diagnostic[]>,
+  ): void {
+    const diagnostics: Diagnostic[] = diagnosticMap.get(path) || []
+    diagnostics.push(diagnostic)
+    diagnosticMap.set(path, diagnostics)
+  }
+
+  /**
+   * post all diagnostic lists in diagnosticMap to [PROBLEMS]
+   * @param diagnosticMap maps paths (string) to diagnostic lists
+   */
+  private postDiagnostics(diagnosticMap: Map<string, Diagnostic[]>): void {
+    diagnosticMap.forEach((diagnosticList, path) => {
       const curDiagnosticCollection: vscode.DiagnosticCollection =
         vscode.languages.createDiagnosticCollection()
-      curDiagnosticCollection.set(Uri.parse(uriObj), diagnosticList)
+      curDiagnosticCollection.set(Uri.parse(path), diagnosticList)
       this.diagnosticCollection.push(curDiagnosticCollection)
     })
   }
@@ -321,13 +371,7 @@ export class ScriptRunner {
   private async relativeToFullPath(uri: Uri): Promise<Uri> {
     const pathAsArray = uri.path.split('/')
     const fileName = pathAsArray[pathAsArray.length - 1]
-    const ignoreFolderRegex =
-      '{**/certora-logs,**/conf,**/.github,cache,**/.last_confs,**/.certora_config,**/images}'
-    const fullPath = await vscode.workspace.findFiles(
-      '**' + fileName,
-      ignoreFolderRegex,
-      1,
-    )
+    const fullPath = await this.findFile(fileName)
     if (!fullPath || !fullPath[0]) {
       return uri
     }
@@ -337,15 +381,14 @@ export class ScriptRunner {
   private getPosition(
     location: RegExpExecArray | null,
     path: string,
-    confFilePath: string,
-    ts: number,
+    logFilePath: Uri,
   ): Position {
-    const confFileUri = this.getConfFileUri(confFilePath, ts)
-    if (confFileUri && !(path === confFileUri.path) && location) {
-      // Position object assumes the indexes given to it are starting with 0 while vscode code lines indexes are starting with 1.
+    if (!(path === logFilePath.path) && location && location[0]) {
       const [row, col] = location[0].split(':').filter(element => {
         return element !== ''
       })
+
+      // Position object assumes the indexes given to it are starting with 0 while vscode code lines indexes are starting with 1.
       const rowPosition = parseInt(row) - 1
       const colPosition = parseInt(col) - 1
       return new Position(rowPosition, colPosition)
@@ -362,15 +405,9 @@ export class ScriptRunner {
    */
   private async getPathToProblem(
     path: RegExpExecArray | null,
-    confFile: string,
-    ts: number,
-  ): Promise<Uri> {
-    const logFilePath = this.getConfFileUri(confFile, ts)
-    if (!logFilePath) {
-      return Uri.parse('')
-    }
-
-    let pathToReturn = logFilePath
+    logFilePath: Uri,
+  ): Promise<string> {
+    let pathToReturn = logFilePath.path
 
     if (path && path[0]) {
       const fileUri = Uri.parse(path[0])
@@ -379,7 +416,7 @@ export class ScriptRunner {
       try {
         const fullPathUri = await this.relativeToFullPath(fileUri)
         await workspace.fs.readFile(fullPathUri)
-        pathToReturn = fullPathUri
+        pathToReturn = fullPathUri.path
       } catch (e) {}
     }
     return pathToReturn
