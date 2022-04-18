@@ -5,7 +5,7 @@ import * as os from 'os'
 import { ScriptProgressLongPolling } from './ScriptProgressLongPolling'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { getProgressUrl } from './utils/getProgressUrl'
-import type { Job, ResourceError, Topic, Message } from './types'
+import type { Job, ResourceError } from './types'
 
 type RunningScript = {
   pid: number
@@ -199,6 +199,12 @@ export class ScriptRunner {
     })
   }
 
+  /**
+   * This function is in charged of posting errors from 'resource_errors.json' to vscode 'PROBLEMS'
+   * @param confFile relative path to the .conf file of the current run
+   * @param ts the time stamp when the run happened
+   * @returns an empty promise
+   */
   private async postProblems(confFile: string, ts: number): Promise<void> {
     const ignoreFolderRegex =
       '{**/certora-logs,**/conf,**/.github,cache,**/.last_confs,**/.certora_config,**/images}'
@@ -228,27 +234,50 @@ export class ScriptRunner {
     const decoder = new TextDecoder()
     const content = decoder.decode(data)
     const resource_error = this.getResourceError(content)
+    if (resource_error.topics.length === 0) {
+      return
+    }
+
+    this.createAndPostDiagnostics(resource_error, confFile, ts)
+  }
+
+  /**
+   * Creates the diagnostics and posts them.
+   * A diagnostic will link to the file the error originated from if a path to such file exists in the message.
+   * If not - the diagnostic will link to the .conf.log file of the current run.
+   * @param resource_error json content of resource_error.json
+   * @param confFile a relative path to this run .conf file
+   * @param ts the timestamp of the current run
+   */
+  private async createAndPostDiagnostics(
+    resource_error: ResourceError,
+    confFile: string,
+    ts: number,
+  ): Promise<void> {
     /**
      * regex to find a file path in a string. example:
-     * string: "/BankLesson/Bank.sol:22:5: ParserError: Expected ';' but got 'function'"
-     * pathRegex will find: /BankLesson/Bank.sol
+     * string: "BankLesson/Bank.sol:22:5: ParserError: Expected ';' but got 'function'"
+     * pathRegex will find: BankLesson/Bank.sol
      */
-    const pathRegex = /((\\|\/)[a-z0-9_\-.]+)+/i
-    const locationRegex = /:\d+:\d+:/g
+    const pathRegex = /([a-z0-9_\-\\/.]+)\.([a-z0-9]+)/i
+    const locationRegex = /((:\d+:\d+:)|(:\d+:\d+))/g
 
     const diagnosticMap: Map<string, vscode.Diagnostic[]> = new Map()
 
     for (const topic of resource_error.topics) {
       for (const message of topic.messages) {
         const curMessage: string = message.message
-        const path = pathRegex.exec(curMessage)
 
+        const path = pathRegex.exec(curMessage)
         const location = locationRegex.exec(curMessage)
         const uri = await this.getPathToProblem(path, confFile, ts)
+
+        const confFileUri = this.getConfFileUri(confFile, ts)
 
         const descriptiveMessage = curMessage
           .replace(pathRegex, '')
           .replace(locationRegex, '')
+          .replace(' ()', '') // for dealing with spec file errors
         const position: Position = this.getPosition(
           location,
           uri.path,
@@ -289,6 +318,22 @@ export class ScriptRunner {
     }
   }
 
+  private async relativeToFullPath(uri: Uri): Promise<Uri> {
+    const pathAsArray = uri.path.split('/')
+    const fileName = pathAsArray[pathAsArray.length - 1]
+    const ignoreFolderRegex =
+      '{**/certora-logs,**/conf,**/.github,cache,**/.last_confs,**/.certora_config,**/images}'
+    const fullPath = await vscode.workspace.findFiles(
+      '**' + fileName,
+      ignoreFolderRegex,
+      1,
+    )
+    if (!fullPath || !fullPath[0]) {
+      return uri
+    }
+    return fullPath[0]
+  }
+
   private getPosition(
     location: RegExpExecArray | null,
     path: string,
@@ -298,7 +343,9 @@ export class ScriptRunner {
     const confFileUri = this.getConfFileUri(confFilePath, ts)
     if (confFileUri && !(path === confFileUri.path) && location) {
       // Position object assumes the indexes given to it are starting with 0 while vscode code lines indexes are starting with 1.
-      const [row, col] = location[0].split(':')
+      const [row, col] = location[0].split(':').filter(element => {
+        return element !== ''
+      })
       const rowPosition = parseInt(row) - 1
       const colPosition = parseInt(col) - 1
       return new Position(rowPosition, colPosition)
@@ -330,11 +377,10 @@ export class ScriptRunner {
 
       // vscode API way to check if a file exists
       try {
-        await workspace.fs.readFile(fileUri)
-        pathToReturn = fileUri
+        const fullPathUri = await this.relativeToFullPath(fileUri)
+        await workspace.fs.readFile(fullPathUri)
+        pathToReturn = fullPathUri
       } catch (e) {}
-
-      // TODO: deal with relative paths?
     }
     return pathToReturn
   }
