@@ -82,9 +82,9 @@ export class ScriptRunner {
   }
 
   public run(confFile: string): void {
+    // clear diagnostic collection in the beginning of the run
     this.diagnosticCollection.forEach(collection => {
       collection.clear()
-      collection.dispose()
     })
     this.diagnosticCollection = []
 
@@ -211,7 +211,7 @@ export class ScriptRunner {
   }
 
   /**
-   * This function is in charged of posting errors from 'resource_errors.json' to vscode 'PROBLEMS'
+   * Posting errors from 'resource_errors.json' to vscode 'PROBLEMS'
    * @param confFile relative path to the .conf file of the current run
    * @param ts the time stamp when the run happened
    * @returns an empty promise
@@ -367,13 +367,20 @@ export class ScriptRunner {
   }
 
   private async relativeToFullPath(uri: Uri): Promise<Uri> {
-    const pathAsArray = uri.path.split('/')
-    const fileName = pathAsArray[pathAsArray.length - 1]
-    const fullPath = await this.findFile(fileName)
-    if (!fullPath || !fullPath[0]) {
+    // check if this is already a full path
+    try {
+      await workspace.fs.readFile(uri)
       return uri
+    } catch (e) {
+      // if it is not - find first uri that matched the relative path
+      const pathAsArray = uri.path.split('/')
+      const fileName = pathAsArray[pathAsArray.length - 1]
+      const fullPath = await this.findFile(fileName)
+      if (!fullPath || !fullPath[0]) {
+        return uri
+      }
+      return fullPath[0]
     }
-    return fullPath[0]
   }
 
   private getPosition(
