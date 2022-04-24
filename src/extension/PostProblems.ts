@@ -72,7 +72,6 @@ export const PostProblems = {
     const uriPatterns: string[] = []
     this.diagnosticCollection.forEach(collection => {
       collection.forEach(uri => {
-        // eslint-disable-next-line prettier/prettier
         const relativePath = uri.path.split(wsFolder.path + '/').join()
         uriPatterns.push(relativePath)
       })
