@@ -33,7 +33,7 @@ export abstract class PostProblems {
     confFile: string,
     ts: number,
   ): Promise<void> {
-    const resourceErrorsFile = 'test.json'
+    const resourceErrorsFile = 'resource_errors.json'
     const found = await this.findFile(resourceErrorsFile)
 
     if (!found || !found[0]) {
@@ -62,6 +62,24 @@ export abstract class PostProblems {
 
   /** private methods: */
 
+  /** returns a pattern to only watch the files that have problems */
+  private static getPattern(): string {
+    const wsFolder = vscode.workspace.workspaceFolders?.[0].uri
+    if (!wsFolder) {
+      return '**/'
+    }
+    const uriPatterns: string[] = []
+    this.diagnosticCollection.forEach(collection => {
+      collection.forEach(uri => {
+        // eslint-disable-next-line prettier/prettier
+        const relativePath = uri.path.split(wsFolder.path + '/').join()
+        uriPatterns.push(relativePath)
+      })
+    })
+    const stringPattern = uriPatterns.join(',')
+    return `**/*{${stringPattern}}`
+  }
+
   /**
    * when user edits the file where problem originated, clear related diagnostics
    */
@@ -69,7 +87,7 @@ export abstract class PostProblems {
     // counts the diagnostic collections left
     let diagnosticCollectionsLength: number = this.diagnosticCollection.length
     const folder = workspace.workspaceFolders?.[0]
-    const pattern = '**/'
+    const pattern = this.getPattern()
     if (folder) {
       const watcher = vscode.workspace.createFileSystemWatcher(
         new vscode.RelativePattern(folder, pattern),
