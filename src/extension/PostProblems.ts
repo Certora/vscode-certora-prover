@@ -9,7 +9,7 @@ import type { ResourceError } from './types'
  * in the extension, and dont want anyone to create instances)
  */
 export abstract class PostProblems {
-  private static diagnosticCollection: vscode.DiagnosticCollection[] = []
+  public static diagnosticCollection: vscode.DiagnosticCollection[] = []
 
   /** public methods: */
 
@@ -21,37 +21,6 @@ export abstract class PostProblems {
       collection.clear()
     })
     this.diagnosticCollection = []
-  }
-
-  /**
-   * THIS IS NOT FULLY IMPLEMENTED YET! AND DOES NOT WORK YET!
-   *
-   * when user edits the file where problem originated, delete red marking:
-   *
-   * listen to the entire workspace ->
-   * every time the user changes a file, the lister catch the event ->
-   * look for the uri of the file that was saved in the diagnostic map. if the uri exists, delete the red mark (and possibly the entire diagnostic)
-   * (question:) do we only want to check solidity / spec / json files?
-   */
-  public static async deleteOnEdit(): Promise<void> {
-    console.log('deleteOnEdit is called')
-    if (this.diagnosticCollection && this.diagnosticCollection.length !== 0) {
-      console.log('collection exists')
-      const folder = '**/'
-      const pattern = '**/'
-      const watcher = vscode.workspace.createFileSystemWatcher(
-        new vscode.RelativePattern(folder, pattern),
-      )
-      watcher.onDidChange(uri => {
-        this.diagnosticCollection.forEach(collection => {
-          collection.forEach(diagnosticUri => {
-            if (uri.path === diagnosticUri.path) {
-              collection.clear() // clear all diagnostics in this file? or check range?
-            }
-          })
-        })
-      }) // listen to files being changed
-    }
   }
 
   /**
@@ -89,9 +58,37 @@ export abstract class PostProblems {
     const resource_error = this.getResourceError(content)
 
     this.createAndPostDiagnostics(resource_error, confFile, ts)
+    this.deleteOnEdit()
   }
 
   /** private methods: */
+
+  /**
+   * when user edits the file where problem originated, delete red marking:
+   *
+   * listen to the entire workspace ->
+   * every time the user changes a file, the lister catch the event ->
+   * look for the uri of the file that was saved in the diagnostic map. if the uri exists, delete the red mark (and possibly the entire diagnostic)
+   * (question:) do we only want to check solidity / spec / json files?
+   */
+  private static async deleteOnEdit(): Promise<void> {
+    const folder = workspace.workspaceFolders?.[0]
+    const pattern = '**/'
+    if (folder) {
+      const watcher = vscode.workspace.createFileSystemWatcher(
+        new vscode.RelativePattern(folder, pattern),
+      )
+      watcher.onDidChange(uri => {
+        this.diagnosticCollection.forEach(collection => {
+          collection.forEach(diagnosticUri => {
+            if (uri.path === diagnosticUri.path) {
+              collection.clear()
+            }
+          })
+        })
+      })
+    }
+  }
 
   /**
    * Creates the diagnostics and posts them.
