@@ -9,7 +9,7 @@ import type { ResourceError } from './types'
  * in the extension, and dont want anyone to create instances)
  */
 export abstract class PostProblems {
-  public static diagnosticCollection: vscode.DiagnosticCollection[] = []
+  private static diagnosticCollection: vscode.DiagnosticCollection[] = []
 
   /** public methods: */
 
@@ -58,20 +58,16 @@ export abstract class PostProblems {
     const resource_error = this.getResourceError(content)
 
     this.createAndPostDiagnostics(resource_error, confFile, ts)
-    this.deleteOnEdit()
   }
 
   /** private methods: */
 
   /**
-   * when user edits the file where problem originated, delete red marking:
-   *
-   * listen to the entire workspace ->
-   * every time the user changes a file, the lister catch the event ->
-   * look for the uri of the file that was saved in the diagnostic map. if the uri exists, delete the red mark (and possibly the entire diagnostic)
-   * (question:) do we only want to check solidity / spec / json files?
+   * when user edits the file where problem originated, clear related diagnostics
    */
   private static async deleteOnEdit(): Promise<void> {
+    // counts the diagnostic collections left
+    let diagnosticCollectionslength: number = this.diagnosticCollection.length
     const folder = workspace.workspaceFolders?.[0]
     const pattern = '**/'
     if (folder) {
@@ -83,6 +79,11 @@ export abstract class PostProblems {
           collection.forEach(diagnosticUri => {
             if (uri.path === diagnosticUri.path) {
               collection.clear()
+              diagnosticCollectionslength -= 1
+            }
+            // if no more diagnostics left - stop watching
+            if (diagnosticCollectionslength === 0) {
+              watcher.dispose()
             }
           })
         })
@@ -199,6 +200,10 @@ export abstract class PostProblems {
       curDiagnosticCollection.set(Uri.parse(path), diagnosticList)
       this.diagnosticCollection.push(curDiagnosticCollection)
     })
+    // when user edits file with diagnostics - clear related diagnostics
+    if (this.diagnosticCollection.length > 0) {
+      this.deleteOnEdit()
+    }
   }
 
   private static getResourceError(str: string): ResourceError {
