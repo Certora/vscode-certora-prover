@@ -67,7 +67,7 @@ export abstract class PostProblems {
    */
   private static async deleteOnEdit(): Promise<void> {
     // counts the diagnostic collections left
-    let diagnosticCollectionslength: number = this.diagnosticCollection.length
+    let diagnosticCollectionsLength: number = this.diagnosticCollection.length
     const folder = workspace.workspaceFolders?.[0]
     const pattern = '**/'
     if (folder) {
@@ -79,10 +79,11 @@ export abstract class PostProblems {
           collection.forEach(diagnosticUri => {
             if (uri.path === diagnosticUri.path) {
               collection.clear()
-              diagnosticCollectionslength -= 1
+              diagnosticCollectionsLength -= 1
             }
             // if no more diagnostics left - stop watching
-            if (diagnosticCollectionslength === 0) {
+            if (diagnosticCollectionsLength === 0) {
+              this.diagnosticCollection = []
               watcher.dispose()
             }
           })
