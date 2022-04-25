@@ -12,29 +12,29 @@ import type { ResourceError } from './types'
 /**
  *  post problems from resource_errors.json the the PROBLEMS view of vscode
  */
-const PostProblems = {
-  diagnosticCollection: [] as DiagnosticCollection[],
+export class PostProblems {
+  private diagnosticCollection: DiagnosticCollection[] = []
 
   /** public methods: */
 
   /**
    * resets all diagnostic collections, should be called in the beginning of a ScriptRunner run
    */
-  resetDiagnosticCollection(): void {
+  public resetDiagnosticCollection(): void {
     this.diagnosticCollection.forEach(collection => {
       collection.clear()
     })
     this.diagnosticCollection = []
-  },
+  }
 
   /**
    * Posting errors from 'resource_errors.json' to vscode 'PROBLEMS'
-   * @param confFile relative path to the .conf file of the current run
+   * @param confFile relative path to the .conf.log file of the current run
    * @param ts the time stamp when the run happened
    * @returns an empty promise
    */
-  async postProblems(confFile: string, ts: number): Promise<void> {
-    const resourceErrorsFile = 'resource_errors.json'
+  public async postProblems(confFile: string, ts: number): Promise<void> {
+    const resourceErrorsFile = 'test.json' // todo: change back to resource_errors.json before pushing to git
     const found = await this.findFile(resourceErrorsFile)
 
     if (!found || !found[0]) {
@@ -59,12 +59,12 @@ const PostProblems = {
     const resource_error = this.getResourceError(content)
 
     this.createAndPostDiagnostics(resource_error, confFile, ts)
-  },
+  }
 
   /** private methods: */
 
   /** returns a pattern to only watch the files that have problems */
-  getPattern(): string {
+  private getPatternForFilesToWatch(): string {
     const wsFolder = vscode.workspace.workspaceFolders?.[0].uri
     if (!wsFolder) {
       return '**/'
@@ -78,16 +78,16 @@ const PostProblems = {
     })
     const stringPattern = uriPatterns.join(',')
     return `**/*{${stringPattern}}`
-  },
+  }
 
   /**
    * when user edits the file where problem originated, clear related diagnostics
    */
-  async deleteOnEdit(): Promise<void> {
+  private async deleteOnEdit(): Promise<void> {
     // counts the diagnostic collections left
     let diagnosticCollectionsLength: number = this.diagnosticCollection.length
     const folder = workspace.workspaceFolders?.[0]
-    const pattern = this.getPattern()
+    const pattern = this.getPatternForFilesToWatch()
     if (folder) {
       const watcher = vscode.workspace.createFileSystemWatcher(
         new vscode.RelativePattern(folder, pattern),
@@ -108,7 +108,7 @@ const PostProblems = {
         })
       })
     }
-  },
+  }
 
   /**
    * Creates the diagnostics and posts them.
@@ -118,7 +118,7 @@ const PostProblems = {
    * @param confFile a relative path to this run .conf file
    * @param ts the timestamp of the current run
    */
-  async createAndPostDiagnostics(
+  private async createAndPostDiagnostics(
     resource_error: ResourceError,
     confFile: string,
     ts: number,
@@ -171,7 +171,7 @@ const PostProblems = {
       }
     }
     this.postDiagnostics(diagnosticMap)
-  },
+  }
 
   /**
    * returns a new diagnostic object
@@ -180,7 +180,7 @@ const PostProblems = {
    * @param message message describing the problem
    * @returns diagnostic object
    */
-  createDiagnostic(
+  private createDiagnostic(
     startPosition: Position,
     endPosition: Position,
     message: string,
@@ -188,7 +188,7 @@ const PostProblems = {
     const range: Range = new Range(startPosition, endPosition)
     const diagnostic = new Diagnostic(range, message)
     return diagnostic
-  },
+  }
 
   /**
    * sets the diagnostic map [diagnosticMap] with the new value:
@@ -196,7 +196,7 @@ const PostProblems = {
    * @param path path to the file where problems originated from
    * @param diagnosticMap maps paths (string) to diagnostic lists
    */
-  setDiagnosticMap(
+  private setDiagnosticMap(
     diagnostic: Diagnostic,
     path: string,
     diagnosticMap: Map<string, Diagnostic[]>,
@@ -204,13 +204,13 @@ const PostProblems = {
     const diagnostics: Diagnostic[] = diagnosticMap.get(path) || []
     diagnostics.push(diagnostic)
     diagnosticMap.set(path, diagnostics)
-  },
+  }
 
   /**
    * post all diagnostic lists in diagnosticMap to [PROBLEMS]
    * @param diagnosticMap maps paths (string) to diagnostic lists
    */
-  postDiagnostics(diagnosticMap: Map<string, Diagnostic[]>): void {
+  private postDiagnostics(diagnosticMap: Map<string, Diagnostic[]>): void {
     diagnosticMap.forEach((diagnosticList, path) => {
       const curDiagnosticCollection: vscode.DiagnosticCollection =
         vscode.languages.createDiagnosticCollection()
@@ -221,9 +221,9 @@ const PostProblems = {
     if (this.diagnosticCollection.length > 0) {
       this.deleteOnEdit()
     }
-  },
+  }
 
-  getResourceError(str: string): ResourceError {
+  private getResourceError(str: string): ResourceError {
     try {
       const jsonContent: ResourceError = JSON.parse(str)
       return jsonContent
@@ -234,9 +234,9 @@ const PostProblems = {
       }
       return resource_error
     }
-  },
+  }
 
-  async findFile(filepath: string): Promise<Uri[]> {
+  private async findFile(filepath: string): Promise<Uri[]> {
     const ignoreFolderRegex =
       '**/{.certora_config,.git,.last_confs,node_modules,certora-logs,conf,.github,images,cache}/**'
     const found = await vscode.workspace.findFiles(
@@ -245,9 +245,9 @@ const PostProblems = {
       1,
     )
     return found
-  },
+  }
 
-  async relativeToFullPath(uri: Uri): Promise<Uri> {
+  private async relativeToFullPath(uri: Uri): Promise<Uri> {
     // check if this is already a full path
     try {
       await workspace.fs.readFile(uri)
@@ -257,19 +257,19 @@ const PostProblems = {
       const pathAsArray = uri.path.split('/')
       const fileName = pathAsArray[pathAsArray.length - 1]
       const fullPath = await this.findFile(fileName)
-      if (!fullPath || !fullPath[0]) {
-        return uri
+      if (fullPath && fullPath[0]) {
+        return fullPath[0]
       }
-      return fullPath[0]
+      return uri
     }
-  },
+  }
 
-  getPosition(
+  private getPosition(
     location: RegExpExecArray | null,
     path: string,
     logFilePath: Uri,
   ): Position {
-    if (!(path === logFilePath.path) && location && location[0]) {
+    if (path !== logFilePath.path && location && location[0]) {
       const [row, col] = location[0].split(':').filter(element => {
         return element !== ''
       })
@@ -280,7 +280,7 @@ const PostProblems = {
       return new Position(rowPosition, colPosition)
     }
     return new Position(0, 0)
-  },
+  }
 
   /**
    * Returns a path to the file where the problem originated from. If the function did not get a file path in [path],
@@ -289,7 +289,7 @@ const PostProblems = {
    * @param logFilePath uri with path to a .conf file of the certora IDE, of the current run.
    * @returns a path to the file where the problem originated from, or a path to the .conf file
    */
-  async getPathToProblem(
+  private async getPathToProblem(
     path: RegExpExecArray | null,
     logFilePath: Uri,
   ): Promise<string> {
@@ -306,7 +306,7 @@ const PostProblems = {
       } catch (e) {}
     }
     return pathToReturn
-  },
+  }
 
   /**
    * returns a uri of the conf.log file if the workspace path exists, null otherwise
@@ -314,7 +314,7 @@ const PostProblems = {
    * @param ts the time the file was created
    * @returns the full path to the conf.log file or null
    */
-  getLogFilePath(pathToConfFile: string, ts: number): Uri | undefined {
+  private getLogFilePath(pathToConfFile: string, ts: number): Uri | undefined {
     const path = workspace.workspaceFolders?.[0]
     if (!path) return
 
@@ -328,16 +328,5 @@ const PostProblems = {
       `${unitedPathToConfFile}-${ts}.log`,
     )
     return logFilePath
-  },
-}
-
-/** public methods of PostProblems */
-export const PostProblemsInstance = {
-  async postProblems(confFile: string, ts: number): Promise<void> {
-    PostProblems.postProblems(confFile, ts)
-  },
-
-  resetDiagnosticCollection(): void {
-    PostProblems.resetDiagnosticCollection()
-  },
+  }
 }
