@@ -22,6 +22,16 @@
   ],
   "main": "./out/extension/extension.js",
   "contributes": {
+    "configuration": {
+      "title": "Certora IDE",
+      "properties": {
+        "certificate.certificateSubject": {
+          "type": ["string", "null"],
+          "default": null,
+          "description": "..."
+        }
+      }
+    },
     "views": {
       "results": [
         {
