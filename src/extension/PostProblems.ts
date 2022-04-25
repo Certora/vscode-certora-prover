@@ -12,7 +12,7 @@ import type { ResourceError } from './types'
 /**
  *  post problems from resource_errors.json the the PROBLEMS view of vscode
  */
-export const PostProblems = {
+const PostProblems = {
   diagnosticCollection: [] as DiagnosticCollection[],
 
   /** public methods: */
@@ -328,5 +328,16 @@ export const PostProblems = {
       `${unitedPathToConfFile}-${ts}.log`,
     )
     return logFilePath
+  },
+}
+
+/** public methods of PostProblems */
+export const PostProblemsInstance = {
+  async postProblems(confFile: string, ts: number): Promise<void> {
+    PostProblems.postProblems(confFile, ts)
+  },
+
+  resetDiagnosticCollection(): void {
+    PostProblems.resetDiagnosticCollection()
   },
 }

@@ -5,7 +5,7 @@ import { ScriptProgressLongPolling } from './ScriptProgressLongPolling'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { getProgressUrl } from './utils/getProgressUrl'
 import type { Job } from './types'
-import { PostProblems } from './PostProblems'
+import { PostProblemsInstance } from './PostProblems'
 
 type RunningScript = {
   pid: number
@@ -81,7 +81,7 @@ export class ScriptRunner {
   }
 
   public run(confFile: string): void {
-    PostProblems.resetDiagnosticCollection()
+    PostProblemsInstance.resetDiagnosticCollection()
 
     const path = workspace.workspaceFolders?.[0]
 
@@ -142,7 +142,7 @@ export class ScriptRunner {
         this.removeRunningScript(pid)
 
         if (code !== 0) {
-          PostProblems.postProblems(confFile, ts)
+          PostProblemsInstance.postProblems(confFile, ts)
         }
 
         const action = await window.showInformationMessage(
