@@ -143,7 +143,7 @@ export class ScriptRunner {
         this.removeRunningScript(pid)
 
         if (code !== 0) {
-          postProblems.postProblems(confFile, ts)
+          postProblems.postProblems(confFile)
         }
 
         const action = await window.showInformationMessage(
