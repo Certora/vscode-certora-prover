@@ -71,14 +71,10 @@ export abstract class PostProblems {
 
   /** returns a pattern to only watch the files that have problems */
   private static getPatternForFilesToWatch(): string {
-    const wsFolder = workspace.workspaceFolders?.[0].uri
-    if (!wsFolder) {
-      return '**/'
-    }
     const uriPatterns: string[] = []
     this.diagnosticCollection.forEach(collection => {
       collection.forEach(uri => {
-        const relativePath = uri.path.split(wsFolder.path + '/').join()
+        const relativePath = workspace.asRelativePath(uri)
         uriPatterns.push(relativePath)
       })
     })
