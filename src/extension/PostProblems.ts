@@ -129,7 +129,7 @@ export abstract class PostProblems {
      * pathRegex will find: BankLesson/Bank.sol
      * (changes to include relative paths)
      */
-    const pathRegex = /([a-z0-9_\-\\/.]+)\.([a-z0-9]+)/i
+    const pathRegex = /([a-z0-9_\-\\/.]+)\.([a-z]+)/i
     const locationRegex = /((:\d+:\d+:)|(:\d+:\d+))/g
 
     const diagnosticMap: Map<string, Diagnostic[]> = new Map()
