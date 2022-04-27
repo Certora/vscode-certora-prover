@@ -36,11 +36,10 @@ export abstract class PostProblems {
    */
   public static async postProblems(confFile: string): Promise<void> {
     const resourceErrorsFile = 'resource_errors.json'
-    const wsFolder = workspace.workspaceFolders?.[0].uri
-    if (!wsFolder) {
+    const fileUri = this.getFullFilePath(resourceErrorsFile)
+    if (!fileUri) {
       return
     }
-    const fileUri = Uri.joinPath(wsFolder, resourceErrorsFile)
 
     try {
       await workspace.fs.stat(fileUri)
@@ -146,7 +145,7 @@ export abstract class PostProblems {
         const regexPathArray = pathRegex.exec(curMessage)
         const regexLocationArray = locationRegex.exec(curMessage)
 
-        const logFilePath = this.getLogFilePath(confFile)
+        const logFilePath = this.getFullFilePath(confFile)
         if (!logFilePath) {
           return
         }
@@ -314,14 +313,14 @@ export abstract class PostProblems {
 
   /**
    * returns a uri of the conf.log file if the workspace path exists, null otherwise
-   * @param pathToConfFile path to the .conf file (relative)
+   * @param relativePath relative path to a file in the workspace folder
    * @returns the full path to the conf.log file or null
    */
-  private static getLogFilePath(pathToConfFile: string): Uri | undefined {
+  private static getFullFilePath(relativePath: string): Uri | undefined {
     const path = workspace.workspaceFolders?.[0]
     if (!path) return
 
-    const logFilePath = Uri.joinPath(path.uri, `${pathToConfFile}`)
-    return logFilePath
+    const fullPath = Uri.joinPath(path.uri, `${relativePath}`)
+    return fullPath
   }
 }
