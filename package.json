@@ -23,12 +23,12 @@
   "main": "./out/extension/extension.js",
   "contributes": {
     "configuration": {
-      "title": "Certora IDE",
+      "title": "Certora Prover",
       "properties": {
-        "certificate.certificateSubject": {
-          "type": ["string", "null"],
-          "default": null,
-          "description": "..."
+        "SolcExecutable": {
+          "type": "string",
+          "default": "solc",
+          "description": "Executable to use"
         }
       }
     },
