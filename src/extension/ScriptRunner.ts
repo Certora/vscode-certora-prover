@@ -81,8 +81,7 @@ export class ScriptRunner {
   }
 
   public run(confFile: string): void {
-    const postProblems: PostProblems = new PostProblems()
-    postProblems.resetDiagnosticCollection()
+    PostProblems.resetDiagnosticCollection()
 
     const path = workspace.workspaceFolders?.[0]
 
@@ -143,7 +142,7 @@ export class ScriptRunner {
         this.removeRunningScript(pid)
 
         if (code !== 0) {
-          postProblems.postProblems(confFile)
+          PostProblems.postProblems(confFile)
         }
 
         const action = await window.showInformationMessage(

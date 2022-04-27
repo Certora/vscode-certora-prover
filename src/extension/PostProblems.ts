@@ -14,15 +14,15 @@ import type { ResourceError } from './types'
 /**
  *  post problems from resource_errors.json the the PROBLEMS view of vscode
  */
-export class PostProblems {
-  private diagnosticCollection: DiagnosticCollection[] = []
+export abstract class PostProblems {
+  private static diagnosticCollection: DiagnosticCollection[] = []
 
   /** public methods: */
 
   /**
    * resets all diagnostic collections, should be called in the beginning of a ScriptRunner run
    */
-  public resetDiagnosticCollection(): void {
+  public static resetDiagnosticCollection(): void {
     this.diagnosticCollection.forEach(collection => {
       collection.clear()
     })
@@ -34,8 +34,8 @@ export class PostProblems {
    * @param confFile relative path to the .conf.log file of the current run
    * @returns an empty promise
    */
-  public async postProblems(confFile: string): Promise<void> {
-    const resourceErrorsFile = 'test.json' // todo: change back to resource_errors.json before pushing to git
+  public static async postProblems(confFile: string): Promise<void> {
+    const resourceErrorsFile = 'resource_errors.json'
     const wsFolder = workspace.workspaceFolders?.[0].uri
     if (!wsFolder) {
       return
@@ -71,7 +71,7 @@ export class PostProblems {
   /** private methods: */
 
   /** returns a pattern to only watch the files that have problems */
-  private getPatternForFilesToWatch(): string {
+  private static getPatternForFilesToWatch(): string {
     const wsFolder = workspace.workspaceFolders?.[0].uri
     if (!wsFolder) {
       return '**/'
@@ -90,7 +90,7 @@ export class PostProblems {
   /**
    * when user edits the file where problem originated, clear related diagnostics
    */
-  private async deleteOnEdit(): Promise<void> {
+  private static async deleteOnEdit(): Promise<void> {
     // counts the diagnostic collections left
     let diagnosticCollectionsLength: number = this.diagnosticCollection.length
     const folder = workspace.workspaceFolders?.[0]
@@ -124,7 +124,7 @@ export class PostProblems {
    * @param resource_error json content of resource_error.json
    * @param confFile a relative path to this run .conf file
    */
-  private async createAndPostDiagnostics(
+  private static async createAndPostDiagnostics(
     resource_error: ResourceError,
     confFile: string,
   ): Promise<void> {
@@ -185,7 +185,7 @@ export class PostProblems {
    * @param message message describing the problem
    * @returns diagnostic object
    */
-  private createDiagnostic(
+  private static createDiagnostic(
     startPosition: Position,
     endPosition: Position,
     message: string,
@@ -201,7 +201,7 @@ export class PostProblems {
    * @param path path to the file where problems originated from
    * @param diagnosticMap maps paths (string) to diagnostic lists
    */
-  private setDiagnosticMap(
+  private static setDiagnosticMap(
     diagnostic: Diagnostic,
     path: string,
     diagnosticMap: Map<string, Diagnostic[]>,
@@ -215,7 +215,9 @@ export class PostProblems {
    * post all diagnostic lists in diagnosticMap to [PROBLEMS]
    * @param diagnosticMap maps paths (string) to diagnostic lists
    */
-  private postDiagnostics(diagnosticMap: Map<string, Diagnostic[]>): void {
+  private static postDiagnostics(
+    diagnosticMap: Map<string, Diagnostic[]>,
+  ): void {
     diagnosticMap.forEach((diagnosticList, path) => {
       const curDiagnosticCollection: DiagnosticCollection =
         languages.createDiagnosticCollection()
@@ -228,7 +230,7 @@ export class PostProblems {
     }
   }
 
-  private getResourceError(str: string): ResourceError {
+  private static getResourceError(str: string): ResourceError {
     try {
       const jsonContent: ResourceError = JSON.parse(str)
       return jsonContent
@@ -241,7 +243,7 @@ export class PostProblems {
     }
   }
 
-  private async findFile(filepath: string): Promise<Uri[]> {
+  private static async findFile(filepath: string): Promise<Uri[]> {
     const ignoreFolderRegex =
       '**/{.certora_config,.git,.last_confs,node_modules,certora-logs,conf,.github,images,cache}/**'
     const found = await workspace.findFiles(
@@ -252,7 +254,7 @@ export class PostProblems {
     return found
   }
 
-  private async relativeToFullPath(uri: Uri): Promise<Uri> {
+  private static async relativeToFullPath(uri: Uri): Promise<Uri> {
     // check if this is already a full path
     try {
       await workspace.fs.stat(uri)
@@ -266,7 +268,7 @@ export class PostProblems {
     }
   }
 
-  private getPosition(
+  private static getPosition(
     location: RegExpExecArray | null,
     path: string,
     logFilePath: Uri,
@@ -291,7 +293,7 @@ export class PostProblems {
    * @param logFilePath uri with path to a .conf file of the certora IDE, of the current run.
    * @returns a path to the file where the problem originated from, or a path to the .conf file
    */
-  private async getPathToProblem(
+  private static async getPathToProblem(
     path: RegExpExecArray | null,
     logFilePath: Uri,
   ): Promise<string> {
@@ -315,7 +317,7 @@ export class PostProblems {
    * @param pathToConfFile path to the .conf file (relative)
    * @returns the full path to the conf.log file or null
    */
-  private getLogFilePath(pathToConfFile: string): Uri | undefined {
+  private static getLogFilePath(pathToConfFile: string): Uri | undefined {
     const path = workspace.workspaceFolders?.[0]
     if (!path) return
 
