@@ -34,10 +34,7 @@ function convertSourceFormDataToConfFileJSON(
   }
 
   if (inputFormData.mainSolidityFile) {
-    if (
-      inputFormData.mainContractName &&
-      inputFormData.mainContractName.length > 0
-    ) {
+    if (inputFormData.mainContractName) {
       config.files.push(
         `${inputFormData.mainSolidityFile}:${inputFormData.mainContractName}`,
       )
