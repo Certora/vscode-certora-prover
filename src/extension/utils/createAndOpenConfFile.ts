@@ -24,7 +24,6 @@ function convertSourceFormDataToConfFileJSON(
   inputFormData: InputFormData,
 ): string {
   const config: ConfFile = {}
-
   if (!Array.isArray(config.files)) config.files = []
 
   if (inputFormData.specFile && inputFormData.mainContractName) {
@@ -47,10 +46,10 @@ function convertSourceFormDataToConfFileJSON(
       )
     })
   }
-
-  if (inputFormData.solidityCompiler) {
-    config.solc = inputFormData.solidityCompiler
-  }
+  // either use user input or vscode settings
+  config.solc =
+    inputFormData.solidityCompiler ||
+    workspace.getConfiguration().get('SolcExecutable')
 
   if (inputFormData.useAdditionalContracts && inputFormData.link?.length > 0) {
     config.link = []
