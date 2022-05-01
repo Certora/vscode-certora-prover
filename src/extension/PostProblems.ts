@@ -15,7 +15,8 @@ import type { ResourceError } from './types'
  *  post problems from resource_errors.json the the PROBLEMS view of vscode
  */
 export abstract class PostProblems {
-  private static diagnosticCollection: DiagnosticCollection[] = []
+  private static diagnosticCollection: DiagnosticCollection =
+    languages.createDiagnosticCollection()
 
   /** public methods: */
 
@@ -23,10 +24,8 @@ export abstract class PostProblems {
    * resets all diagnostic collections, should be called in the beginning of a ScriptRunner run
    */
   public static resetDiagnosticCollection(): void {
-    this.diagnosticCollection.forEach(collection => {
-      collection.clear()
-    })
-    this.diagnosticCollection = []
+    this.diagnosticCollection.clear()
+    this.diagnosticCollection = languages.createDiagnosticCollection()
   }
 
   /**
@@ -35,7 +34,7 @@ export abstract class PostProblems {
    * @returns an empty promise
    */
   public static async postProblems(confFile: string): Promise<void> {
-    const resourceErrorsFile = 'resource_errors.json'
+    const resourceErrorsFile = 'resource_errors.json' // todo: change this back
     const fileUri = this.getFullFilePath(resourceErrorsFile)
     if (!fileUri) {
       return
@@ -72,11 +71,9 @@ export abstract class PostProblems {
   /** returns a pattern to only watch the files that have problems */
   private static getPatternForFilesToWatch(): string {
     const uriPatterns: string[] = []
-    this.diagnosticCollection.forEach(collection => {
-      collection.forEach(uri => {
-        const relativePath = workspace.asRelativePath(uri)
-        uriPatterns.push(relativePath)
-      })
+    this.diagnosticCollection.forEach(uri => {
+      const relativePath = workspace.asRelativePath(uri)
+      uriPatterns.push(relativePath)
     })
     const stringPattern = uriPatterns.join(',')
     return `**/*{${stringPattern}}`
@@ -86,8 +83,6 @@ export abstract class PostProblems {
    * when user edits the file where problem originated, clear related diagnostics
    */
   private static async deleteOnEdit(): Promise<void> {
-    // counts the diagnostic collections left
-    let diagnosticCollectionsLength: number = this.diagnosticCollection.length
     const folder = workspace.workspaceFolders?.[0]
     const pattern = this.getPatternForFilesToWatch()
     if (folder) {
@@ -95,18 +90,11 @@ export abstract class PostProblems {
         new RelativePattern(folder, pattern),
       )
       watcher.onDidChange(uri => {
-        this.diagnosticCollection.forEach(collection => {
-          collection.forEach(diagnosticUri => {
-            if (uri.path === diagnosticUri.path) {
-              collection.clear()
-              diagnosticCollectionsLength -= 1
-            }
-            // if no more diagnostics left - stop watching
-            if (diagnosticCollectionsLength === 0) {
-              this.diagnosticCollection = []
-              watcher.dispose()
-            }
-          })
+        this.diagnosticCollection.forEach(diagnosticUri => {
+          console.log('watch')
+          if (uri.path === diagnosticUri.path) {
+            this.diagnosticCollection.delete(diagnosticUri)
+          }
         })
       })
     }
@@ -213,14 +201,13 @@ export abstract class PostProblems {
   private static postDiagnostics(
     diagnosticMap: Map<string, Diagnostic[]>,
   ): void {
-    diagnosticMap.forEach((diagnosticList, path) => {
-      const curDiagnosticCollection: DiagnosticCollection =
-        languages.createDiagnosticCollection()
-      curDiagnosticCollection.set(Uri.parse(path), diagnosticList)
-      this.diagnosticCollection.push(curDiagnosticCollection)
+    const result: Array<[Uri, readonly Diagnostic[] | undefined]> = []
+    diagnosticMap.forEach((diagnostics, path) => {
+      result.push([Uri.parse(path), diagnostics])
     })
+    this.diagnosticCollection.set(result)
     // when user edits file with diagnostics - clear related diagnostics
-    if (this.diagnosticCollection.length > 0) {
+    if (this.diagnosticCollection) {
       this.deleteOnEdit()
     }
   }
