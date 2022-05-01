@@ -91,7 +91,6 @@ export abstract class PostProblems {
       )
       watcher.onDidChange(uri => {
         this.diagnosticCollection.forEach(diagnosticUri => {
-          console.log('watch')
           if (uri.path === diagnosticUri.path) {
             this.diagnosticCollection.delete(diagnosticUri)
           }
@@ -201,15 +200,12 @@ export abstract class PostProblems {
   private static postDiagnostics(
     diagnosticMap: Map<string, Diagnostic[]>,
   ): void {
-    const result: Array<[Uri, readonly Diagnostic[] | undefined]> = []
+    const uriToDiagnostics: Array<[Uri, readonly Diagnostic[] | undefined]> = []
     diagnosticMap.forEach((diagnostics, path) => {
-      result.push([Uri.parse(path), diagnostics])
+      uriToDiagnostics.push([Uri.parse(path), diagnostics])
     })
-    this.diagnosticCollection.set(result)
-    // when user edits file with diagnostics - clear related diagnostics
-    if (this.diagnosticCollection) {
-      this.deleteOnEdit()
-    }
+    this.diagnosticCollection.set(uriToDiagnostics)
+    this.deleteOnEdit()
   }
 
   private static getResourceError(str: string): ResourceError {
