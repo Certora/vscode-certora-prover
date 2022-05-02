@@ -188,3 +188,15 @@ export type EventFromSettingsWebview =
       command: CommandFromSettingsWebview.CreateConfFile
       payload: InputFormData
     }
+
+// Added type
+export type ConfFile = {
+  files?: string[]
+  verify?: [string]
+  solc?: string
+  link?: string[]
+  settings?: string[]
+  staging?: string
+  cache?: string
+  msg?: string
+} & Record<string, boolean | string>

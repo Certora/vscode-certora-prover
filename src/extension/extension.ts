@@ -2,6 +2,7 @@ import * as vscode from 'vscode'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { SettingsPanel } from './SettingsPanel'
 import { ScriptRunner } from './ScriptRunner'
+import { ConfFile } from './types'
 
 export function activate(context: vscode.ExtensionContext): void {
   function showSettings() {
@@ -9,7 +10,12 @@ export function activate(context: vscode.ExtensionContext): void {
 
     if (!path) return
 
-    SettingsPanel.render(context.extensionUri)
+    const solc: string =
+      vscode.workspace.getConfiguration().get('SolcExecutable') || ''
+    const confFileDefault: ConfFile = {
+      solc: solc,
+    }
+    SettingsPanel.render(context.extensionUri, confFileDefault)
   }
 
   async function quickPickWithConfFiles(

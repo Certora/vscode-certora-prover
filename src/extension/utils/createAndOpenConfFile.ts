@@ -47,6 +47,7 @@ function convertSourceFormDataToConfFileJSON(
     })
   }
   // either use user input or vscode settings
+  // better practice might be not creating the conf file if an input doesn't exists
   config.solc =
     inputFormData.solidityCompiler ||
     workspace.getConfiguration().get('SolcExecutable')
