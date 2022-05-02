@@ -34,7 +34,7 @@ export abstract class PostProblems {
    * @returns an empty promise
    */
   public static async postProblems(confFile: string): Promise<void> {
-    const resourceErrorsFile = 'resource_errors.json' // todo: change this back
+    const resourceErrorsFile = 'resource_errors.json'
     const fileUri = this.getFullFilePath(resourceErrorsFile)
     if (!fileUri) {
       return
@@ -135,10 +135,13 @@ export abstract class PostProblems {
 
         const path = await this.getPathToProblem(regexPathArray, logFilePath)
 
-        const descriptiveMessage = curMessage
-          .replace(pathRegex, '')
-          .replace(locationRegex, '')
-          .replace(' ()', '') // for dealing with spec file errors messages (SomeSpec.spec:1:1)
+        let descriptiveMessage = curMessage.replace(locationRegex, '')
+
+        if (workspace.asRelativePath(path).toString() !== confFile) {
+          descriptiveMessage = descriptiveMessage
+            .replace(pathRegex, '')
+            .replace(' ()', '') // for dealing with spec file errors messages (SomeSpec.spec:1:1)
+        }
 
         const position: Position = this.getPosition(
           regexLocationArray,
