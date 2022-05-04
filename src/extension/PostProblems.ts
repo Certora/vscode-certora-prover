@@ -8,6 +8,7 @@ import {
   window,
   RelativePattern,
   languages,
+  FileSystemWatcher,
 } from 'vscode'
 import type { ResourceError } from './types'
 
@@ -18,6 +19,8 @@ export abstract class PostProblems {
   private static diagnosticCollection: DiagnosticCollection =
     languages.createDiagnosticCollection()
 
+  private static watcher: FileSystemWatcher | undefined
+
   /** public methods: */
 
   /**
@@ -26,11 +29,12 @@ export abstract class PostProblems {
   public static resetDiagnosticCollection(): void {
     this.diagnosticCollection.clear()
     this.diagnosticCollection = languages.createDiagnosticCollection()
+    this.watcher?.dispose()
   }
 
   /**
    * Posting errors from 'resource_errors.json' to vscode 'PROBLEMS'
-   * @param confFile relative path to the .conf.log file of the current run
+   * @param confFile relative path to the .conf file of the current run
    * @returns an empty promise
    */
   public static async postProblems(confFile: string): Promise<void> {
@@ -86,15 +90,22 @@ export abstract class PostProblems {
     const folder = workspace.workspaceFolders?.[0]
     const pattern = this.getPatternForFilesToWatch()
     if (folder) {
-      const watcher = workspace.createFileSystemWatcher(
+      this.watcher = workspace.createFileSystemWatcher(
         new RelativePattern(folder, pattern),
       )
-      watcher.onDidChange(uri => {
+      this.watcher.onDidChange(uri => {
+        let numUris = 0
         this.diagnosticCollection.forEach(diagnosticUri => {
+          numUris++
           if (uri.path === diagnosticUri.path) {
             this.diagnosticCollection.delete(diagnosticUri)
           }
         })
+        // if there is no need to watch because the diagnostic collection is empty
+        if (numUris === 0) {
+          this.watcher?.dispose()
+          this.watcher = undefined
+        }
       })
     }
   }
@@ -102,7 +113,7 @@ export abstract class PostProblems {
   /**
    * Creates the diagnostics and posts them.
    * A diagnostic will link to the file the error originated from if a path to such file exists in the message.
-   * If not - the diagnostic will link to the .conf.log file of the current run.
+   * If not - the diagnostic will link to the .conf file of the current run.
    * @param resource_error json content of resource_error.json
    * @param confFile a relative path to this run .conf file
    */
