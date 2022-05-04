@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Bug Fixes
 
-* Add the main contract name to the "file" section in the conf file, right next to the solidity file name ([#60](https://github.com/Certora/vscode-certora-prover/pull/60))
+* Add the main contract name to the "files" section in the conf file ([#60](https://github.com/Certora/vscode-certora-prover/pull/60))
 
 ### Features
 
