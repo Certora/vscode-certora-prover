@@ -188,3 +188,17 @@ export type EventFromSettingsWebview =
       command: CommandFromSettingsWebview.CreateConfFile
       payload: InputFormData
     }
+
+export type Message = {
+  message: string
+  location: []
+}
+
+export type Topic = {
+  name: string
+  messages: Message[]
+}
+
+export type ResourceError = {
+  topics: Topic[]
+}
