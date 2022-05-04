@@ -16,3 +16,4 @@ DOCS.md
 rollup.config.js
 svelte.config.js
 .circleci/**
+.DS_Store
