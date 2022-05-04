@@ -6,8 +6,8 @@ All notable changes to this project will be documented in this file.
 
 ### Bug Fixes
 
-* **vscode-certora-prover:** contract name from user is now added to the "files" section in the conf file ([#60](https://github.com/Certora/vscode-certora-prover/pull/60))
+* Add the main contract name to the "file" section in the conf file, right next to the solidity file name ([#60](https://github.com/Certora/vscode-certora-prover/pull/60))
 
 ### Features
 
-* **vscode-certora-prover:** added problem view for problems coming from the prover ([#61](https://github.com/Certora/vscode-certora-prover/pull/61))
+* Show the errors coming from the  prover in the problems view ([#61](https://github.com/Certora/vscode-certora-prover/pull/61))
