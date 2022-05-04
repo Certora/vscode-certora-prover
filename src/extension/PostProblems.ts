@@ -44,8 +44,10 @@ export abstract class PostProblems {
       return
     }
 
+    let data: Uint8Array
+
     try {
-      await workspace.fs.stat(fileUri)
+      data = await workspace.fs.readFile(fileUri)
     } catch (e) {
       window.showErrorMessage(
         "Could't find the " +
@@ -55,7 +57,6 @@ export abstract class PostProblems {
       return
     }
 
-    const data = await workspace.fs.readFile(fileUri)
     if (!data) {
       window.showErrorMessage(
         "Couldn't locate the error logs. Please contact Certora team",
@@ -139,12 +140,12 @@ export abstract class PostProblems {
         const regexPathArray = pathRegex.exec(curMessage)
         const regexLocationArray = locationRegex.exec(curMessage)
 
-        const logFilePath = this.getFullFilePath(confFile)
-        if (!logFilePath) {
+        const confFilePath = this.getFullFilePath(confFile)
+        if (!confFilePath) {
           return
         }
 
-        const path = await this.getPathToProblem(regexPathArray, logFilePath)
+        const path = await this.getPathToProblem(regexPathArray, confFilePath)
 
         let descriptiveMessage = curMessage.replace(locationRegex, '')
 
@@ -157,7 +158,7 @@ export abstract class PostProblems {
         const position: Position = this.getPosition(
           regexLocationArray,
           path,
-          logFilePath,
+          confFilePath,
         )
         /**
          * right now we are only getting the start position from the resource_errors.json message
@@ -305,9 +306,9 @@ export abstract class PostProblems {
   }
 
   /**
-   * returns a uri of the conf.log file if the workspace path exists, null otherwise
+   * returns a uri of the conf file if the workspace path exists, null otherwise
    * @param relativePath relative path to a file in the workspace folder
-   * @returns the full path to the conf.log file or null
+   * @returns the full path to the conf file or null
    */
   private static getFullFilePath(relativePath: string): Uri | undefined {
     const path = workspace.workspaceFolders?.[0]
