@@ -4,12 +4,15 @@ import { getNonce } from './utils/getNonce'
 import { createAndOpenConfFile } from './utils/createAndOpenConfFile'
 import { log, Sources } from './utils/log'
 import { CommandFromSettingsWebview, EventFromSettingsWebview } from './types'
+import { settings } from 'cluster'
 
 export class SettingsPanel {
   public static currentPanel?: SettingsPanel
   private readonly _panel: vscode.WebviewPanel
   private _disposables: vscode.Disposable[] = []
   private watcher: SmartContractsFilesWatcher
+  private editConfFile?: Record<string, unknown>
+  private static allPanels: SettingsPanel[] = []
 
   private constructor(
     panel: vscode.WebviewPanel,
@@ -31,6 +34,7 @@ export class SettingsPanel {
         type: 'edit-conf-file',
         payload: editConfFile,
       })
+      this.editConfFile = editConfFile
     }
 
     this._panel.webview.onDidReceiveMessage(
@@ -60,33 +64,75 @@ export class SettingsPanel {
       null,
       [],
     )
-
     this._panel.onDidDispose(this.dispose, null, this._disposables)
   }
 
+  /**
+   * opens a new settings panel in a new tab
+   * @param extensionUri uri of the extension folder
+   * @param editConfFile conf file to edit
+   */
+  private static _openNewPanel(
+    extensionUri: vscode.Uri,
+    editConfFile?: Record<string, unknown>,
+  ) {
+    const editFileName = editConfFile?.verify + ''
+    let confFileName = ''
+    if (editConfFile) {
+      confFileName += editFileName.replace(':', '.').replace('spec', 'conf')
+    }
+    const panel = vscode.window.createWebviewPanel(
+      'certoraSettings',
+      'Certora IDE Settings: ' + confFileName,
+      vscode.ViewColumn.One,
+      {
+        retainContextWhenHidden: true,
+        enableScripts: true,
+        localResourceRoots: [extensionUri],
+      },
+    )
+    SettingsPanel.currentPanel = new SettingsPanel(
+      panel,
+      extensionUri,
+      editConfFile,
+    )
+    this.allPanels.push(SettingsPanel.currentPanel)
+  }
+
+  /**
+   * renders a settings panel:
+   * if the settings panel is not an edit: create a new panel in a new tab
+   * else if the settings panel for that edit was not created, or created and deleted: create new
+   * else: open the already created panel tab
+   * @param extensionUri uri of the extension folder
+   * @param editConfFile conf file to edit
+   */
   public static render(
     extensionUri: vscode.Uri,
     editConfFile?: Record<string, unknown>,
   ): void {
-    if (SettingsPanel.currentPanel) {
-      SettingsPanel.currentPanel._panel.reveal(vscode.ViewColumn.One)
+    let isOpened = false
+    if (editConfFile) {
+      const editFileName = editConfFile.verify + '' // name as string
+      SettingsPanel.allPanels.forEach(panel => {
+        if (panel.editConfFile?.verify + '' === editFileName) {
+          isOpened = true
+          SettingsPanel.currentPanel = panel
+        }
+      })
+    }
+    if (isOpened && SettingsPanel.currentPanel) {
+      try {
+        SettingsPanel.currentPanel._panel.reveal(vscode.ViewColumn.One)
+      } catch (e) {
+        // delete closed panel from the array and render again
+        SettingsPanel.allPanels = SettingsPanel.allPanels.filter(
+          p => p !== SettingsPanel.currentPanel,
+        )
+        SettingsPanel.render(extensionUri, editConfFile)
+      }
     } else {
-      const panel = vscode.window.createWebviewPanel(
-        'certoraSettings',
-        'Certora IDE Settings',
-        vscode.ViewColumn.One,
-        {
-          retainContextWhenHidden: true,
-          enableScripts: true,
-          localResourceRoots: [extensionUri],
-        },
-      )
-
-      SettingsPanel.currentPanel = new SettingsPanel(
-        panel,
-        extensionUri,
-        editConfFile,
-      )
+      this._openNewPanel(extensionUri, editConfFile)
     }
   }
 
@@ -147,7 +193,6 @@ export class SettingsPanel {
 
   public dispose(): void {
     SettingsPanel.currentPanel = undefined
-
     if (!this) return
 
     this._panel?.dispose()
