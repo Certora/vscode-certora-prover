@@ -63,8 +63,6 @@
           info: e.data.payload,
         })
         form = confFileToFormData(e.data.payload)
-        const parsedSpecFilePath = form.specFile.split('/')
-        const specFileName = parsedSpecFilePath[parsedSpecFilePath.length - 1]
         submitButtonText = 'Save'
         break
       default:
