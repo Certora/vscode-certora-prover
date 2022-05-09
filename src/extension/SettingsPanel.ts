@@ -4,7 +4,6 @@ import { getNonce } from './utils/getNonce'
 import { createAndOpenConfFile } from './utils/createAndOpenConfFile'
 import { log, Sources } from './utils/log'
 import { CommandFromSettingsWebview, EventFromSettingsWebview } from './types'
-import { settings } from 'cluster'
 
 export class SettingsPanel {
   public static currentPanel?: SettingsPanel
@@ -70,7 +69,7 @@ export class SettingsPanel {
   /**
    * opens a new settings panel in a new tab
    * @param extensionUri uri of the extension folder
-   * @param editConfFile conf file to edit
+   * @param editConfFile conf file content
    */
   private static _openNewPanel(
     extensionUri: vscode.Uri,
@@ -100,12 +99,11 @@ export class SettingsPanel {
   }
 
   /**
-   * renders a settings panel:
-   * if the settings panel is not an edit: create a new panel in a new tab
-   * else if the settings panel for that edit was not created, or created and deleted: create new
-   * else: open the already created panel tab
+   * Open a new webview panel when creating or editing conf files.
+   * If the panel is already opened (for editing an existing configuration file),
+   * show the same panel.
    * @param extensionUri uri of the extension folder
-   * @param editConfFile conf file to edit
+   * @param editConfFile conf file content
    */
   public static render(
     extensionUri: vscode.Uri,
