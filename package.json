@@ -1,6 +1,6 @@
 {
   "name": "vscode-certora-prover",
-  "displayName": "Certora IDE",
+  "displayName": "Certora Prover",
   "description": "Check and validate smart contracts in VS Code",
   "publisher": "Certora",
   "version": "0.0.1",
@@ -22,16 +22,85 @@
   ],
   "main": "./out/extension/extension.js",
   "contributes": {
-    "configuration": {
-      "title": "Certora Prover",
+    "configuration": [
+      {
+      "title": "Solc compiler defaults",
+      "order": 0,
       "properties": {
+        "Solidity.CompileUsingLocal": {
+          "type": "string",
+          "description": "Directory containing solc compiler binary file",
+          "order": 0,
+          "default": ".../path"
+        },
         "SolcExecutable": {
           "type": "string",
           "default": "solc",
-          "description": "Executable to use"
+          "description": "Executable to use",
+          "order": 1
         }
       }
     },
+    {
+      "title": "Compiler default > Advanced Settings",
+      "order": 1,
+      "properties": {
+        "SolidityArguments": {
+          "description": "A list of arguments to pass to the Solidity compiler.\nThe arguments will be passed as is, without any formatting, in the same order.",
+          "type": "string",
+          "default": "['--optimize', '--optimize-runs', '200']",
+          "order": 0
+        },
+        "Solidity.DefaultDirectoryForPackagesDependencies": {
+          "description": "i.e: 'node_modules', 'lib'. This is used to avoid typing imports with that path prefix",
+          "type": "string",
+          "default": "node_modules",
+          "order": 1
+        },
+        "SolidityPackageDirectories": {
+          "description": "For each package, gets the path to a directory including that Solidity package.\n\nWhen to use it?\nBy default we look for the packages in default directory. Set here if there are packages are in several different directory",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "Package": {
+              "type": "string",
+              "title": "Package",
+              "default": "package.json"
+            },
+            "Directory": {
+              "type": "string",
+              "default": ".../path"
+            }
+          }
+
+        }
+      }
+    },
+    {
+    "title": "Prover defaults",
+    "order": 2,
+      "properties": {
+        "OptimisticLoop": {
+          "markdownDescription": "Ignore some executions of loop. [Read More](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html?highlight=--package#optimistic-loop)",
+          "type": "boolean",
+          "default": false,
+          "order": 0
+        },
+        "LoopUnroll": {
+          "description": "Loop Unroll expanation",
+          "type": "integer",
+          "default": 1,
+          "order": 1
+        },
+        "Duration": {
+          "description": "Maximal execution time per rule",
+          "type": "integer",
+          "default": 600,
+          "order": 2
+        }
+      }
+  }
+],
     "views": {
       "results": [
         {
