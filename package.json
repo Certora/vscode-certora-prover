@@ -61,15 +61,15 @@
           "description": "For each package, gets the path to a directory including that Solidity package.\n\nWhen to use it?\nBy default we look for the packages in default directory. Set here if there are packages are in several different directory",
           "type": "object",
           "additionalProperties": false,
+          "default": {
+            "package.name": ".../path"
+          },
           "properties": {
-            "Package": {
-              "type": "string",
-              "title": "Package",
-              "default": "package.json"
+            "package.name": {
+              "type": "string"
             },
-            "Directory": {
-              "type": "string",
-              "default": ".../path"
+            "somethingElse": {
+              "type": "string"
             }
           }
 
@@ -99,6 +99,41 @@
           "order": 2
         }
       }
+  },
+  {
+    "title": "Prover Defaults > Advance Settings",
+    "order": 3,
+    "properties": {
+      "AdditionalProperties": {
+        "markdownDescription": "[Additional properties explanation]()",
+        "type": "object",
+        "order": 0,
+        "additionalProperties": false,
+        "default": {
+          "--settings": "someValue"
+        },
+        "properties": {
+          "--settings": {
+            "type": "string"
+          },
+          "somethingElse": {
+            "type": "string"
+          }
+        }
+      },
+      "LocalTypeChecking": {
+        "description": "Local type checking expanation",
+        "type": "boolean",
+        "default": true,
+        "order": 1
+      },
+      "Staging": {
+        "description": "Solc executable",
+        "type": "string",
+        "default": "master",
+        "order": 2
+      }
+    }
   }
 ],
     "views": {
