@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Bug Fixes
 
 * Add the main contract name to the "files" section in the conf file ([#60](https://github.com/Certora/vscode-certora-prover/pull/60))
+* The "create conf file" and "edit conf file" buttons work simultaneously ([#62] (https://github.com/Certora/vscode-certora-prover/pull/62))
 
 ### Features
 
