@@ -42,7 +42,7 @@
       }
     },
     {
-      "title": "Compiler default > Advanced Settings",
+      "title": "Compiler Advanced Settings",
       "order": 1,
       "properties": {
         "SolidityArguments": {
@@ -93,7 +93,7 @@
           "order": 1
         },
         "Duration": {
-          "description": "Maximal execution time per rule",
+          "description": "Maximal execution time per rule (in seconds)",
           "type": "integer",
           "default": 600,
           "order": 2
@@ -101,7 +101,7 @@
       }
   },
   {
-    "title": "Prover Defaults > Advance Settings",
+    "title": "Prover Advance Settings",
     "order": 3,
     "properties": {
       "AdditionalProperties": {
