@@ -63,7 +63,16 @@ export class SettingsPanel {
       null,
       [],
     )
-    this._panel.onDidDispose(this.dispose, null, this._disposables)
+    this._panel.onDidDispose(
+      this.removeFromAllPanelsAndDispose,
+      null,
+      this._disposables,
+    )
+  }
+
+  removeFromAllPanelsAndDispose = (): void => {
+    SettingsPanel.allPanels = SettingsPanel.allPanels.filter(p => p !== this)
+    this.dispose()
   }
 
   /**
@@ -120,15 +129,7 @@ export class SettingsPanel {
       })
     }
     if (isOpened && SettingsPanel.currentPanel) {
-      try {
-        SettingsPanel.currentPanel._panel.reveal(vscode.ViewColumn.One)
-      } catch (e) {
-        // delete closed panel from the array and render again
-        SettingsPanel.allPanels = SettingsPanel.allPanels.filter(
-          p => p !== SettingsPanel.currentPanel,
-        )
-        SettingsPanel.render(extensionUri, editConfFile)
-      }
+      SettingsPanel.currentPanel._panel.reveal(vscode.ViewColumn.One)
     } else {
       this._openNewPanel(extensionUri, editConfFile)
     }
