@@ -30,8 +30,7 @@
         "Solidity.CompileUsingLocal": {
           "type": "string",
           "description": "Directory containing solc compiler binary file",
-          "order": 0,
-          "default": ".../path"
+          "order": 0
         },
         "SolcExecutable": {
           "type": "string",
@@ -46,9 +45,8 @@
       "order": 1,
       "properties": {
         "SolidityArguments": {
-          "description": "A list of arguments to pass to the Solidity compiler.\nThe arguments will be passed as is, without any formatting, in the same order.",
+          "markdownDescription": "A list of arguments to pass to the Solidity compiler.\nThe arguments will be passed as is, without any formatting, in the same order.\n\n**Example:**\n\n```js\n['--optimize', '--optimize-runs', '200']\n```",
           "type": "string",
-          "default": "['--optimize', '--optimize-runs', '200']",
           "order": 0
         },
         "Solidity.DefaultDirectoryForPackagesDependencies": {
@@ -61,14 +59,11 @@
           "description": "For each package, gets the path to a directory including that Solidity package.\n\nWhen to use it?\nBy default we look for the packages in default directory. Set here if there are packages are in several different directory",
           "type": "object",
           "additionalProperties": false,
-          "default": {
-            "package.name": ".../path"
-          },
           "properties": {
-            "package.name": {
+            "package": {
               "type": "string"
             },
-            "somethingElse": {
+            "": {
               "type": "string"
             }
           }
@@ -105,7 +100,7 @@
     "order": 3,
     "properties": {
       "AdditionalProperties": {
-        "markdownDescription": "[Additional properties explanation]()",
+        "markdownDescription": "[Additional properties explanation](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html?highlight=option)",
         "type": "object",
         "order": 0,
         "additionalProperties": false,
