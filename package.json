@@ -62,16 +62,8 @@
         "SolidityPackageDirectories": {
           "description": "For each package, gets the path to a directory including that Solidity package.\n\nWhen to use it?\nBy default we look for the packages in default directory. Set here if there are packages are in several different directory",
           "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "package": {
-              "type": "string"
-            },
-            "": {
-              "type": "string"
-            }
-          }
-
+          "additionalProperties": "string",
+          "properties": {}
         }
       }
     },
@@ -107,18 +99,8 @@
         "markdownDescription": "[Additional properties explanation](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html?highlight=option)",
         "type": "object",
         "order": 0,
-        "additionalProperties": false,
-        "default": {
-          "--settings": "someValue"
-        },
-        "properties": {
-          "--settings": {
-            "type": "string"
-          },
-          "somethingElse": {
-            "type": "string"
-          }
-        }
+        "additionalProperties": "string",
+        "properties": {}
       },
       "LocalTypeChecking": {
         "description": "Local type checking expanation",
