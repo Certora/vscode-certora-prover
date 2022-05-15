@@ -9,13 +9,27 @@ export function activate(context: vscode.ExtensionContext): void {
     const path = vscode.workspace.workspaceFolders?.[0]
 
     if (!path) return
+    const confFileDefault = getDefaultSettings()
+    SettingsPanel.render(context.extensionUri, confFileDefault)
+  }
 
+  /**
+   * get default settings from vscode settings
+   */
+  function getDefaultSettings(): ConfFile {
+    let solcPath: string =
+      vscode.workspace.getConfiguration().get('Solidity.CompileUsingLocal') ||
+      ''
+    if (solcPath) {
+      solcPath += '/'
+    }
     const solc: string =
       vscode.workspace.getConfiguration().get('SolcExecutable') || ''
+
     const confFileDefault: ConfFile = {
-      solc: solc,
+      solc: solcPath + solc,
     }
-    SettingsPanel.render(context.extensionUri, confFileDefault)
+    return confFileDefault
   }
 
   async function quickPickWithConfFiles(

@@ -60,7 +60,7 @@
           "order": 1
         },
         "SolidityPackageDirectories": {
-          "markdownDescription": "For each package, gets the path to a directory including that Solidity package.\n\nWhen to use it?\nBy default we look for the packages in default directory. Set here if there are packages are in several different directory.\n\nValue should be a mapping between a package name and the path to the directory the package is at.\n\n**Example:**\n```\n{'package.name': '.../path'}```",
+          "markdownDescription": "For each package, gets the path to a directory including that Solidity package.\n\n**When to use it?**\n\nBy default we look for the packages in default directory. Set here if there are packages are in several different directory.\n\nValue should be a mapping between a package name and the path to the directory the package is at.\n\n**Example:**\n```\n{'package.name': '.../path'}```",
           "type": "object",
           "additionalProperties": "string",
           "properties": {},

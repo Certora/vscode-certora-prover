@@ -15,5 +15,11 @@
 </script>
 
 <BaseSetting {title} {description}>
-  <vscode-text-field {value} on:change={onChange} />
+  <vscode-text-field class="vscode-text-field" {value} on:change={onChange} />
 </BaseSetting>
+
+<style>
+  .vscode-text-field {
+    width: 250px;
+  }
+</style>
