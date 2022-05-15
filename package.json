@@ -60,7 +60,7 @@
           "order": 1
         },
         "SolidityPackageDirectories": {
-          "description": "For each package, gets the path to a directory including that Solidity package.\n\nWhen to use it?\nBy default we look for the packages in default directory. Set here if there are packages are in several different directory",
+          "markdownDescription": "For each package, gets the path to a directory including that Solidity package.\n\nWhen to use it?\nBy default we look for the packages in default directory. Set here if there are packages are in several different directory.\n\nValue should be a mapping between a package name and the path to the directory the package is at.\n\n**Example:**\n```\n{'package.name': '.../path'}```",
           "type": "object",
           "additionalProperties": "string",
           "properties": {},
@@ -97,7 +97,7 @@
     "order": 3,
     "properties": {
       "AdditionalProperties": {
-        "markdownDescription": "[Additional properties explanation](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html?highlight=option)",
+        "markdownDescription": "[Additional properties explanation](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html?highlight=option)\n\n**Example:**\n\n```{'--settings': 'someValue'}```",
         "type": "object",
         "order": 0,
         "additionalProperties": "string",
