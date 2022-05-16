@@ -200,3 +200,17 @@ export type ConfFile = {
   cache?: string
   msg?: string
 } & Record<string, boolean | string | string[] | number>
+
+export type Message = {
+  message: string
+  location: []
+}
+
+export type Topic = {
+  name: string
+  messages: Message[]
+}
+
+export type ResourceError = {
+  topics: Topic[]
+}

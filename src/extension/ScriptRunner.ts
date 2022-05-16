@@ -5,6 +5,7 @@ import { ScriptProgressLongPolling } from './ScriptProgressLongPolling'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { getProgressUrl } from './utils/getProgressUrl'
 import type { Job } from './types'
+import { PostProblems } from './PostProblems'
 
 type RunningScript = {
   pid: number
@@ -28,17 +29,18 @@ export class ScriptRunner {
   }
 
   private getConfFileName(path: string): string {
-    const splitedPathToConfFile = path.split('/')
-    return splitedPathToConfFile[splitedPathToConfFile.length - 1]
+    const splittedPathToConfFile = path.split('/')
+    return splittedPathToConfFile[splittedPathToConfFile.length - 1]
   }
 
-  private async log(
-    str: string,
-    pathToConfFile: string,
-    ts: number,
-  ): Promise<void> {
+  /**
+   * returns a uri of the conf.log file if the workspace path exists, null otherwise
+   * @param pathToConfFile path to the .conf file (relative)
+   * @param ts the time the file was created
+   * @returns the full path to the conf.log file or null
+   */
+  private getLogFilePath(pathToConfFile: string, ts: number) {
     const path = workspace.workspaceFolders?.[0]
-
     if (!path) return
 
     const logFilePath = Uri.joinPath(
@@ -46,6 +48,18 @@ export class ScriptRunner {
       'certora-logs',
       `${this.getConfFileName(pathToConfFile)}-${ts}.log`,
     )
+    return logFilePath
+  }
+
+  private async log(
+    str: string,
+    pathToConfFile: string,
+    ts: number,
+  ): Promise<void> {
+    const logFilePath = this.getLogFilePath(pathToConfFile, ts)
+    if (!logFilePath) {
+      return
+    }
     const encoder = new TextEncoder()
     const content = encoder.encode(str)
 
@@ -67,6 +81,8 @@ export class ScriptRunner {
   }
 
   public run(confFile: string): void {
+    PostProblems.resetDiagnosticCollection()
+
     const path = workspace.workspaceFolders?.[0]
 
     if (!path) return
@@ -124,6 +140,10 @@ export class ScriptRunner {
 
       this.script.on('close', async code => {
         this.removeRunningScript(pid)
+
+        if (code !== 0) {
+          PostProblems.postProblems(confFile)
+        }
 
         const action = await window.showInformationMessage(
           `The script for the conf file ${confFile} exited with code ${code}.`,
