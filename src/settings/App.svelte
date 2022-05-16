@@ -45,6 +45,8 @@
     ],
   }
 
+  let showEmptyFieldsErrorMsg: boolean = false
+
   const listener = (e: MessageEvent<EventsFromExtension>) => {
     switch (e.data.type) {
       case EventTypesFromExtension.SmartContractsFilesUpdated:
@@ -81,6 +83,8 @@
         command: 'create-conf-file',
         payload: form,
       })
+    } else {
+      showEmptyFieldsErrorMsg = true
     }
   }
 
@@ -100,11 +104,13 @@
     description="Pick solidity file"
     refreshButtonTitle="Update list of contracts"
     files={solidityFiles}
+    showErrorMsg={!form.mainSolidityFile && showEmptyFieldsErrorMsg}
     bind:file={form.mainSolidityFile}
   />
   <OneFieldSetting
     title="Main Contract Name"
     description="Contract name"
+    showErrorMsg={!form.mainContractName && showEmptyFieldsErrorMsg}
     bind:value={form.mainContractName}
   />
   <SettingWithFilePicker
@@ -112,6 +118,7 @@
     description="Spec file path"
     refreshButtonTitle="Update list of spec files"
     files={specFiles}
+    showErrorMsg={!form.specFile && showEmptyFieldsErrorMsg}
     bind:file={form.specFile}
   />
   <OneFieldSetting

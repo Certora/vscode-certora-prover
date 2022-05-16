@@ -9,6 +9,8 @@
   export let refreshButtonTitle: string
   export let files: string[]
   export let file: string = files[0]
+  export let showErrorMsg: boolean = false
+
   let query = ''
 
   $: sortedFiles = [...files].sort((a, b) =>
@@ -39,7 +41,7 @@
   })
 </script>
 
-<BaseSetting {title} {description}>
+<BaseSetting {title} {description} {showErrorMsg}>
   <div class="files-dropdown">
     <vscode-text-field
       placeholder="Filter files"
@@ -47,7 +49,7 @@
       on:change={e => (query = e.target.value)}
     />
     <vscode-dropdown on:change={onSelect} value={file}>
-      <vscode-option>Choose file</vscode-option>
+      <vscode-option />
       {#each filteredFiles as path}
         <vscode-option>{path}</vscode-option>
       {/each}
