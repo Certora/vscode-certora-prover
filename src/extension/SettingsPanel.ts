@@ -84,14 +84,19 @@ export class SettingsPanel {
     extensionUri: vscode.Uri,
     editConfFile?: Record<string, unknown>,
   ) {
-    const editFileName = editConfFile?.verify + ''
+    let editFileName = ''
+    if (editConfFile?.verify !== undefined) {
+      editFileName = editConfFile?.verify + ''
+    }
+
     let confFileName = ''
-    if (editConfFile) {
-      confFileName += editFileName.replace(':', '.').replace('spec', 'conf')
+    if (editConfFile && editFileName) {
+      confFileName +=
+        ': ' + editFileName.replace(':', '.').replace('spec', 'conf')
     }
     const panel = vscode.window.createWebviewPanel(
       'certoraSettings',
-      'Certora IDE Settings: ' + confFileName,
+      'Certora IDE Settings' + confFileName,
       vscode.ViewColumn.One,
       {
         retainContextWhenHidden: true,
