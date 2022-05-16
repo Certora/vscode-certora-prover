@@ -189,7 +189,6 @@ export type EventFromSettingsWebview =
       payload: InputFormData
     }
 
-// Added type
 export type ConfFile = {
   files?: string[]
   verify?: [string]
