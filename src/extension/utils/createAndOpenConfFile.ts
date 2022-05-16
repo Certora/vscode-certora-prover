@@ -1,6 +1,7 @@
 import { workspace, Uri, window } from 'vscode'
 import { log, Sources } from '../utils/log'
 import { InputFormData } from '../types'
+import G = require('glob')
 
 type ConfFile = {
   files?: string[]
@@ -14,9 +15,14 @@ type ConfFile = {
 } & Record<string, boolean | string | number>
 
 function setAdditionalSetting(val?: string) {
+  console.log(val)
   if (val === 'true' || !val) return true
   if (val === 'false') return false
   if (/^[0-9]+$/.exec(val)) return Number(val)
+  const objectRegex = /^{(".+":".+")(,".+":".+")*}/g
+  if (objectRegex.exec(val)) {
+    return JSON.parse(val)
+  }
 
   return val
 }

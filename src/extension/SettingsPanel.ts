@@ -76,6 +76,23 @@ export class SettingsPanel {
   }
 
   /**
+   * returns the name of the conf file to edit, if such file exists and has a name
+   * empty string otherwise
+   * @param editConfFile conf file to edit
+   * @returns string name
+   */
+  private static _getConfFileName(
+    editConfFile?: Record<string, unknown>,
+  ): string {
+    let editFileName = ''
+    if (editConfFile?.verify !== undefined) {
+      editFileName = editConfFile?.verify + ''
+      return ': ' + editFileName.replace(':', '.').replace('spec', 'conf')
+    }
+    return editFileName
+  }
+
+  /**
    * opens a new settings panel in a new tab
    * @param extensionUri uri of the extension folder
    * @param editConfFile conf file content
@@ -84,16 +101,7 @@ export class SettingsPanel {
     extensionUri: vscode.Uri,
     editConfFile?: Record<string, unknown>,
   ) {
-    let editFileName = ''
-    if (editConfFile?.verify !== undefined) {
-      editFileName = editConfFile?.verify + ''
-    }
-
-    let confFileName = ''
-    if (editConfFile && editFileName) {
-      confFileName +=
-        ': ' + editFileName.replace(':', '.').replace('spec', 'conf')
-    }
+    const confFileName = this._getConfFileName(editConfFile)
     const panel = vscode.window.createWebviewPanel(
       'certoraSettings',
       'Certora IDE Settings' + confFileName,
