@@ -81,12 +81,15 @@
         "LoopUnroll": {
           "description": "Loop Unroll expanation",
           "type": "integer",
+          "exclusiveMinimum": -1,
+          "exclusiveMaximum": 10,
           "default": 1,
           "order": 1
         },
         "Duration": {
           "description": "Maximal execution time per rule (in seconds)",
           "type": "integer",
+          "exclusiveMinimum": -1,
           "default": 600,
           "order": 2
         }
@@ -97,22 +100,21 @@
     "order": 3,
     "properties": {
       "AdditionalProperties": {
-        "markdownDescription": "[Additional properties explanation](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html?highlight=option)\n\n**Example:**\n\n```{'--settings': 'someValue'}```",
+        "markdownDescription": "[Additional properties explanation](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html?highlight=option)\n\n**Example:**\n\n```{'--property': 'someValue'}```",
         "type": "object",
         "order": 0,
         "additionalProperties": "string",
         "properties": {}
       },
       "LocalTypeChecking": {
-        "description": "Local type checking expanation",
+        "description": "Turning this off implies syntax error are reported after submitting job to server",
         "type": "boolean",
         "default": true,
         "order": 1
       },
       "Staging": {
-        "description": "Solc executable",
+        "description": "",
         "type": "string",
-        "default": "master",
         "order": 2
       }
     }

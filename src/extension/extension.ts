@@ -26,8 +26,75 @@ export function activate(context: vscode.ExtensionContext): void {
     const solc: string =
       vscode.workspace.getConfiguration().get('SolcExecutable') || ''
 
+    const solcArgs: string =
+      vscode.workspace.getConfiguration().get('SolidityArguments') || ''
+
+    const defaultDirectoryForPackagesDependencies: string =
+      vscode.workspace
+        .getConfiguration()
+        .get('Solidity.DefaultDirectoryForPackagesDependencies') || ''
+
+    const solidityPackageDirectories: string = JSON.stringify(
+      vscode.workspace.getConfiguration().get('SolidityPackageDirectories'),
+    )
+
+    const optimisticLoop: boolean | undefined = vscode.workspace
+      .getConfiguration()
+      .get('OptimisticLoop')
+
+    const loopUnroll: number =
+      vscode.workspace.getConfiguration().get('LoopUnroll') || 1
+
+    const duration: number =
+      vscode.workspace.getConfiguration().get('Duration') || 600
+
+    const additionalArguments: string =
+      JSON.stringify(
+        vscode.workspace.getConfiguration().get('AdditionalProperties'),
+      ) || ''
+
+    const typeCheck: boolean | undefined = vscode.workspace
+      .getConfiguration()
+      .get('LocalTypeChecking')
+
+    const staging: string =
+      vscode.workspace.getConfiguration().get('Staging') || ''
+
     const confFileDefault: ConfFile = {
       solc: solcPath + solc,
+    }
+
+    if (solcArgs) {
+      confFileDefault['--solc-args'] = [solcArgs]
+    }
+    if (defaultDirectoryForPackagesDependencies) {
+      confFileDefault['--packages_path'] =
+        defaultDirectoryForPackagesDependencies
+    }
+    if (solidityPackageDirectories !== '{}') {
+      confFileDefault['--packages'] = solidityPackageDirectories
+    }
+    if (optimisticLoop) {
+      confFileDefault['--optimistic_loop'] = ''
+    }
+    if (loopUnroll !== 1) {
+      confFileDefault['--loop_iter'] = loopUnroll
+    }
+    if (duration !== 600) {
+      confFileDefault['--smt_timeout'] = duration
+    }
+    if (additionalArguments) {
+      Object.entries(JSON.parse(additionalArguments)).forEach(
+        ([key, value]) => {
+          confFileDefault[key] = String(value) // todo: solve
+        },
+      )
+    }
+    if (!typeCheck) {
+      confFileDefault['--typecheck_only'] = ''
+    }
+    if (staging) {
+      confFileDefault['--cloud'] = staging
     }
     return confFileDefault
   }

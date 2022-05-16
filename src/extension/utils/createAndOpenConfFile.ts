@@ -11,11 +11,12 @@ type ConfFile = {
   staging?: string
   cache?: string
   msg?: string
-} & Record<string, boolean | string>
+} & Record<string, boolean | string | number>
 
 function setAdditionalSetting(val?: string) {
   if (val === 'true' || !val) return true
   if (val === 'false') return false
+  if (/^[0-9]+$/.exec(val)) return Number(val)
 
   return val
 }

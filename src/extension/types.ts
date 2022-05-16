@@ -199,4 +199,4 @@ export type ConfFile = {
   staging?: string
   cache?: string
   msg?: string
-} & Record<string, boolean | string>
+} & Record<string, boolean | string | string[] | number>
