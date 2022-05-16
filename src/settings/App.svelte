@@ -32,8 +32,8 @@
       },
     ],
     extendedSettings: [{ id: nanoid(), flag: '' }],
-    useStaging: true,
-    branch: 'master',
+    useStaging: false,
+    branch: '',
     cacheName: '',
     message: '',
     additionalSettings: [

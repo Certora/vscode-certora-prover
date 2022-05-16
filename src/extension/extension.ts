@@ -62,6 +62,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
     const confFileDefault: ConfFile = {
       solc: solcPath + solc,
+      staging: staging,
     }
 
     if (solcArgs) {
@@ -93,9 +94,7 @@ export function activate(context: vscode.ExtensionContext): void {
     if (!typeCheck) {
       confFileDefault['--typecheck_only'] = ''
     }
-    if (staging) {
-      confFileDefault['--cloud'] = staging
-    }
+
     return confFileDefault
   }
 
