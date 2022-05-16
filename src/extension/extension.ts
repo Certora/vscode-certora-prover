@@ -86,7 +86,7 @@ export function activate(context: vscode.ExtensionContext): void {
     if (additionalArguments) {
       Object.entries(JSON.parse(additionalArguments)).forEach(
         ([key, value]) => {
-          confFileDefault[key] = String(value) // todo: solve
+          confFileDefault[key] = String(value)
         },
       )
     }
