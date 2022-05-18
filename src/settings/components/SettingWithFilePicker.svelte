@@ -12,6 +12,7 @@
   export let showErrorMsg: boolean = false
 
   let query = ''
+  let showPlaceholder = true
 
   $: sortedFiles = [...files].sort((a, b) =>
     a.toLowerCase().localeCompare(b.toLowerCase()),
@@ -28,6 +29,9 @@
     },
   ) {
     file = e.currentTarget.value
+    if (file && showPlaceholder) {
+      showPlaceholder = false
+    }
   }
 
   onMount(() => {
@@ -49,7 +53,9 @@
       on:change={e => (query = e.target.value)}
     />
     <vscode-dropdown on:change={onSelect} value={file}>
-      <vscode-option />
+      {#if showPlaceholder}
+        <vscode-option>Choose file</vscode-option>
+      {/if}
       {#each filteredFiles as path}
         <vscode-option>{path}</vscode-option>
       {/each}
