@@ -18,7 +18,7 @@ const emptyForm: Form = {
   ],
   extendedSettings: [{ id: nanoid(), flag: '' }],
   useStaging: false,
-  branch: '',
+  branch: 'master',
   cacheName: '',
   message: '',
   additionalSettings: [
