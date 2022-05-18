@@ -87,7 +87,7 @@ export class SettingsPanel {
     let editFileName = ''
     if (editConfFile?.verify !== undefined) {
       editFileName = editConfFile?.verify + ''
-      return ': ' + editFileName.replace(':', '.').replace('spec', 'conf')
+      return editFileName.replace(':', '.').replace('spec', 'conf')
     }
     return editFileName
   }
@@ -101,7 +101,10 @@ export class SettingsPanel {
     extensionUri: vscode.Uri,
     editConfFile?: Record<string, unknown>,
   ) {
-    const confFileName = this._getConfFileName(editConfFile)
+    let confFileName = this._getConfFileName(editConfFile)
+    if (confFileName) {
+      confFileName = ': ' + confFileName
+    }
     const panel = vscode.window.createWebviewPanel(
       'certoraSettings',
       'Certora IDE Settings' + confFileName,

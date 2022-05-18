@@ -1,26 +1,13 @@
 import { workspace, Uri, window } from 'vscode'
 import { log, Sources } from '../utils/log'
-import { InputFormData } from '../types'
-import G = require('glob')
-
-type ConfFile = {
-  files?: string[]
-  verify?: [string]
-  solc?: string
-  link?: string[]
-  settings?: string[]
-  staging?: string
-  cache?: string
-  msg?: string
-} & Record<string, boolean | string | number>
+import { InputFormData, ConfFile } from '../types'
 
 function setAdditionalSetting(val?: string) {
-  console.log(val)
   if (val === 'true' || !val) return true
   if (val === 'false') return false
   if (/^[0-9]+$/.exec(val)) return Number(val)
-  const objectRegex = /^{(".+":".+")(,".+":".+")*}/g
-  if (objectRegex.exec(val)) {
+  const mapRegex = /^{(".+":".+")(,".+":".+")*}/g
+  if (mapRegex.exec(val)) {
     return JSON.parse(val)
   }
 
