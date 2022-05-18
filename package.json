@@ -1,6 +1,6 @@
 {
   "name": "vscode-certora-prover",
-  "displayName": "Certora Prover",
+  "displayName": "Certora IDE",
   "description": "Check and validate smart contracts in VS Code",
   "publisher": "Certora",
   "version": "0.0.2",
@@ -35,8 +35,8 @@
         "SolcExecutable": {
           "type": "string",
           "default": "solc",
-          "pattern": "^[A-Za-z0-9.]{0,20}$",
-          "patternErrorMessage": "Input must be a valid solc executable name",
+          "pattern": "^[A-Za-z0-9.\\-\\_]{0,20}$",
+          "patternErrorMessage": "Supported characters for a solidity compiler name are letters, numbers, dots, hyphens, and underscores. \n\nPlease note the filename should be limited to 20 characters.",
           "description": "Executable to use",
           "order": 1
         }
