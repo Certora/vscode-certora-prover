@@ -89,7 +89,7 @@ export function activate(context: vscode.ExtensionContext): void {
     if (duration !== 600) {
       confFileDefault['--smt_timeout'] = duration
     }
-    if (additionalSettings) {
+    if (additionalSettings !== '{}') {
       const flagsArray: string[] = []
       Object.entries(JSON.parse(additionalSettings)).forEach(([key, value]) => {
         if (!key.startsWith('-')) {
