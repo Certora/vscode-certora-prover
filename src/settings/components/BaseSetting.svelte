@@ -1,16 +1,17 @@
 <script lang="ts">
   export let title: string
   export let description: string = ''
-  export let showErrorMsg: boolean = false
+  export let mandatory: boolean = false
+  const mandatorySimbol: string = '*'
 </script>
 
 <div>
   <h3 class="title">{title}</h3>
+  {#if mandatory}
+    <h3 class="mandatory">{mandatorySimbol}</h3>
+  {/if}
   {#if description}
     <p class="description">{description}</p>
-  {/if}
-  {#if showErrorMsg}
-    <p class="error-msg">This is a mandatory field</p>
   {/if}
   <slot />
 </div>
@@ -18,20 +19,19 @@
 <style>
   .title,
   .description,
-  .error-msg {
+  .mandatory {
     margin: 0;
     line-height: 16px;
   }
 
   .title {
+    display: inline-block;
     margin-bottom: var(--space-xs);
     font-size: var(--vscode-font-size);
   }
 
-  .error-msg {
-    width: 150px;
-    margin-bottom: var(--space-sm);
-    background-color: pink;
+  .mandatory {
+    display: inline-block;
     color: red;
   }
 

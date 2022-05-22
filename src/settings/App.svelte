@@ -45,8 +45,6 @@
     ],
   }
 
-  let showEmptyFieldsErrorMsg: boolean = false
-
   const listener = (e: MessageEvent<EventsFromExtension>) => {
     switch (e.data.type) {
       case EventTypesFromExtension.SmartContractsFilesUpdated:
@@ -73,19 +71,15 @@
   }
 
   function createConfFile() {
-    if (form.mainSolidityFile && form.specFile && form.mainContractName) {
-      log({
-        action: 'Send "create-conf-file" command',
-        source: Sources.SettingsWebview,
-        info: form,
-      })
-      vscode.postMessage({
-        command: 'create-conf-file',
-        payload: form,
-      })
-    } else {
-      showEmptyFieldsErrorMsg = true
-    }
+    log({
+      action: 'Send "create-conf-file" command',
+      source: Sources.SettingsWebview,
+      info: form,
+    })
+    vscode.postMessage({
+      command: 'create-conf-file',
+      payload: form,
+    })
   }
 
   onMount(() => {
@@ -104,13 +98,13 @@
     description="Pick solidity file"
     refreshButtonTitle="Update list of contracts"
     files={solidityFiles}
-    showErrorMsg={!form.mainSolidityFile && showEmptyFieldsErrorMsg}
+    mandatory={true}
     bind:file={form.mainSolidityFile}
   />
   <OneFieldSetting
     title="Main Contract Name"
     description="Contract name"
-    showErrorMsg={!form.mainContractName && showEmptyFieldsErrorMsg}
+    mandatory={true}
     bind:value={form.mainContractName}
   />
   <SettingWithFilePicker
@@ -118,7 +112,7 @@
     description="Spec file path"
     refreshButtonTitle="Update list of spec files"
     files={specFiles}
-    showErrorMsg={!form.specFile && showEmptyFieldsErrorMsg}
+    mandatory={true}
     bind:file={form.specFile}
   />
   <OneFieldSetting
@@ -167,7 +161,12 @@
   />
   <AdditionalSettings bind:settings={form.additionalSettings} />
   <div>
-    <vscode-button on:click={createConfFile}>{submitButtonText}</vscode-button>
+    <vscode-button
+      on:click={createConfFile}
+      disabled={!form.mainSolidityFile ||
+        !form.mainContractName ||
+        !form.specFile}>{submitButtonText}</vscode-button
+    >
   </div>
 </div>
 

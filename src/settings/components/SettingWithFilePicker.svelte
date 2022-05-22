@@ -9,8 +9,7 @@
   export let refreshButtonTitle: string
   export let files: string[]
   export let file: string = files[0]
-  export let showErrorMsg: boolean = false
-
+  export let mandatory: boolean = false
   let query = ''
   let showPlaceholder = true
 
@@ -29,9 +28,6 @@
     },
   ) {
     file = e.currentTarget.value
-    if (file && showPlaceholder) {
-      showPlaceholder = false
-    }
   }
 
   onMount(() => {
@@ -41,11 +37,14 @@
       const correctValue = file
       file = '' // for re-render
       file = correctValue
+      if (file && showPlaceholder) {
+        showPlaceholder = false
+      }
     }, 200)
   })
 </script>
 
-<BaseSetting {title} {description} {showErrorMsg}>
+<BaseSetting {title} {description} {mandatory}>
   <div class="files-dropdown">
     <vscode-text-field
       placeholder="Filter files"
