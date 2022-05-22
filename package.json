@@ -27,17 +27,17 @@
       "title": "Solc compiler defaults",
       "order": 0,
       "properties": {
-        "Solidity.CompileUsingLocal": {
+        "CompilerFolder": {
           "type": "string",
-          "description": "Directory containing solc compiler binary file",
+          "description": "Folder containing solc compiler binary file.\nNeed to supply if not part of path.",
           "order": 0
         },
         "SolcExecutable": {
           "type": "string",
           "default": "solc",
           "pattern": "^[A-Za-z0-9.\\-\\_]{0,20}$",
-          "patternErrorMessage": "Supported characters for a solidity compiler name are letters, numbers, dots, hyphens, and underscores. \n\nPlease note the filename should be limited to 20 characters.",
-          "description": "Executable to use",
+          "patternErrorMessage": "Supported characters for an executable name are letters, numbers, dots, hyphens, and underscores. \n\nPlease note the filename should be limited to 20 characters.",
+          "description": "The default executable used to compile solidity code (default is solc).",
           "order": 1
         }
       }
@@ -54,13 +54,13 @@
           "order": 0
         },
         "Solidity.DefaultDirectoryForPackagesDependencies": {
-          "description": "i.e: 'node_modules', 'lib'. This is used to avoid typing imports with that path prefix",
+          "description": "Default path for relative input.",
           "type": "string",
           "default": "node_modules",
           "order": 1
         },
         "SolidityPackageDirectories": {
-          "markdownDescription": "For each package, gets the path to a directory including that Solidity package.\n\n**When to use it?**\n\nBy default we look for the packages in default directory. Set here if there are packages are in several different directory.\n\nValue should be a mapping between a package name and the path to the directory the package is at.\n\n**Example:**\n```\n{'package.name': '.../path'}```",
+          "markdownDescription": "For each package, the path to a directory including that Solidity package.\n\n**When to use it?**\n\nBy default we look for the packages in default directory. Set here if there are packages are in several different directory.\n\nValue should be a mapping between a package name and the path to the directory the package is at.\n\n**Example:**\n```\n{'package.name': '.../path'}```",
           "type": "object",
           "additionalProperties": "string",
           "properties": {},
@@ -79,7 +79,7 @@
           "order": 0
         },
         "LoopUnroll": {
-          "description": "Loop Unroll expanation",
+          "markdownDescription": "Maximal number of loop iterations. [Read More](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html?highlight=--package#loop-iter)",
           "type": "integer",
           "exclusiveMinimum": -1,
           "exclusiveMaximum": 10,
@@ -99,23 +99,28 @@
     "title": "Prover Advance Settings",
     "order": 3,
     "properties": {
-      "AdditionalProperties": {
-        "markdownDescription": "[Additional properties explanation](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html?highlight=option)\n\n**Example:**\n\n```{'--property': 'someValue'}```",
+      "AdditionalSetting": {
+        "markdownDescription": "[Additional settings explanation](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html?highlight=option)\n\n**Example:**\n\n```solver: z3```",
         "type": "object",
         "order": 0,
         "additionalProperties": "string",
         "properties": {}
       },
       "LocalTypeChecking": {
-        "description": "Turning this off implies syntax error are reported after submitting job to server",
+        "description": "Turning this off implies syntax errors are reported after submitting job to server.",
         "type": "boolean",
         "default": true,
         "order": 1
       },
       "Staging": {
-        "description": "",
-        "type": "string",
+        "description": "Run on staging environment",
+        "type": "boolean",
         "order": 2
+      },
+      "Branch": {
+        "type": "string",
+        "default": "master",
+        "order": 3
       }
     }
   }

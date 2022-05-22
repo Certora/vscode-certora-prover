@@ -10,7 +10,12 @@ function setAdditionalSetting(val?: string) {
   if (mapRegex.exec(val)) {
     return JSON.parse(val)
   }
-
+  // for --settings flags:
+  const settingsRegex = /(-(.+)=(.+))(,(-(.+)=(.+)))*/g
+  if (settingsRegex.exec(val)) {
+    const squareBracketsRegex = /(\[|\])+/g
+    return val.replace(squareBracketsRegex, '').split(',')
+  }
   return val
 }
 

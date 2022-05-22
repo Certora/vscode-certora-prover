@@ -18,8 +18,7 @@ export function activate(context: vscode.ExtensionContext): void {
    */
   function getDefaultSettings(): ConfFile {
     let solcPath: string =
-      vscode.workspace.getConfiguration().get('Solidity.CompileUsingLocal') ||
-      ''
+      vscode.workspace.getConfiguration().get('CompilerFolder') || ''
     if (solcPath) {
       solcPath += '/'
     }
@@ -48,21 +47,27 @@ export function activate(context: vscode.ExtensionContext): void {
     const duration: number =
       vscode.workspace.getConfiguration().get('Duration') || 600
 
-    const additionalArguments: string =
+    const additionalSettings: string =
       JSON.stringify(
-        vscode.workspace.getConfiguration().get('AdditionalProperties'),
+        vscode.workspace.getConfiguration().get('AdditionalSetting'),
       ) || ''
 
     const typeCheck: boolean | undefined = vscode.workspace
       .getConfiguration()
       .get('LocalTypeChecking')
 
-    const staging: string =
-      vscode.workspace.getConfiguration().get('Staging') || ''
+    const staging: boolean =
+      vscode.workspace.getConfiguration().get('Staging') || false
+
+    let branch = ''
+
+    if (staging) {
+      branch = vscode.workspace.getConfiguration().get('Branch') || 'master'
+    }
 
     const confFileDefault: ConfFile = {
       solc: solcPath + solc,
-      staging: staging,
+      staging: branch,
     }
 
     if (solcArgs) {
@@ -84,13 +89,17 @@ export function activate(context: vscode.ExtensionContext): void {
     if (duration !== 600) {
       confFileDefault['--smt_timeout'] = duration
     }
-    if (additionalArguments) {
-      Object.entries(JSON.parse(additionalArguments)).forEach(
-        ([key, value]) => {
-          confFileDefault[key] = String(value)
-        },
-      )
+    if (additionalSettings) {
+      const flagsArray: string[] = []
+      Object.entries(JSON.parse(additionalSettings)).forEach(([key, value]) => {
+        if (!key.startsWith('-')) {
+          key = '-' + key
+        }
+        flagsArray.push(key + '=' + value)
+      })
+      confFileDefault['--settings'] = flagsArray
     }
+
     if (!typeCheck) {
       confFileDefault['--typecheck_only'] = ''
     }
