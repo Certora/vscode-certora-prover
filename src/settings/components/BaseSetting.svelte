@@ -6,10 +6,12 @@
 </script>
 
 <div>
-  <h3 class="title">{title}</h3>
-  {#if mandatory}
-    <h3 class="mandatory">{mandatorySimbol}</h3>
-  {/if}
+  <h3 class="title">
+    {title}
+    {#if mandatory}
+      <span class="mandatory">{mandatorySimbol}</span>
+    {/if}
+  </h3>
   {#if description}
     <p class="description">{description}</p>
   {/if}
@@ -25,13 +27,11 @@
   }
 
   .title {
-    display: inline-block;
     margin-bottom: var(--space-xs);
     font-size: var(--vscode-font-size);
   }
 
   .mandatory {
-    display: inline-block;
     color: red;
   }
 
