@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ## Bug Fixes
 
-* Creation of an empty conf file is not allowed ([#65](https://github.com/Certora/vscode-certora-prover/pull/65))
+* Disable creation of an empty conf file ([#65](https://github.com/Certora/vscode-certora-prover/pull/65))
 * Choosing 'Choose file' as a file name is not an option ([#65](https://github.com/Certora/vscode-certora-prover/pull/65))
 ## Features
 
