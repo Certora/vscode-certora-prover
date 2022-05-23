@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+### 0.0.3 (2022-05-15)
+
+## Bug Fixes
+
+* Creation of an empty conf file is not allowed ([#65](https://github.com/Certora/vscode-certora-prover/pull/65))
+* Choosing 'Choose file' as a file name is not an option ([#65](https://github.com/Certora/vscode-certora-prover/pull/65))
+## Features
+
+* Add VSCode settings to set default values for conf file creation ([#64](https://github.com/Certora/vscode-certora-prover/pull/64))
+
 ### 0.0.2 (2022-05-15)
 
 ### Bug Fixes
@@ -11,5 +21,4 @@ All notable changes to this project will be documented in this file.
 
 ### Features
 
-* Add VSCode settings to set default values for conf file creation ([#64](https://github.com/Certora/vscode-certora-prover/pull/64))
 * Show the errors coming from the  prover in the problems view ([#61](https://github.com/Certora/vscode-certora-prover/pull/61))
