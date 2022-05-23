@@ -11,7 +11,7 @@ function setAdditionalSetting(val?: string) {
     return JSON.parse(val)
   }
   // for --settings flags:
-  const settingsRegex = /(-(.+)=(.+))(,(-(.+)=(.+)))*/g
+  const settingsRegex = /(-(.+)(=(.+))?)(,(-(.+)(=(.+))?))*/g
   if (settingsRegex.exec(val)) {
     const squareBracketsRegex = /(\[|\])+/g
     return val.replace(squareBracketsRegex, '').split(',')

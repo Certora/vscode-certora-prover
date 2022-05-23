@@ -81,7 +81,7 @@ export function activate(context: vscode.ExtensionContext): void {
       confFileDefault['--packages'] = solidityPackageDirectories
     }
     if (optimisticLoop) {
-      confFileDefault['--optimistic_loop'] = ''
+      confFileDefault['--optimistic_loop'] = true
     }
     if (loopUnroll !== 1) {
       confFileDefault['--loop_iter'] = loopUnroll
@@ -90,18 +90,19 @@ export function activate(context: vscode.ExtensionContext): void {
       confFileDefault['--smt_timeout'] = duration
     }
     if (additionalSettings !== '{}') {
-      const flagsArray: string[] = []
+      const settingsArray: string[] = []
       Object.entries(JSON.parse(additionalSettings)).forEach(([key, value]) => {
         if (!key.startsWith('-')) {
           key = '-' + key
         }
-        flagsArray.push(key + '=' + value)
+        const setting = key + (value ? '=' + value : '')
+        settingsArray.push(setting)
       })
-      confFileDefault['--settings'] = flagsArray
+      confFileDefault['--settings'] = settingsArray
     }
 
     if (!typeCheck) {
-      confFileDefault['--typecheck_only'] = ''
+      confFileDefault['--typecheck_only'] = true
     }
 
     return confFileDefault

@@ -60,7 +60,7 @@
           "order": 1
         },
         "SolidityPackageDirectories": {
-          "markdownDescription": "For each package, the path to a directory including that Solidity package.\n\n**When to use it?**\n\nBy default we look for the packages in default directory. Set here if there are packages are in several different directory.\n\nValue should be a mapping between a package name and the path to the directory the package is at.\n\n**Example:**\n```\n{'package.name': '.../path'}```",
+          "markdownDescription": "For each package, the path to a directory including that Solidity package.\n\n**When to use it?**\n\nBy default, we look for the packages in the default directory. Set here if there are packages are in several different directory.\n\nThe value should be a mapping between a package name and the path to the directory the package is at.\n\n**For example:**\n```\n{'package.name': '.../path'}```",
           "type": "object",
           "additionalProperties": "string",
           "properties": {},
@@ -73,13 +73,13 @@
     "order": 2,
       "properties": {
         "OptimisticLoop": {
-          "markdownDescription": "Ignore some executions of loop. [Read More](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html?highlight=--package#optimistic-loop)",
+          "markdownDescription": "Ignore some executions of loops. [Read More](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#optimistic-loop)",
           "type": "boolean",
           "default": false,
           "order": 0
         },
         "LoopUnroll": {
-          "markdownDescription": "Maximal number of loop iterations. [Read More](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html?highlight=--package#loop-iter)",
+          "markdownDescription": "The maximal number of loop iterations. [Read More](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#loop-iter)",
           "type": "integer",
           "exclusiveMinimum": -1,
           "exclusiveMaximum": 10,
@@ -96,18 +96,18 @@
       }
   },
   {
-    "title": "Prover Advance Settings",
+    "title": "Prover Advanced Settings",
     "order": 3,
     "properties": {
       "AdditionalSetting": {
-        "markdownDescription": "[Additional settings explanation](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html?highlight=option)\n\n**Example:**\n\n```solver: z3```",
+        "markdownDescription": "[Additional settings explanation](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html)\n\n**For example:**\n\n```solver: z3```",
         "type": "object",
         "order": 0,
         "additionalProperties": "string",
         "properties": {}
       },
       "LocalTypeChecking": {
-        "description": "Turning this off implies syntax errors are reported after submitting job to server.",
+        "description": "Turning this off implies syntax errors are reported after submitting job to the server.",
         "type": "boolean",
         "default": true,
         "order": 1
