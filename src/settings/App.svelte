@@ -160,7 +160,7 @@
     bind:value={form.message}
   />
   <AdditionalSettings bind:settings={form.additionalSettings} />
-  <div>
+  <div class="save-button">
     <vscode-button
       on:click={createConfFile}
       disabled={!form.mainSolidityFile ||
@@ -218,5 +218,12 @@
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-sm);
+  }
+
+  .save-button {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    padding: 10px 16px;
   }
 </style>
