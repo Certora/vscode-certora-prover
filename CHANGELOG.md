@@ -11,4 +11,5 @@ All notable changes to this project will be documented in this file.
 
 ### Features
 
+* Add VSCode settings to set default values for conf file creation ([#64](https://github.com/Certora/vscode-certora-prover/pull/64))
 * Show the errors coming from the  prover in the problems view ([#61](https://github.com/Certora/vscode-certora-prover/pull/61))

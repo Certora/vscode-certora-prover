@@ -29,7 +29,7 @@
       "properties": {
         "CompilerFolder": {
           "type": "string",
-          "description": "Folder containing solc compiler binary file.\nNeed to supply if not part of path.",
+          "description": "Folder containing solc compiler binary file.\nNeed to supply if not part of the PATH.",
           "order": 0
         },
         "SolcExecutable": {
