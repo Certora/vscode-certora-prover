@@ -71,15 +71,17 @@
   }
 
   function createConfFile() {
-    log({
-      action: 'Send "create-conf-file" command',
-      source: Sources.SettingsWebview,
-      info: form,
-    })
-    vscode.postMessage({
-      command: 'create-conf-file',
-      payload: form,
-    })
+    if (form.mainSolidityFile && form.mainContractName && form.specFile) {
+      log({
+        action: 'Send "create-conf-file" command',
+        source: Sources.SettingsWebview,
+        info: form,
+      })
+      vscode.postMessage({
+        command: 'create-conf-file',
+        payload: form,
+      })
+    }
   }
 
   onMount(() => {
