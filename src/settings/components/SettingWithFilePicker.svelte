@@ -9,7 +9,9 @@
   export let refreshButtonTitle: string
   export let files: string[]
   export let file: string = files[0]
+  export let mandatory: boolean = false
   let query = ''
+  let showPlaceholder = true
 
   $: sortedFiles = [...files].sort((a, b) =>
     a.toLowerCase().localeCompare(b.toLowerCase()),
@@ -35,11 +37,14 @@
       const correctValue = file
       file = '' // for re-render
       file = correctValue
+      if (file && showPlaceholder) {
+        showPlaceholder = false
+      }
     }, 200)
   })
 </script>
 
-<BaseSetting {title} {description}>
+<BaseSetting {title} {description} {mandatory}>
   <div class="files-dropdown">
     <vscode-text-field
       placeholder="Filter files"
@@ -47,7 +52,9 @@
       on:change={e => (query = e.target.value)}
     />
     <vscode-dropdown on:change={onSelect} value={file}>
-      <vscode-option>Choose file</vscode-option>
+      {#if showPlaceholder}
+        <vscode-option>Choose file</vscode-option>
+      {/if}
       {#each filteredFiles as path}
         <vscode-option>{path}</vscode-option>
       {/each}

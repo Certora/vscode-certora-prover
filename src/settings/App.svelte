@@ -71,15 +71,17 @@
   }
 
   function createConfFile() {
-    log({
-      action: 'Send "create-conf-file" command',
-      source: Sources.SettingsWebview,
-      info: form,
-    })
-    vscode.postMessage({
-      command: 'create-conf-file',
-      payload: form,
-    })
+    if (form.mainSolidityFile && form.mainContractName && form.specFile) {
+      log({
+        action: 'Send "create-conf-file" command',
+        source: Sources.SettingsWebview,
+        info: form,
+      })
+      vscode.postMessage({
+        command: 'create-conf-file',
+        payload: form,
+      })
+    }
   }
 
   onMount(() => {
@@ -98,11 +100,13 @@
     description="Pick solidity file"
     refreshButtonTitle="Update list of contracts"
     files={solidityFiles}
+    mandatory={true}
     bind:file={form.mainSolidityFile}
   />
   <OneFieldSetting
     title="Main Contract Name"
     description="Contract name"
+    mandatory={true}
     bind:value={form.mainContractName}
   />
   <SettingWithFilePicker
@@ -110,6 +114,7 @@
     description="Spec file path"
     refreshButtonTitle="Update list of spec files"
     files={specFiles}
+    mandatory={true}
     bind:file={form.specFile}
   />
   <OneFieldSetting
@@ -157,8 +162,16 @@
     bind:value={form.message}
   />
   <AdditionalSettings bind:settings={form.additionalSettings} />
-  <div>
-    <vscode-button on:click={createConfFile}>{submitButtonText}</vscode-button>
+  <div class="save-button">
+    <button
+      class="vscode-button"
+      disabled={!(
+        form.mainSolidityFile &&
+        form.mainContractName &&
+        form.specFile
+      )}
+      on:click={createConfFile}>{submitButtonText}</button
+    >
   </div>
 </div>
 
@@ -168,7 +181,7 @@
   }
 
   :global(body) {
-    padding: 26px 24px;
+    padding: 44px 24px;
   }
 
   :global(:root) {
@@ -210,5 +223,35 @@
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-sm);
+  }
+
+  .save-button {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    padding: 30px 24px;
+    border-top: 1px solid var(--panel-view-border);
+    background-color: var(--panel-view-background);
+  }
+
+  .vscode-button {
+    padding: 6px 11px;
+    border: none;
+    background-color: var(--vscode-button-background);
+    color: var(--button-primary-foreground);
+    font-family: var(--font-family);
+    font-size: var(--type-ramp-base-font-size);
+  }
+
+  .vscode-button:disabled {
+    background-color: var(--vscode-button-background);
+    color: var(--button-primary-foreground);
+    cursor: default;
+    opacity: 0.5;
+  }
+
+  button:hover {
+    background-color: var(--vscode-button-hoverBackground);
+    cursor: pointer;
   }
 </style>

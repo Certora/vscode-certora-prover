@@ -4,6 +4,7 @@
   export let title: string
   export let description: string
   export let value: string
+  export let mandatory: boolean = false
 
   function onChange(
     e: Event & {
@@ -14,7 +15,7 @@
   }
 </script>
 
-<BaseSetting {title} {description}>
+<BaseSetting {title} {description} {mandatory}>
   <vscode-text-field class="vscode-text-field" {value} on:change={onChange} />
 </BaseSetting>
 
