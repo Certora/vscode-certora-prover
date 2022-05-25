@@ -192,14 +192,10 @@
 
   :global(body.vscode-light) {
     --dropdown-text-color: #000;
-    --background-color: white;
-    --border-color: lightgrey;
   }
 
   :global(body.vscode-dark) {
     --dropdown-text-color: var(--dropdown-foreground);
-    --background-color: #1e1e1e;
-    --border-color: #3d3d3d;
   }
 
   .settings {
@@ -231,7 +227,7 @@
     bottom: 0;
     width: 100%;
     padding: 10px 16px;
-    border-top: 1px solid var(--border-color);
-    background-color: var(--background-color);
+    border-top: 1px solid var(--panel-view-border);
+    background-color: var(--panel-view-background);
   }
 </style>
