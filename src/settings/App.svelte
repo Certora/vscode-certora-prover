@@ -163,11 +163,14 @@
   />
   <AdditionalSettings bind:settings={form.additionalSettings} />
   <div class="save-button">
-    <vscode-button
-      on:click={createConfFile}
-      disabled={!form.mainSolidityFile ||
-        !form.mainContractName ||
-        !form.specFile}>{submitButtonText}</vscode-button
+    <button
+      class="vscode-button"
+      disabled={!(
+        form.mainSolidityFile &&
+        form.mainContractName &&
+        form.specFile
+      )}
+      on:click={createConfFile}>{submitButtonText}</button
     >
   </div>
 </div>
@@ -226,8 +229,29 @@
     position: fixed;
     bottom: 0;
     width: 100%;
-    padding: 10px 16px;
+    padding: 30px 24px;
     border-top: 1px solid var(--panel-view-border);
     background-color: var(--panel-view-background);
+  }
+
+  .vscode-button {
+    padding: 6px 11px;
+    border: none;
+    background-color: var(--vscode-button-background);
+    color: var(--button-primary-foreground);
+    font-family: var(--font-family);
+    font-size: var(--type-ramp-base-font-size);
+  }
+
+  .vscode-button:disabled {
+    background-color: var(--vscode-button-background);
+    color: var(--button-primary-foreground);
+    cursor: default;
+    opacity: 0.5;
+  }
+
+  button:hover {
+    background-color: var(--vscode-button-hoverBackground);
+    cursor: pointer;
   }
 </style>
