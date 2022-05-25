@@ -181,7 +181,7 @@
   }
 
   :global(body) {
-    padding: 26px 24px;
+    padding: 44px 24px;
   }
 
   :global(:root) {
