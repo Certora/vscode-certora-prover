@@ -1,22 +1,21 @@
 import { workspace, Uri, window } from 'vscode'
 import { log, Sources } from '../utils/log'
-import { InputFormData } from '../types'
-
-type ConfFile = {
-  files?: string[]
-  verify?: [string]
-  solc?: string
-  link?: string[]
-  settings?: string[]
-  staging?: string
-  cache?: string
-  msg?: string
-} & Record<string, boolean | string>
+import { InputFormData, ConfFile } from '../types'
 
 function setAdditionalSetting(val?: string) {
   if (val === 'true' || !val) return true
   if (val === 'false') return false
-
+  if (/^[0-9]+$/.exec(val)) return Number(val)
+  const mapRegex = /^{(".+":".+")(,".+":".+")*}/g
+  if (mapRegex.exec(val)) {
+    return JSON.parse(val)
+  }
+  // for --settings flags:
+  const settingsRegex = /(-(.+)(=(.+))?)(,(-(.+)(=(.+))?))*/g
+  if (settingsRegex.exec(val)) {
+    const squareBracketsRegex = /(\[|\])+/g
+    return val.replace(squareBracketsRegex, '').split(',')
+  }
   return val
 }
 
@@ -24,7 +23,6 @@ function convertSourceFormDataToConfFileJSON(
   inputFormData: InputFormData,
 ): string {
   const config: ConfFile = {}
-
   if (!Array.isArray(config.files)) config.files = []
 
   if (inputFormData.specFile && inputFormData.mainContractName) {
@@ -53,10 +51,9 @@ function convertSourceFormDataToConfFileJSON(
       )
     })
   }
-
-  if (inputFormData.solidityCompiler) {
-    config.solc = inputFormData.solidityCompiler
-  }
+  // either use user input or vscode settings
+  // better practice might be not creating the conf file if an input doesn't exists
+  config.solc = inputFormData.solidityCompiler || 'solc'
 
   if (inputFormData.useAdditionalContracts && inputFormData.link?.length > 0) {
     config.link = []
