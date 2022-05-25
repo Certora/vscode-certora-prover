@@ -2,14 +2,110 @@ import * as vscode from 'vscode'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { SettingsPanel } from './SettingsPanel'
 import { ScriptRunner } from './ScriptRunner'
+import { ConfFile } from './types'
 
 export function activate(context: vscode.ExtensionContext): void {
   function showSettings() {
     const path = vscode.workspace.workspaceFolders?.[0]
 
     if (!path) return
+    const confFileDefault = getDefaultSettings()
+    SettingsPanel.render(context.extensionUri, confFileDefault)
+  }
 
-    SettingsPanel.render(context.extensionUri)
+  /**
+   * get default settings from vscode settings
+   */
+  function getDefaultSettings(): ConfFile {
+    let solcPath: string =
+      vscode.workspace.getConfiguration().get('CompilerFolder') || ''
+    if (solcPath) {
+      solcPath += '/'
+    }
+    const solc: string =
+      vscode.workspace.getConfiguration().get('SolcExecutable') || ''
+
+    const solcArgs: string =
+      vscode.workspace.getConfiguration().get('SolidityArguments') || ''
+
+    const defaultDirectoryForPackagesDependencies: string =
+      vscode.workspace
+        .getConfiguration()
+        .get('Solidity.DefaultDirectoryForPackagesDependencies') || ''
+
+    const solidityPackageDirectories: string = JSON.stringify(
+      vscode.workspace.getConfiguration().get('SolidityPackageDirectories'),
+    )
+
+    const optimisticLoop: boolean | undefined = vscode.workspace
+      .getConfiguration()
+      .get('OptimisticLoop')
+
+    const loopUnroll: number =
+      vscode.workspace.getConfiguration().get('LoopUnroll') || 1
+
+    const duration: number =
+      vscode.workspace.getConfiguration().get('Duration') || 600
+
+    const additionalSettings: string =
+      JSON.stringify(
+        vscode.workspace.getConfiguration().get('AdditionalSetting'),
+      ) || ''
+
+    const typeCheck: boolean | undefined = vscode.workspace
+      .getConfiguration()
+      .get('LocalTypeChecking')
+
+    const staging: boolean =
+      vscode.workspace.getConfiguration().get('Staging') || false
+
+    let branch = ''
+
+    if (staging) {
+      branch = vscode.workspace.getConfiguration().get('Branch') || 'master'
+    }
+
+    const confFileDefault: ConfFile = {
+      solc: solcPath + solc,
+      staging: branch,
+    }
+
+    if (solcArgs) {
+      confFileDefault['--solc-args'] = [solcArgs]
+    }
+    if (defaultDirectoryForPackagesDependencies) {
+      confFileDefault['--packages_path'] =
+        defaultDirectoryForPackagesDependencies
+    }
+    if (solidityPackageDirectories !== '{}') {
+      confFileDefault['--packages'] = solidityPackageDirectories
+    }
+    if (optimisticLoop) {
+      confFileDefault['--optimistic_loop'] = true
+    }
+    if (loopUnroll !== 1) {
+      confFileDefault['--loop_iter'] = loopUnroll
+    }
+    if (duration !== 600) {
+      confFileDefault['--smt_timeout'] = duration
+    }
+    if (additionalSettings !== '{}') {
+      const settingsArray: string[] = []
+      Object.entries(JSON.parse(additionalSettings)).forEach(([key, value]) => {
+        if (!key.startsWith('-')) {
+          key = '-' + key
+        }
+        const setting = key + (value ? '=' + value : '')
+        settingsArray.push(setting)
+      })
+      confFileDefault['--settings'] = settingsArray
+    }
+
+    if (!typeCheck) {
+      confFileDefault['--typecheck_only'] = true
+    }
+
+    return confFileDefault
   }
 
   async function quickPickWithConfFiles(

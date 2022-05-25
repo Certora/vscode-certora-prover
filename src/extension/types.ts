@@ -189,6 +189,17 @@ export type EventFromSettingsWebview =
       payload: InputFormData
     }
 
+export type ConfFile = {
+  files?: string[]
+  verify?: [string]
+  solc?: string
+  link?: string[]
+  settings?: string[]
+  staging?: string
+  cache?: string
+  msg?: string
+} & Record<string, boolean | string | string[] | number>
+
 export type Message = {
   message: string
   location: []
