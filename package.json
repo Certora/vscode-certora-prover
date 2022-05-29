@@ -24,107 +24,107 @@
   "contributes": {
     "configuration": [
       {
-      "title": "Solc compiler defaults",
-      "order": 0,
-      "properties": {
-        "CompilerFolder": {
-          "type": "string",
-          "description": "Folder containing solc compiler binary file.\nNeed to supply if not part of the PATH.",
-          "order": 0
-        },
-        "SolcExecutable": {
-          "type": "string",
-          "default": "solc",
-          "pattern": "^[A-Za-z0-9.\\-\\_]{0,20}$",
-          "patternErrorMessage": "Supported characters for an executable name are letters, numbers, dots, hyphens, and underscores. \n\nPlease note the filename should be limited to 20 characters.",
-          "description": "The default executable used to compile solidity code (default is solc).",
-          "order": 1
-        }
-      }
-    },
-    {
-      "title": "Compiler Advanced Settings",
-      "order": 1,
-      "properties": {
-        "SolidityArguments": {
-          "markdownDescription": "A list of arguments to pass to the Solidity compiler.\nThe arguments will be passed as is, without any formatting, in the same order.\n\n**Example:**\n\n```js\n['--optimize', '--optimize-runs', '200']\n```",
-          "type": "string",
-          "pattern": "^(\\[(\\'.+\\',(\\s?))*((\\'.+\\')*)\\])*$",
-          "patternErrorMessage": "Input must be an array of string commands",
-          "order": 0
-        },
-        "Solidity.DefaultDirectoryForPackagesDependencies": {
-          "description": "Default path for relative input.",
-          "type": "string",
-          "default": "node_modules",
-          "order": 1
-        },
-        "SolidityPackageDirectories": {
-          "markdownDescription": "For each package, the path to a directory including that Solidity package.\n\n**When to use it?**\n\nBy default, we look for the packages in the default directory. Set here if there are packages are in several different directory.\n\nThe value should be a mapping between a package name and the path to the directory the package is at.\n\n**For example:**\n```\n{'package.name': '.../path'}```",
-          "type": "object",
-          "additionalProperties": "string",
-          "properties": {},
-          "order": 2
-        }
-      }
-    },
-    {
-    "title": "Prover defaults",
-    "order": 2,
-      "properties": {
-        "OptimisticLoop": {
-          "markdownDescription": "Ignore some executions of loops. [Read More](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#optimistic-loop)",
-          "type": "boolean",
-          "default": false,
-          "order": 0
-        },
-        "LoopUnroll": {
-          "markdownDescription": "The maximal number of loop iterations. [Read More](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#loop-iter)",
-          "type": "integer",
-          "exclusiveMinimum": -1,
-          "exclusiveMaximum": 10,
-          "default": 1,
-          "order": 1
-        },
-        "Duration": {
-          "description": "Maximal execution time per rule (in seconds)",
-          "type": "integer",
-          "exclusiveMinimum": -1,
-          "default": 600,
-          "order": 2
-        }
-      }
-  },
-  {
-    "title": "Prover Advanced Settings",
-    "order": 3,
-    "properties": {
-      "AdditionalSetting": {
-        "markdownDescription": "[Additional settings explanation](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html)\n\n**For example:**\n\n```solver: z3```",
-        "type": "object",
+        "title": "Solc compiler defaults",
         "order": 0,
-        "additionalProperties": "string",
-        "properties": {}
+        "properties": {
+          "CompilerFolder": {
+            "type": "string",
+            "description": "Folder containing solc compiler binary file.\nNeed to supply if not part of the PATH.",
+            "order": 0
+          },
+          "SolcExecutable": {
+            "type": "string",
+            "default": "solc",
+            "pattern": "^[A-Za-z0-9.\\-\\_]{0,20}$",
+            "patternErrorMessage": "Supported characters for an executable name are letters, numbers, dots, hyphens, and underscores. \n\nPlease note the filename should be limited to 20 characters.",
+            "description": "The default executable used to compile solidity code (default is solc).",
+            "order": 1
+          }
+        }
       },
-      "LocalTypeChecking": {
-        "description": "Turning this off implies syntax errors are reported after submitting job to the server.",
-        "type": "boolean",
-        "default": true,
-        "order": 1
+      {
+        "title": "Compiler Advanced Settings",
+        "order": 1,
+        "properties": {
+          "SolidityArguments": {
+            "markdownDescription": "A list of arguments to pass to the Solidity compiler.\nThe arguments will be passed as is, without any formatting, in the same order.\n\n**Example:**\n\n```js\n['--optimize', '--optimize-runs', '200']\n```",
+            "type": "string",
+            "pattern": "^(\\[(\\'.+\\',(\\s?))*((\\'.+\\')*)\\])*$",
+            "patternErrorMessage": "Input must be an array of string commands",
+            "order": 0
+          },
+          "Solidity.DefaultDirectoryForPackagesDependencies": {
+            "description": "Default path for relative input.",
+            "type": "string",
+            "default": "node_modules",
+            "order": 1
+          },
+          "SolidityPackageDirectories": {
+            "markdownDescription": "For each package, the path to a directory including that Solidity package.\n\n**When to use it?**\n\nBy default, we look for the packages in the default directory. Set here if there are packages are in several different directory.\n\nThe value should be a mapping between a package name and the path to the directory the package is at.\n\n**For example:**\n```\n{'package.name': '.../path'}```",
+            "type": "object",
+            "additionalProperties": "string",
+            "properties": {},
+            "order": 2
+          }
+        }
       },
-      "Staging": {
-        "description": "Run on staging environment",
-        "type": "boolean",
-        "order": 2
+      {
+        "title": "Prover defaults",
+        "order": 2,
+        "properties": {
+          "OptimisticLoop": {
+            "markdownDescription": "Ignore some executions of loops. [Read More](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#optimistic-loop)",
+            "type": "boolean",
+            "default": false,
+            "order": 0
+          },
+          "LoopUnroll": {
+            "markdownDescription": "The maximal number of loop iterations. [Read More](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#loop-iter)",
+            "type": "integer",
+            "exclusiveMinimum": -1,
+            "exclusiveMaximum": 10,
+            "default": 1,
+            "order": 1
+          },
+          "Duration": {
+            "description": "Maximal execution time per rule (in seconds)",
+            "type": "integer",
+            "exclusiveMinimum": -1,
+            "default": 600,
+            "order": 2
+          }
+        }
       },
-      "Branch": {
-        "type": "string",
-        "default": "master",
-        "order": 3
+      {
+        "title": "Prover Advanced Settings",
+        "order": 3,
+        "properties": {
+          "AdditionalSetting": {
+            "markdownDescription": "[Additional settings explanation](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html)\n\n**For example:**\n\n```solver: z3```",
+            "type": "object",
+            "order": 0,
+            "additionalProperties": "string",
+            "properties": {}
+          },
+          "LocalTypeChecking": {
+            "description": "Turning this off implies syntax errors are reported after submitting job to the server.",
+            "type": "boolean",
+            "default": true,
+            "order": 1
+          },
+          "Staging": {
+            "description": "Run on staging environment",
+            "type": "boolean",
+            "order": 2
+          },
+          "Branch": {
+            "type": "string",
+            "default": "master",
+            "order": 3
+          }
+        }
       }
-    }
-  }
-],
+    ],
     "views": {
       "results": [
         {
@@ -215,7 +215,7 @@
   },
   "dependencies": {
     "@vscode/codicons": "^0.0.26",
-    "@vscode/webview-ui-toolkit": "^0.8.4",
+    "@vscode/webview-ui-toolkit": "^1.0.0",
     "axios": "^0.24.0",
     "lodash.uniqby": "^4.7.0",
     "nanoid": "^3.1.30"
