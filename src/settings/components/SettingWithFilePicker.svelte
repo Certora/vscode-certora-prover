@@ -28,7 +28,7 @@
     },
   ) {
     file = e.currentTarget.value
-    if (file && showPlaceholder) {
+    if (e.currentTarget.value && showPlaceholder) {
       showPlaceholder = false
     }
   }
@@ -40,7 +40,7 @@
       const correctValue = file
       file = '' // for re-render
       file = correctValue
-      if (file && showPlaceholder) {
+      if (correctValue && showPlaceholder) {
         showPlaceholder = false
       }
     }, 200)
