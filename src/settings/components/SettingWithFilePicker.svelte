@@ -28,9 +28,6 @@
     },
   ) {
     file = e.currentTarget.value
-    if (e.currentTarget.value && showPlaceholder) {
-      showPlaceholder = false
-    }
   }
 
   onMount(() => {
@@ -39,10 +36,10 @@
     setTimeout(() => {
       const correctValue = file
       file = '' // for re-render
-      file = correctValue
       if (correctValue && showPlaceholder) {
         showPlaceholder = false
       }
+      file = correctValue
     }, 200)
   })
 </script>
