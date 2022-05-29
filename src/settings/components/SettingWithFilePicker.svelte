@@ -28,6 +28,9 @@
     },
   ) {
     file = e.currentTarget.value
+    if (file && showPlaceholder) {
+      showPlaceholder = false
+    }
   }
 
   onMount(() => {
