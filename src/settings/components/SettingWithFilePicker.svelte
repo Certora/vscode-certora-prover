@@ -3,7 +3,6 @@
   import BaseSetting from './BaseSetting.svelte'
   import VsCodeButton from './VSCodeButton.svelte'
   import { refreshFiles } from '../utils/refreshFiles'
-  import { select_option } from 'svelte/internal'
 
   export let title: string
   export let description: string
@@ -49,9 +48,9 @@
       on:change={e => (query = e.target.value)}
     />
     <select class="vscode-select" on:change={onSelect}>
-      <option disabled selected>Choose File</option>
+      <option disabled selected={file === ''}>Choose File</option>
       {#each filteredFiles as path}
-        <option>{path}</option>
+        <option selected={file === path}>{path}</option>
       {/each}
     </select>
     <VsCodeButton
