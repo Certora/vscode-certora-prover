@@ -11,7 +11,6 @@
   export let file: string = files[0]
   export let mandatory: boolean = false
   let query = ''
-  let showPlaceholder = true
 
   $: sortedFiles = [...files].sort((a, b) =>
     a.toLowerCase().localeCompare(b.toLowerCase()),
@@ -37,9 +36,6 @@
       const correctValue = file
       file = '' // for re-render
       file = correctValue
-      if (file && showPlaceholder) {
-        showPlaceholder = false
-      }
     }, 200)
   })
 </script>
@@ -51,10 +47,8 @@
       value={query}
       on:change={e => (query = e.target.value)}
     />
-    <vscode-dropdown on:change={onSelect} value={file}>
-      {#if showPlaceholder}
-        <vscode-option>Choose file</vscode-option>
-      {/if}
+    <vscode-dropdown class="vscode-select" on:change={onSelect} value={file}>
+      <vscode-option value="">Choose File</vscode-option>
       {#each filteredFiles as path}
         <vscode-option>{path}</vscode-option>
       {/each}
