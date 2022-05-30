@@ -70,7 +70,7 @@
     gap: var(--space-sm);
   }
 
-  .files-dropdown select {
+  .files-dropdown vscode-dropdown {
     min-width: 212.3px;
   }
 
