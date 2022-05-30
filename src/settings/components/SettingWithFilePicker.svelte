@@ -47,12 +47,12 @@
       value={query}
       on:change={e => (query = e.target.value)}
     />
-    <select class="vscode-select" on:change={onSelect}>
-      <option disabled selected={file === ''}>Choose File</option>
+    <vscode-dropdown class="vscode-select" on:change={onSelect} value={file}>
+      <vscode-option value="">Choose File</vscode-option>
       {#each filteredFiles as path}
-        <option selected={file === path}>{path}</option>
+        <vscode-option>{path}</vscode-option>
       {/each}
-    </select>
+    </vscode-dropdown>
     <VsCodeButton
       isSmall
       title={refreshButtonTitle}
@@ -76,22 +76,5 @@
 
   .files-dropdown vscode-text-field {
     max-width: 212.3px;
-  }
-
-  .vscode-select {
-    display: flex;
-    height: 25px;
-    min-height: 100%;
-    box-sizing: border-box;
-    align-items: center;
-    padding: 0 calc(var(--design-unit) * 2px);
-    border: calc(var(--border-width) * 1px) solid var(--dropdown-border);
-    background-color: var(--dropdown-background);
-    border-radius: calc(var(--corner-radius) * 1px);
-    color: var(--dropdown-text-color);
-    cursor: pointer;
-    font-family: inherit;
-    font-size: var(--type-ramp-base-font-size);
-    line-height: var(--type-ramp-base-line-height);
   }
 </style>
