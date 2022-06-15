@@ -2,10 +2,11 @@
   export let doRename: boolean = true
   export let editFunc
   export let deleteFunc
-  export let namesMap: Map<string, number>
+  export let namesMap: Map<string, string>
   export let runName: string = ''
   //add duplicate function
   let doRun = false
+  let beforeRename = ''
 
   function onKeyPress(e: any) {
     console.log('===somekey===')
@@ -16,28 +17,40 @@
         runName = 'untitled'
         titleHandle()
       }
+      if (spacesToUnderscores(e.currentTarget.value) !== beforeRename) {
+        namesMap.delete(beforeRename)
+      }
     }
   }
 
+  function duplicateName() {
+    let counter = 1
+    let currentName = renameDuplicate(runName, counter)
+    while (namesMap.has(spacesToUnderscores(currentName))) {
+      counter++
+      currentName = renameDuplicate(runName, counter)
+      console.log('===while===')
+    }
+    return currentName
+  }
+
   function titleHandle() {
-    if (namesMap.has(runName)) {
+    if (namesMap.has(spacesToUnderscores(runName))) {
       console.log('===already been===')
-      let counter = 1
-      let currentName = renameDuplicate(runName, counter)
-      while (namesMap.has(currentName)) {
-        counter++
-        currentName = renameDuplicate(runName, counter)
-        console.log('===while===')
-      }
-      runName = currentName
+      runName = duplicateName()
     }
     console.log('===new name===')
-    namesMap.set(runName, 0)
+    namesMap.set(spacesToUnderscores(runName), runName)
+    runName = spacesToUnderscores(runName)
     console.log(namesMap)
   }
 
   function renameDuplicate(name: string, counter: number) {
     return name + ' (' + counter.toString() + ')'
+  }
+
+  function spacesToUnderscores(name: string) {
+    return name.replaceAll(' ', '_')
   }
 
   function onChange(
@@ -52,20 +65,31 @@
   function rename() {
     console.log('===rename===')
     doRename = true
-    namesMap.delete(runName)
+    beforeRename = runName
+  }
+
+  function duplicate() {
+    let duplicatedName = duplicateName()
+    let duplicatedRun = { id: 0, name: spacesToUnderscores(duplicatedName) }
+    namesMap.set(spacesToUnderscores(duplicatedName), duplicatedName)
+    editFunc(duplicatedRun)
   }
 </script>
 
 <div class="newRun">
   {#if doRename}
-    <input value={runName} on:keypress={onKeyPress} on:change={onChange} />
+    <input
+      value={namesMap.get(runName) || ''}
+      on:keypress={onKeyPress}
+      on:change={onChange}
+    />
   {:else}
     <div>
-      {runName}
+      {namesMap.get(runName)}
       <button on:click={rename}>rename</button>
       <button on:click={editFunc}>edit</button>
       <button on:click={deleteFunc}>delete</button>
-      <button>duplicate</button>
+      <button on:click={duplicate}>duplicate</button>
       {#if doRun}
         <button>RUN</button>
       {/if}

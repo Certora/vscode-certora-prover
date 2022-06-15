@@ -32,7 +32,7 @@
   let runningScripts: { pid: number; confFile: string }[] = []
   //todo: fill this somwhow?
   let runs: Run[] = [] //todo: change to type "Run"?
-  let namesMap: Map<string, number> = new Map()
+  let namesMap: Map<string, string> = new Map()
   let runsCounter = 0
 
   $: hasRunningScripts = runningScripts.length > 0
@@ -165,16 +165,22 @@
     }
   }
 
-  function createRun() {
+  function createRun(run: Run) {
     //create the NewRun component?
     //probebly should hold them in an array and use foreach
-    runs.push({ id: runsCounter, name: '' })
-    runsCounter++
+    if (run) {
+      runs.push(run)
+    } else {
+      runs.push({ id: runsCounter, name: '' })
+    }
+
+    runsCounter = runs.length
     openSettings()
   }
 
   function deleteRun(index: number) {
     var toFilter = runs[index]
+    console.log('to filter:' + toFilter.name)
     runs = runs.filter(run => {
       return run !== toFilter
     })
@@ -225,7 +231,7 @@
     {#each Array(runsCounter) as _, index (index)}
       <NewRun
         doRename={runs[index].name === ''}
-        editFunc={openSettings}
+        editFunc={createRun}
         deleteFunc={() => deleteRun(index)}
         {namesMap}
         bind:runName={runs[index].name}
