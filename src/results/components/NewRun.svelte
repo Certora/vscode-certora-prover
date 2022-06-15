@@ -24,11 +24,15 @@
   }
 
   function duplicateName() {
+    let nameToDuplicate = runName
+    if (namesMap.has(runName)) {
+      nameToDuplicate = namesMap.get(runName)
+    }
     let counter = 1
-    let currentName = renameDuplicate(runName, counter)
+    let currentName = renameDuplicate(nameToDuplicate, counter)
     while (namesMap.has(spacesToUnderscores(currentName))) {
       counter++
-      currentName = renameDuplicate(runName, counter)
+      currentName = renameDuplicate(nameToDuplicate, counter)
       console.log('===while===')
     }
     return currentName
