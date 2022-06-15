@@ -23,7 +23,7 @@
     Run,
   } from './types'
   import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
-  //import NewRun from './components/NewRun.svelte'
+  import NewRun from './components/NewRun.svelte'
 
   let output: Output
   let selectedCalltraceFunction: CallTraceFunction
@@ -179,6 +179,7 @@
       return run !== toFilter
     })
     runsCounter = runs.length
+    namesMap.delete(toFilter.name)
   }
 
   onMount(() => {
@@ -221,14 +222,15 @@
 {/if}
 {#if runsCounter !== 0}
   <Pane title="MY RUNS" initialExpandedState={true} actions={[]}>
-    <!-- {#each Array(runsCounter) as _, index (index)}
-<NewRun
-doRename={(runs[index].name === '')}
-editFunc={openSettings}
-deleteFunc={() => deleteRun(index)}
-namesMap={namesMap}
-bind:runName={runs[index].name}/>
-{/each} -->
+    {#each Array(runsCounter) as _, index (index)}
+      <NewRun
+        doRename={runs[index].name === ''}
+        editFunc={openSettings}
+        deleteFunc={() => deleteRun(index)}
+        {namesMap}
+        bind:runName={runs[index].name}
+      />
+    {/each}
   </Pane>
 {:else}
   {#each verificationResults as vr (vr.contract + '-' + vr.spec)}

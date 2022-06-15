@@ -8,9 +8,36 @@
   let doRun = false
 
   function onKeyPress(e: any) {
-    if (e.key == 'Enter') {
+    console.log('===somekey===')
+    if (e.key === 'Enter') {
       doRename = false
+      console.log('===enter===' + e.currentTarget.value)
+      if (e.currentTarget.value === '') {
+        runName = 'untitled'
+        titleHandle()
+      }
     }
+  }
+
+  function titleHandle() {
+    if (namesMap.has(runName)) {
+      console.log('===already been===')
+      let counter = 1
+      let currentName = renameDuplicate(runName, counter)
+      while (namesMap.has(currentName)) {
+        counter++
+        currentName = renameDuplicate(runName, counter)
+        console.log('===while===')
+      }
+      runName = currentName
+    }
+    console.log('===new name===')
+    namesMap.set(runName, 0)
+    console.log(namesMap)
+  }
+
+  function renameDuplicate(name: string, counter: number) {
+    return name + ' (' + counter.toString() + ')'
   }
 
   function onChange(
@@ -19,13 +46,13 @@
     },
   ) {
     runName = e.currentTarget.value
-    if (namesMap.has(runName)) {
-      console.log(runName)
-    }
+    titleHandle()
   }
 
   function rename() {
+    console.log('===rename===')
     doRename = true
+    namesMap.delete(runName)
   }
 </script>
 
