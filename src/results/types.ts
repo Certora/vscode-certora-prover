@@ -166,3 +166,8 @@ export type EventsFromExtension =
       type: EventTypesFromExtension.SetCreationTime
       payload: CreationTime
     }
+
+export type Run = {
+  id: number
+  name: string
+}

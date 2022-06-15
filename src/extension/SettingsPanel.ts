@@ -87,6 +87,7 @@ export class SettingsPanel {
     let editFileName = ''
     if (editConfFile?.verify !== undefined) {
       editFileName = editConfFile?.verify + ''
+      console.log(editFileName)
       return editFileName.replace(':', '.').replace('spec', 'conf')
     }
     return editFileName
@@ -135,7 +136,8 @@ export class SettingsPanel {
     editConfFile?: Record<string, unknown>,
   ): void {
     let isOpened = false
-    if (editConfFile) {
+    // mandatory fields only exists on an edit
+    if (editConfFile && editConfFile.files && editConfFile.verify) {
       const editFileName = editConfFile.verify + '' // name as string
       SettingsPanel.allPanels.forEach(panel => {
         if (panel.editConfFile?.verify + '' === editFileName) {

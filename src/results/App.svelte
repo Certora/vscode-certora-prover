@@ -20,17 +20,24 @@
     EventsFromExtension,
     Rule,
     Verification,
+    Run,
   } from './types'
   import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
+  //import NewRun from './components/NewRun.svelte'
 
   let output: Output
   let selectedCalltraceFunction: CallTraceFunction
 
   let verificationResults: Verification[] = []
   let runningScripts: { pid: number; confFile: string }[] = []
+  //todo: fill this somwhow?
+  let runs: Run[] = [] //todo: change to type "Run"?
+  let namesMap: Map<string, number> = new Map()
+  let runsCounter = 0
 
   $: hasRunningScripts = runningScripts.length > 0
   $: hasResults = verificationResults.length > 0
+  $: hasRuns = runs.length > 0
 
   function newFetchOutput(e: CustomEvent<Assert | Rule>, vr: Verification) {
     console.log(e.detail)
@@ -158,6 +165,22 @@
     }
   }
 
+  function createRun() {
+    //create the NewRun component?
+    //probebly should hold them in an array and use foreach
+    runs.push({ id: runsCounter, name: '' })
+    runsCounter++
+    openSettings()
+  }
+
+  function deleteRun(index: number) {
+    var toFilter = runs[index]
+    runs = runs.filter(run => {
+      return run !== toFilter
+    })
+    runsCounter = runs.length
+  }
+
   onMount(() => {
     window.addEventListener('message', listener)
   })
@@ -177,7 +200,7 @@
 
 {#if !hasResults}
   <div class="zero-state">
-    <div class="command">
+    <!-- <div class="command">
       <div class="command-description">
         To check your smart contract start Certora IDE tool in command palette
         or with button.
@@ -185,16 +208,28 @@
       <vscode-button class="command-button" on:click={runScript}>
         Run Certora IDE
       </vscode-button>
-    </div>
+    </div> -->
     <div class="command">
       <div class="command-description">
-        Configurate script and smart contract settings.
+        To check your smart contract start by creating a verification run
       </div>
-      <vscode-button class="command-button" on:click={openSettings}>
-        Create Certora IDE conf file
+      <vscode-button class="command-button" on:click={createRun}>
+        Create verification run
       </vscode-button>
     </div>
   </div>
+{/if}
+{#if runsCounter !== 0}
+  <Pane title="MY RUNS" initialExpandedState={true} actions={[]}>
+    <!-- {#each Array(runsCounter) as _, index (index)}
+<NewRun
+doRename={(runs[index].name === '')}
+editFunc={openSettings}
+deleteFunc={() => deleteRun(index)}
+namesMap={namesMap}
+bind:runName={runs[index].name}/>
+{/each} -->
+  </Pane>
 {:else}
   {#each verificationResults as vr (vr.contract + '-' + vr.spec)}
     <Pane
@@ -296,11 +331,11 @@
           You don’t have any running scripts. To check your smart contract start
           Certora IDE tool in command palette or click the button below.
         </div>
-        {#if hasResults}
+        <!-- {#if hasResults}
           <vscode-button class="command-button" on:click={runScript}>
             Run Certora IDE
           </vscode-button>
-        {/if}
+        {/if} -->
       </div>
     </div>
   {/if}
