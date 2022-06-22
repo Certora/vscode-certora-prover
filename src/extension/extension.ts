@@ -2,19 +2,19 @@ import * as vscode from 'vscode'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { SettingsPanel } from './SettingsPanel'
 import { ScriptRunner } from './ScriptRunner'
-import { ConfFile, InputFormData } from './types'
+import { ConfFile, InputFormData, ConfNameMap } from './types'
 import { SmartContractsFilesWatcher } from './SmartContractsFilesWatcher'
 import { createAndOpenConfFile } from './utils/createAndOpenConfFile'
 
 export function activate(context: vscode.ExtensionContext): void {
-  function showSettings(name: string) {
+  function showSettings(name: ConfNameMap) {
     const path = vscode.workspace.workspaceFolders?.[0]
 
     if (!path) return
     const confFileDefault = getDefaultSettings()
-    console.log('creating a new conf file', name)
+    console.log('creating a new conf file', name.displayName)
     const emptyForm: InputFormData = {
-      name: name,
+      name: name.fileName,
       mainSolidityFile: '',
       mainContractName: '',
       specFile: '',
@@ -30,7 +30,11 @@ export function activate(context: vscode.ExtensionContext): void {
       additionalSettings: [],
     }
     createAndOpenConfFile(emptyForm)
-    SettingsPanel.render(context.extensionUri, name, confFileDefault)
+    SettingsPanel.render(
+      context.extensionUri,
+      name.displayName,
+      confFileDefault,
+    )
   }
 
   /**
@@ -159,18 +163,22 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   }
 
-  async function editConf(name: string): Promise<void> {
+  async function editConf(name: ConfNameMap): Promise<void> {
     const path = vscode.workspace.workspaceFolders?.[0]
     if (!path) return
-    const confFile = 'conf/' + name + '.conf'
+    const confFile = 'conf/' + name.fileName + '.conf'
     const confFileUri = vscode.Uri.joinPath(path.uri, confFile)
     const decoder = new TextDecoder()
     try {
-      console.log('editing existing conf file', name)
+      console.log('editing existing conf file', name.displayName)
       const confFileContent = JSON.parse(
         decoder.decode(await vscode.workspace.fs.readFile(confFileUri)),
       )
-      SettingsPanel.render(context.extensionUri, name, confFileContent)
+      SettingsPanel.render(
+        context.extensionUri,
+        name.displayName,
+        confFileContent,
+      )
     } catch (e) {
       vscode.window.showErrorMessage(
         `Can't read conf file: ${confFile}. Error: ${e}`,
@@ -205,12 +213,13 @@ export function activate(context: vscode.ExtensionContext): void {
     return confFileUri
   }
 
-  function deleteConfFile(name: string): void {
-    const confFileUri: vscode.Uri | void = getConfUri(name)
+  function deleteConfFile(name: ConfNameMap): void {
+    console.log('delete conf: ', name.displayName)
+    const confFileUri: vscode.Uri | void = getConfUri(name.fileName)
     if (confFileUri) {
       vscode.workspace.fs.delete(confFileUri)
     }
-    SettingsPanel.removePanel(name)
+    SettingsPanel.removePanel(name.displayName)
   }
 
   const resultsWebviewProvider = new ResultsWebviewProvider(

@@ -23,6 +23,7 @@
     Rule,
     Verification,
     Run,
+    ConfNameMap,
   } from './types'
   import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
   import NewRun from './components/NewRun.svelte'
@@ -169,7 +170,12 @@
 
   function createRunAndOpenSettings(run: Run) {
     createRun(run)
-    openSettings(run.name)
+    const confNameMap: ConfNameMap = {
+      fileName: run.name,
+      displayName: namesMap.get(run.name),
+    }
+    console.log(confNameMap, 'create')
+    openSettings(confNameMap)
   }
 
   function createRun(run: Run) {
@@ -187,27 +193,48 @@
 
   function editRun(run: Run) {
     console.log('===edit===', run.name)
-    editConfFile(run.name)
+    const confNameMap: ConfNameMap = {
+      fileName: run.name,
+      displayName: namesMap.get(run.name),
+    }
+    console.log(confNameMap, 'edit')
+    editConfFile(confNameMap)
   }
 
-  function deleteRun(index: number) {
-    var toFilter = runs[index]
-    var name = toFilter.name
+  function deleteRun(toFilter: Run) {
+    //const toFilter = runs[index]
+    const name = toFilter.name
+    const confNameMap: ConfNameMap = {
+      fileName: name,
+      displayName: namesMap.get(name),
+    }
     console.log('to filter:' + name)
     runs = runs.filter(run => {
       return run !== toFilter
     })
     runsCounter = runs.length
     namesMap.delete(name)
-    deleteConf(name)
+    console.log(confNameMap, 'delete')
+    deleteConf(confNameMap)
   }
 
   function renameRun(oldName: string, newName: string) {
     if (oldName !== '') {
       console.log('delete old ', oldName)
-      deleteConf(oldName)
+      const confNameMap: ConfNameMap = {
+        fileName: oldName,
+        displayName: namesMap.get(oldName),
+      }
+      console.log(confNameMap, '===rename delete===')
+      deleteConf(confNameMap)
+      namesMap.delete(oldName)
     }
-    openSettings(newName)
+    const confNameMap: ConfNameMap = {
+      fileName: newName,
+      displayName: namesMap.get(newName),
+    }
+    console.log(confNameMap, 'open')
+    openSettings(confNameMap)
   }
 
   onMount(() => {
@@ -254,7 +281,7 @@
       <NewRun
         doRename={runs[index].name === ''}
         editFunc={() => editRun(runs[index])}
-        deleteFunc={() => deleteRun(index)}
+        deleteFunc={() => deleteRun(runs[index])}
         {namesMap}
         {renameRun}
         deplicateFunc={createRunAndOpenSettings}

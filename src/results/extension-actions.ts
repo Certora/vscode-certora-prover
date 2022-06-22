@@ -1,5 +1,5 @@
 import { log, Sources } from './utils/log'
-import type { JumpToDefinition } from './types'
+import type { ConfNameMap, JumpToDefinition } from './types'
 
 enum Commands {
   StopScript = 'stop-script',
@@ -33,7 +33,7 @@ export function runScript(): void {
   })
 }
 
-export function openSettings(name: string): void {
+export function openSettings(name: ConfNameMap): void {
   log({
     action: 'Send "open-settings" command',
     source: Sources.ResultsWebview,
@@ -44,7 +44,7 @@ export function openSettings(name: string): void {
   })
 }
 
-export function editConfFile(name: string): void {
+export function editConfFile(name: ConfNameMap): void {
   log({
     action: 'Send "edit-confFile" command',
     source: Sources.ResultsWebview,
@@ -55,7 +55,7 @@ export function editConfFile(name: string): void {
   })
 }
 
-export function deleteConf(name: string): void {
+export function deleteConf(name: ConfNameMap): void {
   log({
     action: 'Send "delete-confFile" command',
     source: Sources.ResultsWebview,

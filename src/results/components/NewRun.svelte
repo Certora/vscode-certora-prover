@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { ConfNameMap } from '../types'
+
   export let doRename: boolean = true
   export let editFunc
   export let deleteFunc
@@ -9,6 +11,7 @@
   //add duplicate function
   let doRun = false
   let beforeRename = ''
+  let activateRunRename = false
 
   function onKeyPress(e: any) {
     console.log('===somekey===')
@@ -19,10 +22,10 @@
         runName = 'untitled'
         titleHandle()
       }
-      if (spacesToUnderscores(e.currentTarget.value) !== beforeRename) {
-        namesMap.delete(beforeRename)
-      }
-      renameRun(beforeRename, spacesToUnderscores(e.currentTarget.value))
+      // if (spacesToUnderscores(e.currentTarget.value) !== beforeRename) {
+      //   namesMap.delete(beforeRename)
+      // }
+      activateRunRename = true
     }
   }
 
@@ -65,8 +68,14 @@
       currentTarget: EventTarget & HTMLInputElement
     },
   ) {
+    //this bind is the reason rename doesnt delete right at the moment
     runName = e.currentTarget.value
     titleHandle()
+    if (activateRunRename) {
+      activateRunRename = false
+      console.log('###old name: ', beforeRename, '###namesMap: ', namesMap)
+      renameRun(beforeRename, spacesToUnderscores(e.currentTarget.value))
+    }
   }
 
   function rename() {

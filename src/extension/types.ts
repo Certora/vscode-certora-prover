@@ -143,6 +143,11 @@ export type InputFormData = {
   }[]
 }
 
+export type ConfNameMap = {
+  displayName: string
+  fileName: string
+}
+
 export enum CommandFromResultsWebview {
   NavigateToCode = 'navigate-to-code',
   StopScript = 'stop-script',
@@ -173,7 +178,7 @@ export type EventFromResultsWebview =
     }
   | {
       command: CommandFromResultsWebview.OpenSettings
-      payload: string
+      payload: ConfNameMap
     }
   | {
       command: CommandFromResultsWebview.GetOutput
@@ -185,11 +190,11 @@ export type EventFromResultsWebview =
     }
   | {
       command: CommandFromResultsWebview.EditConfFile
-      payload: string
+      payload: ConfNameMap
     }
   | {
       command: CommandFromResultsWebview.DeleteConfFile
-      payload: string
+      payload: ConfNameMap
     }
 
 export type EventFromSettingsWebview =

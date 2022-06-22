@@ -132,14 +132,9 @@ export class SettingsPanel {
     editConfFile?: Record<string, unknown>,
   ): void {
     let isOpened = false
-    // mandatory fields only exists on an edit
-    const alreadyBeenOpened = SettingsPanel.allPanels.find(
-      panel => panel.curConfFileName === confName,
-    )
-    if (alreadyBeenOpened && editConfFile) {
-      const editFileName = editConfFile.verify + '' // name as string
+    if (editConfFile) {
       SettingsPanel.allPanels.forEach(panel => {
-        if (panel.editConfFile?.verify + '' === editFileName) {
+        if (panel.curConfFileName === confName) {
           isOpened = true
           SettingsPanel.currentPanel = panel
         }

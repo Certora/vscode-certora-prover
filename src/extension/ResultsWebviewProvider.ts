@@ -7,6 +7,7 @@ import {
   Output,
   CommandFromResultsWebview,
   EventFromResultsWebview,
+  ConfNameMap,
 } from './types'
 import type { CreationTime } from '../results/types'
 
@@ -14,9 +15,9 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   public viewType = 'results'
   private _panel: vscode.Webview | null = null
   public stopScript: null | ((pid: number) => void) = null
-  public editConfFile: null | ((name: string) => Promise<void>) = null
-  public openSettings: null | ((name: string) => void) = null
-  public deleteConf: null | ((name: string) => void) = null
+  public editConfFile: null | ((name: ConfNameMap) => Promise<void>) = null
+  public openSettings: null | ((name: ConfNameMap) => void) = null
+  public deleteConf: null | ((name: ConfNameMap) => void) = null
 
   constructor(
     private readonly _extensionUri: vscode.Uri,

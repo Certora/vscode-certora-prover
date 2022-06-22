@@ -169,10 +169,10 @@ export type EventsFromExtension =
       payload: CreationTime
     }
 
-// export type NameMap = {
-//   display_name: string
-//   file_name: string
-// }
+export type ConfNameMap = {
+  displayName: string
+  fileName: string
+}
 
 export type Run = {
   id: number
