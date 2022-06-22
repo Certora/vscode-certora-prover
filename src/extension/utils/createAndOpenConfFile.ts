@@ -110,8 +110,8 @@ export async function createAndOpenConfFile(
     const encoder = new TextEncoder()
     const convertedData = convertSourceFormDataToConfFileJSON(formData)
     const content = encoder.encode(convertedData)
-    // const parsedSpecFilePath = formData.specFile.split('/')
     const path = Uri.joinPath(basePath.uri, 'conf', `${formData.name}.conf`)
+    console.log('form.name: ', formData.name)
     await workspace.fs.writeFile(path, content)
     log({
       action: `Conf file was created`,

@@ -30,11 +30,7 @@ export function activate(context: vscode.ExtensionContext): void {
       additionalSettings: [],
     }
     createAndOpenConfFile(emptyForm)
-    SettingsPanel.render(
-      context.extensionUri,
-      name.displayName,
-      confFileDefault,
-    )
+    SettingsPanel.render(context.extensionUri, name, confFileDefault)
   }
 
   /**
@@ -150,7 +146,10 @@ export function activate(context: vscode.ExtensionContext): void {
     )
 
     if (!confFiles?.length) {
-      SettingsPanel.render(context.extensionUri, 'placeholder_name')
+      SettingsPanel.render(context.extensionUri, {
+        displayName: 'placeholder_name',
+        fileName: 'placeholder_name',
+      })
     } else {
       quickPick.items = confFiles.map(file => ({
         label: vscode.workspace.asRelativePath(file),
@@ -174,11 +173,7 @@ export function activate(context: vscode.ExtensionContext): void {
       const confFileContent = JSON.parse(
         decoder.decode(await vscode.workspace.fs.readFile(confFileUri)),
       )
-      SettingsPanel.render(
-        context.extensionUri,
-        name.displayName,
-        confFileContent,
-      )
+      SettingsPanel.render(context.extensionUri, name, confFileContent)
     } catch (e) {
       vscode.window.showErrorMessage(
         `Can't read conf file: ${confFile}. Error: ${e}`,

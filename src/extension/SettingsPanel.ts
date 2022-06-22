@@ -5,10 +5,10 @@ import { createAndOpenConfFile } from './utils/createAndOpenConfFile'
 import { log, Sources } from './utils/log'
 import {
   CommandFromSettingsWebview,
+  ConfNameMap,
   EventFromSettingsWebview,
   InputFormData,
 } from './types'
-import { type } from 'os'
 
 export class SettingsPanel {
   public static currentPanel?: SettingsPanel
@@ -17,15 +17,16 @@ export class SettingsPanel {
   private watcher: SmartContractsFilesWatcher
   private editConfFile?: Record<string, unknown>
   private static allPanels: SettingsPanel[] = []
-  private curConfFileName: string
+  private curConfFileDisplayName: string
 
   private constructor(
     panel: vscode.WebviewPanel,
     extensionUri: vscode.Uri,
+    confFileDisplayName: string,
     confFileName: string,
     editConfFile?: Record<string, unknown>,
   ) {
-    this.curConfFileName = confFileName
+    this.curConfFileDisplayName = confFileDisplayName
 
     this._panel = panel
 
@@ -90,7 +91,7 @@ export class SettingsPanel {
    */
   private static _openNewPanel(
     extensionUri: vscode.Uri,
-    confFileName: string,
+    confFileName: ConfNameMap,
     editConfFile?: Record<string, unknown>,
   ) {
     const panel = vscode.window.createWebviewPanel(
@@ -106,7 +107,8 @@ export class SettingsPanel {
     SettingsPanel.currentPanel = new SettingsPanel(
       panel,
       extensionUri,
-      confFileName,
+      confFileName.displayName,
+      confFileName.fileName,
       editConfFile,
     )
     this.allPanels.push(SettingsPanel.currentPanel)
@@ -114,7 +116,7 @@ export class SettingsPanel {
 
   public static removePanel(name: string): void {
     const panelToRemove = SettingsPanel.allPanels.find(
-      panel => panel.curConfFileName === name,
+      panel => panel.curConfFileDisplayName === name,
     )
     panelToRemove?.dispose()
   }
@@ -128,13 +130,13 @@ export class SettingsPanel {
    */
   public static render(
     extensionUri: vscode.Uri,
-    confName: string,
+    confName: ConfNameMap,
     editConfFile?: Record<string, unknown>,
   ): void {
     let isOpened = false
     if (editConfFile) {
       SettingsPanel.allPanels.forEach(panel => {
-        if (panel.curConfFileName === confName) {
+        if (panel.curConfFileDisplayName === confName.displayName) {
           isOpened = true
           SettingsPanel.currentPanel = panel
         }
