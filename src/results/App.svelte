@@ -33,14 +33,13 @@
 
   let verificationResults: Verification[] = []
   let runningScripts: { pid: number; confFile: string }[] = []
-  //todo: fill this somwhow?
-  let runs: Run[] = [] //todo: change to type "Run"?
+
+  let runs: Run[] = []
   let namesMap: Map<string, string> = new Map()
   let runsCounter = 0
 
   $: hasRunningScripts = runningScripts.length > 0
   $: hasResults = verificationResults.length > 0
-  $: hasRuns = runs.length > 0
 
   function newFetchOutput(e: CustomEvent<Assert | Rule>, vr: Verification) {
     console.log(e.detail)
@@ -179,8 +178,6 @@
   }
 
   function createRun(run: Run) {
-    //create the NewRun component?
-    //probebly should hold them in an array and use foreach
     console.log('===create run===')
     if (run) {
       runs.push(run)
@@ -202,7 +199,6 @@
   }
 
   function deleteRun(toFilter: Run) {
-    //const toFilter = runs[index]
     const name = toFilter.name
     const confNameMap: ConfNameMap = {
       fileName: name,
@@ -284,7 +280,7 @@
         deleteFunc={() => deleteRun(runs[index])}
         {namesMap}
         {renameRun}
-        deplicateFunc={createRunAndOpenSettings}
+        duplicateFunc={createRunAndOpenSettings}
         bind:runName={runs[index].name}
       />
     {/each}

@@ -1,14 +1,13 @@
 <script lang="ts">
-  import type { ConfNameMap } from '../types'
+  import type { Run } from '../types'
 
   export let doRename: boolean = true
-  export let editFunc
-  export let deleteFunc
+  export let editFunc: () => void
+  export let deleteFunc: () => void
   export let namesMap: Map<string, string>
   export let runName: string = ''
-  export let renameRun
-  export let deplicateFunc
-  //add duplicate function
+  export let renameRun: (oldName: string, newName: string) => void
+  export let duplicateFunc: (run: Run) => void
   let doRun = false
   let beforeRename = ''
   let activateRunRename = false
@@ -27,6 +26,9 @@
     }
   }
 
+  /**
+   * returns a name for a duplicated item
+   */
   function duplicateName() {
     let nameToDuplicate = runName
     if (namesMap.has(runName)) {
@@ -42,6 +44,13 @@
     return currentName
   }
 
+  /**
+   * process a title so it can become a suitable run name
+   * a run name cannot contain spaces in the beginning/end of the name,
+   * cannot have multiple spaces in a row, cannot contain special cheracters
+   * outside space.
+   * run name that only contains illegal characters and spaces will become 'undtitled'
+   */
   function titleHandle() {
     runName = runName
       .replace(/[^a-zA-Z0-9 ]/g, '')
@@ -73,7 +82,6 @@
       currentTarget: EventTarget & HTMLInputElement
     },
   ) {
-    //this bind is the reason rename doesnt delete right at the moment
     runName = e.currentTarget.value
     titleHandle()
     if (activateRunRename) {
@@ -83,7 +91,7 @@
     }
   }
 
-  function rename() {
+  function setRename() {
     console.log('===rename===')
     doRename = true
     beforeRename = runName
@@ -93,7 +101,7 @@
     let duplicatedName = duplicateName()
     let duplicatedRun = { id: 0, name: spacesToUnderscores(duplicatedName) }
     namesMap.set(spacesToUnderscores(duplicatedName), duplicatedName)
-    deplicateFunc(duplicatedRun)
+    duplicateFunc(duplicatedRun)
   }
 </script>
 
@@ -107,7 +115,7 @@
   {:else}
     <div>
       {namesMap.get(runName)}
-      <button on:click={rename}>rename</button>
+      <button on:click={setRename}>rename</button>
       <button on:click={editFunc}>edit</button>
       <button on:click={deleteFunc}>delete</button>
       <button on:click={duplicate}>duplicate</button>
