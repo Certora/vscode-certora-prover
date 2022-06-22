@@ -12,6 +12,7 @@
   let doRun = false
   let beforeRename = ''
   let activateRunRename = false
+  const UNTITLED = 'untitled'
 
   function onKeyPress(e: any) {
     console.log('===somekey===')
@@ -19,12 +20,9 @@
       doRename = false
       console.log('===enter===' + e.currentTarget.value)
       if (e.currentTarget.value === '') {
-        runName = 'untitled'
+        runName = UNTITLED
         titleHandle()
       }
-      // if (spacesToUnderscores(e.currentTarget.value) !== beforeRename) {
-      //   namesMap.delete(beforeRename)
-      // }
       activateRunRename = true
     }
   }
@@ -45,6 +43,13 @@
   }
 
   function titleHandle() {
+    runName = runName
+      .replace(/[^a-zA-Z0-9 ]/g, '')
+      .replace(/ +/g, ' ')
+      .trim()
+    if (runName === '') {
+      runName = UNTITLED
+    }
     if (namesMap.has(spacesToUnderscores(runName))) {
       console.log('===already been===')
       runName = duplicateName()
@@ -74,7 +79,7 @@
     if (activateRunRename) {
       activateRunRename = false
       console.log('###old name: ', beforeRename, '###namesMap: ', namesMap)
-      renameRun(beforeRename, spacesToUnderscores(e.currentTarget.value))
+      renameRun(beforeRename, spacesToUnderscores(runName))
     }
   }
 
