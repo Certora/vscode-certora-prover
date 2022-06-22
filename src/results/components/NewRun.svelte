@@ -4,6 +4,8 @@
   export let deleteFunc
   export let namesMap: Map<string, string>
   export let runName: string = ''
+  export let renameRun
+  export let deplicateFunc
   //add duplicate function
   let doRun = false
   let beforeRename = ''
@@ -20,6 +22,7 @@
       if (spacesToUnderscores(e.currentTarget.value) !== beforeRename) {
         namesMap.delete(beforeRename)
       }
+      renameRun(beforeRename, spacesToUnderscores(e.currentTarget.value))
     }
   }
 
@@ -76,7 +79,7 @@
     let duplicatedName = duplicateName()
     let duplicatedRun = { id: 0, name: spacesToUnderscores(duplicatedName) }
     namesMap.set(spacesToUnderscores(duplicatedName), duplicatedName)
-    editFunc(duplicatedRun)
+    deplicateFunc(duplicatedRun)
   }
 </script>
 

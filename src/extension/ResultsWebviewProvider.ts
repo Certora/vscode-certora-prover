@@ -14,15 +14,16 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   public viewType = 'results'
   private _panel: vscode.Webview | null = null
   public stopScript: null | ((pid: number) => void) = null
+  public editConfFile: null | ((name: string) => Promise<void>) = null
+  public openSettings: null | ((name: string) => void) = null
+  public deleteConf: null | ((name: string) => void) = null
 
   constructor(
     private readonly _extensionUri: vscode.Uri,
     private readonly runScript: () => Promise<void>,
-    private readonly openSettings: () => void,
   ) {
     this._extensionUri = _extensionUri
     this.runScript = runScript
-    this.openSettings = openSettings
   }
 
   resolveWebviewView({ webview }: vscode.WebviewView): void {
@@ -68,7 +69,18 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
               action: 'Received "open-settings" command',
               source: Sources.Extension,
             })
-            this.openSettings()
+            if (typeof this.openSettings === 'function') {
+              this.openSettings(e.payload)
+            }
+            break
+          case CommandFromResultsWebview.EditConfFile:
+            log({
+              action: 'Received "edit-confFile" command',
+              source: Sources.Extension,
+            })
+            if (typeof this.editConfFile === 'function') {
+              this.editConfFile(e.payload)
+            }
             break
           case CommandFromResultsWebview.GetOutput:
             log({
@@ -85,6 +97,16 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
               info: e.payload,
             })
             this.getCreationTime(e.payload)
+            break
+          case CommandFromResultsWebview.DeleteConfFile:
+            log({
+              action: 'Received "delete-confFile" command',
+              source: Sources.Extension,
+              info: e.payload,
+            })
+            if (typeof this.deleteConf === 'function') {
+              this.deleteConf(e.payload)
+            }
             break
           default:
             break

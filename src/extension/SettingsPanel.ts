@@ -3,7 +3,12 @@ import { SmartContractsFilesWatcher } from './SmartContractsFilesWatcher'
 import { getNonce } from './utils/getNonce'
 import { createAndOpenConfFile } from './utils/createAndOpenConfFile'
 import { log, Sources } from './utils/log'
-import { CommandFromSettingsWebview, EventFromSettingsWebview } from './types'
+import {
+  CommandFromSettingsWebview,
+  EventFromSettingsWebview,
+  InputFormData,
+} from './types'
+import { type } from 'os'
 
 export class SettingsPanel {
   public static currentPanel?: SettingsPanel
@@ -12,12 +17,16 @@ export class SettingsPanel {
   private watcher: SmartContractsFilesWatcher
   private editConfFile?: Record<string, unknown>
   private static allPanels: SettingsPanel[] = []
+  private curConfFileName: string
 
   private constructor(
     panel: vscode.WebviewPanel,
     extensionUri: vscode.Uri,
+    confFileName: string,
     editConfFile?: Record<string, unknown>,
   ) {
+    this.curConfFileName = confFileName
+
     this._panel = panel
 
     this._panel.webview.html = this._getWebviewContent(
@@ -27,11 +36,10 @@ export class SettingsPanel {
 
     this.watcher = new SmartContractsFilesWatcher()
     this.watcher.init(this._panel.webview)
-
     if (editConfFile) {
       this._panel.webview.postMessage({
         type: 'edit-conf-file',
-        payload: editConfFile,
+        payload: [editConfFile, confFileName],
       })
       this.editConfFile = editConfFile
     }
@@ -76,39 +84,18 @@ export class SettingsPanel {
   }
 
   /**
-   * returns the name of the conf file to edit, if such file exists and has a name
-   * empty string otherwise
-   * @param editConfFile conf file to edit
-   * @returns string name
-   */
-  private static _getConfFileName(
-    editConfFile?: Record<string, unknown>,
-  ): string {
-    let editFileName = ''
-    if (editConfFile?.verify !== undefined) {
-      editFileName = editConfFile?.verify + ''
-      console.log(editFileName)
-      return editFileName.replace(':', '.').replace('spec', 'conf')
-    }
-    return editFileName
-  }
-
-  /**
    * opens a new settings panel in a new tab
    * @param extensionUri uri of the extension folder
    * @param editConfFile conf file content
    */
   private static _openNewPanel(
     extensionUri: vscode.Uri,
+    confFileName: string,
     editConfFile?: Record<string, unknown>,
   ) {
-    let confFileName = this._getConfFileName(editConfFile)
-    if (confFileName) {
-      confFileName = ': ' + confFileName
-    }
     const panel = vscode.window.createWebviewPanel(
       'certoraSettings',
-      'Certora IDE Settings' + confFileName,
+      'Certora IDE Settings: ' + confFileName,
       vscode.ViewColumn.One,
       {
         retainContextWhenHidden: true,
@@ -119,9 +106,17 @@ export class SettingsPanel {
     SettingsPanel.currentPanel = new SettingsPanel(
       panel,
       extensionUri,
+      confFileName,
       editConfFile,
     )
     this.allPanels.push(SettingsPanel.currentPanel)
+  }
+
+  public static removePanel(name: string): void {
+    const panelToRemove = SettingsPanel.allPanels.find(
+      panel => panel.curConfFileName === name,
+    )
+    panelToRemove?.dispose()
   }
 
   /**
@@ -133,11 +128,15 @@ export class SettingsPanel {
    */
   public static render(
     extensionUri: vscode.Uri,
+    confName: string,
     editConfFile?: Record<string, unknown>,
   ): void {
     let isOpened = false
     // mandatory fields only exists on an edit
-    if (editConfFile && editConfFile.files && editConfFile.verify) {
+    const alreadyBeenOpened = SettingsPanel.allPanels.find(
+      panel => panel.curConfFileName === confName,
+    )
+    if (alreadyBeenOpened && editConfFile) {
       const editFileName = editConfFile.verify + '' // name as string
       SettingsPanel.allPanels.forEach(panel => {
         if (panel.editConfFile?.verify + '' === editFileName) {
@@ -149,7 +148,7 @@ export class SettingsPanel {
     if (isOpened && SettingsPanel.currentPanel) {
       SettingsPanel.currentPanel._panel.reveal(vscode.ViewColumn.One)
     } else {
-      this._openNewPanel(extensionUri, editConfFile)
+      this._openNewPanel(extensionUri, confName, editConfFile)
     }
   }
 

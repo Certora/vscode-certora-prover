@@ -2,6 +2,7 @@ import { nanoid } from 'nanoid'
 import type { Form, ConfFile } from '../types'
 
 const emptyForm: Form = {
+  name: '',
   mainSolidityFile: '',
   mainContractName: '',
   specFile: '',
@@ -51,9 +52,9 @@ function getAdditionalSettings(confFile: ConfFile) {
   return copy
 }
 
-export function confFileToFormData(confFile: ConfFile): Form {
+export function confFileToFormData(confFile: ConfFile, name: string): Form {
   const form = emptyForm as Form
-
+  form.name = name
   if (Array.isArray(confFile.files) && confFile.files.length > 0) {
     form.mainSolidityFile = confFile.files[0] as string
 

@@ -10,6 +10,8 @@
     stopScript,
     openSettings,
     getOutput,
+    editConfFile,
+    deleteConf,
   } from './extension-actions'
   import { smartMergeVerificationResult } from './utils/mergeResults'
   import { log, Sources } from './utils/log'
@@ -165,9 +167,15 @@
     }
   }
 
+  function createRunAndOpenSettings(run: Run) {
+    createRun(run)
+    openSettings(run.name)
+  }
+
   function createRun(run: Run) {
     //create the NewRun component?
     //probebly should hold them in an array and use foreach
+    console.log('===create run===')
     if (run) {
       runs.push(run)
     } else {
@@ -175,17 +183,31 @@
     }
 
     runsCounter = runs.length
-    openSettings()
+  }
+
+  function editRun(run: Run) {
+    console.log('===edit===', run.name)
+    editConfFile(run.name)
   }
 
   function deleteRun(index: number) {
     var toFilter = runs[index]
-    console.log('to filter:' + toFilter.name)
+    var name = toFilter.name
+    console.log('to filter:' + name)
     runs = runs.filter(run => {
       return run !== toFilter
     })
     runsCounter = runs.length
-    namesMap.delete(toFilter.name)
+    namesMap.delete(name)
+    deleteConf(name)
+  }
+
+  function renameRun(oldName: string, newName: string) {
+    if (oldName !== '') {
+      console.log('delete old ', oldName)
+      deleteConf(oldName)
+    }
+    openSettings(newName)
   }
 
   onMount(() => {
@@ -231,9 +253,11 @@
     {#each Array(runsCounter) as _, index (index)}
       <NewRun
         doRename={runs[index].name === ''}
-        editFunc={createRun}
+        editFunc={() => editRun(runs[index])}
         deleteFunc={() => deleteRun(index)}
         {namesMap}
+        {renameRun}
+        deplicateFunc={createRunAndOpenSettings}
         bind:runName={runs[index].name}
       />
     {/each}

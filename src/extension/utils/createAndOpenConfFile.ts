@@ -1,4 +1,4 @@
-import { workspace, Uri, window } from 'vscode'
+import { workspace, Uri, window, ConfigurationTarget } from 'vscode'
 import { log, Sources } from '../utils/log'
 import { InputFormData, ConfFile } from '../types'
 
@@ -101,6 +101,7 @@ function convertSourceFormDataToConfFileJSON(
 export async function createAndOpenConfFile(
   formData: InputFormData,
 ): Promise<void> {
+  console.log('saving into form', formData)
   try {
     const basePath = workspace.workspaceFolders?.[0]
 
@@ -109,15 +110,8 @@ export async function createAndOpenConfFile(
     const encoder = new TextEncoder()
     const convertedData = convertSourceFormDataToConfFileJSON(formData)
     const content = encoder.encode(convertedData)
-    const parsedSpecFilePath = formData.specFile.split('/')
-    const path = Uri.joinPath(
-      basePath.uri,
-      'conf',
-      `${formData.mainContractName}.${parsedSpecFilePath[
-        parsedSpecFilePath.length - 1
-      ].replace('.spec', '')}.conf`,
-    )
-
+    // const parsedSpecFilePath = formData.specFile.split('/')
+    const path = Uri.joinPath(basePath.uri, 'conf', `${formData.name}.conf`)
     await workspace.fs.writeFile(path, content)
     log({
       action: `Conf file was created`,
@@ -128,8 +122,8 @@ export async function createAndOpenConfFile(
         confFileContent: convertedData,
       },
     })
-    const document = await workspace.openTextDocument(path)
-    await window.showTextDocument(document)
+    // const document = await workspace.openTextDocument(path)
+    // await window.showTextDocument(document)
   } catch (e) {
     window.showErrorMessage(`Can't create conf file. Error: ${e}`)
   }

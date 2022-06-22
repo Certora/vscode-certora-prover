@@ -7,6 +7,8 @@ enum Commands {
   OpenSettings = 'open-settings',
   NavigateToCode = 'navigate-to-code',
   GetOutput = 'get-output',
+  EditConfFile = 'edit-confFile',
+  DeleteConf = 'delete-confFile',
 }
 
 export function stopScript(pid: number): void {
@@ -31,13 +33,36 @@ export function runScript(): void {
   })
 }
 
-export function openSettings(): void {
+export function openSettings(name: string): void {
   log({
     action: 'Send "open-settings" command',
     source: Sources.ResultsWebview,
   })
   vscode.postMessage({
     command: Commands.OpenSettings,
+    payload: name,
+  })
+}
+
+export function editConfFile(name: string): void {
+  log({
+    action: 'Send "edit-confFile" command',
+    source: Sources.ResultsWebview,
+  })
+  vscode.postMessage({
+    command: Commands.EditConfFile,
+    payload: name,
+  })
+}
+
+export function deleteConf(name: string): void {
+  log({
+    action: 'Send "delete-confFile" command',
+    source: Sources.ResultsWebview,
+  })
+  vscode.postMessage({
+    command: Commands.DeleteConf,
+    payload: name,
   })
 }
 

@@ -112,6 +112,7 @@ export type Output = {
 }
 
 export type InputFormData = {
+  name: string
   mainSolidityFile: string
   mainContractName: string
   specFile: string
@@ -149,6 +150,8 @@ export enum CommandFromResultsWebview {
   OpenSettings = 'open-settings',
   GetOutput = 'get-output',
   GetCreationTime = 'get-creation-time',
+  EditConfFile = 'edit-confFile',
+  DeleteConfFile = 'delete-confFile',
 }
 
 export enum CommandFromSettingsWebview {
@@ -170,6 +173,7 @@ export type EventFromResultsWebview =
     }
   | {
       command: CommandFromResultsWebview.OpenSettings
+      payload: string
     }
   | {
       command: CommandFromResultsWebview.GetOutput
@@ -177,6 +181,14 @@ export type EventFromResultsWebview =
     }
   | {
       command: CommandFromResultsWebview.GetCreationTime
+      payload: string
+    }
+  | {
+      command: CommandFromResultsWebview.EditConfFile
+      payload: string
+    }
+  | {
+      command: CommandFromResultsWebview.DeleteConfFile
       payload: string
     }
 

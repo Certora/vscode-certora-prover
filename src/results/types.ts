@@ -1,3 +1,5 @@
+import type { Uri } from 'vscode'
+
 export type Action = { title: string; onClick: () => void; icon: string }
 
 export type JumpToDefinition = {
@@ -166,6 +168,11 @@ export type EventsFromExtension =
       type: EventTypesFromExtension.SetCreationTime
       payload: CreationTime
     }
+
+// export type NameMap = {
+//   display_name: string
+//   file_name: string
+// }
 
 export type Run = {
   id: number
