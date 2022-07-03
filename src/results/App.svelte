@@ -163,6 +163,14 @@
         clearOutput()
         break
       }
+      case EventTypesFromExtension.CreateJob: {
+        log({
+          action: 'Received "create-new-job" command',
+          source: Sources.ResultsWebview,
+        })
+        createRun({ id: 0, name: '' })
+        break
+      }
       default:
         break
     }

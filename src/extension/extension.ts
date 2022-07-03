@@ -265,22 +265,26 @@ export function activate(context: vscode.ExtensionContext): void {
   const scriptRunner = new ScriptRunner(resultsWebviewProvider)
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('certora.createConfFile', showSettings),
-    vscode.commands.registerCommand('certora.editConfFile', editConf),
-    vscode.commands.registerCommand('certora.runScript', runScript),
-    vscode.commands.registerCommand('certora.clearResults', async () => {
-      const action = await vscode.window.showInformationMessage(
-        'Clear all jobs?',
-        'Clear All',
-        'Cancel',
-      )
-
-      if (action === 'Clear All') {
-        resultsWebviewProvider.postMessage({
-          type: 'clear-all-jobs',
-        })
-      }
+    vscode.commands.registerCommand('certora.createConfFile', async () => {
+      resultsWebviewProvider.postMessage({
+        type: 'create-new-job',
+      })
     }),
+    // vscode.commands.registerCommand('certora.editConfFile', editConf),
+    // vscode.commands.registerCommand('certora.runScript', runScript),
+    // vscode.commands.registerCommand('certora.clearResults', async () => {
+    //   const action = await vscode.window.showInformationMessage(
+    //     'Clear all jobs?',
+    //     'Clear All',
+    //     'Cancel',
+    //   )
+
+    //   if (action === 'Clear All') {
+    //     resultsWebviewProvider.postMessage({
+    //       type: 'clear-all-jobs',
+    //     })
+    //   }
+    // }),
     vscode.window.registerWebviewViewProvider(
       resultsWebviewProvider.viewType,
       resultsWebviewProvider,

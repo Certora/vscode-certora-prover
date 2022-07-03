@@ -144,6 +144,7 @@ export enum EventTypesFromExtension {
   SetOutput = 'set-output',
   ClearAllJobs = 'clear-all-jobs',
   SetCreationTime = 'set-creation-time',
+  CreateJob = 'create-new-job',
 }
 
 export type EventsFromExtension =
@@ -165,6 +166,9 @@ export type EventsFromExtension =
   | {
       type: EventTypesFromExtension.SetCreationTime
       payload: CreationTime
+    }
+  | {
+      type: EventTypesFromExtension.CreateJob
     }
 
 export type ConfNameMap = {
