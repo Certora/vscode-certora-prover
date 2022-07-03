@@ -1,5 +1,3 @@
-import type { Uri } from 'vscode'
-
 export type Action = { title: string; onClick: () => void; icon: string }
 
 export type JumpToDefinition = {

@@ -96,7 +96,7 @@ export class SettingsPanel {
   ) {
     const panel = vscode.window.createWebviewPanel(
       'certoraSettings',
-      'Certora IDE Settings: ' + confFileName,
+      'Certora IDE Settings: ' + confFileName.displayName,
       vscode.ViewColumn.One,
       {
         retainContextWhenHidden: true,

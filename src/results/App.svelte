@@ -12,6 +12,7 @@
     getOutput,
     editConfFile,
     deleteConf,
+    duplicate,
   } from './extension-actions'
   import { smartMergeVerificationResult } from './utils/mergeResults'
   import { log, Sources } from './utils/log'
@@ -167,14 +168,28 @@
     }
   }
 
-  function createRunAndOpenSettings(run: Run) {
-    createRun(run)
-    const confNameMap: ConfNameMap = {
-      fileName: run.name,
-      displayName: namesMap.get(run.name),
+  // function createRunAndOpenSettings(run: Run) {
+  //   createRun(run)
+  //   const confNameMap: ConfNameMap = {
+  //     fileName: run.name,
+  //     displayName: namesMap.get(run.name),
+  //   }
+  //   console.log(confNameMap, 'create')
+  //   openSettings(confNameMap)
+  // }
+
+  function duplicateRun(toDuplicate: Run, duplicated: Run) {
+    createRun(duplicated)
+    const confNameMapDuplicated: ConfNameMap = {
+      fileName: duplicated.name,
+      displayName: namesMap.get(duplicated.name),
     }
-    console.log(confNameMap, 'create')
-    openSettings(confNameMap)
+    const confNameMapToDuplicate: ConfNameMap = {
+      fileName: toDuplicate.name,
+      displayName: namesMap.get(toDuplicate.name),
+    }
+    console.log('to duplicate:', toDuplicate, 'duplicated: ', duplicated)
+    duplicate(confNameMapToDuplicate, confNameMapDuplicated)
   }
 
   function createRun(run: Run) {
@@ -215,22 +230,31 @@
   }
 
   function renameRun(oldName: string, newName: string) {
+    // rename existing
     if (oldName !== '') {
       console.log('delete old ', oldName)
-      const confNameMap: ConfNameMap = {
+      const oldConfNameMap: ConfNameMap = {
         fileName: oldName,
         displayName: namesMap.get(oldName),
       }
-      console.log(confNameMap, '===rename delete===')
-      deleteConf(confNameMap)
+      const newConfNameMap: ConfNameMap = {
+        fileName: newName,
+        displayName: namesMap.get(newName),
+      }
+
+      duplicate(oldConfNameMap, newConfNameMap)
+      deleteConf(oldConfNameMap)
       namesMap.delete(oldName)
     }
-    const confNameMap: ConfNameMap = {
-      fileName: newName,
-      displayName: namesMap.get(newName),
+    // rename new
+    else {
+      const confNameMap: ConfNameMap = {
+        fileName: newName,
+        displayName: namesMap.get(newName),
+      }
+      console.log(confNameMap, 'open')
+      openSettings(confNameMap)
     }
-    console.log(confNameMap, 'open')
-    openSettings(confNameMap)
   }
 
   onMount(() => {
@@ -280,7 +304,7 @@
         deleteFunc={() => deleteRun(runs[index])}
         {namesMap}
         {renameRun}
-        duplicateFunc={createRunAndOpenSettings}
+        duplicateFunc={duplicateRun}
         bind:runName={runs[index].name}
       />
     {/each}

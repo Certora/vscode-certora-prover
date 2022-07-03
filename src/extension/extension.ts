@@ -181,6 +181,41 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   }
 
+  async function duplicate(
+    toDuplicate: ConfNameMap,
+    duplicated: ConfNameMap,
+  ): Promise<void> {
+    // get the content of the conf to duplicate
+    // cretate a new conf file with the name of "duplicated", content of "to duplicate", and open it with settings view
+    const path = vscode.workspace.workspaceFolders?.[0]
+    if (!path) return
+    const confFile = 'conf/' + toDuplicate.fileName + '.conf'
+    const confFileUri = vscode.Uri.joinPath(path.uri, confFile)
+    const decoder = new TextDecoder()
+    try {
+      console.log('duplicating existing conf file', toDuplicate.displayName)
+      const confFileContent: ConfFile = JSON.parse(
+        decoder.decode(await vscode.workspace.fs.readFile(confFileUri)),
+      )
+
+      try {
+        const newConfFilePath = 'conf/' + duplicated.fileName + '.conf'
+        const newConfFileUri = vscode.Uri.joinPath(path.uri, newConfFilePath)
+        const encoder = new TextEncoder()
+        const content = encoder.encode(JSON.stringify(confFileContent, null, 2))
+        await vscode.workspace.fs.writeFile(newConfFileUri, content)
+      } catch (e) {
+        vscode.window.showErrorMessage(`Can't create conf file. Error: ${e}`)
+      }
+
+      SettingsPanel.render(context.extensionUri, duplicated, confFileContent)
+    } catch (e) {
+      vscode.window.showErrorMessage(
+        `Can't read conf file: ${confFile}. Error: ${e}`,
+      )
+    }
+  }
+
   async function runScript() {
     quickPickWithConfFiles((selection, quickPick) => {
       if (selection[0]) {
@@ -225,6 +260,7 @@ export function activate(context: vscode.ExtensionContext): void {
   resultsWebviewProvider.editConfFile = editConf
   resultsWebviewProvider.openSettings = showSettings
   resultsWebviewProvider.deleteConf = deleteConfFile
+  resultsWebviewProvider.duplicate = duplicate
 
   const scriptRunner = new ScriptRunner(resultsWebviewProvider)
 
@@ -256,6 +292,3 @@ export function activate(context: vscode.ExtensionContext): void {
     ),
   )
 }
-
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-export function deactivate(): void {}

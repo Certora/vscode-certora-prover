@@ -157,6 +157,7 @@ export enum CommandFromResultsWebview {
   GetCreationTime = 'get-creation-time',
   EditConfFile = 'edit-confFile',
   DeleteConfFile = 'delete-confFile',
+  Duplicate = 'duplicate',
 }
 
 export enum CommandFromSettingsWebview {
@@ -195,6 +196,10 @@ export type EventFromResultsWebview =
   | {
       command: CommandFromResultsWebview.DeleteConfFile
       payload: ConfNameMap
+    }
+  | {
+      command: CommandFromResultsWebview.Duplicate
+      payload: [ConfNameMap, ConfNameMap]
     }
 
 export type EventFromSettingsWebview =

@@ -9,6 +9,7 @@ enum Commands {
   GetOutput = 'get-output',
   EditConfFile = 'edit-confFile',
   DeleteConf = 'delete-confFile',
+  Duplicate = 'duplicate',
 }
 
 export function stopScript(pid: number): void {
@@ -63,6 +64,20 @@ export function deleteConf(name: ConfNameMap): void {
   vscode.postMessage({
     command: Commands.DeleteConf,
     payload: name,
+  })
+}
+
+export function duplicate(
+  toDuplicate: ConfNameMap,
+  duplicated: ConfNameMap,
+): void {
+  log({
+    action: 'Send "duplicate" command',
+    source: Sources.ResultsWebview,
+  })
+  vscode.postMessage({
+    command: Commands.Duplicate,
+    payload: [toDuplicate, duplicated],
   })
 }
 

@@ -18,6 +18,9 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   public editConfFile: null | ((name: ConfNameMap) => Promise<void>) = null
   public openSettings: null | ((name: ConfNameMap) => void) = null
   public deleteConf: null | ((name: ConfNameMap) => void) = null
+  public duplicate:
+    | null
+    | ((toDuplicate: ConfNameMap, duplicated: ConfNameMap) => void) = null
 
   constructor(
     private readonly _extensionUri: vscode.Uri,
@@ -107,6 +110,21 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
             })
             if (typeof this.deleteConf === 'function') {
               this.deleteConf(e.payload)
+            }
+            break
+          case CommandFromResultsWebview.Duplicate:
+            log({
+              action: 'Received "duplicate" command',
+              source: Sources.Extension,
+              info: e.payload,
+            })
+            if (typeof this.duplicate === 'function') {
+              console.log(
+                'typeof from duplicate',
+                typeof e.payload,
+                typeof e.payload[0],
+              )
+              this.duplicate(e.payload[0], e.payload[1])
             }
             break
           default:

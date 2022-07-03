@@ -7,7 +7,7 @@
   export let namesMap: Map<string, string>
   export let runName: string = ''
   export let renameRun: (oldName: string, newName: string) => void
-  export let duplicateFunc: (run: Run) => void
+  export let duplicateFunc: (toDuplicate: Run, duplicated: Run) => void
   let doRun = false
   let beforeRename = ''
   let activateRunRename = false
@@ -98,10 +98,11 @@
   }
 
   function duplicate() {
+    let toDuplicate = { id: 0, name: runName } //todo: clean
     let duplicatedName = duplicateName()
-    let duplicatedRun = { id: 0, name: spacesToUnderscores(duplicatedName) }
+    let duplicatedRun = { id: 0, name: spacesToUnderscores(duplicatedName) } //todo clean
     namesMap.set(spacesToUnderscores(duplicatedName), duplicatedName)
-    duplicateFunc(duplicatedRun)
+    duplicateFunc(toDuplicate, duplicatedRun)
   }
 </script>
 
