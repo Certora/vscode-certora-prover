@@ -129,6 +129,7 @@ export type ProgressResponse = {
 }
 
 export type Verification = {
+  name: string
   spec: string
   contract: string
   jobs: Job[]
@@ -177,6 +178,6 @@ export type ConfNameMap = {
 }
 
 export type Run = {
-  id: number
   name: string
+  verification?: Verification
 }

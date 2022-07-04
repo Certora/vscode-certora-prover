@@ -1,5 +1,7 @@
 <script lang="ts">
-  import type { Run } from '../types'
+  import { Run, Verification, TreeType, Job, Rule, Assert } from '../types'
+  import Pane from './Pane.svelte'
+  import Tree from './Tree.svelte'
 
   export let doRename: boolean = true
   export let editFunc: () => void
@@ -8,7 +10,13 @@
   export let runName: string = ''
   export let renameRun: (oldName: string, newName: string) => void
   export let duplicateFunc: (toDuplicate: Run, duplicated: Run) => void
-  let doRun = false
+  export let runFunc: () => void
+  export let verificationResults: Verification[]
+  export let newFetchOutput: (
+    e: CustomEvent<Assert | Rule>,
+    vr: Verification,
+  ) => void
+  let doRun = true //todo: get this from extension
   let beforeRename = ''
   let activateRunRename = false
   const UNTITLED = 'untitled'
@@ -98,11 +106,19 @@
   }
 
   function duplicate() {
-    let toDuplicate = { id: 0, name: runName } //todo: clean
+    let toDuplicate = { name: runName } //todo: clean
     let duplicatedName = duplicateName()
-    let duplicatedRun = { id: 0, name: spacesToUnderscores(duplicatedName) } //todo clean
+    let duplicatedRun = { name: spacesToUnderscores(duplicatedName) } //todo clean
     namesMap.set(spacesToUnderscores(duplicatedName), duplicatedName)
     duplicateFunc(toDuplicate, duplicatedRun)
+  }
+
+  function retrieveRules(jobs: Job[]): Rule[] {
+    // rulesArrays = [Rule[] A, Rule[]B,...]
+    const rulesArrays: Rule[][] = jobs.map(
+      job => job.verificationProgress.rules,
+    )
+    return [].concat(...rulesArrays)
   }
 </script>
 
@@ -121,8 +137,35 @@
       <button on:click={deleteFunc}>delete</button>
       <button on:click={duplicate}>duplicate</button>
       {#if doRun}
-        <button>RUN</button>
+        <button on:click={runFunc}>RUN</button>
       {/if}
+      {#each verificationResults as verification}
+        {#if verification.name === runName}
+          <Pane
+            title={verification.name}
+            initialExpandedState={true}
+            actions={[
+              // {
+              //   title: 'Remove Current Verification Result',
+              //   icon: 'close',
+              //   onClick: () => {
+              //     verificationResults = verificationResults.filter(
+              //       res => res.contract !== verification.contract && res.spec !== verification.spec,
+              //     )
+              //   },
+              // },
+            ]}
+          >
+            <Tree
+              data={{
+                type: TreeType.Rules,
+                tree: retrieveRules(verification.jobs),
+              }}
+              on:fetchOutput={e => newFetchOutput(e, verification)}
+            />
+          </Pane>
+        {/if}
+      {/each}
     </div>
   {/if}
 </div>

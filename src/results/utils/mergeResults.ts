@@ -40,6 +40,7 @@ function addJobIdToProperties(job: Job) {
 export function smartMergeVerificationResult(
   results: Verification[],
   newResult: Job,
+  name: string,
 ): void {
   const tree: Tree = newResult.verificationProgress
   // look for Verification with the same contract name and spec file
@@ -61,6 +62,7 @@ export function smartMergeVerificationResult(
     console.log(newResult)
     // create a new Verification object and push to the Verification[]
     const newVerification: Verification = {
+      name: name, // todo: add the righ name
       contract: tree.contract,
       spec: tree.spec,
       jobs: [newResult],

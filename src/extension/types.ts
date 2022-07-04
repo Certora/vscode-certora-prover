@@ -176,6 +176,7 @@ export type EventFromResultsWebview =
     }
   | {
       command: CommandFromResultsWebview.RunScript
+      payload: ConfNameMap
     }
   | {
       command: CommandFromResultsWebview.OpenSettings

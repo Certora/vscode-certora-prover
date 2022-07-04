@@ -24,13 +24,14 @@ export function stopScript(pid: number): void {
   })
 }
 
-export function runScript(): void {
+export function runScript(name: ConfNameMap): void {
   log({
     action: 'Send "run-script" command',
     source: Sources.ResultsWebview,
   })
   vscode.postMessage({
     command: Commands.RunScript,
+    payload: name,
   })
 }
 

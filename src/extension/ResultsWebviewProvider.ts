@@ -22,12 +22,9 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
     | null
     | ((toDuplicate: ConfNameMap, duplicated: ConfNameMap) => void) = null
 
-  constructor(
-    private readonly _extensionUri: vscode.Uri,
-    private readonly runScript: () => Promise<void>,
-  ) {
+  public runScript: null | ((name: ConfNameMap) => void) = null
+  constructor(private readonly _extensionUri: vscode.Uri) {
     this._extensionUri = _extensionUri
-    this.runScript = runScript
   }
 
   resolveWebviewView({ webview }: vscode.WebviewView): void {
@@ -66,7 +63,9 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
               action: 'Received "run-script" command',
               source: Sources.Extension,
             })
-            this.runScript()
+            if (typeof this.runScript === 'function') {
+              this.runScript(e.payload)
+            }
             break
           case CommandFromResultsWebview.OpenSettings:
             log({
@@ -136,7 +135,10 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
     )
   }
 
-  public postMessage<T>(message: { type: string; payload?: T }): void {
+  public postMessage<T>(message: {
+    type: string
+    payload?: T | [T, string]
+  }): void {
     if (!this._panel) return
 
     log({

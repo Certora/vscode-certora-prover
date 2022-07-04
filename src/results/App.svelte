@@ -119,10 +119,15 @@
           source: Sources.ResultsWebview,
           info: {
             currentVerificationResults: verificationResults,
-            newResult: e.data.payload,
+            newResult: e.data.payload[0],
+            name: e.data.payload[1],
           },
         })
-        smartMergeVerificationResult(verificationResults, e.data.payload)
+        smartMergeVerificationResult(
+          verificationResults,
+          e.data.payload[0],
+          e.data.payload[1],
+        )
         verificationResults = verificationResults
         log({
           action: 'After Smart merge current results with new result',
@@ -168,7 +173,13 @@
           action: 'Received "create-new-job" command',
           source: Sources.ResultsWebview,
         })
-        createRun({ id: 0, name: '' })
+        const verification: Verification = {
+          name: '',
+          spec: '',
+          contract: '',
+          jobs: [],
+        }
+        createRun({ name: '' })
         break
       }
       default:
@@ -205,7 +216,13 @@
     if (run) {
       runs.push(run)
     } else {
-      runs.push({ id: runsCounter, name: '' })
+      const verification: Verification = {
+        name: '',
+        spec: '',
+        contract: '',
+        jobs: [],
+      }
+      runs.push({ name: '' })
     }
 
     runsCounter = runs.length
@@ -235,6 +252,14 @@
     namesMap.delete(name)
     console.log(confNameMap, 'delete')
     deleteConf(confNameMap)
+  }
+
+  function run(run: Run) {
+    const confNameMap: ConfNameMap = {
+      fileName: run.name,
+      displayName: namesMap.get(run.name),
+    }
+    runScript(confNameMap)
   }
 
   function renameRun(oldName: string, newName: string) {
@@ -272,14 +297,6 @@
   onDestroy(() => {
     window.removeEventListener('message', listener)
   })
-
-  function retrieveRules(jobs: Job[]): Rule[] {
-    // rulesArrays = [Rule[] A, Rule[]B,...]
-    const rulesArrays: Rule[][] = jobs.map(
-      job => job.verificationProgress.rules,
-    )
-    return [].concat(...rulesArrays)
-  }
 </script>
 
 {#if !hasResults}
@@ -313,14 +330,17 @@
         {namesMap}
         {renameRun}
         duplicateFunc={duplicateRun}
+        runFunc={() => run(runs[index])}
+        {verificationResults}
+        {newFetchOutput}
         bind:runName={runs[index].name}
       />
     {/each}
   </Pane>
-{:else}
-  {#each verificationResults as vr (vr.contract + '-' + vr.spec)}
-    <Pane
-      title={vr.contract + '-' + vr.spec}
+{/if}
+<!-- {#each verificationResults as vr (vr.contract + '-' + vr.spec)} -->
+<!-- <Pane
+      title={vr.name}
       initialExpandedState={true}
       actions={[
         {
@@ -341,62 +361,62 @@
         }}
         on:fetchOutput={e => newFetchOutput(e, vr)}
       />
+    </Pane> -->
+<!-- {/each} -->
+{#if output}
+  {#if output.variables && output.variables.length > 0}
+    <Pane
+      title={`${output.treeViewPath.ruleName} variables`}
+      initialExpandedState={true}
+      actions={[
+        {
+          title: 'Close Output',
+          icon: 'close',
+          onClick: clearOutput,
+        },
+      ]}
+    >
+      <CodeItemList codeItems={output.variables} />
     </Pane>
-  {/each}
-  {#if output}
-    {#if output.variables && output.variables.length > 0}
-      <Pane
-        title={`${output.treeViewPath.ruleName} variables`}
-        initialExpandedState={true}
-        actions={[
-          {
-            title: 'Close Output',
-            icon: 'close',
-            onClick: clearOutput,
-          },
-        ]}
-      >
-        <CodeItemList codeItems={output.variables} />
-      </Pane>
-    {/if}
-    {#if output.callTrace && Object.keys(output.callTrace).length > 0}
-      <Pane title={`Call Trace`} initialExpandedState={true}>
-        <Tree
-          data={{
-            type: TreeType.Calltrace,
-            tree: [output.callTrace],
-          }}
-          on:selectCalltraceFunction={selectCalltraceFunction}
-        />
-      </Pane>
-    {/if}
-    {#if selectedCalltraceFunction && selectedCalltraceFunction.variables && selectedCalltraceFunction.variables.length > 0}
-      <Pane
-        title={`${selectedCalltraceFunction.name} variables`}
-        initialExpandedState={true}
-      >
-        <CodeItemList codeItems={selectedCalltraceFunction.variables} />
-      </Pane>
-    {/if}
-    {#if output.callResolutionWarnings && output.callResolutionWarnings.length > 0}
-      <Pane
-        title={`Contract call resolution warnings`}
-        initialExpandedState={true}
-      >
-        {#each output.callResolutionWarnings as resolution}
-          <ContractCallResolution contractCallResolution={resolution} />
-        {/each}
-      </Pane>
-    {/if}
-    {#if output.callResolution && output.callResolution.length > 0}
-      <Pane title={`Contract call resolution`} initialExpandedState={true}>
-        {#each output.callResolution as resolution}
-          <ContractCallResolution contractCallResolution={resolution} />
-        {/each}
-      </Pane>
-    {/if}
+  {/if}
+  {#if output.callTrace && Object.keys(output.callTrace).length > 0}
+    <Pane title={`Call Trace`} initialExpandedState={true}>
+      <Tree
+        data={{
+          type: TreeType.Calltrace,
+          tree: [output.callTrace],
+        }}
+        on:selectCalltraceFunction={selectCalltraceFunction}
+      />
+    </Pane>
+  {/if}
+  {#if selectedCalltraceFunction && selectedCalltraceFunction.variables && selectedCalltraceFunction.variables.length > 0}
+    <Pane
+      title={`${selectedCalltraceFunction.name} variables`}
+      initialExpandedState={true}
+    >
+      <CodeItemList codeItems={selectedCalltraceFunction.variables} />
+    </Pane>
+  {/if}
+  {#if output.callResolutionWarnings && output.callResolutionWarnings.length > 0}
+    <Pane
+      title={`Contract call resolution warnings`}
+      initialExpandedState={true}
+    >
+      {#each output.callResolutionWarnings as resolution}
+        <ContractCallResolution contractCallResolution={resolution} />
+      {/each}
+    </Pane>
+  {/if}
+  {#if output.callResolution && output.callResolution.length > 0}
+    <Pane title={`Contract call resolution`} initialExpandedState={true}>
+      {#each output.callResolution as resolution}
+        <ContractCallResolution contractCallResolution={resolution} />
+      {/each}
+    </Pane>
   {/if}
 {/if}
+<!-- {/if} -->
 <Pane title="Running Scripts" initialExpandedState={true}>
   {#if hasRunningScripts}
     <ul class="running-scripts">

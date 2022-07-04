@@ -216,23 +216,25 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   }
 
-  async function runScript() {
-    quickPickWithConfFiles((selection, quickPick) => {
-      if (selection[0]) {
-        const confFile = selection[0].label
+  async function runScript(name: ConfNameMap) {
+    const confFile = 'conf/' + name.fileName + '.conf'
+    scriptRunner.run(confFile)
+    // quickPickWithConfFiles((selection, quickPick) => {
+    //   if (selection[0]) {
+    //     const confFile = selection[0].label
 
-        if (confFile.includes(' ')) {
-          vscode.window.showErrorMessage(
-            'The extension does not support path to conf file with spaces. Correct the conf file path and run the script again',
-          )
-          quickPick.hide()
-          return
-        }
+    //     if (confFile.includes(' ')) {
+    //       vscode.window.showErrorMessage(
+    //         'The extension does not support path to conf file with spaces. Correct the conf file path and run the script again',
+    //       )
+    //       quickPick.hide()
+    //       return
+    //     }
 
-        scriptRunner.run(confFile)
-        quickPick.hide()
-      }
-    })
+    //     scriptRunner.run(confFile)
+    //     quickPick.hide()
+    //   }
+    // })
   }
 
   function getConfUri(name: string): vscode.Uri | void {
@@ -254,13 +256,13 @@ export function activate(context: vscode.ExtensionContext): void {
 
   const resultsWebviewProvider = new ResultsWebviewProvider(
     context.extensionUri,
-    runScript,
   )
 
   resultsWebviewProvider.editConfFile = editConf
   resultsWebviewProvider.openSettings = showSettings
   resultsWebviewProvider.deleteConf = deleteConfFile
   resultsWebviewProvider.duplicate = duplicate
+  resultsWebviewProvider.runScript = runScript
 
   const scriptRunner = new ScriptRunner(resultsWebviewProvider)
 
