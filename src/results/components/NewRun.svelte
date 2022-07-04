@@ -82,7 +82,7 @@
   }
 
   function spacesToUnderscores(name: string) {
-    return name.replaceAll(' ', '_')
+    return name.replaceAll(' ', '_').toLocaleLowerCase()
   }
 
   function onChange(
