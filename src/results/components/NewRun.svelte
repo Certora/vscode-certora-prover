@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Run, Verification, TreeType, Job, Rule, Assert } from '../types'
+  import type { Run, Verification, TreeType, Job, Rule, Assert } from '../types'
   import Pane from './Pane.svelte'
   import Tree from './Tree.svelte'
 
@@ -106,13 +106,14 @@
   }
 
   function duplicate() {
-    let toDuplicate = { name: runName } //todo: clean
+    let toDuplicate = { name: runName }
     let duplicatedName = duplicateName()
-    let duplicatedRun = { name: spacesToUnderscores(duplicatedName) } //todo clean
+    let duplicatedRun = { name: spacesToUnderscores(duplicatedName) }
     namesMap.set(spacesToUnderscores(duplicatedName), duplicatedName)
     duplicateFunc(toDuplicate, duplicatedRun)
   }
 
+  // moved here from App.svelte
   function retrieveRules(jobs: Job[]): Rule[] {
     // rulesArrays = [Rule[] A, Rule[]B,...]
     const rulesArrays: Rule[][] = jobs.map(
@@ -139,33 +140,6 @@
       {#if doRun}
         <button on:click={runFunc}>RUN</button>
       {/if}
-      {#each verificationResults as verification}
-        {#if verification.name === runName}
-          <Pane
-            title={verification.name}
-            initialExpandedState={true}
-            actions={[
-              // {
-              //   title: 'Remove Current Verification Result',
-              //   icon: 'close',
-              //   onClick: () => {
-              //     verificationResults = verificationResults.filter(
-              //       res => res.contract !== verification.contract && res.spec !== verification.spec,
-              //     )
-              //   },
-              // },
-            ]}
-          >
-            <Tree
-              data={{
-                type: TreeType.Rules,
-                tree: retrieveRules(verification.jobs),
-              }}
-              on:fetchOutput={e => newFetchOutput(e, verification)}
-            />
-          </Pane>
-        {/if}
-      {/each}
     </div>
   {/if}
 </div>

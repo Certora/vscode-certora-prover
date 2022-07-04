@@ -70,6 +70,14 @@
     }
   }
 
+  function retrieveRules(jobs: Job[]): Rule[] {
+    // rulesArrays = [Rule[] A, Rule[]B,...]
+    const rulesArrays: Rule[][] = jobs.map(
+      job => job.verificationProgress.rules,
+    )
+    return [].concat(...rulesArrays)
+  }
+
   function fetchOutput(e: CustomEvent<Assert | Rule>, job: Job) {
     log({
       action: 'Try to fetch output',
@@ -323,6 +331,7 @@
 {#if runsCounter !== 0}
   <Pane title="MY RUNS" initialExpandedState={true} actions={[]}>
     {#each Array(runsCounter) as _, index (index)}
+      <!-- NewRun should be able to expend and have a Tree inside for the results -->
       <NewRun
         doRename={runs[index].name === ''}
         editFunc={() => editRun(runs[index])}
@@ -334,35 +343,23 @@
         {verificationResults}
         {newFetchOutput}
         bind:runName={runs[index].name}
-      />
+      >
+        {#each verificationResults as vr (vr.contract + '-' + vr.spec)}
+          {#if vr.name === runs[index].name}
+            <!-- for some reason can't see this inside NewRun -->
+            <Tree
+              data={{
+                type: TreeType.Rules,
+                tree: retrieveRules(vr.jobs),
+              }}
+              on:fetchOutput={e => newFetchOutput(e, vr)}
+            />
+          {/if}
+        {/each}
+      </NewRun>
     {/each}
   </Pane>
 {/if}
-<!-- {#each verificationResults as vr (vr.contract + '-' + vr.spec)} -->
-<!-- <Pane
-      title={vr.name}
-      initialExpandedState={true}
-      actions={[
-        {
-          title: 'Remove Current Verification Result',
-          icon: 'close',
-          onClick: () => {
-            verificationResults = verificationResults.filter(
-              res => res.contract !== vr.contract && res.spec !== vr.spec,
-            )
-          },
-        },
-      ]}
-    >
-      <Tree
-        data={{
-          type: TreeType.Rules,
-          tree: retrieveRules(vr.jobs),
-        }}
-        on:fetchOutput={e => newFetchOutput(e, vr)}
-      />
-    </Pane> -->
-<!-- {/each} -->
 {#if output}
   {#if output.variables && output.variables.length > 0}
     <Pane
