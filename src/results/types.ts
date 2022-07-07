@@ -178,6 +178,6 @@ export type ConfNameMap = {
 }
 
 export type Run = {
+  id: number
   name: string
-  verification?: Verification
 }

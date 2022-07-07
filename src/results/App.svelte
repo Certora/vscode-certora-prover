@@ -41,6 +41,7 @@
 
   $: hasRunningScripts = runningScripts.length > 0
   $: hasResults = verificationResults.length > 0
+  $: hasRuns = runsCounter > 0
 
   function newFetchOutput(e: CustomEvent<Assert | Rule>, vr: Verification) {
     console.log(e.detail)
@@ -181,13 +182,8 @@
           action: 'Received "create-new-job" command',
           source: Sources.ResultsWebview,
         })
-        const verification: Verification = {
-          name: '',
-          spec: '',
-          contract: '',
-          jobs: [],
-        }
-        createRun({ name: '' })
+
+        createRun({ id: runs.length, name: '' })
         break
       }
       default:
@@ -205,7 +201,15 @@
   //   openSettings(confNameMap)
   // }
 
-  function duplicateRun(toDuplicate: Run, duplicated: Run) {
+  function duplicateRun(nameToDuplicate: string, duplicatedName: string) {
+    console.log(
+      'to duplicate: ',
+      nameToDuplicate,
+      'duplicated: ',
+      duplicatedName,
+    )
+    const toDuplicate: Run = runs.find(run => run.name === nameToDuplicate)
+    const duplicated: Run = { id: runs.length, name: duplicatedName }
     createRun(duplicated)
     const confNameMapDuplicated: ConfNameMap = {
       fileName: duplicated.name,
@@ -219,21 +223,15 @@
     duplicate(confNameMapToDuplicate, confNameMapDuplicated)
   }
 
-  function createRun(run: Run) {
+  function createRun(run?: Run) {
     console.log('===create run===')
     if (run) {
       runs.push(run)
     } else {
-      const verification: Verification = {
-        name: '',
-        spec: '',
-        contract: '',
-        jobs: [],
-      }
-      runs.push({ name: '' })
+      runs.push({ id: runs.length, name: '' })
     }
-
-    runsCounter = runs.length
+    runsCounter++
+    console.log(runsCounter, 'runs counter after creation')
   }
 
   function editRun(run: Run) {
@@ -256,10 +254,11 @@
     runs = runs.filter(run => {
       return run !== toFilter
     })
-    runsCounter = runs.length
+
     namesMap.delete(name)
     console.log(confNameMap, 'delete')
     deleteConf(confNameMap)
+    runsCounter--
   }
 
   function run(run: Run) {
@@ -322,13 +321,13 @@
       <div class="command-description">
         To check your smart contract start by creating a verification run
       </div>
-      <vscode-button class="command-button" on:click={createRun}>
+      <vscode-button class="command-button" on:click={() => createRun()}>
         Create verification run
       </vscode-button>
     </div>
   </div>
 {/if}
-{#if runsCounter !== 0}
+{#if hasRuns}
   <Pane title="MY RUNS" initialExpandedState={true} actions={[]}>
     {#each Array(runsCounter) as _, index (index)}
       <NewRun

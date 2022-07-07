@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { rename } from 'fs'
-
   import {
     Run,
     Verification,
@@ -19,14 +17,20 @@
   export let namesMap: Map<string, string>
   export let runName: string = ''
   export let renameRun: (oldName: string, newName: string) => void
-  export let duplicateFunc: (toDuplicate: Run, duplicated: Run) => void
+  export let duplicateFunc: (
+    nameToDuplicate: string,
+    duplicatedName: string,
+  ) => void
   export let runFunc: () => void
   export let verificationResults: Verification[]
   export let newFetchOutput: (
     e: CustomEvent<Assert | Rule>,
     vr: Verification,
   ) => void
-  let initialExpandedState = true
+
+  let nowRunning = false
+  let expandedState = false
+
   let doRun = true //todo: get this from extension
   let beforeRename = ''
   let activateRunRename = false
@@ -40,6 +44,7 @@
       if (e.currentTarget.value === '') {
         runName = UNTITLED
         titleHandle()
+        renameRun('', spacesToUnderscores(runName))
       }
       activateRunRename = true
     }
@@ -117,11 +122,14 @@
   }
 
   function duplicate() {
-    let toDuplicate = { name: runName }
     let duplicatedName = duplicateName()
-    let duplicatedRun = { name: spacesToUnderscores(duplicatedName) }
     namesMap.set(spacesToUnderscores(duplicatedName), duplicatedName)
-    duplicateFunc(toDuplicate, duplicatedRun)
+    duplicateFunc(runName, spacesToUnderscores(duplicatedName))
+  }
+
+  function runAndDisable() {
+    nowRunning = true
+    runFunc()
   }
 
   function createActions(): Action[] {
@@ -151,7 +159,7 @@
       const runAction = {
         title: 'run',
         icon: 'run',
-        onClick: runFunc,
+        onClick: runAndDisable,
       }
       actions.push(runAction)
     }
@@ -178,7 +186,7 @@
     <div>
       <Pane
         title={namesMap.get(runName)}
-        {initialExpandedState}
+        initialExpandedState={expandedState}
         actions={createActions()}
       >
         {#each verificationResults as vr (vr.contract + '-' + vr.spec)}
