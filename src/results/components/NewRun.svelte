@@ -28,8 +28,8 @@
     vr: Verification,
   ) => void
 
-  let nowRunning = false
-  let expandedState = false
+  export let expandedState = false
+  export let nowRunning = false
 
   let doRun = true //todo: get this from extension
   let beforeRename = ''
@@ -44,7 +44,7 @@
       if (e.currentTarget.value === '') {
         runName = UNTITLED
         titleHandle()
-        renameRun('', spacesToUnderscores(runName))
+        renameRun('', spacesToUnderscores(UNTITLED))
       }
       activateRunRename = true
     }
@@ -128,8 +128,8 @@
   }
 
   function runAndDisable() {
-    nowRunning = true
     runFunc()
+    //nowRunning = true
   }
 
   function createActions(): Action[] {
@@ -182,7 +182,7 @@
       on:keypress={onKeyPress}
       on:change={onChange}
     />
-  {:else}
+  {:else if !nowRunning}
     <div>
       <Pane
         title={namesMap.get(runName)}
@@ -200,6 +200,16 @@
             />
           {/if}
         {/each}
+      </Pane>
+    </div>
+  {:else}
+    <div>
+      <Pane
+        title={namesMap.get(runName)}
+        initialExpandedState={false}
+        actions={[]}
+      >
+        running...
       </Pane>
     </div>
   {/if}

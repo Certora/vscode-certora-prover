@@ -2,6 +2,7 @@
   import { getIconPath } from '../utils/getIconPath'
 
   export let confFile: string
+  export let title: string
 </script>
 
 <div class="running-script">
@@ -13,7 +14,7 @@
       src={getIconPath('running-rule-status.svg')}
       alt=""
     />
-    <span title={confFile}>{confFile}</span>
+    <span title={confFile}>{title}</span>
   </div>
   <div
     tabindex="0"

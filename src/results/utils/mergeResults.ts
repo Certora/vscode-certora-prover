@@ -49,14 +49,14 @@ export function smartMergeVerificationResult(
   )
   // if found
   if (index > -1) {
-    console.log(
-      'found Verification with contract=' +
-        tree.contract +
-        ' spec=' +
-        tree.spec,
-    )
-    console.log(results[index])
-    mergeVerification(results[index], newResult)
+    // console.log(
+    //   'found Verification with contract=' +
+    //     tree.contract +
+    //     ' spec=' +
+    //     tree.spec,
+    // )
+    // console.log(results[index])
+    // mergeVerification(results[index], newResult)
   } else {
     addJobIdToProperties(newResult)
     console.log(newResult)

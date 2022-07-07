@@ -5,6 +5,7 @@ import { ScriptRunner } from './ScriptRunner'
 import { ConfFile, InputFormData, ConfNameMap } from './types'
 import { SmartContractsFilesWatcher } from './SmartContractsFilesWatcher'
 import { createAndOpenConfFile } from './utils/createAndOpenConfFile'
+import { display } from '@microsoft/fast-foundation'
 
 export function activate(context: vscode.ExtensionContext): void {
   function showSettings(name: ConfNameMap) {
@@ -217,6 +218,7 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   async function runScript(name: ConfNameMap) {
+    SettingsPanel.removePanel(name.displayName)
     const confFile = 'conf/' + name.fileName + '.conf'
     scriptRunner.run(confFile)
     // quickPickWithConfFiles((selection, quickPick) => {

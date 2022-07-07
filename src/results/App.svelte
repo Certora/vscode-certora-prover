@@ -28,6 +28,8 @@
   } from './types'
   import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
   import NewRun from './components/NewRun.svelte'
+  import { Script } from 'vm'
+  import { RelativePattern } from 'vscode'
 
   let output: Output
   let selectedCalltraceFunction: CallTraceFunction
@@ -246,6 +248,9 @@
 
   function deleteRun(toFilter: Run) {
     const name = toFilter.name
+    verificationResults = verificationResults.filter(vr => {
+      return vr.name !== name
+    })
     const confNameMap: ConfNameMap = {
       fileName: name,
       displayName: namesMap.get(name),
@@ -262,6 +267,9 @@
   }
 
   function run(run: Run) {
+    verificationResults = verificationResults.filter(vr => {
+      return vr.name !== run.name
+    })
     const confNameMap: ConfNameMap = {
       fileName: run.name,
       displayName: namesMap.get(run.name),
@@ -273,6 +281,23 @@
     // rename existing
     if (oldName !== '') {
       console.log('delete old ', oldName)
+
+      let oldResult = verificationResults.find(vr => vr.name === oldName)
+      console.log('===old result====', oldResult)
+      if (oldResult !== undefined) {
+        let newResult: Verification = {
+          name: newName,
+          contract: oldResult.contract,
+          spec: oldResult.spec,
+          jobs: oldResult.jobs,
+        }
+        verificationResults = verificationResults.filter(vr => {
+          return vr.name !== oldName
+        })
+        verificationResults.push(newResult)
+        console.log('====verification results====', verificationResults)
+      }
+
       const oldConfNameMap: ConfNameMap = {
         fileName: oldName,
         displayName: namesMap.get(oldName),
@@ -340,6 +365,14 @@
         runFunc={() => run(runs[index])}
         {verificationResults}
         {newFetchOutput}
+        nowRunning={runningScripts.find(
+          rs =>
+            rs.confFile.replace('conf/', '').replace('.conf', '') ===
+            runs[index].name,
+        ) !== undefined}
+        expandedState={verificationResults.find(
+          vr => vr.name === runs[index].name,
+        ) !== undefined}
         bind:runName={runs[index].name}
       />
     {/each}
@@ -405,6 +438,9 @@
       {#each runningScripts as script (script.pid)}
         <li>
           <RunningScript
+            title={namesMap.get(
+              script.confFile.replace('conf/', '').replace('.conf', ''),
+            ) || script.confFile}
             confFile={script.confFile}
             on:click={() => {
               stopScript(script.pid)
