@@ -44,6 +44,7 @@
 
   /**
    * returns a name for a duplicated item
+   * example: name => name (1)
    */
   function duplicateName() {
     let nameToDuplicate = runName
@@ -119,10 +120,6 @@
     duplicateFunc(runName, spacesToUnderscores(duplicatedName))
   }
 
-  function runAndDisable() {
-    runFunc()
-  }
-
   function createActions(): Action[] {
     let actions: Action[] = [
       {
@@ -150,13 +147,14 @@
       const runAction = {
         title: 'run',
         icon: 'run',
-        onClick: runAndDisable,
+        onClick: runFunc,
       }
       actions.push(runAction)
     }
     return actions
   }
 
+  // was copied from App.svelte
   function retrieveRules(jobs: Job[]): Rule[] {
     // rulesArrays = [Rule[] A, Rule[]B,...]
     const rulesArrays: Rule[][] = jobs.map(
@@ -180,7 +178,7 @@
         initialExpandedState={expandedState}
         actions={createActions()}
       >
-        {#each verificationResults as vr (vr.contract + '-' + vr.spec)}
+        {#each verificationResults as vr}
           {#if vr.name === runName}
             <Tree
               data={{

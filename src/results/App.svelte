@@ -14,7 +14,7 @@
     deleteConf,
     duplicate,
   } from './extension-actions'
-  import { smartMergeVerificationResult } from './utils/mergeResults'
+  import { addVerificationResult } from './utils/mergeResults'
   import { log, Sources } from './utils/log'
   import type {
     Assert,
@@ -71,13 +71,13 @@
     }
   }
 
-  function retrieveRules(jobs: Job[]): Rule[] {
-    // rulesArrays = [Rule[] A, Rule[]B,...]
-    const rulesArrays: Rule[][] = jobs.map(
-      job => job.verificationProgress.rules,
-    )
-    return [].concat(...rulesArrays)
-  }
+  // function retrieveRules(jobs: Job[]): Rule[] {
+  //   // rulesArrays = [Rule[] A, Rule[]B,...]
+  //   const rulesArrays: Rule[][] = jobs.map(
+  //     job => job.verificationProgress.rules,
+  //   )
+  //   return [].concat(...rulesArrays)
+  // }
 
   function fetchOutput(e: CustomEvent<Assert | Rule>, job: Job) {
     log({
@@ -132,7 +132,7 @@
             name: e.data.payload[1],
           },
         })
-        smartMergeVerificationResult(
+        addVerificationResult(
           verificationResults,
           e.data.payload[0],
           e.data.payload[1],

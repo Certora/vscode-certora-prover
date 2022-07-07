@@ -37,6 +37,22 @@ function addJobIdToProperties(job: Job) {
   addJobIdToRules(jobId, tree.rules)
 }
 
+export function addVerificationResult(
+  results: Verification[],
+  newResult: Job,
+  name: string,
+): void {
+  const tree: Tree = newResult.verificationProgress
+  addJobIdToProperties(newResult)
+  const newVerification: Verification = {
+    name: name,
+    contract: tree.contract,
+    spec: tree.spec,
+    jobs: [newResult],
+  }
+  results.push(newVerification)
+}
+
 export function smartMergeVerificationResult(
   results: Verification[],
   newResult: Job,
