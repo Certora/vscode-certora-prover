@@ -331,7 +331,6 @@
 {#if runsCounter !== 0}
   <Pane title="MY RUNS" initialExpandedState={true} actions={[]}>
     {#each Array(runsCounter) as _, index (index)}
-      <!-- NewRun should be able to expend and have a Tree inside for the results -->
       <NewRun
         doRename={runs[index].name === ''}
         editFunc={() => editRun(runs[index])}
@@ -343,20 +342,7 @@
         {verificationResults}
         {newFetchOutput}
         bind:runName={runs[index].name}
-      >
-        {#each verificationResults as vr (vr.contract + '-' + vr.spec)}
-          {#if vr.name === runs[index].name}
-            <!-- for some reason can't see this inside NewRun -->
-            <Tree
-              data={{
-                type: TreeType.Rules,
-                tree: retrieveRules(vr.jobs),
-              }}
-              on:fetchOutput={e => newFetchOutput(e, vr)}
-            />
-          {/if}
-        {/each}
-      </NewRun>
+      />
     {/each}
   </Pane>
 {/if}

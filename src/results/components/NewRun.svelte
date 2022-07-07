@@ -1,5 +1,15 @@
 <script lang="ts">
-  import type { Run, Verification, TreeType, Job, Rule, Assert } from '../types'
+  import { rename } from 'fs'
+
+  import {
+    Run,
+    Verification,
+    TreeType,
+    Job,
+    Rule,
+    Assert,
+    Action,
+  } from '../types'
   import Pane from './Pane.svelte'
   import Tree from './Tree.svelte'
 
@@ -16,6 +26,7 @@
     e: CustomEvent<Assert | Rule>,
     vr: Verification,
   ) => void
+  let initialExpandedState = true
   let doRun = true //todo: get this from extension
   let beforeRename = ''
   let activateRunRename = false
@@ -113,7 +124,40 @@
     duplicateFunc(toDuplicate, duplicatedRun)
   }
 
-  // moved here from App.svelte
+  function createActions(): Action[] {
+    let actions: Action[] = [
+      {
+        title: 'rename',
+        icon: 'edit',
+        onClick: setRename,
+      },
+      {
+        title: 'edit',
+        icon: 'settings',
+        onClick: editFunc,
+      },
+      {
+        title: 'delete',
+        icon: 'trash',
+        onClick: deleteFunc,
+      },
+      {
+        title: 'duplicate',
+        icon: 'add',
+        onClick: duplicate,
+      },
+    ]
+    if (doRun) {
+      const runAction = {
+        title: 'run',
+        icon: 'run',
+        onClick: runFunc,
+      }
+      actions.push(runAction)
+    }
+    return actions
+  }
+
   function retrieveRules(jobs: Job[]): Rule[] {
     // rulesArrays = [Rule[] A, Rule[]B,...]
     const rulesArrays: Rule[][] = jobs.map(
@@ -132,14 +176,23 @@
     />
   {:else}
     <div>
-      {namesMap.get(runName)}
-      <button on:click={setRename}>rename</button>
-      <button on:click={editFunc}>edit</button>
-      <button on:click={deleteFunc}>delete</button>
-      <button on:click={duplicate}>duplicate</button>
-      {#if doRun}
-        <button on:click={runFunc}>RUN</button>
-      {/if}
+      <Pane
+        title={namesMap.get(runName)}
+        {initialExpandedState}
+        actions={createActions()}
+      >
+        {#each verificationResults as vr (vr.contract + '-' + vr.spec)}
+          {#if vr.name === runName}
+            <Tree
+              data={{
+                type: TreeType.Rules,
+                tree: retrieveRules(vr.jobs),
+              }}
+              on:fetchOutput={e => newFetchOutput(e, vr)}
+            />
+          {/if}
+        {/each}
+      </Pane>
     </div>
   {/if}
 </div>
