@@ -5,7 +5,6 @@ import { ScriptRunner } from './ScriptRunner'
 import { ConfFile, InputFormData, ConfNameMap } from './types'
 import { SmartContractsFilesWatcher } from './SmartContractsFilesWatcher'
 import { createAndOpenConfFile } from './utils/createAndOpenConfFile'
-import { display } from '@microsoft/fast-foundation'
 
 export function activate(context: vscode.ExtensionContext): void {
   function showSettings(name: ConfNameMap) {

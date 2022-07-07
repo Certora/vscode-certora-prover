@@ -1,13 +1,5 @@
 <script lang="ts">
-  import {
-    Run,
-    Verification,
-    TreeType,
-    Job,
-    Rule,
-    Assert,
-    Action,
-  } from '../types'
+  import { Verification, TreeType, Job, Rule, Assert, Action } from '../types'
   import Pane from './Pane.svelte'
   import Tree from './Tree.svelte'
 
@@ -129,7 +121,6 @@
 
   function runAndDisable() {
     runFunc()
-    //nowRunning = true
   }
 
   function createActions(): Action[] {

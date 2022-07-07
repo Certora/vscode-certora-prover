@@ -28,8 +28,6 @@
   } from './types'
   import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
   import NewRun from './components/NewRun.svelte'
-  import { Script } from 'vm'
-  import { RelativePattern } from 'vscode'
 
   let output: Output
   let selectedCalltraceFunction: CallTraceFunction
