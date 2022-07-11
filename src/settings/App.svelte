@@ -8,14 +8,17 @@
   import AdditionalSettings from './components/AdditionalSettings.svelte'
   import OneFieldSetting from './components/OneFieldSetting.svelte'
   import SettingWithFilePicker from './components/SettingWithFilePicker.svelte'
+  // new cutting edge stuff
   import { log, Sources } from './utils/log'
   import { confFileToFormData } from './utils/confFileToFormData'
   import type { Form } from './types'
   import { EventTypesFromExtension, EventsFromExtension } from './types'
+  import RenamedMainWrapper from './not_sure_how_to_structure/RenamedMainWrapper.svelte'
 
   let solidityFiles: string[] = []
   let specFiles: string[] = []
   let submitButtonText = 'Create conf file'
+  let test = false
   let form: Form = {
     mainSolidityFile: '',
     mainContractName: '',
@@ -95,85 +98,94 @@
   })
 </script>
 
-<div class="settings">
-  <h2 class="section-title">General</h2>
-  <SettingWithFilePicker
-    title="Main Solidity File"
-    description="Pick solidity file"
-    refreshButtonTitle="Update list of contracts"
-    files={solidityFiles}
-    bind:file={form.mainSolidityFile}
-  />
-  <OneFieldSetting
-    title="Main Contract Name"
-    description="Contract name"
-    bind:value={form.mainContractName}
-  />
-  <SettingWithFilePicker
-    title="Spec File"
-    description="Spec file path"
-    refreshButtonTitle="Update list of spec files"
-    files={specFiles}
-    bind:file={form.specFile}
-  />
-  <OneFieldSetting
-    title="Solidity Compiler"
-    description="Solidity compiler executable file (expected to be added to the $PATH environment variable). By default, solc (or solc.exe on Windows) is used"
-    bind:value={form.solidityCompiler}
-  />
-  <VerifyAdditionalContract
-    {solidityFiles}
-    bind:useAdditionalContracts={form.useAdditionalContracts}
-    bind:additionalContracts={form.additionalContracts}
-  />
-  <Link
-    useAdditionalContracts={form.useAdditionalContracts}
-    bind:link={form.link}
-  />
+{#if test}
+  <div class="settings">
+    <h2 class="section-title">General</h2>
+    <SettingWithFilePicker
+      title="Main Solidity File"
+      description="Pick solidity file"
+      refreshButtonTitle="Update list of contracts"
+      files={solidityFiles}
+      bind:file={form.mainSolidityFile}
+    />
+    <OneFieldSetting
+      title="Main Contract Name"
+      description="Contract name"
+      bind:value={form.mainContractName}
+    />
+    <SettingWithFilePicker
+      title="Spec File"
+      description="Spec file path"
+      refreshButtonTitle="Update list of spec files"
+      files={specFiles}
+      bind:file={form.specFile}
+    />
+    <OneFieldSetting
+      title="Solidity Compiler"
+      description="Solidity compiler executable file (expected to be added to the $PATH environment variable). By default, solc (or solc.exe on Windows) is used"
+      bind:value={form.solidityCompiler}
+    />
+    <VerifyAdditionalContract
+      {solidityFiles}
+      bind:useAdditionalContracts={form.useAdditionalContracts}
+      bind:additionalContracts={form.additionalContracts}
+    />
+    <Link
+      useAdditionalContracts={form.useAdditionalContracts}
+      bind:link={form.link}
+    />
 
-  <h2 class="section-title">Advanced</h2>
-  <ExtendedSettings bind:flags={form.extendedSettings} />
-  <BaseSetting title="Staging">
-    <div class="staging">
-      <vscode-checkbox
-        checked={form.useStaging}
-        on:change={e => (form.useStaging = e.target.checked)}
+    <h2 class="section-title">Advanced</h2>
+    <ExtendedSettings bind:flags={form.extendedSettings} />
+    <BaseSetting title="Staging">
+      <div class="staging">
+        <vscode-checkbox
+          checked={form.useStaging}
+          on:change={e => (form.useStaging = e.target.checked)}
+        >
+          Run on the Staging Environment
+        </vscode-checkbox>
+        <vscode-text-field
+          disabled={!form.useStaging}
+          value={form.branch}
+          on:change={e => (form.branch = e.target.value)}
+        >
+          Branch name
+        </vscode-text-field>
+      </div>
+    </BaseSetting>
+    <OneFieldSetting
+      title="Cache Name"
+      description="Optimize the pre-analysis by using cache"
+      bind:value={form.cacheName}
+    />
+    <OneFieldSetting
+      title="Message"
+      description="Adds a message description to your run, similar to a commit message. This message will appear in the title of the completion email sent to you"
+      bind:value={form.message}
+    />
+    <AdditionalSettings bind:settings={form.additionalSettings} />
+    <div>
+      <vscode-button on:click={createConfFile}>{submitButtonText}</vscode-button
       >
-        Run on the Staging Environment
-      </vscode-checkbox>
-      <vscode-text-field
-        disabled={!form.useStaging}
-        value={form.branch}
-        on:change={e => (form.branch = e.target.value)}
-      >
-        Branch name
-      </vscode-text-field>
     </div>
-  </BaseSetting>
-  <OneFieldSetting
-    title="Cache Name"
-    description="Optimize the pre-analysis by using cache"
-    bind:value={form.cacheName}
-  />
-  <OneFieldSetting
-    title="Message"
-    description="Adds a message description to your run, similar to a commit message. This message will appear in the title of the completion email sent to you"
-    bind:value={form.message}
-  />
-  <AdditionalSettings bind:settings={form.additionalSettings} />
-  <div>
-    <vscode-button on:click={createConfFile}>{submitButtonText}</vscode-button>
   </div>
-</div>
+{:else}
+  <RenamedMainWrapper />
+{/if}
 
 <style lang="postcss">
+  /* stylelint-disable */
+
+  @import './styles.css';
+
   :global(vscode-dropdown) {
     color: var(--dropdown-text-color);
   }
 
-  :global(body) {
+  /* :global(body) {
     padding: 26px 24px;
-  }
+  } */
 
   :global(:root) {
     --space-xs: 4px;
@@ -184,9 +196,9 @@
     --space-xxl: 30px;
   }
 
-  :global(body.vscode-light) {
+  /* :global(body.vscode-light) {
     --dropdown-text-color: #000;
-  }
+  } */
 
   :global(body.vscode-dark) {
     --dropdown-text-color: var(--dropdown-foreground);

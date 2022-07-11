@@ -173,6 +173,8 @@
     )
     return [].concat(...rulesArrays)
   }
+  // temp
+  openSettings()
 </script>
 
 {#if !hasResults}
