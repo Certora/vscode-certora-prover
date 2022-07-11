@@ -384,7 +384,10 @@
           rs =>
             rs.confFile.replace('conf/', '').replace('.conf', '') ===
             runs[index].name,
-        ) !== undefined || queueCounter > 0}
+        ) !== undefined ||
+          (runsQueue.find(rs => rs.fileName === runs[index].name) !==
+            undefined &&
+            queueCounter > 0)}
         expandedState={verificationResults.find(
           vr => vr.name === runs[index].name,
         ) !== undefined}
@@ -459,6 +462,11 @@
             confFile={script.confFile}
             on:click={() => {
               stopScript(script.pid)
+              if (queueCounter > 0) {
+                let curRun = runsQueue.shift()
+                queueCounter--
+                runScript(curRun)
+              }
             }}
           />
         </li>
@@ -473,7 +481,7 @@
             confFile={runsQueue[index].fileName}
             on:click={() => {
               runsQueue = runsQueue.filter(rq => {
-                rq.fileName !== runsQueue[index].fileName
+                return rq.fileName !== runsQueue[index].fileName
               })
               queueCounter--
             }}
