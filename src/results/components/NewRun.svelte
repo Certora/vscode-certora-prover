@@ -23,7 +23,7 @@
   export let expandedState = false
   export let nowRunning = false
 
-  let doRun = true //todo: get this from extension
+  export let doRun = true //todo: get this from extension
   let beforeRename = ''
   let activateRunRename = false
   const UNTITLED = 'untitled'

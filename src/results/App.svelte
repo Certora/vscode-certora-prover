@@ -28,6 +28,7 @@
   } from './types'
   import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
   import NewRun from './components/NewRun.svelte'
+  import { findSourceMap } from 'module'
 
   let output: Output
   let selectedCalltraceFunction: CallTraceFunction
@@ -37,6 +38,7 @@
 
   let runs: Run[] = []
   let runsQueue: ConfNameMap[] = []
+  let queueCounter = 0
   let namesMap: Map<string, string> = new Map()
   let runsCounter = 0
 
@@ -148,6 +150,7 @@
         })
         if (runsQueue.length > 0) {
           let curRun = runsQueue.shift()
+          queueCounter--
           console.log('run ', curRun.fileName, 'after previus run finished')
           runScript(curRun)
         }
@@ -281,7 +284,9 @@
 
     console.log('add ', confNameMap.fileName, 'to queue')
     runsQueue.push(confNameMap)
+    queueCounter++
     if (runningScripts.length === 0) {
+      queueCounter--
       runScript(runsQueue.shift())
     }
   }
@@ -372,13 +377,14 @@
         {renameRun}
         duplicateFunc={duplicateRun}
         runFunc={() => run(runs[index])}
+        doRun={true}
         {verificationResults}
         {newFetchOutput}
         nowRunning={runningScripts.find(
           rs =>
             rs.confFile.replace('conf/', '').replace('.conf', '') ===
             runs[index].name,
-        ) !== undefined}
+        ) !== undefined || queueCounter > 0}
         expandedState={verificationResults.find(
           vr => vr.name === runs[index].name,
         ) !== undefined}
@@ -442,17 +448,34 @@
 {/if}
 <!-- {/if} -->
 <Pane title="Running Scripts" initialExpandedState={true}>
-  {#if hasRunningScripts}
+  {#if hasRunningScripts || queueCounter > 0}
     <ul class="running-scripts">
       {#each runningScripts as script (script.pid)}
         <li>
           <RunningScript
-            title={namesMap.get(
+            title={(namesMap.get(
               script.confFile.replace('conf/', '').replace('.conf', ''),
-            ) || script.confFile}
+            ) || script.confFile) + '     currently runnig'}
             confFile={script.confFile}
             on:click={() => {
               stopScript(script.pid)
+            }}
+          />
+        </li>
+      {/each}
+    </ul>
+    <ul class="running-scripts">
+      {#each Array(queueCounter) as _, index (index)}
+        <li>
+          <RunningScript
+            title={namesMap.get(runsQueue[index].fileName) ||
+              runsQueue[index].fileName}
+            confFile={runsQueue[index].fileName}
+            on:click={() => {
+              runsQueue = runsQueue.filter(rq => {
+                rq.fileName !== runsQueue[index].fileName
+              })
+              queueCounter--
             }}
           />
         </li>
