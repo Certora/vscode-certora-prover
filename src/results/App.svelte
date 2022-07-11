@@ -36,6 +36,7 @@
   let runningScripts: { pid: number; confFile: string }[] = []
 
   let runs: Run[] = []
+  let runsQueue: ConfNameMap[] = []
   let namesMap: Map<string, string> = new Map()
   let runsCounter = 0
 
@@ -145,6 +146,11 @@
             updatedVerificationResults: verificationResults,
           },
         })
+        if (runsQueue.length > 0) {
+          let curRun = runsQueue.shift()
+          console.log('run ', curRun.fileName, 'after previus run finished')
+          runScript(curRun)
+        }
         break
       }
       case EventTypesFromExtension.RunningScriptChanged: {
@@ -272,7 +278,12 @@
       fileName: run.name,
       displayName: namesMap.get(run.name),
     }
-    runScript(confNameMap)
+
+    console.log('add ', confNameMap.fileName, 'to queue')
+    runsQueue.push(confNameMap)
+    if (runningScripts.length === 0) {
+      runScript(runsQueue.shift())
+    }
   }
 
   function renameRun(oldName: string, newName: string) {
