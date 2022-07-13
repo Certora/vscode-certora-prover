@@ -146,6 +146,7 @@ export enum EventTypesFromExtension {
   ClearAllJobs = 'clear-all-jobs',
   SetCreationTime = 'set-creation-time',
   CreateJob = 'create-new-job',
+  ParseError = 'parse-error',
 }
 
 export type EventsFromExtension =
@@ -170,6 +171,9 @@ export type EventsFromExtension =
     }
   | {
       type: EventTypesFromExtension.CreateJob
+    }
+  | {
+      type: EventTypesFromExtension.ParseError
     }
 
 export type ConfNameMap = {

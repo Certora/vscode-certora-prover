@@ -145,6 +145,9 @@ export class ScriptRunner {
 
         if (code !== 0) {
           PostProblems.postProblems(confFile)
+          this.resultsWebviewProvider.postMessage({
+            type: 'parse-error',
+          })
         }
 
         const action = await window.showInformationMessage(

@@ -193,6 +193,14 @@
         createRun({ id: runs.length, name: '' })
         break
       }
+      case EventTypesFromExtension.ParseError: {
+        log({
+          action: 'Received "parse-error" command',
+          source: Sources.ResultsWebview,
+        })
+        runNext()
+        break
+      }
       default:
         break
     }
