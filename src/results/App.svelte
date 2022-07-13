@@ -279,7 +279,7 @@
     runsCounter--
   }
 
-  function run(run: Run) {
+  function run(run: Run, index?: number) {
     verificationResults = verificationResults.filter(vr => {
       return vr.name !== run.name
     })
@@ -291,7 +291,7 @@
     console.log('add ', confNameMap.fileName, 'to queue')
     runsQueue.push(confNameMap)
     queueCounter++
-    if (!hasRunningScripts) {
+    if (!hasRunningScripts && (!index || index === 0)) {
       runNext()
     }
   }
@@ -349,6 +349,25 @@
     }
   }
 
+  function getFilename(confFile: string): string {
+    return confFile.replace('conf/', '').replace('.conf', '')
+  }
+
+  function runAll(): void {
+    runs.forEach((singleRun, index) => {
+      const nowRunning = runningScripts.find(script => {
+        return getFilename(script.confFile) === singleRun.name
+      })
+      const inQueue = runsQueue.find(pendingRun => {
+        return pendingRun.fileName === singleRun.name
+      })
+      console.log('inQueue:', inQueue, 'nowRunning:', nowRunning)
+      if (inQueue === undefined && nowRunning === undefined) {
+        run(singleRun, index)
+      }
+    })
+  }
+
   onMount(() => {
     window.addEventListener('message', listener)
     runNext()
@@ -381,7 +400,22 @@
 </div>
 <!-- {/if} -->
 {#if hasRuns}
-  <Pane title="MY RUNS" initialExpandedState={true} actions={[]}>
+  <Pane
+    title="MY RUNS"
+    initialExpandedState={true}
+    actions={[
+      {
+        title: 'run all',
+        icon: 'run-all',
+        onClick: runAll,
+      },
+      {
+        title: 'create new run',
+        icon: 'diff-added',
+        onClick: createRun,
+      },
+    ]}
+  >
     {#each Array(runsCounter) as _, index (index)}
       <NewRun
         doRename={runs[index].name === ''}
@@ -395,9 +429,7 @@
         {verificationResults}
         {newFetchOutput}
         nowRunning={runningScripts.find(
-          rs =>
-            rs.confFile.replace('conf/', '').replace('.conf', '') ===
-            runs[index].name,
+          rs => getFilename(rs.confFile) === runs[index].name,
         ) !== undefined ||
           (runsQueue.find(rs => rs.fileName === runs[index].name) !==
             undefined &&
@@ -470,9 +502,8 @@
       {#each runningScripts as script (script.pid)}
         <li>
           <RunningScript
-            title={(namesMap.get(
-              script.confFile.replace('conf/', '').replace('.conf', ''),
-            ) || script.confFile) + '     currently runnig'}
+            title={(namesMap.get(getFilename(script.confFile)) ||
+              script.confFile) + '     currently runnig'}
             confFile={script.confFile}
             on:click={() => {
               stopScript(script.pid)

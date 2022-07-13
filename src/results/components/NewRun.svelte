@@ -129,7 +129,7 @@
       },
       {
         title: 'edit',
-        icon: 'settings',
+        icon: 'gear',
         onClick: editFunc,
       },
       {
@@ -164,15 +164,16 @@
   }
 </script>
 
-<div class="newRun">
+<div class="body">
   {#if doRename}
     <input
+      class="input"
       value={namesMap.get(runName) || ''}
       on:keypress={onKeyPress}
       on:change={onChange}
     />
   {:else if !nowRunning}
-    <div>
+    <div class="results">
       <Pane
         title={namesMap.get(runName)}
         initialExpandedState={expandedState}
@@ -180,19 +181,21 @@
       >
         {#each verificationResults as vr}
           {#if vr.name === runName}
-            <Tree
-              data={{
-                type: TreeType.Rules,
-                tree: retrieveRules(vr.jobs),
-              }}
-              on:fetchOutput={e => newFetchOutput(e, vr)}
-            />
+            <div class="tree">
+              <Tree
+                data={{
+                  type: TreeType.Rules,
+                  tree: retrieveRules(vr.jobs),
+                }}
+                on:fetchOutput={e => newFetchOutput(e, vr)}
+              />
+            </div>
           {/if}
         {/each}
       </Pane>
     </div>
   {:else}
-    <div>
+    <div class="running">
       <Pane
         title={namesMap.get(runName)}
         initialExpandedState={false}
@@ -203,3 +206,28 @@
     </div>
   {/if}
 </div>
+
+<style lang="postcss">
+  .running {
+    position: relative;
+    overflow: hidden;
+    margin-right: 5px;
+    margin-left: 5px;
+  }
+
+  .results {
+    position: relative;
+    overflow: hidden;
+    margin-right: 5px;
+    margin-left: 5px;
+  }
+
+  .input {
+    width: 97.5%;
+    border-width: 1px;
+    border-style: solid;
+    border-color: var(--vscode-inputValidation-infoBorder);
+    background-color: var(--list-active-selection-background);
+    color: white;
+  }
+</style>
