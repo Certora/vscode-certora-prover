@@ -49,7 +49,6 @@
     cursor: pointer;
     font-size: var(--font-size);
     font-weight: 700;
-    text-transform: uppercase;
 
     .arrow-icon {
       margin: 0 2px;

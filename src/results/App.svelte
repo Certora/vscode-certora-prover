@@ -279,7 +279,7 @@
     runsCounter--
   }
 
-  function run(run: Run, index?: number) {
+  function run(run: Run, index = 0) {
     verificationResults = verificationResults.filter(vr => {
       return vr.name !== run.name
     })
@@ -291,7 +291,7 @@
     console.log('add ', confNameMap.fileName, 'to queue')
     runsQueue.push(confNameMap)
     queueCounter++
-    if (!hasRunningScripts && (!index || index === 0)) {
+    if (!hasRunningScripts && index === 0) {
       runNext()
     }
   }
@@ -361,7 +361,6 @@
       const inQueue = runsQueue.find(pendingRun => {
         return pendingRun.fileName === singleRun.name
       })
-      console.log('inQueue:', inQueue, 'nowRunning:', nowRunning)
       if (inQueue === undefined && nowRunning === undefined) {
         run(singleRun, index)
       }
@@ -416,36 +415,40 @@
       },
     ]}
   >
-    {#each Array(runsCounter) as _, index (index)}
-      <NewRun
-        doRename={runs[index].name === ''}
-        editFunc={() => editRun(runs[index])}
-        deleteFunc={() => deleteRun(runs[index])}
-        {namesMap}
-        {renameRun}
-        duplicateFunc={duplicateRun}
-        runFunc={() => run(runs[index])}
-        doRun={true}
-        {verificationResults}
-        {newFetchOutput}
-        nowRunning={runningScripts.find(
-          rs => getFilename(rs.confFile) === runs[index].name,
-        ) !== undefined ||
-          (runsQueue.find(rs => rs.fileName === runs[index].name) !==
-            undefined &&
-            queueCounter > 0)}
-        expandedState={verificationResults.find(
-          vr => vr.name === runs[index].name,
-        ) !== undefined}
-        bind:runName={runs[index].name}
-      />
-    {/each}
+    <ul class="running-scripts">
+      {#each Array(runsCounter) as _, index (index)}
+        <li>
+          <NewRun
+            doRename={runs[index].name === ''}
+            editFunc={() => editRun(runs[index])}
+            deleteFunc={() => deleteRun(runs[index])}
+            {namesMap}
+            {renameRun}
+            duplicateFunc={duplicateRun}
+            runFunc={() => run(runs[index])}
+            doRun={true}
+            {verificationResults}
+            {newFetchOutput}
+            nowRunning={runningScripts.find(
+              rs => getFilename(rs.confFile) === runs[index].name,
+            ) !== undefined ||
+              (runsQueue.find(rs => rs.fileName === runs[index].name) !==
+                undefined &&
+                queueCounter > 0)}
+            expandedState={verificationResults.find(
+              vr => vr.name === runs[index].name,
+            ) !== undefined}
+            bind:runName={runs[index].name}
+          />
+        </li>
+      {/each}
+    </ul>
   </Pane>
 {/if}
 {#if output}
   {#if output.variables && output.variables.length > 0}
     <Pane
-      title={`${output.treeViewPath.ruleName} variables`}
+      title={`${output.treeViewPath.ruleName.toUpperCase()} VARIABLES`}
       initialExpandedState={true}
       actions={[
         {
@@ -459,7 +462,7 @@
     </Pane>
   {/if}
   {#if output.callTrace && Object.keys(output.callTrace).length > 0}
-    <Pane title={`Call Trace`} initialExpandedState={true}>
+    <Pane title={`CALL TRACE`} initialExpandedState={true}>
       <Tree
         data={{
           type: TreeType.Calltrace,
@@ -471,7 +474,7 @@
   {/if}
   {#if selectedCalltraceFunction && selectedCalltraceFunction.variables && selectedCalltraceFunction.variables.length > 0}
     <Pane
-      title={`${selectedCalltraceFunction.name} variables`}
+      title={`${selectedCalltraceFunction.name.toUpperCase()} VARIABLES`}
       initialExpandedState={true}
     >
       <CodeItemList codeItems={selectedCalltraceFunction.variables} />
@@ -496,7 +499,7 @@
   {/if}
 {/if}
 <!-- {/if} -->
-<Pane title="Running Scripts" initialExpandedState={true}>
+<Pane title="RUNNING SCRIPTS" initialExpandedState={true}>
   {#if hasRunningScripts || queueCounter > 0}
     <ul class="running-scripts">
       {#each runningScripts as script (script.pid)}
