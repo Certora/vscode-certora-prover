@@ -14,7 +14,10 @@
     deleteConf,
     duplicate,
   } from './extension-actions'
-  import { addVerificationResult } from './utils/mergeResults'
+  import {
+    addVerificationResult,
+    smartMergeVerificationResult,
+  } from './utils/mergeResults'
   import { log, Sources } from './utils/log'
   import type {
     Assert,
@@ -135,7 +138,7 @@
             name: e.data.payload[1],
           },
         })
-        addVerificationResult(
+        smartMergeVerificationResult(
           verificationResults,
           e.data.payload[0],
           e.data.payload[1],
@@ -148,12 +151,7 @@
             updatedVerificationResults: verificationResults,
           },
         })
-        if (runsQueue.length > 0) {
-          let curRun = runsQueue.shift()
-          queueCounter--
-          console.log('run ', curRun.fileName, 'after previus run finished')
-          runScript(curRun)
-        }
+        runNext()
         break
       }
       case EventTypesFromExtension.RunningScriptChanged: {
@@ -285,9 +283,8 @@
     console.log('add ', confNameMap.fileName, 'to queue')
     runsQueue.push(confNameMap)
     queueCounter++
-    if (runningScripts.length === 0) {
-      queueCounter--
-      runScript(runsQueue.shift())
+    if (!hasRunningScripts) {
+      runNext()
     }
   }
 
@@ -336,8 +333,17 @@
     }
   }
 
+  function runNext(): void {
+    if (runsQueue.length > 0) {
+      let curRun = runsQueue.shift()
+      queueCounter--
+      runScript(curRun)
+    }
+  }
+
   onMount(() => {
     window.addEventListener('message', listener)
+    runNext()
   })
 
   onDestroy(() => {
@@ -345,9 +351,9 @@
   })
 </script>
 
-{#if !hasResults}
-  <div class="zero-state">
-    <!-- <div class="command">
+<!-- {#if !hasResults} -->
+<div class="zero-state">
+  <!-- <div class="command">
       <div class="command-description">
         To check your smart contract start Certora IDE tool in command palette
         or with button.
@@ -356,16 +362,16 @@
         Run Certora IDE
       </vscode-button>
     </div> -->
-    <div class="command">
-      <div class="command-description">
-        To check your smart contract start by creating a verification run
-      </div>
-      <vscode-button class="command-button" on:click={() => createRun()}>
-        Create verification run
-      </vscode-button>
+  <div class="command">
+    <div class="command-description">
+      To check your smart contract start by creating a verification run
     </div>
+    <vscode-button class="command-button" on:click={() => createRun()}>
+      Create verification run
+    </vscode-button>
   </div>
-{/if}
+</div>
+<!-- {/if} -->
 {#if hasRuns}
   <Pane title="MY RUNS" initialExpandedState={true} actions={[]}>
     {#each Array(runsCounter) as _, index (index)}
@@ -462,11 +468,7 @@
             confFile={script.confFile}
             on:click={() => {
               stopScript(script.pid)
-              if (queueCounter > 0) {
-                let curRun = runsQueue.shift()
-                queueCounter--
-                runScript(curRun)
-              }
+              runNext()
             }}
           />
         </li>
