@@ -191,3 +191,12 @@ export type Run = {
   name: string
   allowRun: boolean
 }
+
+export type Status = {
+  finishSetup: string
+  ready: string
+  running: string
+  pending: string
+  success: string
+  unableToRun: string
+}

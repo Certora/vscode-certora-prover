@@ -39,8 +39,8 @@
   let runningScripts: { pid: number; confFile: string }[] = []
 
   let runs: Run[] = []
-  let runsQueue: ConfNameMap[] = []
-  let queueCounter = 0
+  let pendingQueue: ConfNameMap[] = []
+  let pendingQueueCounter = 0
   let namesMap: Map<string, string> = new Map()
   let runsCounter = 0
 
@@ -162,6 +162,13 @@
           info: e.data.payload,
         })
         runningScripts = e.data.payload
+        runs.forEach(r => {
+          runningScripts.forEach(rs => {
+            if (r.name === getFilename(rs.confFile)) {
+              r.id = rs.pid
+            }
+          })
+        })
 
         if (e.data.payload.length === 0) {
           console.log('runNext from running-scripts-changed')
@@ -186,7 +193,6 @@
           source: Sources.ResultsWebview,
           info: e.data.payload,
         })
-        // run named "payload should have allowRun=true"
         console.log('Recieved "allow-run" with payload: ', e.data.payload)
         runs = setAllowRun(e.data.payload)
         break
@@ -217,26 +223,12 @@
           action: 'Received "parse-error" command',
           source: Sources.ResultsWebview,
         })
-        // console.log('runNext from parseError')
-        // if (!hasRunningScripts){
-        //   runNext()
-        // }
         break
       }
       default:
         break
     }
   }
-
-  // function createRunAndOpenSettings(run: Run) {
-  //   createRun(run)
-  //   const confNameMap: ConfNameMap = {
-  //     fileName: run.name,
-  //     displayName: namesMap.get(run.name),
-  //   }
-  //   console.log(confNameMap, 'create')
-  //   openSettings(confNameMap)
-  // }
 
   function setAllowRun(runName: string) {
     runs.forEach(run => {
@@ -274,23 +266,19 @@
   }
 
   function createRun(run?: Run) {
-    console.log('===create run===')
     if (run) {
       runs.push(run)
     } else {
       runs.push({ id: runs.length, name: '', allowRun: false })
     }
     runsCounter++
-    console.log(runsCounter, 'runs counter after creation')
   }
 
   function editRun(run: Run) {
-    console.log('===edit===', run.name)
     const confNameMap: ConfNameMap = {
       fileName: run.name,
       displayName: namesMap.get(run.name),
     }
-    console.log(confNameMap, 'edit')
     editConfFile(confNameMap)
   }
 
@@ -303,13 +291,11 @@
       fileName: name,
       displayName: namesMap.get(name),
     }
-    console.log('to filter:' + name)
     runs = runs.filter(run => {
       return run !== toFilter
     })
 
     namesMap.delete(name)
-    console.log(confNameMap, 'delete')
     deleteConf(confNameMap)
     runsCounter--
   }
@@ -323,22 +309,21 @@
       displayName: namesMap.get(run.name),
     }
 
-    console.log('add ', confNameMap.fileName, 'to queue')
-    runsQueue.push(confNameMap)
-    queueCounter++
+    //add to pending queue
+    pendingQueue.push(confNameMap)
+    pendingQueueCounter++
+
+    //if there are no running scripts => runNext
     if (!hasRunningScripts && index === 0) {
-      console.log('runNext from run')
       runNext()
     }
   }
 
   function renameRun(oldName: string, newName: string) {
-    // rename existing
+    // rename existing run
     if (oldName !== '') {
-      console.log('delete old ', oldName)
-
+      // the renamed run should have the same verification results, if they exist
       let oldResult = verificationResults.find(vr => vr.name === oldName)
-      console.log('===old result====', oldResult)
       if (oldResult !== undefined) {
         let newResult: Verification = {
           name: newName,
@@ -350,7 +335,6 @@
           return vr.name !== oldName
         })
         verificationResults.push(newResult)
-        console.log('====verification results====', verificationResults)
       }
 
       const oldConfNameMap: ConfNameMap = {
@@ -366,41 +350,62 @@
       deleteConf(oldConfNameMap)
       namesMap.delete(oldName)
     }
-    // rename new
+    // rename new run
     else {
       const confNameMap: ConfNameMap = {
         fileName: newName,
         displayName: namesMap.get(newName),
       }
-      console.log(confNameMap, 'open')
       openSettings(confNameMap)
     }
   }
 
+  /**
+   * run the fisrt pending run in the queue
+   */
   function runNext(): void {
-    if (runsQueue.length > 0) {
-      let curRun = runsQueue.shift()
-      queueCounter--
+    if (pendingQueue.length > 0) {
+      let curRun = pendingQueue.shift()
+      pendingQueueCounter--
       runScript(curRun)
     }
   }
 
+  /**
+   * from conf file uri to only the file name
+   */
   function getFilename(confFile: string): string {
     return confFile.replace('conf/', '').replace('.conf', '')
   }
 
+  /**
+   * run all the runs that are allowed to run
+   */
   function runAll(): void {
     runs.forEach((singleRun, index) => {
+      if (!singleRun.allowRun) {
+        return
+      }
       const nowRunning = runningScripts.find(script => {
         return getFilename(script.confFile) === singleRun.name
       })
-      const inQueue = runsQueue.find(pendingRun => {
+      const inQueue = pendingQueue.find(pendingRun => {
         return pendingRun.fileName === singleRun.name
       })
       if (inQueue === undefined && nowRunning === undefined) {
         run(singleRun, index)
       }
     })
+  }
+
+  /**
+   * stops a pending run
+   */
+  function pendingStopFunc(run: Run): void {
+    pendingQueue = pendingQueue.filter(rq => {
+      return rq.fileName !== run.name
+    })
+    pendingQueueCounter--
   }
 
   onMount(() => {
@@ -412,28 +417,18 @@
   })
 </script>
 
-<!-- {#if !hasResults} -->
-<div class="zero-state">
-  <!-- <div class="command">
+{#if !hasRuns}
+  <div class="zero-state">
+    <div class="command">
       <div class="command-description">
-        To check your smart contract start Certora IDE tool in command palette
-        or with button.
+        To check your smart contract start by creating a verification run
       </div>
-      <vscode-button class="command-button" on:click={runScript}>
-        Run Certora IDE
+      <vscode-button class="command-button" on:click={() => createRun()}>
+        Create verification run
       </vscode-button>
-    </div> -->
-  <div class="command">
-    <div class="command-description">
-      To check your smart contract start by creating a verification run
     </div>
-    <vscode-button class="command-button" on:click={() => createRun()}>
-      Create verification run
-    </vscode-button>
   </div>
-</div>
-<!-- {/if} -->
-{#if hasRuns}
+{:else}
   <Pane
     title="MY RUNS"
     initialExpandedState={true}
@@ -468,12 +463,20 @@
               nowRunning={runningScripts.find(
                 rs => getFilename(rs.confFile) === runs[index].name,
               ) !== undefined ||
-                (runsQueue.find(rs => rs.fileName === runs[index].name) !==
+                (pendingQueue.find(rs => rs.fileName === runs[index].name) !==
                   undefined &&
-                  queueCounter > 0)}
+                  pendingQueueCounter > 0)}
+              isPending={pendingQueue.find(
+                rs => rs.fileName === runs[index].name,
+              ) !== undefined && pendingQueueCounter > 0}
               expandedState={verificationResults.find(
                 vr => vr.name === runs[index].name,
               ) !== undefined}
+              pendingStopFunc={() => pendingStopFunc(runs[index])}
+              runningStopFunc={() => {
+                stopScript(runs[index].id)
+                runNext()
+              }}
               bind:runName={runs[index].name}
             />
           </li>
@@ -485,7 +488,7 @@
 {#if output}
   {#if output.variables && output.variables.length > 0}
     <Pane
-      title={`${output.treeViewPath.ruleName.toUpperCase()} VARIABLES`}
+      title={`${output.treeViewPath.ruleName} variables`}
       initialExpandedState={true}
       actions={[
         {
@@ -511,7 +514,7 @@
   {/if}
   {#if selectedCalltraceFunction && selectedCalltraceFunction.variables && selectedCalltraceFunction.variables.length > 0}
     <Pane
-      title={`${selectedCalltraceFunction.name.toUpperCase()} VARIABLES`}
+      title={`${selectedCalltraceFunction.name} variables`}
       initialExpandedState={true}
     >
       <CodeItemList codeItems={selectedCalltraceFunction.variables} />
@@ -536,7 +539,7 @@
   {/if}
 {/if}
 <!-- {/if} -->
-<Pane title="RUNNING SCRIPTS" initialExpandedState={true}>
+<!-- <Pane title="RUNNING SCRIPTS" initialExpandedState={true}>
   {#if hasRunningScripts || queueCounter > 0}
     <ul class="running-scripts">
       {#each runningScripts as script (script.pid)}
@@ -578,16 +581,16 @@
           You don’t have any running scripts. To check your smart contract start
           Certora IDE tool in command palette or click the button below.
         </div>
-        <!-- {#if hasResults}
+       {#if hasResults}
           <vscode-button class="command-button" on:click={runScript}>
             Run Certora IDE
           </vscode-button>
         {/if} -->
-      </div>
-    </div>
-  {/if}
-</Pane>
+<!-- </div> -->
+<!-- </div> -->
+<!-- {/if} -->
 
+<!-- </Pane> -->
 <style lang="postcss">
   :global(body) {
     padding: 0;

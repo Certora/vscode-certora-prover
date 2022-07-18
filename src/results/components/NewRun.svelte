@@ -1,5 +1,13 @@
 <script lang="ts">
-  import { Verification, TreeType, Job, Rule, Assert, Action } from '../types'
+  import {
+    Verification,
+    TreeType,
+    Job,
+    Rule,
+    Assert,
+    Action,
+    Status,
+  } from '../types'
   import Pane from './Pane.svelte'
   import Tree from './Tree.svelte'
 
@@ -23,9 +31,24 @@
   export let expandedState = false
   export let nowRunning = false
 
-  export let doRun = true //todo: get this from extension
+  export let doRun = true
+  export let isPending = false
+
+  export let pendingStopFunc: () => void
+  export let runningStopFunc: () => void
+
+  const STATUS: Status = {
+    finishSetup: 'Finish setup',
+    ready: 'Ready',
+    running: 'Running',
+    pending: 'Pending',
+    success: 'Ready success',
+    unableToRun: 'Unable to run', //todo: implement
+  }
+
   let beforeRename = ''
   let activateRunRename = false
+  let status = STATUS.finishSetup
   const UNTITLED = 'untitled'
 
   function onKeyPress(e: any) {
@@ -114,12 +137,25 @@
     beforeRename = runName
   }
 
+  function getRunStatus() {
+    if (isPending) {
+      status = STATUS.pending
+    } else if (nowRunning) {
+      status = STATUS.running
+    }
+    return status
+  }
+
   function duplicate() {
     let duplicatedName = duplicateName()
     namesMap.set(spacesToUnderscores(duplicatedName), duplicatedName)
     duplicateFunc(runName, spacesToUnderscores(duplicatedName))
   }
 
+  /**
+   * creates actions for the finishSetup, ready and unableToRun statuses.
+   * the actions are: rename, edit, delete, duplicate, and if possible: run
+   */
   function createActions(): Action[] {
     let actions: Action[] = [
       {
@@ -150,8 +186,38 @@
         onClick: runFunc,
       }
       actions.push(runAction)
+      status = STATUS.ready
     }
     return actions
+  }
+
+  function createActionsForRunningScript(): Action[] {
+    if (isPending) {
+      return [
+        {
+          title: 'stop',
+          icon: 'stop-circle',
+          onClick: pendingStopFunc,
+        },
+      ]
+    }
+    if (nowRunning) {
+      return [
+        {
+          title: 'stop',
+          icon: 'stop-circle',
+          onClick: runningStopFunc,
+        },
+      ]
+    }
+    return []
+  }
+
+  function hasResults(): boolean {
+    const result = verificationResults.find(vr => {
+      return vr.name === runName
+    })
+    return result !== undefined
   }
 
   // was copied from App.svelte
@@ -169,6 +235,7 @@
     <input
       class="input"
       value={namesMap.get(runName) || ''}
+      placeholder="Enter run name"
       on:keypress={onKeyPress}
       on:change={onChange}
     />
@@ -179,6 +246,7 @@
         initialExpandedState={expandedState}
         actions={createActions()}
         showExpendIcon={expandedState}
+        status={hasResults() ? STATUS.success : status}
       >
         {#each verificationResults as vr}
           {#if vr.name === runName}
@@ -200,15 +268,21 @@
       <Pane
         title={namesMap.get(runName)}
         initialExpandedState={false}
-        actions={[]}
-      >
-        running...
-      </Pane>
+        actions={createActionsForRunningScript()}
+        status={getRunStatus()}
+        showExpendIcon={false}
+      />
     </div>
   {/if}
 </div>
 
 <style lang="postcss">
+  .body {
+    &:hover {
+      background-color: var(--vscode-list-hoverBackground);
+    }
+  }
+
   .running {
     position: relative;
     overflow: hidden;
