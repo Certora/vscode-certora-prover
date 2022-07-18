@@ -30,6 +30,7 @@ export function activate(context: vscode.ExtensionContext): void {
       additionalSettings: [],
     }
     createAndOpenConfFile(emptyForm)
+    SettingsPanel.setAllowRun(sendAllowRun)
     SettingsPanel.render(context.extensionUri, name, confFileDefault)
   }
 
@@ -146,6 +147,7 @@ export function activate(context: vscode.ExtensionContext): void {
     )
 
     if (!confFiles?.length) {
+      SettingsPanel.setAllowRun(sendAllowRun)
       SettingsPanel.render(context.extensionUri, {
         displayName: 'placeholder_name',
         fileName: 'placeholder_name',
@@ -173,6 +175,7 @@ export function activate(context: vscode.ExtensionContext): void {
       const confFileContent = JSON.parse(
         decoder.decode(await vscode.workspace.fs.readFile(confFileUri)),
       )
+      SettingsPanel.setAllowRun(sendAllowRun)
       SettingsPanel.render(context.extensionUri, name, confFileContent)
     } catch (e) {
       vscode.window.showErrorMessage(
@@ -207,7 +210,7 @@ export function activate(context: vscode.ExtensionContext): void {
       } catch (e) {
         vscode.window.showErrorMessage(`Can't create conf file. Error: ${e}`)
       }
-
+      SettingsPanel.setAllowRun(sendAllowRun)
       SettingsPanel.render(context.extensionUri, duplicated, confFileContent)
     } catch (e) {
       vscode.window.showErrorMessage(
@@ -253,6 +256,13 @@ export function activate(context: vscode.ExtensionContext): void {
       vscode.workspace.fs.delete(confFileUri)
     }
     SettingsPanel.removePanel(name.displayName)
+  }
+
+  function sendAllowRun(runName: string): void {
+    resultsWebviewProvider.postMessage({
+      type: 'allow-run',
+      payload: runName,
+    })
   }
 
   const resultsWebviewProvider = new ResultsWebviewProvider(

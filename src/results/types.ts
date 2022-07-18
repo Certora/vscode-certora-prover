@@ -147,6 +147,7 @@ export enum EventTypesFromExtension {
   SetCreationTime = 'set-creation-time',
   CreateJob = 'create-new-job',
   ParseError = 'parse-error',
+  AllowRun = 'allow-run',
 }
 
 export type EventsFromExtension =
@@ -175,6 +176,10 @@ export type EventsFromExtension =
   | {
       type: EventTypesFromExtension.ParseError
     }
+  | {
+      type: EventTypesFromExtension.AllowRun
+      payload: string
+    }
 
 export type ConfNameMap = {
   displayName: string
@@ -184,4 +189,5 @@ export type ConfNameMap = {
 export type Run = {
   id: number
   name: string
+  allowRun: boolean
 }

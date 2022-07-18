@@ -31,7 +31,6 @@
   } from './types'
   import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
   import NewRun from './components/NewRun.svelte'
-  import { findSourceMap } from 'module'
 
   let output: Output
   let selectedCalltraceFunction: CallTraceFunction
@@ -54,10 +53,11 @@
     console.log(vr)
     let clickedRuleOrAssert = e.detail
 
-    if (!clickedRuleOrAssert.output) {
-      clearOutput()
-      return
-    }
+    // if (!clickedRuleOrAssert.output) {
+    //   console.log('set data from newFetch')
+    //   clearOutput()
+    //   return
+    // }
 
     const index = vr.jobs.findIndex(
       job => job.jobId === clickedRuleOrAssert.jobId,
@@ -151,6 +151,7 @@
             updatedVerificationResults: verificationResults,
           },
         })
+        console.log('run next from smart merge (verification)')
         runNext()
         break
       }
@@ -161,6 +162,11 @@
           info: e.data.payload,
         })
         runningScripts = e.data.payload
+
+        if (e.data.payload.length === 0) {
+          console.log('runNext from running-scripts-changed')
+          runNext()
+        }
         break
       }
       case EventTypesFromExtension.SetOutput: {
@@ -169,7 +175,20 @@
           source: Sources.ResultsWebview,
           info: e.data.payload,
         })
-        output = e.data.payload
+        if (e.data.payload) {
+          output = e.data.payload
+        }
+        break
+      }
+      case EventTypesFromExtension.AllowRun: {
+        log({
+          action: 'Received "allow-run" command',
+          source: Sources.ResultsWebview,
+          info: e.data.payload,
+        })
+        // run named "payload should have allowRun=true"
+        console.log('Recieved "allow-run" with payload: ', e.data.payload)
+        runs = setAllowRun(e.data.payload)
         break
       }
       case EventTypesFromExtension.ClearAllJobs: {
@@ -190,7 +209,7 @@
           source: Sources.ResultsWebview,
         })
 
-        createRun({ id: runs.length, name: '' })
+        createRun({ id: runs.length, name: '', allowRun: false })
         break
       }
       case EventTypesFromExtension.ParseError: {
@@ -198,7 +217,10 @@
           action: 'Received "parse-error" command',
           source: Sources.ResultsWebview,
         })
-        runNext()
+        // console.log('runNext from parseError')
+        // if (!hasRunningScripts){
+        //   runNext()
+        // }
         break
       }
       default:
@@ -216,6 +238,15 @@
   //   openSettings(confNameMap)
   // }
 
+  function setAllowRun(runName: string) {
+    runs.forEach(run => {
+      if (run.name === runName) {
+        run.allowRun = true
+      }
+    })
+    return runs
+  }
+
   function duplicateRun(nameToDuplicate: string, duplicatedName: string) {
     console.log(
       'to duplicate: ',
@@ -224,7 +255,11 @@
       duplicatedName,
     )
     const toDuplicate: Run = runs.find(run => run.name === nameToDuplicate)
-    const duplicated: Run = { id: runs.length, name: duplicatedName }
+    const duplicated: Run = {
+      id: runs.length,
+      name: duplicatedName,
+      allowRun: toDuplicate.allowRun,
+    }
     createRun(duplicated)
     const confNameMapDuplicated: ConfNameMap = {
       fileName: duplicated.name,
@@ -243,7 +278,7 @@
     if (run) {
       runs.push(run)
     } else {
-      runs.push({ id: runs.length, name: '' })
+      runs.push({ id: runs.length, name: '', allowRun: false })
     }
     runsCounter++
     console.log(runsCounter, 'runs counter after creation')
@@ -292,6 +327,7 @@
     runsQueue.push(confNameMap)
     queueCounter++
     if (!hasRunningScripts && index === 0) {
+      console.log('runNext from run')
       runNext()
     }
   }
@@ -369,7 +405,6 @@
 
   onMount(() => {
     window.addEventListener('message', listener)
-    runNext()
   })
 
   onDestroy(() => {
@@ -417,30 +452,32 @@
   >
     <ul class="running-scripts">
       {#each Array(runsCounter) as _, index (index)}
-        <li>
-          <NewRun
-            doRename={runs[index].name === ''}
-            editFunc={() => editRun(runs[index])}
-            deleteFunc={() => deleteRun(runs[index])}
-            {namesMap}
-            {renameRun}
-            duplicateFunc={duplicateRun}
-            runFunc={() => run(runs[index])}
-            doRun={true}
-            {verificationResults}
-            {newFetchOutput}
-            nowRunning={runningScripts.find(
-              rs => getFilename(rs.confFile) === runs[index].name,
-            ) !== undefined ||
-              (runsQueue.find(rs => rs.fileName === runs[index].name) !==
-                undefined &&
-                queueCounter > 0)}
-            expandedState={verificationResults.find(
-              vr => vr.name === runs[index].name,
-            ) !== undefined}
-            bind:runName={runs[index].name}
-          />
-        </li>
+        {#key runs[index]}
+          <li>
+            <NewRun
+              doRename={runs[index].name === ''}
+              editFunc={() => editRun(runs[index])}
+              deleteFunc={() => deleteRun(runs[index])}
+              {namesMap}
+              {renameRun}
+              duplicateFunc={duplicateRun}
+              runFunc={() => run(runs[index])}
+              doRun={runs[index].allowRun}
+              {verificationResults}
+              {newFetchOutput}
+              nowRunning={runningScripts.find(
+                rs => getFilename(rs.confFile) === runs[index].name,
+              ) !== undefined ||
+                (runsQueue.find(rs => rs.fileName === runs[index].name) !==
+                  undefined &&
+                  queueCounter > 0)}
+              expandedState={verificationResults.find(
+                vr => vr.name === runs[index].name,
+              ) !== undefined}
+              bind:runName={runs[index].name}
+            />
+          </li>
+        {/key}
       {/each}
     </ul>
   </Pane>
@@ -510,6 +547,7 @@
             confFile={script.confFile}
             on:click={() => {
               stopScript(script.pid)
+              console.log('runNext from stop script')
               runNext()
             }}
           />

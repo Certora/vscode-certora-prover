@@ -178,6 +178,7 @@
         title={namesMap.get(runName)}
         initialExpandedState={expandedState}
         actions={createActions()}
+        showExpendIcon={expandedState}
       >
         {#each verificationResults as vr}
           {#if vr.name === runName}

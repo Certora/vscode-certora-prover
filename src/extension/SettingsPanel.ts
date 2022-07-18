@@ -18,6 +18,7 @@ export class SettingsPanel {
   private editConfFile?: Record<string, unknown>
   private static allPanels: SettingsPanel[] = []
   private curConfFileDisplayName: string
+  private static allowRun: ((runName: string) => void) | null = null
 
   private constructor(
     panel: vscode.WebviewPanel,
@@ -62,6 +63,13 @@ export class SettingsPanel {
               info: e.payload,
             })
             createAndOpenConfFile(e.payload)
+            if (SettingsPanel.allowRun !== null) {
+              SettingsPanel.allowRun(confFileName)
+            }
+            // this._panel.webview.postMessage({
+            //   type: 'allow-run',
+            //   payload: confFileName,
+            // })
             this._panel?.dispose()
             break
           }
@@ -215,5 +223,9 @@ export class SettingsPanel {
 
       if (disposable) disposable.dispose()
     }
+  }
+
+  public static setAllowRun(func: (runName: string) => void): void {
+    SettingsPanel.allowRun = func
   }
 }

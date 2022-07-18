@@ -5,8 +5,13 @@
   export let title: string
   export let actions: Action[] = []
   export let initialExpandedState: boolean = false
+  export let showExpendIcon: boolean = true
 
   let isExpanded = initialExpandedState
+
+  function getClassName() {
+    return isExpanded ? 'pane-header' : 'pane-header normal-cursor'
+  }
 
   function toggleExpand() {
     isExpanded = !isExpanded
@@ -15,16 +20,24 @@
 
 <div class="pane" class:expanded={isExpanded}>
   <div
-    class="pane-header"
+    class={getClassName()}
     on:click={toggleExpand}
     tabindex="0"
     role="button"
     aria-label={`${title} section`}
     aria-expanded={isExpanded}
   >
-    <div
-      class="arrow-icon codicon codicon-chevron-{isExpanded ? 'down' : 'right'}"
-    />
+    {#if showExpendIcon}
+      <div
+        class="arrow-icon codicon codicon-chevron-{isExpanded
+          ? 'down'
+          : 'right'}"
+      />
+      <!-- {:else}
+  <div
+    class="normal-cursor"
+  /> -->
+    {/if}
     <h3 class="title" {title}>{title}</h3>
     <div class="actions">
       <Toolbar {actions} />
@@ -94,5 +107,9 @@
   .pane-body {
     overflow: hidden;
     flex: 1;
+  }
+
+  .normal-cursor {
+    cursor: default !important;
   }
 </style>
