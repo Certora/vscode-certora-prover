@@ -7,6 +7,7 @@ import {
   Output,
   CommandFromResultsWebview,
   EventFromResultsWebview,
+  ConfNameMap,
 } from './types'
 import type { CreationTime } from '../results/types'
 
@@ -14,15 +15,16 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   public viewType = 'results'
   private _panel: vscode.Webview | null = null
   public stopScript: null | ((pid: number) => void) = null
+  public editConfFile: null | ((name: ConfNameMap) => Promise<void>) = null
+  public openSettings: null | ((name: ConfNameMap) => void) = null
+  public deleteConf: null | ((name: ConfNameMap) => void) = null
+  public duplicate:
+    | null
+    | ((toDuplicate: ConfNameMap, duplicated: ConfNameMap) => void) = null
 
-  constructor(
-    private readonly _extensionUri: vscode.Uri,
-    private readonly runScript: () => Promise<void>,
-    private readonly openSettings: () => void,
-  ) {
+  public runScript: null | ((name: ConfNameMap) => void) = null
+  constructor(private readonly _extensionUri: vscode.Uri) {
     this._extensionUri = _extensionUri
-    this.runScript = runScript
-    this.openSettings = openSettings
   }
 
   resolveWebviewView({ webview }: vscode.WebviewView): void {
@@ -61,14 +63,27 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
               action: 'Received "run-script" command',
               source: Sources.Extension,
             })
-            this.runScript()
+            if (typeof this.runScript === 'function') {
+              this.runScript(e.payload)
+            }
             break
           case CommandFromResultsWebview.OpenSettings:
             log({
               action: 'Received "open-settings" command',
               source: Sources.Extension,
             })
-            this.openSettings()
+            if (typeof this.openSettings === 'function') {
+              this.openSettings(e.payload)
+            }
+            break
+          case CommandFromResultsWebview.EditConfFile:
+            log({
+              action: 'Received "edit-confFile" command',
+              source: Sources.Extension,
+            })
+            if (typeof this.editConfFile === 'function') {
+              this.editConfFile(e.payload)
+            }
             break
           case CommandFromResultsWebview.GetOutput:
             log({
@@ -86,6 +101,31 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
             })
             this.getCreationTime(e.payload)
             break
+          case CommandFromResultsWebview.DeleteConfFile:
+            log({
+              action: 'Received "delete-confFile" command',
+              source: Sources.Extension,
+              info: e.payload,
+            })
+            if (typeof this.deleteConf === 'function') {
+              this.deleteConf(e.payload)
+            }
+            break
+          case CommandFromResultsWebview.Duplicate:
+            log({
+              action: 'Received "duplicate" command',
+              source: Sources.Extension,
+              info: e.payload,
+            })
+            if (typeof this.duplicate === 'function') {
+              console.log(
+                'typeof from duplicate',
+                typeof e.payload,
+                typeof e.payload[0],
+              )
+              this.duplicate(e.payload[0], e.payload[1])
+            }
+            break
           default:
             break
         }
@@ -95,7 +135,10 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
     )
   }
 
-  public postMessage<T>(message: { type: string; payload?: T }): void {
+  public postMessage<T>(message: {
+    type: string
+    payload?: T | [T, string]
+  }): void {
     if (!this._panel) return
 
     log({

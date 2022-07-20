@@ -17,6 +17,7 @@
   let specFiles: string[] = []
   let submitButtonText = 'Create conf file'
   let form: Form = {
+    name: '',
     mainSolidityFile: '',
     mainContractName: '',
     specFile: '',
@@ -62,7 +63,8 @@
           source: Sources.SettingsWebview,
           info: e.data.payload,
         })
-        form = confFileToFormData(e.data.payload)
+        console.log(e.data.payload, e.data.payload[1])
+        form = confFileToFormData(e.data.payload[0], e.data.payload[1])
         submitButtonText = 'Save'
         break
       default:

@@ -10,8 +10,14 @@
     stopScript,
     openSettings,
     getOutput,
+    editConfFile,
+    deleteConf,
+    duplicate,
   } from './extension-actions'
-  import { smartMergeVerificationResult } from './utils/mergeResults'
+  import {
+    addVerificationResult,
+    smartMergeVerificationResult,
+  } from './utils/mergeResults'
   import { log, Sources } from './utils/log'
   import type {
     Assert,
@@ -20,8 +26,11 @@
     EventsFromExtension,
     Rule,
     Verification,
+    Run,
+    ConfNameMap,
   } from './types'
   import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
+  import NewRun from './components/NewRun.svelte'
 
   let output: Output
   let selectedCalltraceFunction: CallTraceFunction
@@ -29,18 +38,27 @@
   let verificationResults: Verification[] = []
   let runningScripts: { pid: number; confFile: string }[] = []
 
+  let runs: Run[] = []
+  let pendingQueue: ConfNameMap[] = []
+  let pendingQueueCounter = 0
+  let namesMap: Map<string, string> = new Map()
+  let runsCounter = 0
+  let focusedRun: string = ''
+
   $: hasRunningScripts = runningScripts.length > 0
   $: hasResults = verificationResults.length > 0
+  $: hasRuns = runsCounter > 0
 
   function newFetchOutput(e: CustomEvent<Assert | Rule>, vr: Verification) {
     console.log(e.detail)
     console.log(vr)
     let clickedRuleOrAssert = e.detail
 
-    if (!clickedRuleOrAssert.output) {
-      clearOutput()
-      return
-    }
+    // if (!clickedRuleOrAssert.output) {
+    //   console.log('set data from newFetch')
+    //   clearOutput()
+    //   return
+    // }
 
     const index = vr.jobs.findIndex(
       job => job.jobId === clickedRuleOrAssert.jobId,
@@ -60,27 +78,35 @@
     }
   }
 
-  function fetchOutput(e: CustomEvent<Assert | Rule>, job: Job) {
-    log({
-      action: 'Try to fetch output',
-      source: Sources.ResultsWebview,
-      info: {
-        outputField: e.detail.output,
-      },
-    })
+  // function retrieveRules(jobs: Job[]): Rule[] {
+  //   // rulesArrays = [Rule[] A, Rule[]B,...]
+  //   const rulesArrays: Rule[][] = jobs.map(
+  //     job => job.verificationProgress.rules,
+  //   )
+  //   return [].concat(...rulesArrays)
+  // }
 
-    if (!e.detail.output) {
-      clearOutput()
-      return
-    }
+  // function fetchOutput(e: CustomEvent<Assert | Rule>, job: Job) {
+  //   log({
+  //     action: 'Try to fetch output',
+  //     source: Sources.ResultsWebview,
+  //     info: {
+  //       outputField: e.detail.output,
+  //     },
+  //   })
 
-    const outputUrl = `${job.progressUrl.replace(
-      'progress',
-      'result',
-    )}&output=${e.detail.output}`
+  //   if (!e.detail.output) {
+  //     clearOutput()
+  //     return
+  //   }
 
-    getOutput(outputUrl)
-  }
+  //   const outputUrl = `${job.progressUrl.replace(
+  //     'progress',
+  //     'result',
+  //   )}&output=${e.detail.output}`
+
+  //   getOutput(outputUrl)
+  // }
 
   function selectCalltraceFunction(e: CustomEvent<CallTraceFunction>) {
     selectedCalltraceFunction = e.detail
@@ -109,10 +135,15 @@
           source: Sources.ResultsWebview,
           info: {
             currentVerificationResults: verificationResults,
-            newResult: e.data.payload,
+            newResult: e.data.payload[0],
+            name: e.data.payload[1],
           },
         })
-        smartMergeVerificationResult(verificationResults, e.data.payload)
+        smartMergeVerificationResult(
+          verificationResults,
+          e.data.payload[0],
+          e.data.payload[1],
+        )
         verificationResults = verificationResults
         log({
           action: 'After Smart merge current results with new result',
@@ -121,6 +152,8 @@
             updatedVerificationResults: verificationResults,
           },
         })
+        console.log('run next from smart merge (verification)')
+        runNext()
         break
       }
       case EventTypesFromExtension.RunningScriptChanged: {
@@ -130,6 +163,18 @@
           info: e.data.payload,
         })
         runningScripts = e.data.payload
+        runs.forEach(r => {
+          runningScripts.forEach(rs => {
+            if (r.name === getFilename(rs.confFile)) {
+              r.id = rs.pid
+            }
+          })
+        })
+
+        if (e.data.payload.length === 0) {
+          console.log('runNext from running-scripts-changed')
+          runNext()
+        }
         break
       }
       case EventTypesFromExtension.SetOutput: {
@@ -138,7 +183,19 @@
           source: Sources.ResultsWebview,
           info: e.data.payload,
         })
-        output = e.data.payload
+        if (e.data.payload) {
+          output = e.data.payload
+        }
+        break
+      }
+      case EventTypesFromExtension.AllowRun: {
+        log({
+          action: 'Received "allow-run" command',
+          source: Sources.ResultsWebview,
+          info: e.data.payload,
+        })
+        console.log('Recieved "allow-run" with payload: ', e.data.payload)
+        runs = setAllowRun(e.data.payload, true)
         break
       }
       case EventTypesFromExtension.ClearAllJobs: {
@@ -153,9 +210,216 @@
         clearOutput()
         break
       }
+      case EventTypesFromExtension.CreateJob: {
+        log({
+          action: 'Received "create-new-job" command',
+          source: Sources.ResultsWebview,
+        })
+
+        createRun({ id: runs.length, name: '', allowRun: false })
+        break
+      }
+      case EventTypesFromExtension.FocusChanged: {
+        log({
+          action: 'Received "focus-changed" command',
+          source: Sources.ResultsWebview,
+          info: e.data.payload,
+        })
+        focusedRun = e.data.payload
+        break
+      }
+      // case EventTypesFromExtension.ParseError: {
+      //   log({
+      //     action: 'Received "parse-error" command',
+      //     source: Sources.ResultsWebview,
+      //     info: e.data.payload
+      //   })
+      //   setAllowRun(e.data.payload, false)
+      //   break
+      // }
       default:
         break
     }
+  }
+
+  function setAllowRun(runName: string, value: boolean) {
+    runs.forEach(run => {
+      if (run.name === runName) {
+        run.allowRun = value
+      }
+    })
+    return runs
+  }
+
+  function duplicateRun(nameToDuplicate: string, duplicatedName: string) {
+    console.log(
+      'to duplicate: ',
+      nameToDuplicate,
+      'duplicated: ',
+      duplicatedName,
+    )
+    const toDuplicate: Run = runs.find(run => run.name === nameToDuplicate)
+    const duplicated: Run = {
+      id: runs.length,
+      name: duplicatedName,
+      allowRun: toDuplicate.allowRun,
+    }
+    createRun(duplicated)
+    const confNameMapDuplicated: ConfNameMap = {
+      fileName: duplicated.name,
+      displayName: namesMap.get(duplicated.name),
+    }
+    const confNameMapToDuplicate: ConfNameMap = {
+      fileName: toDuplicate.name,
+      displayName: namesMap.get(toDuplicate.name),
+    }
+    console.log('to duplicate:', toDuplicate, 'duplicated: ', duplicated)
+    duplicate(confNameMapToDuplicate, confNameMapDuplicated)
+    focusedRun = duplicatedName
+  }
+
+  function createRun(run?: Run) {
+    if (run) {
+      runs.push(run)
+    } else {
+      runs.push({ id: runs.length, name: '', allowRun: false })
+    }
+    runsCounter++
+  }
+
+  function editRun(run: Run) {
+    const confNameMap: ConfNameMap = {
+      fileName: run.name,
+      displayName: namesMap.get(run.name),
+    }
+    editConfFile(confNameMap)
+  }
+
+  function deleteRun(toFilter: Run) {
+    const name = toFilter.name
+    verificationResults = verificationResults.filter(vr => {
+      return vr.name !== name
+    })
+    const confNameMap: ConfNameMap = {
+      fileName: name,
+      displayName: namesMap.get(name),
+    }
+    runs = runs.filter(run => {
+      return run !== toFilter
+    })
+
+    namesMap.delete(name)
+    deleteConf(confNameMap)
+    runsCounter--
+  }
+
+  function run(run: Run, index = 0) {
+    verificationResults = verificationResults.filter(vr => {
+      return vr.name !== run.name
+    })
+    const confNameMap: ConfNameMap = {
+      fileName: run.name,
+      displayName: namesMap.get(run.name),
+    }
+
+    //add to pending queue
+    pendingQueue.push(confNameMap)
+    pendingQueueCounter++
+
+    //if there are no running scripts => runNext
+    if (!hasRunningScripts && index === 0) {
+      runNext()
+    }
+  }
+
+  function renameRun(oldName: string, newName: string) {
+    // rename existing run
+    if (oldName !== '') {
+      // the renamed run should have the same verification results, if they exist
+      let oldResult = verificationResults.find(vr => vr.name === oldName)
+      if (oldResult !== undefined) {
+        let newResult: Verification = {
+          name: newName,
+          contract: oldResult.contract,
+          spec: oldResult.spec,
+          jobs: oldResult.jobs,
+        }
+        verificationResults = verificationResults.filter(vr => {
+          return vr.name !== oldName
+        })
+        verificationResults.push(newResult)
+      }
+
+      const oldConfNameMap: ConfNameMap = {
+        fileName: oldName,
+        displayName: namesMap.get(oldName),
+      }
+      const newConfNameMap: ConfNameMap = {
+        fileName: newName,
+        displayName: namesMap.get(newName),
+      }
+
+      duplicate(oldConfNameMap, newConfNameMap)
+      deleteConf(oldConfNameMap)
+      namesMap.delete(oldName)
+    }
+    // rename new run
+    else {
+      const confNameMap: ConfNameMap = {
+        fileName: newName,
+        displayName: namesMap.get(newName),
+      }
+      openSettings(confNameMap)
+    }
+    focusedRun = newName
+  }
+
+  /**
+   * run the fisrt pending run in the queue
+   */
+  function runNext(): void {
+    if (pendingQueue.length > 0) {
+      let curRun = pendingQueue.shift()
+      pendingQueueCounter--
+      runScript(curRun)
+    }
+  }
+
+  /**
+   * from conf file uri to only the file name
+   */
+  function getFilename(confFile: string): string {
+    return confFile.replace('conf/', '').replace('.conf', '')
+  }
+
+  /**
+   * run all the runs that are allowed to run
+   */
+  function runAll(): void {
+    runs.forEach((singleRun, index) => {
+      if (!singleRun.allowRun) {
+        return
+      }
+      const nowRunning = runningScripts.find(script => {
+        return getFilename(script.confFile) === singleRun.name
+      })
+      const inQueue = pendingQueue.find(pendingRun => {
+        return pendingRun.fileName === singleRun.name
+      })
+      if (inQueue === undefined && nowRunning === undefined) {
+        run(singleRun, index)
+      }
+    })
+  }
+
+  /**
+   * stops a pending run
+   */
+  function pendingStopFunc(run: Run): void {
+    pendingQueue = pendingQueue.filter(rq => {
+      return rq.fileName !== run.name
+    })
+    pendingQueueCounter--
   }
 
   onMount(() => {
@@ -165,125 +429,163 @@
   onDestroy(() => {
     window.removeEventListener('message', listener)
   })
-
-  function retrieveRules(jobs: Job[]): Rule[] {
-    // rulesArrays = [Rule[] A, Rule[]B,...]
-    const rulesArrays: Rule[][] = jobs.map(
-      job => job.verificationProgress.rules,
-    )
-    return [].concat(...rulesArrays)
-  }
 </script>
 
-{#if !hasResults}
+{#if !hasRuns}
   <div class="zero-state">
     <div class="command">
       <div class="command-description">
-        To check your smart contract start Certora IDE tool in command palette
-        or with button.
+        To check your smart contract start by creating a verification run
       </div>
-      <vscode-button class="command-button" on:click={runScript}>
-        Run Certora IDE
-      </vscode-button>
-    </div>
-    <div class="command">
-      <div class="command-description">
-        Configurate script and smart contract settings.
-      </div>
-      <vscode-button class="command-button" on:click={openSettings}>
-        Create Certora IDE conf file
+      <vscode-button class="command-button" on:click={() => createRun()}>
+        Create verification run
       </vscode-button>
     </div>
   </div>
 {:else}
-  {#each verificationResults as vr (vr.contract + '-' + vr.spec)}
+  <Pane
+    title="MY RUNS"
+    initialExpandedState={true}
+    actions={[
+      {
+        title: 'run all',
+        icon: 'run-all',
+        onClick: runAll,
+      },
+      {
+        title: 'create new run',
+        icon: 'diff-added',
+        onClick: createRun,
+      },
+    ]}
+  >
+    <ul class="running-scripts">
+      {#each Array(runsCounter) as _, index (index)}
+        {#key [runs[index], focusedRun, runs[index].allowRun]}
+          <li>
+            <NewRun
+              doRename={runs[index].name === ''}
+              editFunc={() => editRun(runs[index])}
+              deleteFunc={() => deleteRun(runs[index])}
+              {namesMap}
+              {renameRun}
+              duplicateFunc={duplicateRun}
+              runFunc={() => run(runs[index])}
+              doRun={runs[index].allowRun}
+              {verificationResults}
+              {newFetchOutput}
+              nowRunning={runningScripts.find(
+                rs => getFilename(rs.confFile) === runs[index].name,
+              ) !== undefined ||
+                (pendingQueue.find(rs => rs.fileName === runs[index].name) !==
+                  undefined &&
+                  pendingQueueCounter > 0)}
+              isPending={pendingQueue.find(
+                rs => rs.fileName === runs[index].name,
+              ) !== undefined && pendingQueueCounter > 0}
+              expandedState={verificationResults.find(
+                vr => vr.name === runs[index].name,
+              ) !== undefined}
+              pendingStopFunc={() => pendingStopFunc(runs[index])}
+              runningStopFunc={() => {
+                stopScript(runs[index].id)
+                setAllowRun(runs[index].name, true)
+                runNext()
+              }}
+              inactiveSelected={focusedRun}
+              setDoRun={() => setAllowRun(runs[index].name, false)}
+              bind:runName={runs[index].name}
+            />
+          </li>
+        {/key}
+      {/each}
+    </ul>
+  </Pane>
+{/if}
+{#if output}
+  {#if output.variables && output.variables.length > 0}
     <Pane
-      title={vr.contract + '-' + vr.spec}
+      title={`${output.treeViewPath.ruleName} variables`}
       initialExpandedState={true}
       actions={[
         {
-          title: 'Remove Current Verification Result',
+          title: 'Close Output',
           icon: 'close',
-          onClick: () => {
-            verificationResults = verificationResults.filter(
-              res => res.contract !== vr.contract && res.spec !== vr.spec,
-            )
-          },
+          onClick: clearOutput,
         },
       ]}
     >
+      <CodeItemList codeItems={output.variables} />
+    </Pane>
+  {/if}
+  {#if output.callTrace && Object.keys(output.callTrace).length > 0}
+    <Pane title={`CALL TRACE`} initialExpandedState={true}>
       <Tree
         data={{
-          type: TreeType.Rules,
-          tree: retrieveRules(vr.jobs),
+          type: TreeType.Calltrace,
+          tree: [output.callTrace],
         }}
-        on:fetchOutput={e => newFetchOutput(e, vr)}
+        on:selectCalltraceFunction={selectCalltraceFunction}
       />
     </Pane>
-  {/each}
-  {#if output}
-    {#if output.variables && output.variables.length > 0}
-      <Pane
-        title={`${output.treeViewPath.ruleName} variables`}
-        initialExpandedState={true}
-        actions={[
-          {
-            title: 'Close Output',
-            icon: 'close',
-            onClick: clearOutput,
-          },
-        ]}
-      >
-        <CodeItemList codeItems={output.variables} />
-      </Pane>
-    {/if}
-    {#if output.callTrace && Object.keys(output.callTrace).length > 0}
-      <Pane title={`Call Trace`} initialExpandedState={true}>
-        <Tree
-          data={{
-            type: TreeType.Calltrace,
-            tree: [output.callTrace],
-          }}
-          on:selectCalltraceFunction={selectCalltraceFunction}
-        />
-      </Pane>
-    {/if}
-    {#if selectedCalltraceFunction && selectedCalltraceFunction.variables && selectedCalltraceFunction.variables.length > 0}
-      <Pane
-        title={`${selectedCalltraceFunction.name} variables`}
-        initialExpandedState={true}
-      >
-        <CodeItemList codeItems={selectedCalltraceFunction.variables} />
-      </Pane>
-    {/if}
-    {#if output.callResolutionWarnings && output.callResolutionWarnings.length > 0}
-      <Pane
-        title={`Contract call resolution warnings`}
-        initialExpandedState={true}
-      >
-        {#each output.callResolutionWarnings as resolution}
-          <ContractCallResolution contractCallResolution={resolution} />
-        {/each}
-      </Pane>
-    {/if}
-    {#if output.callResolution && output.callResolution.length > 0}
-      <Pane title={`Contract call resolution`} initialExpandedState={true}>
-        {#each output.callResolution as resolution}
-          <ContractCallResolution contractCallResolution={resolution} />
-        {/each}
-      </Pane>
-    {/if}
+  {/if}
+  {#if selectedCalltraceFunction && selectedCalltraceFunction.variables && selectedCalltraceFunction.variables.length > 0}
+    <Pane
+      title={`${selectedCalltraceFunction.name} variables`}
+      initialExpandedState={true}
+    >
+      <CodeItemList codeItems={selectedCalltraceFunction.variables} />
+    </Pane>
+  {/if}
+  {#if output.callResolutionWarnings && output.callResolutionWarnings.length > 0}
+    <Pane
+      title={`Contract call resolution warnings`}
+      initialExpandedState={true}
+    >
+      {#each output.callResolutionWarnings as resolution}
+        <ContractCallResolution contractCallResolution={resolution} />
+      {/each}
+    </Pane>
+  {/if}
+  {#if output.callResolution && output.callResolution.length > 0}
+    <Pane title={`Contract call resolution`} initialExpandedState={true}>
+      {#each output.callResolution as resolution}
+        <ContractCallResolution contractCallResolution={resolution} />
+      {/each}
+    </Pane>
   {/if}
 {/if}
-<Pane title="Running Scripts" initialExpandedState={true}>
-  {#if hasRunningScripts}
+<!-- {/if} -->
+<!-- <Pane title="RUNNING SCRIPTS" initialExpandedState={true}>
+  {#if hasRunningScripts || queueCounter > 0}
     <ul class="running-scripts">
       {#each runningScripts as script (script.pid)}
         <li>
           <RunningScript
+            title={(namesMap.get(getFilename(script.confFile)) ||
+              script.confFile) + '     currently runnig'}
             confFile={script.confFile}
             on:click={() => {
               stopScript(script.pid)
+              console.log('runNext from stop script')
+              runNext()
+            }}
+          />
+        </li>
+      {/each}
+    </ul>
+    <ul class="running-scripts">
+      {#each Array(queueCounter) as _, index (index)}
+        <li>
+          <RunningScript
+            title={namesMap.get(runsQueue[index].fileName) ||
+              runsQueue[index].fileName}
+            confFile={runsQueue[index].fileName}
+            on:click={() => {
+              runsQueue = runsQueue.filter(rq => {
+                return rq.fileName !== runsQueue[index].fileName
+              })
+              queueCounter--
             }}
           />
         </li>
@@ -296,16 +598,16 @@
           You don’t have any running scripts. To check your smart contract start
           Certora IDE tool in command palette or click the button below.
         </div>
-        {#if hasResults}
+       {#if hasResults}
           <vscode-button class="command-button" on:click={runScript}>
             Run Certora IDE
           </vscode-button>
-        {/if}
-      </div>
-    </div>
-  {/if}
-</Pane>
+        {/if} -->
+<!-- </div> -->
+<!-- </div> -->
+<!-- {/if} -->
 
+<!-- </Pane> -->
 <style lang="postcss">
   :global(body) {
     padding: 0;
@@ -351,4 +653,6 @@
     margin: 0;
     list-style-type: none;
   }
+
+
 </style>

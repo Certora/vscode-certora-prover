@@ -37,15 +37,30 @@ function addJobIdToProperties(job: Job) {
   addJobIdToRules(jobId, tree.rules)
 }
 
+export function addVerificationResult(
+  results: Verification[],
+  newResult: Job,
+  name: string,
+): void {
+  const tree: Tree = newResult.verificationProgress
+  addJobIdToProperties(newResult)
+  const newVerification: Verification = {
+    name: name,
+    contract: tree.contract,
+    spec: tree.spec,
+    jobs: [newResult],
+  }
+  results.push(newVerification)
+}
+
 export function smartMergeVerificationResult(
   results: Verification[],
   newResult: Job,
+  name: string,
 ): void {
   const tree: Tree = newResult.verificationProgress
   // look for Verification with the same contract name and spec file
-  const index = results.findIndex(
-    item => item.contract === tree.contract && item.spec === tree.spec,
-  )
+  const index = results.findIndex(item => item.name === name)
   // if found
   if (index > -1) {
     console.log(
@@ -61,6 +76,7 @@ export function smartMergeVerificationResult(
     console.log(newResult)
     // create a new Verification object and push to the Verification[]
     const newVerification: Verification = {
+      name: name, // todo: add the righ name
       contract: tree.contract,
       spec: tree.spec,
       jobs: [newResult],

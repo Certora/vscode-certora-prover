@@ -118,11 +118,13 @@ export class ScriptRunner {
 
         const progressUrl = getProgressUrl(str)
 
+        const confFileName = confFile.replace('conf/', '').replace('.conf', '')
+
         if (progressUrl) {
           await this.polling.run(progressUrl, data => {
             this.resultsWebviewProvider.postMessage<Job>({
               type: 'receive-new-job-result',
-              payload: data,
+              payload: [data, confFileName],
             })
           })
         }
@@ -143,6 +145,10 @@ export class ScriptRunner {
 
         if (code !== 0) {
           PostProblems.postProblems(confFile)
+          this.resultsWebviewProvider.postMessage({
+            type: 'parse-error',
+            payload: this.getConfFileName(confFile).replace('.conf', ''),
+          })
         }
 
         const action = await window.showInformationMessage(

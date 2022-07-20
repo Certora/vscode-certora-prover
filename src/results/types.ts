@@ -129,6 +129,7 @@ export type ProgressResponse = {
 }
 
 export type Verification = {
+  name: string
   spec: string
   contract: string
   jobs: Job[]
@@ -144,6 +145,10 @@ export enum EventTypesFromExtension {
   SetOutput = 'set-output',
   ClearAllJobs = 'clear-all-jobs',
   SetCreationTime = 'set-creation-time',
+  CreateJob = 'create-new-job',
+  ParseError = 'parse-error',
+  AllowRun = 'allow-run',
+  FocusChanged = 'focus-changed',
 }
 
 export type EventsFromExtension =
@@ -166,3 +171,38 @@ export type EventsFromExtension =
       type: EventTypesFromExtension.SetCreationTime
       payload: CreationTime
     }
+  | {
+      type: EventTypesFromExtension.CreateJob
+    }
+  | {
+      type: EventTypesFromExtension.ParseError
+      payload: string
+    }
+  | {
+      type: EventTypesFromExtension.AllowRun
+      payload: string
+    }
+  | {
+      type: EventTypesFromExtension.FocusChanged
+      payload: string
+    }
+
+export type ConfNameMap = {
+  displayName: string
+  fileName: string
+}
+
+export type Run = {
+  id: number
+  name: string
+  allowRun: boolean
+}
+
+export type Status = {
+  finishSetup: string
+  ready: string
+  running: string
+  pending: string
+  success: string
+  unableToRun: string
+}

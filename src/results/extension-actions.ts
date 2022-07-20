@@ -1,5 +1,5 @@
 import { log, Sources } from './utils/log'
-import type { JumpToDefinition } from './types'
+import type { ConfNameMap, JumpToDefinition } from './types'
 
 enum Commands {
   StopScript = 'stop-script',
@@ -7,6 +7,9 @@ enum Commands {
   OpenSettings = 'open-settings',
   NavigateToCode = 'navigate-to-code',
   GetOutput = 'get-output',
+  EditConfFile = 'edit-confFile',
+  DeleteConf = 'delete-confFile',
+  Duplicate = 'duplicate',
 }
 
 export function stopScript(pid: number): void {
@@ -21,23 +24,61 @@ export function stopScript(pid: number): void {
   })
 }
 
-export function runScript(): void {
+export function runScript(name: ConfNameMap): void {
   log({
     action: 'Send "run-script" command',
     source: Sources.ResultsWebview,
   })
   vscode.postMessage({
     command: Commands.RunScript,
+    payload: name,
   })
 }
 
-export function openSettings(): void {
+export function openSettings(name: ConfNameMap): void {
   log({
     action: 'Send "open-settings" command',
     source: Sources.ResultsWebview,
   })
   vscode.postMessage({
     command: Commands.OpenSettings,
+    payload: name,
+  })
+}
+
+export function editConfFile(name: ConfNameMap): void {
+  log({
+    action: 'Send "edit-confFile" command',
+    source: Sources.ResultsWebview,
+  })
+  vscode.postMessage({
+    command: Commands.EditConfFile,
+    payload: name,
+  })
+}
+
+export function deleteConf(name: ConfNameMap): void {
+  log({
+    action: 'Send "delete-confFile" command',
+    source: Sources.ResultsWebview,
+  })
+  vscode.postMessage({
+    command: Commands.DeleteConf,
+    payload: name,
+  })
+}
+
+export function duplicate(
+  toDuplicate: ConfNameMap,
+  duplicated: ConfNameMap,
+): void {
+  log({
+    action: 'Send "duplicate" command',
+    source: Sources.ResultsWebview,
+  })
+  vscode.postMessage({
+    command: Commands.Duplicate,
+    payload: [toDuplicate, duplicated],
   })
 }
 

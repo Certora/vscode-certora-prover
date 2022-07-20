@@ -130,7 +130,7 @@
         {
           "type": "webview",
           "id": "results",
-          "name": "Results"
+          "name": "Certora plugin"
         }
       ]
     },
@@ -138,66 +138,23 @@
       "activitybar": [
         {
           "id": "results",
-          "title": "Results",
+          "title": "Certora plugin",
           "icon": "/media/extension-icon.svg"
         }
       ]
     },
     "commands": [
       {
-        "command": "certora.runScript",
-        "title": "Run Script",
-        "category": "Certora",
-        "icon": "$(play)"
-      },
-      {
         "command": "certora.createConfFile",
         "title": "Create conf file",
         "category": "Certora",
         "icon": "$(settings)"
-      },
-      {
-        "command": "certora.editConfFile",
-        "title": "Edit conf file",
-        "category": "Certora",
-        "icon": "$(edit)"
-      },
-      {
-        "command": "certora.clearResults",
-        "title": "Clear Results",
-        "category": "Certora",
-        "icon": "$(close)"
       }
     ],
     "menus": {
-      "commandPalette": [
-        {
-          "command": "certora.runScript",
-          "when": "focusedView == results"
-        },
-        {
-          "command": "certora.clearResults",
-          "when": "focusedView == results"
-        }
-      ],
       "view/title": [
         {
-          "command": "certora.runScript",
-          "when": "view == results",
-          "group": "navigation"
-        },
-        {
-          "command": "certora.clearResults",
-          "when": "view == results",
-          "group": "navigation"
-        },
-        {
           "command": "certora.createConfFile",
-          "when": "view == results",
-          "group": "navigation"
-        },
-        {
-          "command": "certora.editConfFile",
           "when": "view == results",
           "group": "navigation"
         }

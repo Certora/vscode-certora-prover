@@ -22,6 +22,7 @@ export type Flag = {
 }
 
 export type Form = {
+  name: string
   mainSolidityFile: string
   mainContractName: string
   specFile: string
@@ -60,5 +61,5 @@ export type EventsFromExtension =
     }
   | {
       type: EventTypesFromExtension.EditConfFile
-      payload: ConfFile
+      payload: [ConfFile, string]
     }

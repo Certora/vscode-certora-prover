@@ -112,6 +112,7 @@ export type Output = {
 }
 
 export type InputFormData = {
+  name: string
   mainSolidityFile: string
   mainContractName: string
   specFile: string
@@ -142,6 +143,11 @@ export type InputFormData = {
   }[]
 }
 
+export type ConfNameMap = {
+  displayName: string
+  fileName: string
+}
+
 export enum CommandFromResultsWebview {
   NavigateToCode = 'navigate-to-code',
   StopScript = 'stop-script',
@@ -149,6 +155,9 @@ export enum CommandFromResultsWebview {
   OpenSettings = 'open-settings',
   GetOutput = 'get-output',
   GetCreationTime = 'get-creation-time',
+  EditConfFile = 'edit-confFile',
+  DeleteConfFile = 'delete-confFile',
+  Duplicate = 'duplicate',
 }
 
 export enum CommandFromSettingsWebview {
@@ -167,9 +176,11 @@ export type EventFromResultsWebview =
     }
   | {
       command: CommandFromResultsWebview.RunScript
+      payload: ConfNameMap
     }
   | {
       command: CommandFromResultsWebview.OpenSettings
+      payload: ConfNameMap
     }
   | {
       command: CommandFromResultsWebview.GetOutput
@@ -178,6 +189,18 @@ export type EventFromResultsWebview =
   | {
       command: CommandFromResultsWebview.GetCreationTime
       payload: string
+    }
+  | {
+      command: CommandFromResultsWebview.EditConfFile
+      payload: ConfNameMap
+    }
+  | {
+      command: CommandFromResultsWebview.DeleteConfFile
+      payload: ConfNameMap
+    }
+  | {
+      command: CommandFromResultsWebview.Duplicate
+      payload: [ConfNameMap, ConfNameMap]
     }
 
 export type EventFromSettingsWebview =

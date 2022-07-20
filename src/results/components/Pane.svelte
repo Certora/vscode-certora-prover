@@ -1,33 +1,104 @@
 <script lang="ts">
   import Toolbar from './Toolbar.svelte'
-  import type { Action } from '../types'
+  import type { Action, Status } from '../types'
+  import { getIconPath } from '../utils/getIconPath'
 
   export let title: string
   export let actions: Action[] = []
   export let initialExpandedState: boolean = false
+  export let showExpendIcon: boolean = true
+  export let status: string = ''
+  export let inactiveSelected: boolean = false
+  export let runFunc: () => void = null
 
   let isExpanded = initialExpandedState
+
+  const STATUS: Status = {
+    finishSetup: 'Finish setup',
+    ready: 'Ready',
+    running: 'Running',
+    pending: 'Pending',
+    success: 'Ready success',
+    unableToRun: 'Unable to run',
+  }
+
+  const STATUS_ICONS: Status = {
+    finishSetup: 'finish-setup.svg',
+    ready: 'ready-to-run.svg',
+    running: 'running-rule-status.svg',
+    pending: 'pending.svg',
+    success: 'rerun-success.svg',
+    unableToRun: 'unable-to-run.svg',
+  }
+
+  const statusMap: Map<string, string> = new Map([
+    [STATUS.finishSetup, STATUS_ICONS.finishSetup],
+    [STATUS.running, STATUS_ICONS.running],
+    [STATUS.ready, STATUS_ICONS.ready],
+    [STATUS.pending, STATUS_ICONS.pending],
+    [STATUS.success, STATUS_ICONS.success],
+    [STATUS.unableToRun, STATUS_ICONS.unableToRun],
+  ])
+
+  function getPaneClassName() {
+    let className = 'pane-header'
+    if (isExpanded) {
+      className += ' normal-cursor'
+    }
+    if (inactiveSelected) {
+      className += ' inactive-selected'
+    }
+    console.log(className)
+    return className
+  }
+
+  function getIconClassName() {
+    let className = 'icon'
+    if (runFunc) {
+      className += ' normal-cursor'
+    }
+    return className
+  }
 
   function toggleExpand() {
     isExpanded = !isExpanded
   }
 </script>
 
-<div class="pane" class:expanded={isExpanded}>
+<div class="pane" class:expanded={isExpanded} id={title}>
   <div
-    class="pane-header"
+    class={getPaneClassName()}
     on:click={toggleExpand}
     tabindex="0"
     role="button"
     aria-label={`${title} section`}
     aria-expanded={isExpanded}
   >
-    <div
-      class="arrow-icon codicon codicon-chevron-{isExpanded ? 'down' : 'right'}"
-    />
+    {#if showExpendIcon}
+      <div
+        class="arrow-icon codicon codicon-chevron-{isExpanded
+          ? 'down'
+          : 'right'}"
+      />
+    {:else}
+      <div class="no-icon" />
+    {/if}
+    {#if status}
+      <img
+        class={getIconClassName()}
+        width="16"
+        height="16"
+        src={getIconPath(statusMap.get(status))}
+        alt=""
+        on:click={runFunc}
+      />
+    {/if}
     <h3 class="title" {title}>{title}</h3>
     <div class="actions">
       <Toolbar {actions} />
+    </div>
+    <div class="status">
+      {status === STATUS.success ? STATUS.ready : status}
     </div>
   </div>
   {#if isExpanded}
@@ -46,19 +117,28 @@
     box-sizing: border-box;
     align-items: center;
     border-top: 1px solid var(--pane-border-color);
-    cursor: pointer;
+    cursor: default;
     font-size: var(--font-size);
     font-weight: 700;
-    text-transform: uppercase;
 
     .arrow-icon {
       margin: 0 2px;
+    }
+
+    .icon {
+      margin-right: 7px;
+      margin-left: 2px;
+    }
+
+    .no-icon {
+      margin: 10px;
     }
 
     .title {
       overflow: hidden;
       min-width: 3ch;
       font-size: var(--font-size);
+      font-weight: normal !important;
       line-height: var(--height);
       -webkit-margin-after: 0;
       -webkit-margin-before: 0;
@@ -66,15 +146,45 @@
       white-space: nowrap;
     }
 
+    .status {
+      display: initial;
+      padding-right: 10px;
+      margin-left: auto !important;
+      font-size: 11px;
+      font-weight: normal !important;
+      opacity: 0.8;
+    }
+
     .actions {
       display: none;
       margin-left: auto;
     }
+
+    &:hover .actions {
+      display: initial;
+    }
+
+    &:hover .status {
+      display: none;
+    }
+
+    &:hover {
+      background-color: var(--vscode-list-hoverBackground);
+    }
+  }
+
+  *:focus {
+    background-color: var(--vscode-list-activeSelectionBackground);
+    outline-color: var(--vscode-list-focusHighlightForeground);
+  }
+
+  *:selection {
+    background-color: var(--vscode-list-activeSelectionBackground);
   }
 
   .pane {
     --height: 22px;
-    --font-size: 11px;
+    --font-size: 13px;
 
     display: flex;
     overflow: hidden;
@@ -82,10 +192,6 @@
     height: 100%;
     flex-direction: column;
     user-select: none;
-
-    &:hover .pane-header .actions {
-      display: initial;
-    }
 
     &:first-of-type .pane-header {
       border-top: none;
@@ -95,5 +201,17 @@
   .pane-body {
     overflow: hidden;
     flex: 1;
+  }
+
+  .normal-cursor {
+    cursor: pointer !important;
+
+    /* &:hover {
+      background-color: rgb(184 184 184 / 31%);
+    }  */
+  }
+
+  .inactive-selected {
+    background-color: var(--vscode-editor-inactiveSelectionBackground);
   }
 </style>

@@ -2,15 +2,37 @@ import * as vscode from 'vscode'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { SettingsPanel } from './SettingsPanel'
 import { ScriptRunner } from './ScriptRunner'
-import { ConfFile } from './types'
+import { ConfFile, InputFormData, ConfNameMap } from './types'
+// import { SmartContractsFilesWatcher } from './SmartContractsFilesWatcher'
+import { createAndOpenConfFile } from './utils/createAndOpenConfFile'
 
 export function activate(context: vscode.ExtensionContext): void {
-  function showSettings() {
+  function showSettings(name: ConfNameMap) {
     const path = vscode.workspace.workspaceFolders?.[0]
 
     if (!path) return
     const confFileDefault = getDefaultSettings()
-    SettingsPanel.render(context.extensionUri, confFileDefault)
+    console.log('creating a new conf file', name.displayName)
+    const emptyForm: InputFormData = {
+      name: name.fileName,
+      mainSolidityFile: '',
+      mainContractName: '',
+      specFile: '',
+      solidityCompiler: '',
+      useAdditionalContracts: false,
+      additionalContracts: [],
+      link: [],
+      extendedSettings: [],
+      useStaging: false,
+      branch: '',
+      cacheName: '',
+      message: '',
+      additionalSettings: [],
+    }
+    createAndOpenConfFile(emptyForm)
+    // SettingsPanel.setAllowRun(sendAllowRun)
+    SettingsPanel.setResultsWebviewProvider(resultsWebviewProvider)
+    SettingsPanel.render(context.extensionUri, name, confFileDefault)
   }
 
   /**
@@ -108,103 +130,177 @@ export function activate(context: vscode.ExtensionContext): void {
     return confFileDefault
   }
 
-  async function quickPickWithConfFiles(
-    select: (
-      selection: readonly vscode.QuickPickItem[],
-      quickPick: vscode.QuickPick<vscode.QuickPickItem>,
-      basePath: vscode.WorkspaceFolder,
-    ) => void,
-  ) {
+  // async function quickPickWithConfFiles(
+  //   select: (
+  //     selection: readonly vscode.QuickPickItem[],
+  //     quickPick: vscode.QuickPick<vscode.QuickPickItem>,
+  //     basePath: vscode.WorkspaceFolder,
+  //   ) => void,
+  // ) {
+  //   const path = vscode.workspace.workspaceFolders?.[0]
+
+  //   if (!path) return
+
+  //   const quickPick = vscode.window.createQuickPick()
+  //   const confFiles = await vscode.workspace.findFiles(
+  //     '**/*.{conf}',
+  //     '**/{.certora_config,.git,.last_confs,node_modules}/**',
+  //   )
+
+  //   if (!confFiles?.length) {
+  //     SettingsPanel.setAllowRun(sendAllowRun)
+  //     SettingsPanel.render(context.extensionUri, {
+  //       displayName: 'placeholder_name',
+  //       fileName: 'placeholder_name',
+  //     })
+  //   } else {
+  //     quickPick.items = confFiles.map(file => ({
+  //       label: vscode.workspace.asRelativePath(file),
+  //     }))
+  //     quickPick.onDidHide(() => quickPick.dispose())
+  //     quickPick.show()
+  //     quickPick.onDidChangeSelection(selection =>
+  //       select(selection, quickPick, path),
+  //     )
+  //   }
+  // }
+
+  async function editConf(name: ConfNameMap): Promise<void> {
     const path = vscode.workspace.workspaceFolders?.[0]
-
     if (!path) return
-
-    const quickPick = vscode.window.createQuickPick()
-    const confFiles = await vscode.workspace.findFiles(
-      '**/*.{conf}',
-      '**/{.certora_config,.git,.last_confs,node_modules}/**',
-    )
-
-    if (!confFiles?.length) {
-      SettingsPanel.render(context.extensionUri)
-    } else {
-      quickPick.items = confFiles.map(file => ({
-        label: vscode.workspace.asRelativePath(file),
-      }))
-      quickPick.onDidHide(() => quickPick.dispose())
-      quickPick.show()
-      quickPick.onDidChangeSelection(selection =>
-        select(selection, quickPick, path),
+    const confFile = 'conf/' + name.fileName + '.conf'
+    const confFileUri = vscode.Uri.joinPath(path.uri, confFile)
+    const decoder = new TextDecoder()
+    try {
+      console.log('editing existing conf file', name.displayName)
+      const confFileContent = JSON.parse(
+        decoder.decode(await vscode.workspace.fs.readFile(confFileUri)),
+      )
+      // SettingsPanel.setAllowRun(sendAllowRun)
+      SettingsPanel.setResultsWebviewProvider(resultsWebviewProvider)
+      SettingsPanel.render(context.extensionUri, name, confFileContent)
+    } catch (e) {
+      vscode.window.showErrorMessage(
+        `Can't read conf file: ${confFile}. Error: ${e}`,
       )
     }
   }
 
-  async function editConfFile() {
-    quickPickWithConfFiles(async (selection, quickPick, basePath) => {
-      if (selection[0]) {
-        quickPick.hide()
+  async function duplicate(
+    toDuplicate: ConfNameMap,
+    duplicated: ConfNameMap,
+  ): Promise<void> {
+    // get the content of the conf to duplicate
+    // cretate a new conf file with the name of "duplicated", content of "to duplicate", and open it with settings view
+    const path = vscode.workspace.workspaceFolders?.[0]
+    if (!path) return
+    const confFile = 'conf/' + toDuplicate.fileName + '.conf'
+    const confFileUri = vscode.Uri.joinPath(path.uri, confFile)
+    const decoder = new TextDecoder()
+    try {
+      console.log('duplicating existing conf file', toDuplicate.displayName)
+      const confFileContent: ConfFile = JSON.parse(
+        decoder.decode(await vscode.workspace.fs.readFile(confFileUri)),
+      )
 
-        const confFile = selection[0].label
-        const confFileUri = vscode.Uri.joinPath(basePath.uri, confFile)
-        const decoder = new TextDecoder()
-
-        try {
-          const confFileContent = JSON.parse(
-            decoder.decode(await vscode.workspace.fs.readFile(confFileUri)),
-          )
-          SettingsPanel.render(context.extensionUri, confFileContent)
-        } catch (e) {
-          vscode.window.showErrorMessage(
-            `Can't read conf file: ${confFile}. Error: ${e}`,
-          )
-        }
+      try {
+        const newConfFilePath = 'conf/' + duplicated.fileName + '.conf'
+        const newConfFileUri = vscode.Uri.joinPath(path.uri, newConfFilePath)
+        const encoder = new TextEncoder()
+        const content = encoder.encode(JSON.stringify(confFileContent, null, 2))
+        await vscode.workspace.fs.writeFile(newConfFileUri, content)
+      } catch (e) {
+        vscode.window.showErrorMessage(`Can't create conf file. Error: ${e}`)
       }
-    })
+      // SettingsPanel.setAllowRun(sendAllowRun)
+      SettingsPanel.setResultsWebviewProvider(resultsWebviewProvider)
+      SettingsPanel.render(context.extensionUri, duplicated, confFileContent)
+    } catch (e) {
+      vscode.window.showErrorMessage(
+        `Can't read conf file: ${confFile}. Error: ${e}`,
+      )
+    }
   }
 
-  async function runScript() {
-    quickPickWithConfFiles((selection, quickPick) => {
-      if (selection[0]) {
-        const confFile = selection[0].label
+  async function runScript(name: ConfNameMap) {
+    SettingsPanel.removePanel(name.displayName)
+    const confFile = 'conf/' + name.fileName + '.conf'
+    scriptRunner.run(confFile)
+    // quickPickWithConfFiles((selection, quickPick) => {
+    //   if (selection[0]) {
+    //     const confFile = selection[0].label
 
-        if (confFile.includes(' ')) {
-          vscode.window.showErrorMessage(
-            'The extension does not support path to conf file with spaces. Correct the conf file path and run the script again',
-          )
-          quickPick.hide()
-          return
-        }
+    //     if (confFile.includes(' ')) {
+    //       vscode.window.showErrorMessage(
+    //         'The extension does not support path to conf file with spaces. Correct the conf file path and run the script again',
+    //       )
+    //       quickPick.hide()
+    //       return
+    //     }
 
-        scriptRunner.run(confFile)
-        quickPick.hide()
-      }
-    })
+    //     scriptRunner.run(confFile)
+    //     quickPick.hide()
+    //   }
+    // })
   }
+
+  function getConfUri(name: string): vscode.Uri | void {
+    const path = vscode.workspace.workspaceFolders?.[0]
+    if (!path) return
+    const confFile = 'conf/' + name + '.conf'
+    const confFileUri = vscode.Uri.joinPath(path.uri, confFile)
+    return confFileUri
+  }
+
+  function deleteConfFile(name: ConfNameMap): void {
+    console.log('delete conf: ', name.displayName)
+    const confFileUri: vscode.Uri | void = getConfUri(name.fileName)
+    if (confFileUri) {
+      vscode.workspace.fs.delete(confFileUri)
+    }
+    SettingsPanel.removePanel(name.displayName)
+  }
+
+  // function sendAllowRun(runName: string): void {
+  //   resultsWebviewProvider.postMessage({
+  //     type: 'allow-run',
+  //     payload: runName,
+  //   })
+  // }
 
   const resultsWebviewProvider = new ResultsWebviewProvider(
     context.extensionUri,
-    runScript,
-    showSettings,
   )
+
+  resultsWebviewProvider.editConfFile = editConf
+  resultsWebviewProvider.openSettings = showSettings
+  resultsWebviewProvider.deleteConf = deleteConfFile
+  resultsWebviewProvider.duplicate = duplicate
+  resultsWebviewProvider.runScript = runScript
+
   const scriptRunner = new ScriptRunner(resultsWebviewProvider)
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('certora.createConfFile', showSettings),
-    vscode.commands.registerCommand('certora.editConfFile', editConfFile),
-    vscode.commands.registerCommand('certora.runScript', runScript),
-    vscode.commands.registerCommand('certora.clearResults', async () => {
-      const action = await vscode.window.showInformationMessage(
-        'Clear all jobs?',
-        'Clear All',
-        'Cancel',
-      )
-
-      if (action === 'Clear All') {
-        resultsWebviewProvider.postMessage({
-          type: 'clear-all-jobs',
-        })
-      }
+    vscode.commands.registerCommand('certora.createConfFile', async () => {
+      resultsWebviewProvider.postMessage({
+        type: 'create-new-job',
+      })
     }),
+    // vscode.commands.registerCommand('certora.editConfFile', editConf),
+    // vscode.commands.registerCommand('certora.runScript', runScript),
+    // vscode.commands.registerCommand('certora.clearResults', async () => {
+    //   const action = await vscode.window.showInformationMessage(
+    //     'Clear all jobs?',
+    //     'Clear All',
+    //     'Cancel',
+    //   )
+
+    //   if (action === 'Clear All') {
+    //     resultsWebviewProvider.postMessage({
+    //       type: 'clear-all-jobs',
+    //     })
+    //   }
+    // }),
     vscode.window.registerWebviewViewProvider(
       resultsWebviewProvider.viewType,
       resultsWebviewProvider,
@@ -216,6 +312,3 @@ export function activate(context: vscode.ExtensionContext): void {
     ),
   )
 }
-
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-export function deactivate(): void {}
