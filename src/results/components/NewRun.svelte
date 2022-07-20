@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { onDestroy, onMount } from 'svelte'
+
   import {
     Verification,
     TreeType,
@@ -7,7 +9,10 @@
     Assert,
     Action,
     Status,
+    EventsFromExtension,
+    EventTypesFromExtension,
   } from '../types'
+  import { log, Sources } from '../utils/log'
   import Pane from './Pane.svelte'
   import Tree from './Tree.svelte'
 
@@ -31,11 +36,15 @@
   export let expandedState = false
   export let nowRunning = false
 
-  export let doRun = true
+  export let doRun = false
   export let isPending = false
 
   export let pendingStopFunc: () => void
   export let runningStopFunc: () => void
+
+  export let inactiveSelected: string = ''
+
+  export let setDoRun: () => void
 
   const STATUS: Status = {
     finishSetup: 'Finish setup',
@@ -43,13 +52,45 @@
     running: 'Running',
     pending: 'Pending',
     success: 'Ready success',
-    unableToRun: 'Unable to run', //todo: implement
+    unableToRun: 'Unable to run',
   }
 
   let beforeRename = ''
   let activateRunRename = false
   let status = STATUS.finishSetup
+
   const UNTITLED = 'untitled'
+
+  const listener = (e: MessageEvent<EventsFromExtension>) => {
+    switch (e.data.type) {
+      case EventTypesFromExtension.ParseError: {
+        log({
+          action: 'Received "parse-error" command',
+          source: Sources.ResultsWebview,
+          info: e.data.payload,
+        })
+        if (e.data.payload === runName) {
+          // editFunc()
+          setDoRun()
+          status = STATUS.unableToRun
+          console.log('status: ', status)
+        }
+        break
+      }
+    }
+  }
+
+  onMount(() => {
+    window.addEventListener('message', listener)
+    if (doRun) {
+      console.log('status changed from actions: ', status)
+      status = STATUS.ready
+    }
+  })
+
+  onDestroy(() => {
+    window.removeEventListener('message', listener)
+  })
 
   function onKeyPress(e: any) {
     console.log('===somekey===')
@@ -59,7 +100,7 @@
       if (e.currentTarget.value === '') {
         runName = UNTITLED
         titleHandle()
-        renameRun('', spacesToUnderscores(UNTITLED))
+        renameRun('', spacesToUnderscores(runName))
       }
       activateRunRename = true
     }
@@ -179,15 +220,10 @@
         onClick: duplicate,
       },
     ]
-    if (doRun) {
-      const runAction = {
-        title: 'run',
-        icon: 'run',
-        onClick: runFunc,
-      }
-      actions.push(runAction)
-      status = STATUS.ready
-    }
+    // if (doRun) {
+    //   console.log('status changed from actions: ', status)
+    //   status = STATUS.ready
+    // }
     return actions
   }
 
@@ -247,10 +283,12 @@
         actions={createActions()}
         showExpendIcon={expandedState}
         status={hasResults() ? STATUS.success : status}
+        inactiveSelected={runName === inactiveSelected}
+        runFunc={doRun ? runFunc : null}
       >
-        {#each verificationResults as vr}
+        {#each verificationResults as vr, index (index)}
           {#if vr.name === runName}
-            <div class="tree">
+            <li class="tree">
               <Tree
                 data={{
                   type: TreeType.Rules,
@@ -258,7 +296,7 @@
                 }}
                 on:fetchOutput={e => newFetchOutput(e, vr)}
               />
-            </div>
+            </li>
           {/if}
         {/each}
       </Pane>
@@ -278,23 +316,24 @@
 
 <style lang="postcss">
   .body {
-    &:hover {
-      background-color: var(--vscode-list-hoverBackground);
+    *:focus {
+      background-color: var(--vscode-list-activeSelectionBackground);
+      outline-color: var(--vscode-list-focusHighlightForeground);
+    }
+
+    *:selection {
+      background-color: var(--vscode-list-activeSelectionBackground);
     }
   }
 
   .running {
     position: relative;
     overflow: hidden;
-    margin-right: 5px;
-    margin-left: 5px;
   }
 
   .results {
     position: relative;
     overflow: hidden;
-    margin-right: 5px;
-    margin-left: 5px;
   }
 
   .input {

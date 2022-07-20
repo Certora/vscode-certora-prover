@@ -9,6 +9,7 @@ import {
   EventFromSettingsWebview,
   InputFormData,
 } from './types'
+import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 
 export class SettingsPanel {
   public static currentPanel?: SettingsPanel
@@ -18,7 +19,8 @@ export class SettingsPanel {
   private editConfFile?: Record<string, unknown>
   private static allPanels: SettingsPanel[] = []
   private curConfFileDisplayName: string
-  private static allowRun: ((runName: string) => void) | null = null
+  // private static allowRun: ((runName: string) => void) | null = null
+  private static resultsWebviewProvider: ResultsWebviewProvider
 
   private constructor(
     panel: vscode.WebviewPanel,
@@ -46,6 +48,17 @@ export class SettingsPanel {
       this.editConfFile = editConfFile
     }
 
+    this._panel.onDidChangeViewState(e => {
+      if (e.webviewPanel.visible) {
+        if (SettingsPanel.resultsWebviewProvider) {
+          SettingsPanel.resultsWebviewProvider.postMessage({
+            type: 'focus-changed',
+            payload: confFileName,
+          })
+        }
+      }
+    })
+
     this._panel.webview.onDidReceiveMessage(
       (e: EventFromSettingsWebview) => {
         switch (e.command) {
@@ -63,13 +76,10 @@ export class SettingsPanel {
               info: e.payload,
             })
             createAndOpenConfFile(e.payload)
-            if (SettingsPanel.allowRun !== null) {
-              SettingsPanel.allowRun(confFileName)
-            }
-            // this._panel.webview.postMessage({
-            //   type: 'allow-run',
-            //   payload: confFileName,
-            // })
+            SettingsPanel.resultsWebviewProvider.postMessage({
+              type: 'allow-run',
+              payload: confFileName,
+            })
             this._panel?.dispose()
             break
           }
@@ -89,6 +99,14 @@ export class SettingsPanel {
 
   removeFromAllPanelsAndDispose = (): void => {
     SettingsPanel.allPanels = SettingsPanel.allPanels.filter(p => p !== this)
+    if (SettingsPanel.allPanels.length === 0) {
+      if (SettingsPanel.resultsWebviewProvider) {
+        SettingsPanel.resultsWebviewProvider.postMessage({
+          type: 'focus-changed',
+          payload: '',
+        })
+      }
+    }
     this.dispose()
   }
 
@@ -120,6 +138,12 @@ export class SettingsPanel {
       editConfFile,
     )
     this.allPanels.push(SettingsPanel.currentPanel)
+    if (SettingsPanel.resultsWebviewProvider) {
+      SettingsPanel.resultsWebviewProvider.postMessage({
+        type: 'focus-changed',
+        payload: confFileName.fileName,
+      })
+    }
   }
 
   public static removePanel(name: string): void {
@@ -225,7 +249,13 @@ export class SettingsPanel {
     }
   }
 
-  public static setAllowRun(func: (runName: string) => void): void {
-    SettingsPanel.allowRun = func
+  // public static setAllowRun(func: (runName: string) => void): void {
+  //   SettingsPanel.allowRun = func
+  // }
+
+  public static setResultsWebviewProvider(
+    resultsWebviewProvide: ResultsWebviewProvider,
+  ): void {
+    SettingsPanel.resultsWebviewProvider = resultsWebviewProvide
   }
 }

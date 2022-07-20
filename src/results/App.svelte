@@ -43,6 +43,7 @@
   let pendingQueueCounter = 0
   let namesMap: Map<string, string> = new Map()
   let runsCounter = 0
+  let focusedRun: string = ''
 
   $: hasRunningScripts = runningScripts.length > 0
   $: hasResults = verificationResults.length > 0
@@ -85,27 +86,27 @@
   //   return [].concat(...rulesArrays)
   // }
 
-  function fetchOutput(e: CustomEvent<Assert | Rule>, job: Job) {
-    log({
-      action: 'Try to fetch output',
-      source: Sources.ResultsWebview,
-      info: {
-        outputField: e.detail.output,
-      },
-    })
+  // function fetchOutput(e: CustomEvent<Assert | Rule>, job: Job) {
+  //   log({
+  //     action: 'Try to fetch output',
+  //     source: Sources.ResultsWebview,
+  //     info: {
+  //       outputField: e.detail.output,
+  //     },
+  //   })
 
-    if (!e.detail.output) {
-      clearOutput()
-      return
-    }
+  //   if (!e.detail.output) {
+  //     clearOutput()
+  //     return
+  //   }
 
-    const outputUrl = `${job.progressUrl.replace(
-      'progress',
-      'result',
-    )}&output=${e.detail.output}`
+  //   const outputUrl = `${job.progressUrl.replace(
+  //     'progress',
+  //     'result',
+  //   )}&output=${e.detail.output}`
 
-    getOutput(outputUrl)
-  }
+  //   getOutput(outputUrl)
+  // }
 
   function selectCalltraceFunction(e: CustomEvent<CallTraceFunction>) {
     selectedCalltraceFunction = e.detail
@@ -194,7 +195,7 @@
           info: e.data.payload,
         })
         console.log('Recieved "allow-run" with payload: ', e.data.payload)
-        runs = setAllowRun(e.data.payload)
+        runs = setAllowRun(e.data.payload, true)
         break
       }
       case EventTypesFromExtension.ClearAllJobs: {
@@ -218,22 +219,33 @@
         createRun({ id: runs.length, name: '', allowRun: false })
         break
       }
-      case EventTypesFromExtension.ParseError: {
+      case EventTypesFromExtension.FocusChanged: {
         log({
-          action: 'Received "parse-error" command',
+          action: 'Received "focus-changed" command',
           source: Sources.ResultsWebview,
+          info: e.data.payload,
         })
+        focusedRun = e.data.payload
         break
       }
+      // case EventTypesFromExtension.ParseError: {
+      //   log({
+      //     action: 'Received "parse-error" command',
+      //     source: Sources.ResultsWebview,
+      //     info: e.data.payload
+      //   })
+      //   setAllowRun(e.data.payload, false)
+      //   break
+      // }
       default:
         break
     }
   }
 
-  function setAllowRun(runName: string) {
+  function setAllowRun(runName: string, value: boolean) {
     runs.forEach(run => {
       if (run.name === runName) {
-        run.allowRun = true
+        run.allowRun = value
       }
     })
     return runs
@@ -263,6 +275,7 @@
     }
     console.log('to duplicate:', toDuplicate, 'duplicated: ', duplicated)
     duplicate(confNameMapToDuplicate, confNameMapDuplicated)
+    focusedRun = duplicatedName
   }
 
   function createRun(run?: Run) {
@@ -358,6 +371,7 @@
       }
       openSettings(confNameMap)
     }
+    focusedRun = newName
   }
 
   /**
@@ -447,7 +461,7 @@
   >
     <ul class="running-scripts">
       {#each Array(runsCounter) as _, index (index)}
-        {#key runs[index]}
+        {#key [runs[index], focusedRun, runs[index].allowRun]}
           <li>
             <NewRun
               doRename={runs[index].name === ''}
@@ -475,8 +489,11 @@
               pendingStopFunc={() => pendingStopFunc(runs[index])}
               runningStopFunc={() => {
                 stopScript(runs[index].id)
+                setAllowRun(runs[index].name, true)
                 runNext()
               }}
+              inactiveSelected={focusedRun}
+              setDoRun={() => setAllowRun(runs[index].name, false)}
               bind:runName={runs[index].name}
             />
           </li>
@@ -636,4 +653,6 @@
     margin: 0;
     list-style-type: none;
   }
+
+
 </style>

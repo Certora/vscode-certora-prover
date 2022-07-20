@@ -148,6 +148,7 @@ export enum EventTypesFromExtension {
   CreateJob = 'create-new-job',
   ParseError = 'parse-error',
   AllowRun = 'allow-run',
+  FocusChanged = 'focus-changed',
 }
 
 export type EventsFromExtension =
@@ -175,9 +176,14 @@ export type EventsFromExtension =
     }
   | {
       type: EventTypesFromExtension.ParseError
+      payload: string
     }
   | {
       type: EventTypesFromExtension.AllowRun
+      payload: string
+    }
+  | {
+      type: EventTypesFromExtension.FocusChanged
       payload: string
     }
 

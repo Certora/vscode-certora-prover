@@ -8,6 +8,8 @@
   export let initialExpandedState: boolean = false
   export let showExpendIcon: boolean = true
   export let status: string = ''
+  export let inactiveSelected: boolean = false
+  export let runFunc: () => void = null
 
   let isExpanded = initialExpandedState
 
@@ -38,8 +40,24 @@
     [STATUS.unableToRun, STATUS_ICONS.unableToRun],
   ])
 
-  function getClassName() {
-    return isExpanded ? 'pane-header' : 'pane-header normal-cursor'
+  function getPaneClassName() {
+    let className = 'pane-header'
+    if (isExpanded) {
+      className += ' normal-cursor'
+    }
+    if (inactiveSelected) {
+      className += ' inactive-selected'
+    }
+    console.log(className)
+    return className
+  }
+
+  function getIconClassName() {
+    let className = 'icon'
+    if (runFunc) {
+      className += ' normal-cursor'
+    }
+    return className
   }
 
   function toggleExpand() {
@@ -47,9 +65,9 @@
   }
 </script>
 
-<div class="pane" class:expanded={isExpanded}>
+<div class="pane" class:expanded={isExpanded} id={title}>
   <div
-    class={getClassName()}
+    class={getPaneClassName()}
     on:click={toggleExpand}
     tabindex="0"
     role="button"
@@ -67,11 +85,12 @@
     {/if}
     {#if status}
       <img
-        class="icon"
+        class={getIconClassName()}
         width="16"
         height="16"
         src={getIconPath(statusMap.get(status))}
         alt=""
+        on:click={runFunc}
       />
     {/if}
     <h3 class="title" {title}>{title}</h3>
@@ -98,7 +117,7 @@
     box-sizing: border-box;
     align-items: center;
     border-top: 1px solid var(--pane-border-color);
-    cursor: pointer;
+    cursor: default;
     font-size: var(--font-size);
     font-weight: 700;
 
@@ -112,7 +131,7 @@
     }
 
     .no-icon {
-      margin: 5px;
+      margin: 10px;
     }
 
     .title {
@@ -129,6 +148,7 @@
 
     .status {
       display: initial;
+      padding-right: 10px;
       margin-left: auto !important;
       font-size: 11px;
       font-weight: normal !important;
@@ -139,6 +159,27 @@
       display: none;
       margin-left: auto;
     }
+
+    &:hover .actions {
+      display: initial;
+    }
+
+    &:hover .status {
+      display: none;
+    }
+
+    &:hover {
+      background-color: var(--vscode-list-hoverBackground);
+    }
+  }
+
+  *:focus {
+    background-color: var(--vscode-list-activeSelectionBackground);
+    outline-color: var(--vscode-list-focusHighlightForeground);
+  }
+
+  *:selection {
+    background-color: var(--vscode-list-activeSelectionBackground);
   }
 
   .pane {
@@ -152,14 +193,6 @@
     flex-direction: column;
     user-select: none;
 
-    &:hover .pane-header .actions {
-      display: initial;
-    }
-
-    &:hover .pane-header .status {
-      display: none;
-    }
-
     &:first-of-type .pane-header {
       border-top: none;
     }
@@ -171,6 +204,14 @@
   }
 
   .normal-cursor {
-    cursor: default !important;
+    cursor: pointer !important;
+
+    /* &:hover {
+      background-color: rgb(184 184 184 / 31%);
+    }  */
+  }
+
+  .inactive-selected {
+    background-color: var(--vscode-editor-inactiveSelectionBackground);
   }
 </style>

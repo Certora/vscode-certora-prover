@@ -3,7 +3,7 @@ import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { SettingsPanel } from './SettingsPanel'
 import { ScriptRunner } from './ScriptRunner'
 import { ConfFile, InputFormData, ConfNameMap } from './types'
-import { SmartContractsFilesWatcher } from './SmartContractsFilesWatcher'
+// import { SmartContractsFilesWatcher } from './SmartContractsFilesWatcher'
 import { createAndOpenConfFile } from './utils/createAndOpenConfFile'
 
 export function activate(context: vscode.ExtensionContext): void {
@@ -30,7 +30,8 @@ export function activate(context: vscode.ExtensionContext): void {
       additionalSettings: [],
     }
     createAndOpenConfFile(emptyForm)
-    SettingsPanel.setAllowRun(sendAllowRun)
+    // SettingsPanel.setAllowRun(sendAllowRun)
+    SettingsPanel.setResultsWebviewProvider(resultsWebviewProvider)
     SettingsPanel.render(context.extensionUri, name, confFileDefault)
   }
 
@@ -129,40 +130,40 @@ export function activate(context: vscode.ExtensionContext): void {
     return confFileDefault
   }
 
-  async function quickPickWithConfFiles(
-    select: (
-      selection: readonly vscode.QuickPickItem[],
-      quickPick: vscode.QuickPick<vscode.QuickPickItem>,
-      basePath: vscode.WorkspaceFolder,
-    ) => void,
-  ) {
-    const path = vscode.workspace.workspaceFolders?.[0]
+  // async function quickPickWithConfFiles(
+  //   select: (
+  //     selection: readonly vscode.QuickPickItem[],
+  //     quickPick: vscode.QuickPick<vscode.QuickPickItem>,
+  //     basePath: vscode.WorkspaceFolder,
+  //   ) => void,
+  // ) {
+  //   const path = vscode.workspace.workspaceFolders?.[0]
 
-    if (!path) return
+  //   if (!path) return
 
-    const quickPick = vscode.window.createQuickPick()
-    const confFiles = await vscode.workspace.findFiles(
-      '**/*.{conf}',
-      '**/{.certora_config,.git,.last_confs,node_modules}/**',
-    )
+  //   const quickPick = vscode.window.createQuickPick()
+  //   const confFiles = await vscode.workspace.findFiles(
+  //     '**/*.{conf}',
+  //     '**/{.certora_config,.git,.last_confs,node_modules}/**',
+  //   )
 
-    if (!confFiles?.length) {
-      SettingsPanel.setAllowRun(sendAllowRun)
-      SettingsPanel.render(context.extensionUri, {
-        displayName: 'placeholder_name',
-        fileName: 'placeholder_name',
-      })
-    } else {
-      quickPick.items = confFiles.map(file => ({
-        label: vscode.workspace.asRelativePath(file),
-      }))
-      quickPick.onDidHide(() => quickPick.dispose())
-      quickPick.show()
-      quickPick.onDidChangeSelection(selection =>
-        select(selection, quickPick, path),
-      )
-    }
-  }
+  //   if (!confFiles?.length) {
+  //     SettingsPanel.setAllowRun(sendAllowRun)
+  //     SettingsPanel.render(context.extensionUri, {
+  //       displayName: 'placeholder_name',
+  //       fileName: 'placeholder_name',
+  //     })
+  //   } else {
+  //     quickPick.items = confFiles.map(file => ({
+  //       label: vscode.workspace.asRelativePath(file),
+  //     }))
+  //     quickPick.onDidHide(() => quickPick.dispose())
+  //     quickPick.show()
+  //     quickPick.onDidChangeSelection(selection =>
+  //       select(selection, quickPick, path),
+  //     )
+  //   }
+  // }
 
   async function editConf(name: ConfNameMap): Promise<void> {
     const path = vscode.workspace.workspaceFolders?.[0]
@@ -175,7 +176,8 @@ export function activate(context: vscode.ExtensionContext): void {
       const confFileContent = JSON.parse(
         decoder.decode(await vscode.workspace.fs.readFile(confFileUri)),
       )
-      SettingsPanel.setAllowRun(sendAllowRun)
+      // SettingsPanel.setAllowRun(sendAllowRun)
+      SettingsPanel.setResultsWebviewProvider(resultsWebviewProvider)
       SettingsPanel.render(context.extensionUri, name, confFileContent)
     } catch (e) {
       vscode.window.showErrorMessage(
@@ -210,7 +212,8 @@ export function activate(context: vscode.ExtensionContext): void {
       } catch (e) {
         vscode.window.showErrorMessage(`Can't create conf file. Error: ${e}`)
       }
-      SettingsPanel.setAllowRun(sendAllowRun)
+      // SettingsPanel.setAllowRun(sendAllowRun)
+      SettingsPanel.setResultsWebviewProvider(resultsWebviewProvider)
       SettingsPanel.render(context.extensionUri, duplicated, confFileContent)
     } catch (e) {
       vscode.window.showErrorMessage(
@@ -258,12 +261,12 @@ export function activate(context: vscode.ExtensionContext): void {
     SettingsPanel.removePanel(name.displayName)
   }
 
-  function sendAllowRun(runName: string): void {
-    resultsWebviewProvider.postMessage({
-      type: 'allow-run',
-      payload: runName,
-    })
-  }
+  // function sendAllowRun(runName: string): void {
+  //   resultsWebviewProvider.postMessage({
+  //     type: 'allow-run',
+  //     payload: runName,
+  //   })
+  // }
 
   const resultsWebviewProvider = new ResultsWebviewProvider(
     context.extensionUri,

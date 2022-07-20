@@ -147,6 +147,7 @@ export class ScriptRunner {
           PostProblems.postProblems(confFile)
           this.resultsWebviewProvider.postMessage({
             type: 'parse-error',
+            payload: this.getConfFileName(confFile).replace('.conf', ''),
           })
         }
 
