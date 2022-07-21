@@ -3,22 +3,20 @@
 name: CI
 
 # Controls when the workflow will run
-on:
-  # Triggers the workflow on push or pull request events but only for the main branch
-  push:
-    branches: "*"
+on: label
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
-    runs-on: windows-latest
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       # Runs a single command using the runners shell
       - name: Run a one-line script
@@ -29,13 +27,3 @@ jobs:
         run: |
           yarn
           npx vsce package
-      - name: Archive an artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: vsix_file
-          path: ./*.vsix
-      - name: Download a single artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: vsix_file
-
