@@ -23,7 +23,12 @@
   }
 </script>
 
-<div class="card" class:open aria-expanded={open}>
+<div
+  class="card"
+  class:open
+  class:cursor_disabled={disabledState}
+  aria-expanded={open}
+>
   <div class="card-header" on:click={handleToggle}>
     <slot name="header" />
   </div>
@@ -37,5 +42,9 @@
   .card-header {
     cursor: pointer;
     user-select: none;
+  }
+  .cursor_disabled,
+  .cursor_disabled > .card-header {
+    cursor: not-allowed;
   }
 </style>

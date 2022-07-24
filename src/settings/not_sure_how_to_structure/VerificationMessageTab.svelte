@@ -1,4 +1,6 @@
 <script>
+  import CustomInput from './slots_and_utility/CustomInput.svelte'
+  import { verification_message } from './stores/store.js'
 </script>
 
 <div class="card_parent_wrapper bg_dark">
@@ -9,10 +11,9 @@
   <div>
     <div class="input_wrapper input_single" style="margin-top: 8px;">
       <div class="dark_input">
-        <input
-          class="simple_txt_input"
-          type="text"
+        <CustomInput
           placeholder="Text message"
+          bind:bindValue={$verification_message}
         />
       </div>
     </div>

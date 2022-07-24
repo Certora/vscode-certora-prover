@@ -21,7 +21,7 @@
     solidityObj,
   } from './not_sure_how_to_structure/stores/store.js'
 
-  $: $solidityObj, console.log($solidityObj)
+  $: $solidityObj, console.log($solidityObj.compiler.ver)
 
   let solidityFiles: string[] = []
   let solidityFilesNew

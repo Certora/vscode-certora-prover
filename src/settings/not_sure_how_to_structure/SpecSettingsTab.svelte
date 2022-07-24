@@ -26,22 +26,18 @@
 
   function handleClear() {}
 
-  // swich? finished && active , !finished && !active , !finished && active???
-  let disabledState =
-    $solidityObj.mainFile === '' &&
-    $solidityObj.mainContract === '' &&
-    $solidityObj.compiler.ver === ''
+  $: solDisabledState = !(
+    $solidityObj.mainFile !== '' &&
+    $solidityObj.mainContract !== '' &&
+    $solidityObj.compiler.ver !== ''
+  )
 </script>
 
-<p>{disabledState}</p>
-<p>{$solidityObj.mainFile}</p>
-<p>{$solidityObj.mainContract}</p>
-<p>{$solidityObj.compiler.ver}</p>
 <div class="card_parent_wrapper bg_dark">
   <CollapseCard
     bind:open={$navState.specCheck.active}
     resetNavProp={true}
-    bind:disabledState
+    bind:disabledState={solDisabledState}
   >
     <div slot="header" class="header header_contracts">
       <i class="codicon codicon-file" />
@@ -78,7 +74,7 @@
                 />
               </div>
             </div>
-            <div class="input_wrapper">
+            <div class="input_wrapper mt-24px">
               <div class="dark_input">
                 <h3>Duration</h3>
                 <CustomInput
@@ -88,23 +84,15 @@
               </div>
               <div class="dark_input">
                 <h3>Inherit</h3>
-                <Select
-                  {items}
-                  {Icon}
-                  {ClearIcon}
-                  on:select={handleSelect}
-                  on:clear={handleClear}
+                <CustomInput
                   placeholder="Another contract to inherit se..."
+                  bind:bindValue={$specObj.inherit}
                 />
-                <!-- not sure if drop or just txt input -->
-                <!-- <input class="simple_txt_input" type="text"
-                    placeholder="Another contract to inherit se..."
-                    /> -->
               </div>
             </div>
-            <div class="input_wrapper ">
+            <div class="input_wrapper mt-24px">
               <div class="dark_input alternate_input">
-                <label class="checkbox_container"
+                <label class="checkbox_container" style="margin:0"
                   >Optomistic loop
                   <input
                     type="checkbox"
@@ -113,7 +101,10 @@
                   <span class="checkmark" />
                 </label>
               </div>
-              <div class="dark_input alternate_input">
+              <div
+                class="dark_input alternate_input"
+                style="width: auto; flex-grow:1;"
+              >
                 <h3>Loop Unroll</h3>
                 <CustomInput
                   placeholder="0"
@@ -150,6 +141,25 @@
               <button class="btn_add"
                 ><i class="codicon codicon-add" /> Add Property</button
               >
+              <div class="input_wrapper input_single">
+                <div class="dark_input ">
+                  <h3>Staging</h3>
+                  <label class="checkbox_container"
+                    >Run on the Staging Environment
+                    <input type="checkbox" bind:checked={$specObj.runOnStg} />
+                    <span class="checkmark" />
+                  </label>
+                </div>
+              </div>
+              <div class="input_wrapper input_single">
+                <div class="dark_input">
+                  <h3>Branch Name</h3>
+                  <CustomInput
+                    placeholder="default: master"
+                    bind:bindValue={$specObj.branchName}
+                  />
+                </div>
+              </div>
               <div class="input_wrapper check_between">
                 <div class="dark_input alternate_input ">
                   <label class="checkbox_container"
@@ -186,10 +196,6 @@
           </CollapseCard>
         </div>
       </div>
-
-      <button class="btn_add"
-        ><i class="codicon codicon-add" />Add another spec file</button
-      >
     </div>
   </CollapseCard>
 </div>
@@ -197,7 +203,7 @@
 <style>
   /* stylelint-disable */
 
-  .input_wrapper {
+  .mt-24px {
     margin-top: 24px;
   }
   .check_between {

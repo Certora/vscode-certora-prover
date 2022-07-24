@@ -1,82 +1,51 @@
 <script>
-  import Select from 'svelte-select'
-  import ClearIcon from './slots_and_utility/ClearIcon.svelte'
-  import Icon from './slots_and_utility/Icon.svelte'
-  import { navState, resetNav, selectNavMenu } from './stores/store.js'
-
-  let items = [
-    {
-      value: 'chocolate',
-      label: 'Chocolate',
-      group: 'Sweet',
-      monkey: 'monkey',
-    },
-    { value: 'pizza', label: 'Pizza', group: 'Savory' },
-    { value: 'cake', label: 'Cake', group: 'Sweet' },
-    { value: 'cookies', label: 'Cookies', group: 'Savory' },
-    { value: 'ice-cream', label: 'Ice Cream', group: 'Sweet' },
-  ]
-
-  let favouriteFood = undefined
-
-  function handleSelect(event) {
-    favouriteFood = event.detail
-    console.log(event)
-  }
-
-  function handleClear() {
-    favouriteFood = undefined
-  }
-
-  function handleNav(nav) {
-    selectNavMenu(nav)
-  }
+  import {
+    navState,
+    selectNavMenu,
+    solidityObj,
+    specObj,
+    verification_message,
+  } from './stores/store.js'
+  $: solDisabledState =
+    $solidityObj.mainFile !== '' &&
+    $solidityObj.mainContract !== '' &&
+    $solidityObj.compiler.ver !== ''
 </script>
 
 <h1>My run name settings</h1>
-<div class="input_wrapper" style="margin-top: 8px;">
-  <div class="dark_input input_single">
-    <Select
-      {items}
-      {Icon}
-      {ClearIcon}
-      on:select={handleSelect}
-      on:clear={handleClear}
-      placeholder="Search Settings"
-    />
-  </div>
-</div>
-
 <div class="nav_settings">
-  <div
+  <button
     class="nav_settings_child "
     on:click={() => selectNavMenu('solCheck')}
-    class:checked={$navState.solCheck.checked}
+    class:checked={solDisabledState}
     class:active={$navState.solCheck.active}
   >
     <i class="codicon codicon-file" />
     <h3>Solidity contracts</h3>
     <i class="codicon codicon-check" />
-  </div>
-  <div
+  </button>
+  <button
     class="nav_settings_child"
     on:click={() => selectNavMenu('specCheck')}
-    class:checked={$navState.specCheck.checked}
+    class:checked={$specObj.specFile !== ''}
     class:active={$navState.specCheck.active}
+    disabled={!solDisabledState}
   >
     <i class="codicon codicon-file" />
-    <h3>Solidity contracts</h3>
+    <h3>Certora spec</h3>
     <i class="codicon codicon-check" />
-  </div>
-  <div
+  </button>
+  <button
     class="nav_settings_child"
-    class:checked={$navState.msgCheck.checked}
+    on:click={() => selectNavMenu('msgCheck')}
+    class:checked={$verification_message !== ''}
     class:active={$navState.msgCheck.active}
+    disabled={$specObj.specFile == ''}
   >
     <i class="codicon codicon-file" />
-    <h3>Solidity contracts</h3>
+    <h3>Verification message</h3>
     <i class="codicon codicon-check" />
-  </div>
+  </button>
 </div>
 
 <style>
@@ -102,11 +71,16 @@
     height: min-content;
   }
   .nav_settings_child {
+    border: 0;
     border-radius: 4px;
+    cursor: pointer;
     display: flex;
     padding: 8px;
     background: transparent;
     transition: background 0.2c ease-in-out;
+  }
+  .nav_settings_child:disabled {
+    cursor: not-allowed;
   }
   .active.nav_settings_child {
     background: var(--vscode-list-activeSelectionBackground);

@@ -53,13 +53,13 @@ export function selectNavMenu(str) {
 export const solidityObj = writable({
   mainFile: '',
   mainContract: '',
-  linking: [{ variable: 'some string', contractName: 'some string' }],
-  specifiMethod: 'some string',
+  linking: [{ variable: '', contractName: '' }],
+  specifiMethod: '',
   compiler: { exe: '', ver: '' },
-  solidityArgument: 'some string',
+  solidityArgument: '',
   solidityPackageDir: [
     {
-      packageName: 'some string',
+      packageName: '',
       path: '',
     },
   ],
@@ -77,22 +77,24 @@ export const solidityObj = writable({
 
 // const solidityPackageDir = {
 //     packageName:'some string',
-//     path:'some path'
+//     path:''
 // }
 
 export const specObj = writable({
-  specFile: 'some path',
-  rules: 'some path',
-  duration: 'some string',
-  inherit: 'some string',
+  specFile: '',
+  rules: '',
+  duration: '',
+  inherit: '',
   optimisticLoop: true,
-  loopUnroll: 0,
+  loopUnroll: '',
   properties: [
     {
-      name: 'some string',
-      value: 'some string',
+      name: '',
+      value: '',
     },
   ],
+  runOnStg: false,
+  branchName: '',
   localTypeChecking: true,
   shortOutput: true,
   multiAssert: true,

@@ -77,6 +77,95 @@
               <CollapseCard>
                 <div slot="header" class="header header_contract">
                   <i class="codicon codicon-gear" />
+                  <h3>Compiler</h3>
+                  <i class="codicon codicon-chevron-up" />
+                </div>
+                <div slot="body" class="card_body_wrapper">
+                  <div class="input_wrapper">
+                    <div class="dark_input">
+                      <h3>
+                        Directory containing solidity packages<span>*</span>
+                      </h3>
+                      <CustomInput
+                        placeholder="CVT-Executables-Mac"
+                        bind:bindValue={$solidityObj.compiler.exe}
+                      />
+                    </div>
+                    <div class="dark_input">
+                      <h3>Default soldity version to use<span>*</span></h3>
+                      <!-- no placeholder, this filed should have the default compiler selected by default -->
+                      <CustomInput
+                        placeholder="version: solc7.6"
+                        bind:bindValue={$solidityObj.compiler.ver}
+                      />
+                    </div>
+                    <i class="codicon codicon-trash" />
+                  </div>
+
+                  <!-- validation message -->
+                  <!-- <div class="input_error_message">
+                    <i class="codicon codicon-warning" />
+                    Validation message
+                    <a target="_blank">Optional link to docs</a>
+                  </div> -->
+
+                  <!-- advanced settings -->
+                  <div class="card_body_wrapper_parent bg_light mt-8px">
+                    <CollapseCard>
+                      <div slot="header" class="header header_contract">
+                        <i class="codicon codicon-gear" />
+                        <h3>Advanced Settings</h3>
+                        <i class="codicon codicon-chevron-up" />
+                      </div>
+                      <div slot="body" class="card_body_wrapper">
+                        <div class="input_wrapper input_single">
+                          <div class="dark_input">
+                            <h3>Solidity Argument</h3>
+                            <CustomInput
+                              placeholder="Argument"
+                              bind:bindValue={$solidityObj.solidityArgument}
+                            />
+                          </div>
+                        </div>
+                        <div class="input_wrapper">
+                          <div class="dark_input">
+                            <h3>Solidity package directories</h3>
+                            <Select
+                              {items}
+                              {Icon}
+                              {ClearIcon}
+                              on:select={handleSelect}
+                              on:clear={handleClear}
+                              placeholder="Package name"
+                            />
+                          </div>
+                          <div class="dark_input">
+                            <h3>&nbsp;</h3>
+                            <Select
+                              {items}
+                              {Icon}
+                              {ClearIcon}
+                              on:select={handleSelect}
+                              on:clear={handleClear}
+                              placeholder=".../path"
+                            />
+                          </div>
+                          <i class="codicon codicon-trash" />
+                        </div>
+
+                        <button class="btn_add"
+                          ><i class="codicon codicon-add" /> Add Directory</button
+                        >
+                      </div>
+                    </CollapseCard>
+                  </div>
+                </div>
+              </CollapseCard>
+            </div>
+            <div class="card_body_wrapper_parent bg_dark mt-8px">
+              <CollapseCard>
+                <div slot="header" class="header header_contract">
+                  <i class="codicon codicon-gear" />
                   <h3>Linking</h3>
                   <i class="codicon codicon-chevron-up" />
                 </div>
@@ -119,107 +208,6 @@
                         bind:bindValue={$solidityObj.specifiMethod}
                       />
                     </div>
-                  </div>
-                </div>
-              </CollapseCard>
-            </div>
-            <div class="card_body_wrapper_parent bg_dark mt-8px">
-              <CollapseCard>
-                <div slot="header" class="header header_contract">
-                  <i class="codicon codicon-gear" />
-                  <h3>Compiler</h3>
-                  <i class="codicon codicon-chevron-up" />
-                </div>
-                <div slot="body" class="card_body_wrapper">
-                  <div class="input_wrapper">
-                    <div class="dark_input">
-                      <h3>
-                        Directory containing solidity packages<span>*</span>
-                      </h3>
-                      <Select
-                        {items}
-                        {Icon}
-                        {ClearIcon}
-                        on:select={handleSelect}
-                        on:clear={handleClear}
-                        placeholder="CVT-Executables-Mac"
-                      />
-                    </div>
-                    <div class="dark_input">
-                      <h3>Default soldity version to use<span>*</span></h3>
-                      <!-- no placeholder, this filed should have the default compiler selected by default -->
-                      <Select
-                        {items}
-                        {Icon}
-                        {ClearIcon}
-                        bind:value={$solidityObj.compiler.ver}
-                        on:select={handleSelect}
-                        on:clear={handleClear}
-                        placeholder="version: solc7.6"
-                      />
-                    </div>
-                    <i class="codicon codicon-trash" />
-                  </div>
-
-                  <div class="input_error_message">
-                    <i class="codicon codicon-warning" />
-                    Validation message
-                    <a target="_blank">Optional link to docs</a>
-                  </div>
-
-                  <!-- advanced settings -->
-                  <div class="card_body_wrapper_parent bg_light mt-8px">
-                    <CollapseCard>
-                      <div slot="header" class="header header_contract">
-                        <i class="codicon codicon-gear" />
-                        <h3>Advanced Settings</h3>
-                        <i class="codicon codicon-chevron-up" />
-                      </div>
-                      <div slot="body" class="card_body_wrapper">
-                        <div class="input_wrapper input_single">
-                          <div class="dark_input">
-                            <h3>Solidity Argument</h3>
-                            <Select
-                              {items}
-                              {Icon}
-                              {ClearIcon}
-                              on:select={handleSelect}
-                              on:clear={handleClear}
-                              placeholder="CVT-Executables-Mac"
-                            />
-                          </div>
-                        </div>
-                        <div class="input_wrapper">
-                          <div class="dark_input">
-                            <h3>Solidity package directories</h3>
-                            <Select
-                              {items}
-                              {Icon}
-                              {ClearIcon}
-                              on:select={handleSelect}
-                              on:clear={handleClear}
-                              placeholder="Package name"
-                            />
-                          </div>
-                          <div class="dark_input">
-                            <h3>&nbsp;</h3>
-                            <Select
-                              {items}
-                              {Icon}
-                              {ClearIcon}
-                              on:select={handleSelect}
-                              on:clear={handleClear}
-                              placeholder=".../path"
-                            />
-                          </div>
-                          <i class="codicon codicon-trash" />
-                        </div>
-
-                        <button class="btn_add"
-                          ><i class="codicon codicon-add" /> Add Directory</button
-                        >
-                      </div>
-                    </CollapseCard>
                   </div>
                 </div>
               </CollapseCard>
