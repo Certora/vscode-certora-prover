@@ -53,7 +53,7 @@ jobs:
 workflows:
   build-test:
     jobs:
-      - build
+      - build:
           filters:
             branches:
               ignore: main
