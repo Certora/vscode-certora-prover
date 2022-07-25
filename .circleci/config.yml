@@ -54,4 +54,6 @@ workflows:
   build-test:
     jobs:
       - build
-      
+          filters:
+            branches:
+              ignore: main
