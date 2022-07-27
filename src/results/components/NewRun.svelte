@@ -1,5 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte'
+  import { checkServerIdentity } from 'tls'
+  import { runScript } from '../extension-actions'
 
   import {
     Verification,
@@ -11,6 +13,7 @@
     Status,
     EventsFromExtension,
     EventTypesFromExtension,
+    Run,
   } from '../types'
   import { log, Sources } from '../utils/log'
   import Pane from './Pane.svelte'
@@ -36,7 +39,6 @@
   export let expandedState = false
   export let nowRunning = false
 
-  export let doRun = false
   export let isPending = false
 
   export let pendingStopFunc: () => void
@@ -44,7 +46,9 @@
 
   export let inactiveSelected: string = ''
 
-  export let setDoRun: () => void
+  export let setStatus: (name: string, status: string) => void
+
+  export let run: Run
 
   const STATUS: Status = {
     finishSetup: 'Finish setup',
@@ -55,9 +59,12 @@
     unableToRun: 'Unable to run',
   }
 
+  export let status = STATUS.finishSetup
+
   let beforeRename = ''
   let activateRunRename = false
-  let status = STATUS.finishSetup
+  let stop = false
+  //let status = STATUS.finishSetup
 
   const UNTITLED = 'untitled'
 
@@ -70,10 +77,19 @@
           info: e.data.payload,
         })
         if (e.data.payload === runName) {
-          // editFunc()
-          setDoRun()
-          status = STATUS.unableToRun
-          console.log('status: ', status)
+          console.log(
+            'name:',
+            runName,
+            'current status parse error: ',
+            status,
+            run.catcheStatus,
+          )
+          if (!stop) {
+            setStatus(runName, STATUS.unableToRun)
+            status = STATUS.unableToRun
+            stop = false
+          }
+          // console.log('status: ', status)
         }
         break
       }
@@ -82,10 +98,6 @@
 
   onMount(() => {
     window.addEventListener('message', listener)
-    if (doRun) {
-      console.log('status changed from actions: ', status)
-      status = STATUS.ready
-    }
   })
 
   onDestroy(() => {
@@ -180,8 +192,10 @@
 
   function getRunStatus() {
     if (isPending) {
+      setStatus(runName, STATUS.pending)
       status = STATUS.pending
     } else if (nowRunning) {
+      setStatus(runName, STATUS.running)
       status = STATUS.running
     }
     return status
@@ -227,13 +241,36 @@
     return actions
   }
 
+  function pendingRunStop() {
+    let newStatus = STATUS.ready
+    // if (run.catcheStatus !== undefined){
+    //   newStatus = run.catcheStatus
+    // }
+    status = newStatus
+    setStatus(runName, newStatus)
+    pendingStopFunc()
+    isPending = false
+  }
+
+  function runningStop() {
+    console.log('running stop cache status: ', run.catcheStatus)
+    let newStatus = STATUS.ready
+    // if (run.catcheStatus !== undefined){
+    //   newStatus = run.catcheStatus
+    // }
+    status = newStatus
+    setStatus(runName, newStatus)
+    runningStopFunc()
+    stop = true
+  }
+
   function createActionsForRunningScript(): Action[] {
     if (isPending) {
       return [
         {
           title: 'stop',
           icon: 'stop-circle',
-          onClick: pendingStopFunc,
+          onClick: pendingRunStop,
         },
       ]
     }
@@ -242,7 +279,7 @@
         {
           title: 'stop',
           icon: 'stop-circle',
-          onClick: runningStopFunc,
+          onClick: runningStop,
         },
       ]
     }
@@ -253,6 +290,9 @@
     const result = verificationResults.find(vr => {
       return vr.name === runName
     })
+    if (result !== undefined) {
+      setStatus(runName, STATUS.success)
+    }
     return result !== undefined
   }
 
@@ -284,7 +324,11 @@
         showExpendIcon={expandedState}
         status={hasResults() ? STATUS.success : status}
         inactiveSelected={runName === inactiveSelected}
-        runFunc={doRun ? runFunc : null}
+        runFunc={status === STATUS.ready ||
+        status === STATUS.success ||
+        status === STATUS.unableToRun
+          ? runFunc
+          : null}
       >
         {#each verificationResults as vr, index (index)}
           {#if vr.name === runName}
@@ -324,6 +368,8 @@
     *:selection {
       background-color: var(--vscode-list-activeSelectionBackground);
     }
+
+    text-overflow: ellipsis;
   }
 
   .running {

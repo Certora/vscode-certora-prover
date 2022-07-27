@@ -9,7 +9,7 @@
   export let showExpendIcon: boolean = true
   export let status: string = ''
   export let inactiveSelected: boolean = false
-  export let runFunc: () => void = null
+  export let runFunc: () => void = test
 
   let isExpanded = initialExpandedState
 
@@ -39,6 +39,10 @@
     [STATUS.success, STATUS_ICONS.success],
     [STATUS.unableToRun, STATUS_ICONS.unableToRun],
   ])
+
+  function test() {
+    console.log('no run function given')
+  }
 
   function getPaneClassName() {
     let className = 'pane-header'

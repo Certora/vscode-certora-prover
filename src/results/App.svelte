@@ -28,9 +28,11 @@
     Verification,
     Run,
     ConfNameMap,
+    Status,
   } from './types'
   import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
   import NewRun from './components/NewRun.svelte'
+  import { SignatureHelp } from 'vscode'
 
   let output: Output
   let selectedCalltraceFunction: CallTraceFunction
@@ -48,6 +50,15 @@
   $: hasRunningScripts = runningScripts.length > 0
   $: hasResults = verificationResults.length > 0
   $: hasRuns = runsCounter > 0
+
+  const STATUS: Status = {
+    finishSetup: 'Finish setup',
+    ready: 'Ready',
+    running: 'Running',
+    pending: 'Pending',
+    success: 'Ready success',
+    unableToRun: 'Unable to run',
+  }
 
   function newFetchOutput(e: CustomEvent<Assert | Rule>, vr: Verification) {
     console.log(e.detail)
@@ -195,7 +206,7 @@
           info: e.data.payload,
         })
         console.log('Recieved "allow-run" with payload: ', e.data.payload)
-        runs = setAllowRun(e.data.payload, true)
+        runs = setStatus(e.data.payload, STATUS.ready)
         break
       }
       case EventTypesFromExtension.ClearAllJobs: {
@@ -216,7 +227,7 @@
           source: Sources.ResultsWebview,
         })
 
-        createRun({ id: runs.length, name: '', allowRun: false })
+        createRun({ id: runs.length, name: '', status: STATUS.finishSetup })
         break
       }
       case EventTypesFromExtension.FocusChanged: {
@@ -228,24 +239,24 @@
         focusedRun = e.data.payload
         break
       }
-      // case EventTypesFromExtension.ParseError: {
-      //   log({
-      //     action: 'Received "parse-error" command',
-      //     source: Sources.ResultsWebview,
-      //     info: e.data.payload
-      //   })
-      //   setAllowRun(e.data.payload, false)
-      //   break
-      // }
       default:
         break
     }
   }
 
-  function setAllowRun(runName: string, value: boolean) {
+  function setStatus(runName: string, value: string) {
     runs.forEach(run => {
       if (run.name === runName) {
-        run.allowRun = value
+        run.catcheStatus = run.status
+        run.status = value
+        console.log(
+          'name: ',
+          runName,
+          'set status to: ',
+          run.status,
+          'cache: ',
+          run.catcheStatus,
+        )
       }
     })
     return runs
@@ -259,10 +270,14 @@
       duplicatedName,
     )
     const toDuplicate: Run = runs.find(run => run.name === nameToDuplicate)
+    let newStatus = toDuplicate.status
+    if (newStatus === STATUS.success) {
+      newStatus = STATUS.ready
+    }
     const duplicated: Run = {
       id: runs.length,
       name: duplicatedName,
-      allowRun: toDuplicate.allowRun,
+      status: newStatus,
     }
     createRun(duplicated)
     const confNameMapDuplicated: ConfNameMap = {
@@ -282,7 +297,7 @@
     if (run) {
       runs.push(run)
     } else {
-      runs.push({ id: runs.length, name: '', allowRun: false })
+      runs.push({ id: runs.length, name: '', status: STATUS.finishSetup })
     }
     runsCounter++
   }
@@ -397,7 +412,13 @@
    */
   function runAll(): void {
     runs.forEach((singleRun, index) => {
-      if (!singleRun.allowRun) {
+      if (
+        singleRun.status === STATUS.finishSetup ||
+        singleRun.status === STATUS.pending ||
+        singleRun.status === STATUS.running ||
+        singleRun.status === STATUS.unableToRun
+      ) {
+        console.log('run all: ', singleRun.status)
         return
       }
       const nowRunning = runningScripts.find(script => {
@@ -461,7 +482,7 @@
   >
     <ul class="running-scripts">
       {#each Array(runsCounter) as _, index (index)}
-        {#key [runs[index], focusedRun, runs[index].allowRun]}
+        {#key [runs[index], focusedRun, runs[index].status, runs[index].catcheStatus]}
           <li>
             <NewRun
               doRename={runs[index].name === ''}
@@ -471,7 +492,7 @@
               {renameRun}
               duplicateFunc={duplicateRun}
               runFunc={() => run(runs[index])}
-              doRun={runs[index].allowRun}
+              status={runs[index].status}
               {verificationResults}
               {newFetchOutput}
               nowRunning={runningScripts.find(
@@ -486,14 +507,18 @@
               expandedState={verificationResults.find(
                 vr => vr.name === runs[index].name,
               ) !== undefined}
-              pendingStopFunc={() => pendingStopFunc(runs[index])}
+              pendingStopFunc={() => {
+                // setStatus(runs[index].name, runs[index].catcheStatus)
+                pendingStopFunc(runs[index])
+              }}
               runningStopFunc={() => {
                 stopScript(runs[index].id)
-                setAllowRun(runs[index].name, true)
+                // setStatus(runs[index].name, runs[index].catcheStatus)
                 runNext()
               }}
               inactiveSelected={focusedRun}
-              setDoRun={() => setAllowRun(runs[index].name, false)}
+              {setStatus}
+              run={runs[index]}
               bind:runName={runs[index].name}
             />
           </li>
@@ -653,6 +678,4 @@
     margin: 0;
     list-style-type: none;
   }
-
-
 </style>
