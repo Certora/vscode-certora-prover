@@ -196,8 +196,6 @@ export type Run = {
   id: number
   name: string
   status: string
-  catcheStatus?: string
-  catcheResult?: Verification
 }
 
 export type Status = {

@@ -4,7 +4,6 @@
   import CodeItemList from './components/CodeItemList.svelte'
   import Tree from './components/Tree.svelte'
   import ContractCallResolution from './components/ContractCallResolution.svelte'
-  import RunningScript from './components/RunningScript.svelte'
   import {
     runScript,
     stopScript,
@@ -14,10 +13,7 @@
     deleteConf,
     duplicate,
   } from './extension-actions'
-  import {
-    addVerificationResult,
-    smartMergeVerificationResult,
-  } from './utils/mergeResults'
+  import { smartMergeVerificationResult } from './utils/mergeResults'
   import { log, Sources } from './utils/log'
   import type {
     Assert,
@@ -32,7 +28,6 @@
   } from './types'
   import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
   import NewRun from './components/NewRun.svelte'
-  import { SignatureHelp } from 'vscode'
 
   let output: Output
   let selectedCalltraceFunction: CallTraceFunction
@@ -244,56 +239,64 @@
     }
   }
 
-  function setStatus(runName: string, value: string) {
+  /**
+   * set the status of the run named [runName] to be [value]
+   * @param runName name of a run
+   * @param value status
+   * @returns new list of runs after change
+   */
+  function setStatus(runName: string, value: string): Run[] {
     runs.forEach(run => {
       if (run.name === runName) {
-        run.catcheStatus = run.status
         run.status = value
-        console.log(
-          'name: ',
-          runName,
-          'set status to: ',
-          run.status,
-          'cache: ',
-          run.catcheStatus,
-        )
+        console.log('name: ', runName, 'set status to: ', run.status)
       }
     })
     return runs
   }
 
-  function duplicateRun(nameToDuplicate: string, duplicatedName: string) {
-    console.log(
-      'to duplicate: ',
-      nameToDuplicate,
-      'duplicated: ',
-      duplicatedName,
-    )
+  /**
+   * duplicate [name to duplicate] into [duplicatedName]
+   * this will create a new run and a new conf file with a duplicated name
+   * @param nameToDuplicate
+   * @param duplicatedName
+   */
+  function duplicateRun(nameToDuplicate: string, duplicatedName: string): void {
     const toDuplicate: Run = runs.find(run => run.name === nameToDuplicate)
+
+    // the status of the new run cannot be 'success' (havn't run yet => no results)
     let newStatus = toDuplicate.status
     if (newStatus === STATUS.success) {
       newStatus = STATUS.ready
     }
+
     const duplicated: Run = {
       id: runs.length,
       name: duplicatedName,
       status: newStatus,
     }
+
     createRun(duplicated)
+
     const confNameMapDuplicated: ConfNameMap = {
       fileName: duplicated.name,
       displayName: namesMap.get(duplicated.name),
     }
+
     const confNameMapToDuplicate: ConfNameMap = {
       fileName: toDuplicate.name,
       displayName: namesMap.get(toDuplicate.name),
     }
-    console.log('to duplicate:', toDuplicate, 'duplicated: ', duplicated)
+
     duplicate(confNameMapToDuplicate, confNameMapDuplicated)
     focusedRun = duplicatedName
   }
 
-  function createRun(run?: Run) {
+  /**
+   * adds a new run to runs array and increase the counter
+   * @param run new run. if doest exists - creates a new run object
+   */
+  function createRun(run?: Run): void {
     if (run) {
       runs.push(run)
     } else {
@@ -302,7 +305,7 @@
     runsCounter++
   }
 
-  function editRun(run: Run) {
+  function editRun(run: Run): void {
     const confNameMap: ConfNameMap = {
       fileName: run.name,
       displayName: namesMap.get(run.name),
@@ -310,8 +313,14 @@
     editConfFile(confNameMap)
   }
 
-  function deleteRun(toFilter: Run) {
-    const name = toFilter.name
+  /**
+   * deletes a run, it's conf file and it's results
+   * @param runToDelete run to delete
+   */
+  function deleteRun(runToDelete: Run): void {
+    const name = runToDelete.name
+
+    //delete results
     verificationResults = verificationResults.filter(vr => {
       return vr.name !== name
     })
@@ -319,16 +328,23 @@
       fileName: name,
       displayName: namesMap.get(name),
     }
+    //delete run
     runs = runs.filter(run => {
-      return run !== toFilter
+      return run !== runToDelete
     })
-
     namesMap.delete(name)
+
+    //delete conf file
     deleteConf(confNameMap)
     runsCounter--
   }
 
-  function run(run: Run, index = 0) {
+  /**
+   * either run this run or add to pending queue
+   * @param run run to run
+   * @param index if 0 - run, else: add to pending queue
+   */
+  function run(run: Run, index = 0): void {
     verificationResults = verificationResults.filter(vr => {
       return vr.name !== run.name
     })
@@ -347,7 +363,12 @@
     }
   }
 
-  function renameRun(oldName: string, newName: string) {
+  /**
+   * rename the run named oldName to newName (also renames the conf file)
+   * @param oldName name to change
+   * @param newName new name for the run and conf
+   */
+  function renameRun(oldName: string, newName: string): void {
     // rename existing run
     if (oldName !== '') {
       // the renamed run should have the same verification results, if they exist
@@ -412,13 +433,13 @@
    */
   function runAll(): void {
     runs.forEach((singleRun, index) => {
+      // runs with these statuses should not run automatically
       if (
         singleRun.status === STATUS.finishSetup ||
         singleRun.status === STATUS.pending ||
         singleRun.status === STATUS.running ||
         singleRun.status === STATUS.unableToRun
       ) {
-        console.log('run all: ', singleRun.status)
         return
       }
       const nowRunning = runningScripts.find(script => {
@@ -427,6 +448,7 @@
       const inQueue = pendingQueue.find(pendingRun => {
         return pendingRun.fileName === singleRun.name
       })
+      //make sure runs arn't ran in parallel to themself
       if (inQueue === undefined && nowRunning === undefined) {
         run(singleRun, index)
       }
@@ -482,7 +504,7 @@
   >
     <ul class="running-scripts">
       {#each Array(runsCounter) as _, index (index)}
-        {#key [runs[index], focusedRun, runs[index].status, runs[index].catcheStatus]}
+        {#key [runs[index], focusedRun, runs[index].status]}
           <li>
             <NewRun
               doRename={runs[index].name === ''}
@@ -508,17 +530,14 @@
                 vr => vr.name === runs[index].name,
               ) !== undefined}
               pendingStopFunc={() => {
-                // setStatus(runs[index].name, runs[index].catcheStatus)
                 pendingStopFunc(runs[index])
               }}
               runningStopFunc={() => {
                 stopScript(runs[index].id)
-                // setStatus(runs[index].name, runs[index].catcheStatus)
                 runNext()
               }}
               inactiveSelected={focusedRun}
               {setStatus}
-              run={runs[index]}
               bind:runName={runs[index].name}
             />
           </li>
@@ -580,59 +599,7 @@
     </Pane>
   {/if}
 {/if}
-<!-- {/if} -->
-<!-- <Pane title="RUNNING SCRIPTS" initialExpandedState={true}>
-  {#if hasRunningScripts || queueCounter > 0}
-    <ul class="running-scripts">
-      {#each runningScripts as script (script.pid)}
-        <li>
-          <RunningScript
-            title={(namesMap.get(getFilename(script.confFile)) ||
-              script.confFile) + '     currently runnig'}
-            confFile={script.confFile}
-            on:click={() => {
-              stopScript(script.pid)
-              console.log('runNext from stop script')
-              runNext()
-            }}
-          />
-        </li>
-      {/each}
-    </ul>
-    <ul class="running-scripts">
-      {#each Array(queueCounter) as _, index (index)}
-        <li>
-          <RunningScript
-            title={namesMap.get(runsQueue[index].fileName) ||
-              runsQueue[index].fileName}
-            confFile={runsQueue[index].fileName}
-            on:click={() => {
-              runsQueue = runsQueue.filter(rq => {
-                return rq.fileName !== runsQueue[index].fileName
-              })
-              queueCounter--
-            }}
-          />
-        </li>
-      {/each}
-    </ul>
-  {:else}
-    <div class="zero-state">
-      <div class="command">
-        <div class="command-description">
-          You don’t have any running scripts. To check your smart contract start
-          Certora IDE tool in command palette or click the button below.
-        </div>
-       {#if hasResults}
-          <vscode-button class="command-button" on:click={runScript}>
-            Run Certora IDE
-          </vscode-button>
-        {/if} -->
-<!-- </div> -->
-<!-- </div> -->
-<!-- {/if} -->
 
-<!-- </Pane> -->
 <style lang="postcss">
   :global(body) {
     padding: 0;

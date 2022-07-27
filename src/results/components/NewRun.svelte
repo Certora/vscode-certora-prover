@@ -1,7 +1,5 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte'
-  import { checkServerIdentity } from 'tls'
-  import { runScript } from '../extension-actions'
 
   import {
     Verification,
@@ -13,7 +11,6 @@
     Status,
     EventsFromExtension,
     EventTypesFromExtension,
-    Run,
   } from '../types'
   import { log, Sources } from '../utils/log'
   import Pane from './Pane.svelte'
@@ -48,8 +45,6 @@
 
   export let setStatus: (name: string, status: string) => void
 
-  export let run: Run
-
   const STATUS: Status = {
     finishSetup: 'Finish setup',
     ready: 'Ready',
@@ -64,7 +59,6 @@
   let beforeRename = ''
   let activateRunRename = false
   let stop = false
-  //let status = STATUS.finishSetup
 
   const UNTITLED = 'untitled'
 
@@ -77,19 +71,11 @@
           info: e.data.payload,
         })
         if (e.data.payload === runName) {
-          console.log(
-            'name:',
-            runName,
-            'current status parse error: ',
-            status,
-            run.catcheStatus,
-          )
+          // change status to 'unableToRun' only if run wasn't stoped manually / intentionly
           if (!stop) {
-            setStatus(runName, STATUS.unableToRun)
-            status = STATUS.unableToRun
+            statusChange(STATUS.unableToRun)
             stop = false
           }
-          // console.log('status: ', status)
         }
         break
       }
@@ -104,11 +90,11 @@
     window.removeEventListener('message', listener)
   })
 
-  function onKeyPress(e: any) {
-    console.log('===somekey===')
+  function onKeyPress(e: any): void {
+    // get out of 'rename' mode when enter is pressed
     if (e.key === 'Enter') {
       doRename = false
-      console.log('===enter===' + e.currentTarget.value)
+      // empty names are not allowed - we use UNTITLED instead
       if (e.currentTarget.value === '') {
         runName = UNTITLED
         titleHandle()
@@ -122,7 +108,7 @@
    * returns a name for a duplicated item
    * example: name => name (1)
    */
-  function duplicateName() {
+  function duplicateName(): string {
     let nameToDuplicate = runName
     if (namesMap.has(runName)) {
       nameToDuplicate = namesMap.get(runName)
@@ -132,7 +118,6 @@
     while (namesMap.has(spacesToUnderscores(currentName))) {
       counter++
       currentName = renameDuplicate(nameToDuplicate, counter)
-      console.log('===while===')
     }
     return currentName
   }
@@ -144,7 +129,7 @@
    * outside space.
    * run name that only contains illegal characters and spaces will become 'undtitled'
    */
-  function titleHandle() {
+  function titleHandle(): void {
     runName = runName
       .replace(/[^a-zA-Z0-9 ]/g, '')
       .replace(/ +/g, ' ')
@@ -152,21 +137,19 @@
     if (runName === '') {
       runName = UNTITLED
     }
+    // already been
     if (namesMap.has(spacesToUnderscores(runName))) {
-      console.log('===already been===')
       runName = duplicateName()
     }
-    console.log('===new name===')
     namesMap.set(spacesToUnderscores(runName), runName)
     runName = spacesToUnderscores(runName)
-    console.log(namesMap)
   }
 
-  function renameDuplicate(name: string, counter: number) {
+  function renameDuplicate(name: string, counter: number): string {
     return name + ' (' + counter.toString() + ')'
   }
 
-  function spacesToUnderscores(name: string) {
+  function spacesToUnderscores(name: string): string {
     return name.replaceAll(' ', '_').toLocaleLowerCase()
   }
 
@@ -177,31 +160,37 @@
   ) {
     runName = e.currentTarget.value
     titleHandle()
+    // in rename mode we rename
     if (activateRunRename) {
       activateRunRename = false
-      console.log('###old name: ', beforeRename, '###namesMap: ', namesMap)
       renameRun(beforeRename, spacesToUnderscores(runName))
     }
   }
 
-  function setRename() {
-    console.log('===rename===')
+  /**
+   * get into rename mode
+   */
+  function setRename(): void {
     doRename = true
     beforeRename = runName
   }
 
-  function getRunStatus() {
+  /**
+   * returns the status for a run that was just ran
+   */
+  function getRunStatus(): string {
     if (isPending) {
-      setStatus(runName, STATUS.pending)
-      status = STATUS.pending
+      statusChange(STATUS.pending)
     } else if (nowRunning) {
-      setStatus(runName, STATUS.running)
-      status = STATUS.running
+      statusChange(STATUS.running)
     }
     return status
   }
 
-  function duplicate() {
+  /**
+   * duplicate this run
+   */
+  function duplicate(): void {
     let duplicatedName = duplicateName()
     namesMap.set(spacesToUnderscores(duplicatedName), duplicatedName)
     duplicateFunc(runName, spacesToUnderscores(duplicatedName))
@@ -234,36 +223,39 @@
         onClick: duplicate,
       },
     ]
-    // if (doRun) {
-    //   console.log('status changed from actions: ', status)
-    //   status = STATUS.ready
-    // }
     return actions
   }
 
-  function pendingRunStop() {
-    let newStatus = STATUS.ready
-    // if (run.catcheStatus !== undefined){
-    //   newStatus = run.catcheStatus
-    // }
+  /**
+   * change run status
+   * @param newStatus status to change to
+   */
+  function statusChange(newStatus: string): void {
     status = newStatus
     setStatus(runName, newStatus)
+  }
+
+  /**
+   * stops a pending run
+   */
+  function pendingRunStop(): void {
+    statusChange(STATUS.ready)
     pendingStopFunc()
     isPending = false
   }
 
-  function runningStop() {
-    console.log('running stop cache status: ', run.catcheStatus)
-    let newStatus = STATUS.ready
-    // if (run.catcheStatus !== undefined){
-    //   newStatus = run.catcheStatus
-    // }
-    status = newStatus
-    setStatus(runName, newStatus)
+  /**
+   * stops a running run
+   */
+  function runningStop(): void {
+    statusChange(STATUS.ready)
     runningStopFunc()
     stop = true
   }
 
+  /**
+   * creates 'stop' actios according to run status
+   */
   function createActionsForRunningScript(): Action[] {
     if (isPending) {
       return [
@@ -286,12 +278,15 @@
     return []
   }
 
+  /**
+   * checks if a run has results
+   */
   function hasResults(): boolean {
     const result = verificationResults.find(vr => {
       return vr.name === runName
     })
     if (result !== undefined) {
-      setStatus(runName, STATUS.success)
+      statusChange(STATUS.success)
     }
     return result !== undefined
   }

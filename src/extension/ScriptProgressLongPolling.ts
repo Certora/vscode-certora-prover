@@ -53,22 +53,22 @@ export class ScriptProgressLongPolling {
       const dataToUI = await this.prepareDataToUI(data, url)
 
       if (data.jobStatus === 'FAILED') {
-        window.showErrorMessage(data.cloudErrorMessages.join('. '))
+        // window.showErrorMessage(data.cloudErrorMessages.join('. '))
         return
       }
 
       if (data.jobEnded && data.jobStatus === 'SUCCEEDED' && dataToUI) {
         if (Object.keys(dataToUI.verificationProgress).length === 0) {
-          window.showErrorMessage(
-            `Job ${dataToUI.jobId} completed successfully, with an empty output. Please contact Certora team`,
-          )
+          // window.showErrorMessage(
+          //   `Job ${dataToUI.jobId} completed successfully, with an empty output. Please contact Certora team`,
+          // )
           return
         }
 
         callback(dataToUI)
-        window.showInformationMessage(
-          `Job ${dataToUI.jobId} completed successfully. Checked spec file: ${dataToUI.verificationProgress.spec}`,
-        )
+        // window.showInformationMessage(
+        //   `Job ${dataToUI.jobId} completed successfully. Checked spec file: ${dataToUI.verificationProgress.spec}`,
+        // )
         return
       }
 

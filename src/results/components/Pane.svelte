@@ -9,7 +9,7 @@
   export let showExpendIcon: boolean = true
   export let status: string = ''
   export let inactiveSelected: boolean = false
-  export let runFunc: () => void = test
+  export let runFunc: () => void = null
 
   let isExpanded = initialExpandedState
 
@@ -31,6 +31,7 @@
     unableToRun: 'unable-to-run.svg',
   }
 
+  // maps status to icon
   const statusMap: Map<string, string> = new Map([
     [STATUS.finishSetup, STATUS_ICONS.finishSetup],
     [STATUS.running, STATUS_ICONS.running],
@@ -40,26 +41,27 @@
     [STATUS.unableToRun, STATUS_ICONS.unableToRun],
   ])
 
-  function test() {
-    console.log('no run function given')
-  }
-
-  function getPaneClassName() {
+  /**
+   * panel class can change the panels cursor and show if its selected
+   */
+  function getPaneClassName(): string {
     let className = 'pane-header'
     if (isExpanded) {
-      className += ' normal-cursor'
+      className += ' pointer-cursor'
     }
     if (inactiveSelected) {
       className += ' inactive-selected'
     }
-    console.log(className)
     return className
   }
 
-  function getIconClassName() {
+  /**
+   * icon class can either have normal / pointer cursor
+   */
+  function getIconClassName(): string {
     let className = 'icon'
     if (runFunc) {
-      className += ' normal-cursor'
+      className += ' pointer-cursor'
     }
     return className
   }
@@ -207,12 +209,8 @@
     flex: 1;
   }
 
-  .normal-cursor {
+  .pointer-cursor {
     cursor: pointer !important;
-
-    /* &:hover {
-      background-color: rgb(184 184 184 / 31%);
-    }  */
   }
 
   .inactive-selected {
