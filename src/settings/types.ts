@@ -40,6 +40,7 @@ export type Form = {
 export enum EventTypesFromExtension {
   SmartContractsFilesUpdated = 'smart-contracts-files-updated',
   EditConfFile = 'edit-conf-file',
+  FileChosen = 'file-chosen',
 }
 
 export type ConfFile = {
@@ -61,4 +62,8 @@ export type EventsFromExtension =
   | {
       type: EventTypesFromExtension.EditConfFile
       payload: ConfFile
+    }
+  | {
+      type: EventTypesFromExtension.FileChosen
+      payload: string
     }

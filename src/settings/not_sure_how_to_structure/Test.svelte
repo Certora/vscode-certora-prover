@@ -4,6 +4,8 @@
   import CollapseCard from './slots_and_utility/CollapseCard.svelte'
   import Icon from './slots_and_utility/Icon.svelte'
   import CustomInput from './slots_and_utility/CustomInput.svelte'
+  import { refreshFiles } from '../utils/refreshFiles'
+  import { log, Sources } from '../utils/log'
   import {
     navState,
     resetNav,
@@ -34,6 +36,17 @@
   function handleClear() {
     favouriteFood = undefined
   }
+
+  function openBrowser(fileType) {
+    log({
+      action: 'Send "open-browser" command',
+      source: Sources.SettingsWebview,
+    })
+    vscode.postMessage({
+      command: 'open-browser',
+      payload: fileType,
+    })
+  }
 </script>
 
 <div class="card_parent_wrapper bg_dark">
@@ -56,14 +69,24 @@
             <div class="input_wrapper" style="margin-top: 8px;">
               <div class="dark_input">
                 <h3>Source<span>*</span></h3>
-                <Select
-                  items={$solFilesArr}
-                  {Icon}
-                  {ClearIcon}
-                  on:select={handleSelectSol}
-                  on:clear={handleClear}
-                  placeholder="Main solidity file"
-                />
+                <!-- refresh files when component is pressed -->
+                <div on:click={refreshFiles}>
+                  <Select
+                    items={$solFilesArr}
+                    value={$solidityObj.mainFile}
+                    {Icon}
+                    {ClearIcon}
+                    on:select={handleSelectSol}
+                    on:clear={handleClear}
+                    placeholder="Main solidity file"
+                  />
+                </div>
+                <!-- browse example -->
+                <button
+                  on:click={() => {
+                    openBrowser('sol')
+                  }}>Browse</button
+                >
               </div>
               <div class="dark_input">
                 <h3>Main contract name<span>*</span></h3>

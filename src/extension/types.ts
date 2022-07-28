@@ -154,6 +154,7 @@ export enum CommandFromResultsWebview {
 export enum CommandFromSettingsWebview {
   SmartContractsFilesRefresh = 'smart-contracts-files-refresh',
   CreateConfFile = 'create-conf-file',
+  OpenBrowser = 'open-browser',
 }
 
 export type EventFromResultsWebview =
@@ -187,6 +188,10 @@ export type EventFromSettingsWebview =
   | {
       command: CommandFromSettingsWebview.CreateConfFile
       payload: InputFormData
+    }
+  | {
+      command: CommandFromSettingsWebview.OpenBrowser
+      payload: string
     }
 
 export type Message = {

@@ -96,6 +96,14 @@
           form.mainContractName
         }.${specFileName.replace('.spec', '')}.conf`
         break
+      case EventTypesFromExtension.FileChosen:
+        log({
+          action: 'Received "file-chosen" command',
+          source: Sources.SettingsWebview,
+          info: e.data.payload,
+        })
+        $solidityObj.mainFile = e.data.payload
+        break
       default:
         break
     }
