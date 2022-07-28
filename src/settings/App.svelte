@@ -19,6 +19,7 @@
     solFilesArr,
     specFilesArr,
     solidityObj,
+    specObj,
   } from './not_sure_how_to_structure/stores/store.js'
 
   $: $solidityObj, console.log($solidityObj.compiler.ver)
@@ -102,7 +103,11 @@
           source: Sources.SettingsWebview,
           info: e.data.payload,
         })
-        $solidityObj.mainFile = e.data.payload
+        if (e.data.payload.endsWith('.sol')) {
+          $solidityObj.mainFile = e.data.payload
+        } else if (e.data.payload.endsWith('.spec')) {
+          $specObj.specFile = e.data.payload
+        }
         break
       default:
         break

@@ -6,6 +6,8 @@
   import Icon from './slots_and_utility/Icon.svelte'
   import { writableArray_Spec, specObj } from './stores/store.js'
   import { navState, specFilesArr, solidityObj } from './stores/store.js'
+  import { refreshFiles } from '../utils/refreshFiles'
+  import { log, Sources } from '../utils/log'
   let items = [
     {
       value: 'chocolate',
@@ -31,6 +33,17 @@
     $solidityObj.mainContract !== '' &&
     $solidityObj.compiler.ver !== ''
   )
+
+  function openBrowser(fileType) {
+    log({
+      action: 'Send "open-browser" command',
+      source: Sources.SettingsWebview,
+    })
+    vscode.postMessage({
+      command: 'open-browser',
+      payload: fileType,
+    })
+  }
 </script>
 
 <div class="card_parent_wrapper bg_dark">
@@ -57,14 +70,33 @@
             <div class="input_wrapper" style="margin-top: 8px;">
               <div class="dark_input">
                 <h3>Certore specification file<span>*</span></h3>
-                <Select
+
+                <!-- refresh files when component is pressed -->
+                <div on:click={refreshFiles}>
+                  <Select
+                    items={$specFilesArr}
+                    value={$specObj.specFile}
+                    {Icon}
+                    {ClearIcon}
+                    on:select={handleSelectSpec}
+                    on:clear={handleClear}
+                    placeholder=".spec file"
+                  />
+                </div>
+                <!-- browse example -->
+                <button
+                  on:click={() => {
+                    openBrowser('spec')
+                  }}>Browse</button
+                >
+                <!-- <Select
                   items={$specFilesArr}
                   {Icon}
                   {ClearIcon}
                   on:select={handleSelectSpec}
                   on:clear={handleClear}
                   placeholder=".spec file"
-                />
+                /> -->
               </div>
               <div class="dark_input">
                 <h3>Rules<span>*</span></h3>
