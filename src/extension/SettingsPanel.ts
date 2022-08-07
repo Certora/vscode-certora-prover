@@ -78,14 +78,37 @@ export class SettingsPanel {
               source: Sources.Extension,
               info: e.payload,
             })
+            // temp:
+            console.log('from create-conf-file: ', confFileDisplayName)
 
-            createAndOpenConfFile(e.payload)
+            let compilerDirectory: string = e.payload.solidyObj.compiler.exe
+            if (compilerDirectory !== '') {
+              compilerDirectory += '/'
+            }
+            const form: InputFormData = {
+              name: confFileDisplayName,
+              mainSolidityFile: e.payload.solidyObj.mainFile,
+              mainContractName: e.payload.solidyObj.mainContract,
+              specFile: e.payload.specObj.specFile,
+              solidityCompiler:
+                compilerDirectory + e.payload.solidyObj.compiler.ver,
+              useAdditionalContracts: false,
+              additionalContracts: [],
+              link: [],
+              extendedSettings: [],
+              useStaging: false,
+              branch: '',
+              cacheName: '',
+              message: '',
+              additionalSettings: [],
+            }
+            createAndOpenConfFile(form)
             SettingsPanel.resultsWebviewProvider.postMessage({
               type: 'allow-run',
               payload: confFileName,
             })
-            this._panel?.dispose()
-            createConfFile(e.payload) // create the .conf file out out of the [Form] object
+            // this._panel?.dispose()
+            // createConfFile(e.payload) // create the .conf file out out of the [Form] object
             // this._panel?.dispose()
             break
           }

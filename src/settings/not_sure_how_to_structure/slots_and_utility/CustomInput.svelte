@@ -1,6 +1,7 @@
 <script>
   export let placeholder = 'placeholder'
   export let bindValue
+  export let change
 </script>
 
 <div>
@@ -8,6 +9,7 @@
     class="simple_txt_input"
     type="text"
     bind:value={bindValue}
+    on:input={change}
     {placeholder}
   />
   {#if bindValue !== ''}

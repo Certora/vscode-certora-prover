@@ -23,6 +23,7 @@
 
   function handleSelectSpec(event) {
     $specObj.specFile = event.detail.value
+    saveOnChange()
   }
   function handleSelect(event) {}
 
@@ -42,6 +43,22 @@
     vscode.postMessage({
       command: 'open-browser',
       payload: fileType,
+    })
+  }
+
+  function saveOnChange() {
+    let form = {
+      solidyObj: $solidityObj,
+      specObj: $specObj,
+    }
+    log({
+      action: 'Send "create-conf-file" command',
+      source: Sources.SettingsWebview,
+      info: form,
+    })
+    vscode.postMessage({
+      command: 'create-conf-file',
+      payload: form,
     })
   }
 </script>

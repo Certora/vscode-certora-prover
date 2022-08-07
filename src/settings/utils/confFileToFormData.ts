@@ -117,12 +117,13 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
   const form = newForm as NewForm
 
   if (Array.isArray(confFile.files) && confFile.files.length > 0) {
+    console.log('conf files content: ', confFile.files)
     form.solidyObj.mainFile = confFile.files[0] as string
 
     if (form.solidyObj.mainFile.includes(':')) {
       form.solidyObj.mainFile = form.solidyObj.mainFile.split(':')[0]
+      form.solidyObj.mainContract = confFile.files[0].split(':')[1]
     }
-
     // if (confFile.files.length > 1) {
     //   const [, ...additional] = confFile.files
 
@@ -158,7 +159,16 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
   }
 
   if (confFile.solc) {
-    form.solidyObj.compiler.ver = confFile.solc as string
+    if (confFile.solc.includes('/')) {
+      const index = confFile.solc.lastIndexOf('/')
+      form.solidyObj.compiler.exe = confFile.solc.slice(0, index)
+      form.solidyObj.compiler.ver = confFile.solc.slice(
+        index + 1,
+        confFile.solc.length,
+      )
+    } else {
+      form.solidyObj.compiler.ver = confFile.solc
+    }
   }
 
   // if (

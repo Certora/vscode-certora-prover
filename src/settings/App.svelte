@@ -106,6 +106,7 @@
         $solidityObj.mainContract = newForm.solidyObj.mainContract
         $solidityObj.mainFile = newForm.solidyObj.mainFile
         $solidityObj.compiler.ver = newForm.solidyObj.compiler.ver
+        $solidityObj.compiler.exe = newForm.solidyObj.compiler.exe
         $specObj.specFile = newForm.specObj.specFile
         break
       case EventTypesFromExtension.FileChosen:

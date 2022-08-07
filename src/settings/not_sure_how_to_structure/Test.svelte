@@ -34,6 +34,11 @@
     saveOnChange()
   }
 
+  function handleSelectInputField(event) {
+    console.log('event was handled')
+    saveOnChange()
+  }
+
   //todo: add handleSelect for every field
 
   function handleSelect(event) {}
@@ -114,6 +119,7 @@
                 <CustomInput
                   placeholder="className()"
                   bind:bindValue={$solidityObj.mainContract}
+                  change={handleSelectInputField}
                 />
               </div>
             </div>
@@ -133,6 +139,7 @@
                       <CustomInput
                         placeholder="CVT-Executables-Mac"
                         bind:bindValue={$solidityObj.compiler.exe}
+                        change={handleSelectInputField}
                       />
                     </div>
                     <div class="dark_input">
@@ -141,6 +148,7 @@
                       <CustomInput
                         placeholder="version: solc7.6"
                         bind:bindValue={$solidityObj.compiler.ver}
+                        change={handleSelectInputField}
                       />
                     </div>
                     <i class="codicon codicon-trash" />
