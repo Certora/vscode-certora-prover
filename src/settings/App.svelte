@@ -11,12 +11,24 @@
   // new cutting edge stuff
   import { log, Sources } from './utils/log'
   import { confFileToFormData } from './utils/confFileToFormData'
-  import type { Form } from './types'
+  import type { ConfFile, Form, NewForm } from './types'
   import { EventTypesFromExtension, EventsFromExtension } from './types'
   import RenamedMainWrapper from './not_sure_how_to_structure/RenamedMainWrapper.svelte'
+  // testing files with store
+  import {
+    solFilesArr,
+    specFilesArr,
+    solidityObj,
+    specObj,
+  } from './not_sure_how_to_structure/stores/store.js'
+
+  $: $solidityObj, console.log($solidityObj.compiler.ver)
 
   let solidityFiles: string[] = []
+  let solidityFilesNew
   let specFiles: string[] = []
+  let specFilesNew
+
   let submitButtonText = 'Create conf file'
   let test = false
   let form: Form = {
@@ -28,12 +40,12 @@
     useAdditionalContracts: false,
     additionalContracts: solidityFiles.map(file => ({ file, name: '' })),
     link: [
-      {
-        id: nanoid(),
-        contractName: '',
-        fieldName: '',
-        associatedContractName: '',
-      },
+      // {
+      //   id: nanoid(),
+      //   contractName: '',
+      //   fieldName: '',
+      //   associatedContractName: '',
+      // },
     ],
     extendedSettings: [{ id: nanoid(), flag: '' }],
     useStaging: false,
@@ -58,7 +70,20 @@
           info: e.data.payload,
         })
         solidityFiles = e.data.payload.sol
+        solidityFilesNew = solidityFiles.map(str => {
+          return { value: str, label: str }
+        })
+
         specFiles = e.data.payload.spec
+        specFilesNew = specFiles.map(str => {
+          return { value: str, label: str }
+        })
+
+        // very bad temp timeout
+        setTimeout(() => {
+          solFilesArr.set(solidityFilesNew)
+          specFilesArr.set(specFilesNew)
+        })
         break
       case EventTypesFromExtension.EditConfFile:
         log({
@@ -66,9 +91,34 @@
           source: Sources.SettingsWebview,
           info: e.data.payload,
         })
-        console.log(e.data.payload, e.data.payload[1])
-        form = confFileToFormData(e.data.payload[0], e.data.payload[1])
-        submitButtonText = 'Save'
+
+        // console.log(e.data.payload, e.data.payload[1])
+        // form = confFileToFormData(e.data.payload[0], e.data.payload[1])
+        // submitButtonText = 'Save'
+
+        let newForm: NewForm = confFileToFormData(e.data.payload[0]) // change the conf file info form data for the settings form
+        console.log('new form:', newForm)
+        // const parsedSpecFilePath = form.specFile.split('/')
+        // const specFileName = parsedSpecFilePath[parsedSpecFilePath.length - 1]
+        // submitButtonText = `Save ${
+        //   form.mainContractName
+        // }.${specFileName.replace('.spec', '')}.conf`
+        $solidityObj.mainContract = newForm.solidyObj.mainContract
+        $solidityObj.mainFile = newForm.solidyObj.mainFile
+        $solidityObj.compiler.ver = newForm.solidyObj.compiler.ver
+        $specObj.specFile = newForm.specObj.specFile
+        break
+      case EventTypesFromExtension.FileChosen:
+        log({
+          action: 'Received "file-chosen" command',
+          source: Sources.SettingsWebview,
+          info: e.data.payload,
+        })
+        if (e.data.payload.endsWith('.sol')) {
+          $solidityObj.mainFile = e.data.payload
+        } else if (e.data.payload.endsWith('.spec')) {
+          $specObj.specFile = e.data.payload
+        }
         break
       default:
         break
@@ -109,6 +159,11 @@
       mandatory={true}
       bind:file={form.mainSolidityFile}
     />
+    <!-- 
+      passing files from here to new settings 
+      this guy
+      files={solidityFiles}
+ -->
     <OneFieldSetting
       title="Main Contract Name"
       description="Contract name"
@@ -177,8 +232,6 @@
 
 <style lang="postcss">
   /* stylelint-disable */
-
-  @import './styles.css';
 
   :global(vscode-dropdown) {
     color: var(--dropdown-text-color);
@@ -260,5 +313,231 @@
   button:hover {
     background-color: var(--vscode-button-hoverBackground);
     cursor: pointer;
+  }
+
+  /* stylelint-disable */
+
+  /* really bad start temporary selector */
+  :global(*),
+  :global(a) {
+    color: var(--vscode-foreground);
+  }
+  /* bg helpers */
+  :global(.bg_dark) {
+    background: var(--vscode-menu-background);
+  }
+  :global(.bg_light) {
+    background: var(--vscode-menu-separatorBackground);
+  }
+  :global(.mt-8px) {
+    margin-top: 8px;
+  }
+
+  :global(.btn_add) {
+    background: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-button-secondaryBackground);
+    display: flex;
+    margin-top: 8px;
+    transition: all 0.3s ease-in-out;
+    font-size: 12px;
+    padding: 2px 4px;
+  }
+
+  :global(.btn_add i) {
+    font-size: 12px;
+    margin: auto 4px auto 0;
+  }
+  :global(.btn_add:hover) {
+    /* background: var(--vscode-button-secondaryHoverBackground); */
+    background: var(--vscode-menu-background);
+  }
+  :global(.input_wrapper) {
+    display: flex;
+    gap: 8px;
+  }
+  :global(.input_wrapper h3 > span) {
+    color: var(--vscode-charts-red);
+  }
+  :global(.input_wrapper h3) {
+    font-size: 12px;
+    font-weight: 500;
+  }
+  :global(.input_wrapper > div) {
+    width: calc(50% - 4px);
+    display: flex;
+    flex-direction: column;
+  }
+  :global(.input_wrapper.input_single > div) {
+    width: 100%;
+  }
+
+  :global(h3) {
+    margin: 0 0 8px;
+  }
+
+  /* wrapper element needs 0 margin in order to avoid jumpy animation */
+  :global(.card_body_wrapper) {
+    margin: 0;
+  }
+  :global(.card_body_wrapper .codicon-trash) {
+    margin: auto -1px 1px 0;
+  }
+  :global(.card_parent_wrapper) {
+    border-radius: 4px;
+    margin-bottom: 8px;
+    padding: 16px;
+  }
+
+  :global(.card_body_wrapper_parent) {
+    width: calc(100% - 16px);
+    border-radius: 4px;
+    padding: 8px;
+  }
+  :global(.header_contracts) {
+    display: flex;
+    width: 100%;
+    margin: 12px 0;
+  }
+  :global(.header_contracts h3) {
+    line-height: 15px;
+    margin: 0;
+    text-transform: uppercase;
+  }
+  :global(.header_contracts .codicon-file) {
+    height: min-content;
+    margin: auto 3px auto 0;
+  }
+  :global(.header_contracts .codicon-settings) {
+    height: min-content;
+    margin: auto 0 auto auto;
+  }
+  :global(.header_contracts .codicon-chevron-up) {
+    height: min-content;
+    margin: auto 0 auto 6px;
+  }
+  :global(.header_contract) {
+    transition: all 0.2s ease;
+    display: flex;
+    width: 100%;
+  }
+
+  :global(.card.open
+      > .card-header
+      > .header_contract:not(.no_border_padding)) {
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--vscode-menu-separatorBackground);
+    margin-bottom: 8px;
+  }
+  :global(.header_contract h3) {
+    font-size: 12px;
+    line-height: 14px;
+    font-weight: 500;
+    margin: 0;
+    text-transform: uppercase;
+  }
+  :global(.header_contract .codicon-file),
+  :global(.header_contract .codicon-gear) {
+    height: min-content;
+    margin: auto 3px auto 0;
+  }
+  :global(.header_contract .codicon-chevron-up) {
+    height: min-content;
+    margin: auto 0 auto auto;
+  }
+
+  :global(.dark_input) {
+    /* https://www.npmjs.com/package/svelte-select */
+    /* https://github.com/rob-balfre/svelte-select/blob/master/docs/theming_variables.md */
+    --background: var(--vscode-dropdown-background);
+    --borderRadius: 0;
+    --borderFocusColor: var(--vscode-inputValidation-infoBorder);
+    --borderHoverColor: var(--vscode-inputValidation-infoBorder);
+    --border: 1px solid transparent;
+
+    --selectedItemPadding: 0 10px 0 8px;
+    /* from dev tools */
+    --inputColor: var(--vscode-foreground);
+    --placeholderColor: var(--vscode-foreground);
+    --placeholderOpacity: 0.4;
+    --height: 30px;
+    --inputPadding: 8px 4px;
+    --inputFontSize: 13px;
+    --inputLetterSpacing: initial;
+    --padding: 6px 4px;
+    --internalPadding: 0;
+    --inputLetterSpacing: inherit;
+    /* drop down open */
+    --listBackground: var(--vscode-editor-background);
+    --listBorder: 1px solid var(--vscode-button-secondaryBackground);
+    --itemHoverBG: var(--vscode-editorSuggestWidget-selectedBackground);
+    --itemHoverColor: var(--vscode-editorSuggestWidget-highlightForeground);
+    --listShadow: 0;
+    --listBorderRadius: 0;
+    --itemFirstBorderRadius: 0;
+    --itemPadding: 0 2px 0 16px;
+
+    --selectedItemPadding: 0;
+
+    /* slected active */
+    --itemIsActiveBG: var(--vscode-editorSuggestWidget-selectedBackground);
+    --itemISActiveColor: var(--vscode-editorSuggestWidget-highlightForeground);
+    /* close icon */
+    --clearSelectRight: 0;
+    --clearSelectTop: 0;
+    --clearSelectBottom: 0;
+    --clearSelectWidth: 16px;
+  }
+
+  :global(input.simple_txt_input) {
+    cursor: default;
+    border: none;
+    color: var(--vscode-foreground);
+    padding: 6px 4px;
+    height: 18px;
+    width: auto;
+    background: var(--vscode-dropdown-background);
+    font-size: var(--inputFontSize, 14px);
+    outline-color: var(--vscode-inputValidation-infoBorder);
+  }
+  :global(input.simple_txt_input:hover) {
+    outline: 1px solid var(--vscode-inputValidation-infoBorder);
+    outline-offset: -1px;
+  }
+
+  :global(.dark_input .item) {
+    position: relative;
+    padding-left: 22px;
+  }
+  :global(.dark_input .item:before) {
+    content: '\ea7b';
+    font-family: 'codicon';
+    position: absolute;
+    top: 0;
+    left: 2px;
+  }
+  :global(.dark_input .clearSelect) {
+    background: var(--vscode-dropdown-background);
+    display: flex !important;
+  }
+
+  /* error msg div */
+  :global(.input_error_message) {
+    background: var(--vscode-debugExceptionWidget-border);
+    /* background: var(--vscode-peekViewResult-matchHighlightBackground); */
+    border: 1px solid var(--vscode-editorError-foreground);
+    border-radius: 4px;
+    padding: 6px 8px;
+    margin-top: 8px;
+    display: flex;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 15px;
+  }
+
+  :global(.input_error_message i) {
+    margin-right: 4px;
+  }
+  :global(.input_error_message a) {
+    margin-left: auto;
   }
 </style>

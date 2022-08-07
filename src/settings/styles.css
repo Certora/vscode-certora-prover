@@ -522,3 +522,7 @@
     --vscode-gitDecoration-conflictingResourceForeground: #e4676b;
     --vscode-gitDecoration-submoduleResourceForeground: #8db9e2;
 }
+
+*{
+    color: red !important;
+}

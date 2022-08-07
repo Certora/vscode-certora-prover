@@ -1,7 +1,10 @@
 import * as vscode from 'vscode'
 import { SmartContractsFilesWatcher } from './SmartContractsFilesWatcher'
 import { getNonce } from './utils/getNonce'
-import { createAndOpenConfFile } from './utils/createAndOpenConfFile'
+import {
+  createAndOpenConfFile,
+  createConfFile,
+} from './utils/createAndOpenConfFile'
 import { log, Sources } from './utils/log'
 import {
   CommandFromSettingsWebview,
@@ -75,12 +78,24 @@ export class SettingsPanel {
               source: Sources.Extension,
               info: e.payload,
             })
+
             createAndOpenConfFile(e.payload)
             SettingsPanel.resultsWebviewProvider.postMessage({
               type: 'allow-run',
               payload: confFileName,
             })
             this._panel?.dispose()
+            createConfFile(e.payload) // create the .conf file out out of the [Form] object
+            // this._panel?.dispose()
+            break
+          }
+          case CommandFromSettingsWebview.OpenBrowser: {
+            log({
+              action: 'Received "open-browser" command',
+              source: Sources.Extension,
+              info: e.payload,
+            })
+            this.openOsPicker(e.payload)
             break
           }
           default:
@@ -160,6 +175,31 @@ export class SettingsPanel {
    * @param extensionUri uri of the extension folder
    * @param editConfFile conf file content
    */
+
+  private openOsPicker(fileType: string) {
+    const uri =
+      vscode.workspace.workspaceFolders?.[0].uri || vscode.Uri.parse('')
+    const options: vscode.OpenDialogOptions = {
+      canSelectMany: false,
+      canSelectFolders: false,
+      openLabel: 'Open',
+      defaultUri: uri,
+      filters: {
+        'File type': [fileType],
+      },
+    }
+
+    vscode.window.showOpenDialog(options).then(fileUri => {
+      if (fileUri && fileUri[0]) {
+        console.log('Selected file: ' + fileUri[0].fsPath)
+        this._panel.webview.postMessage({
+          type: 'file-chosen',
+          payload: fileUri[0].fsPath.replace(uri.path + '/', ''),
+        })
+      }
+    })
+  }
+
   public static render(
     extensionUri: vscode.Uri,
     confName: ConfNameMap,
