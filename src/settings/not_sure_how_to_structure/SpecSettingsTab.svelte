@@ -27,7 +27,10 @@
   }
   function handleSelect(event) {}
 
-  function handleClear() {}
+  function handleClear() {
+    $specObj.specFile = ''
+    saveOnChange()
+  }
 
   $: solDisabledState = !(
     $solidityObj.mainFile !== '' &&
@@ -129,6 +132,7 @@
                 <CustomInput
                   placeholder="600s"
                   bind:bindValue={$specObj.duration}
+                  change={saveOnChange}
                 />
               </div>
               <div class="dark_input">
@@ -146,6 +150,7 @@
                   <input
                     type="checkbox"
                     bind:checked={$specObj.optimisticLoop}
+                    change={saveOnChange}
                   />
                   <span class="checkmark" />
                 </label>

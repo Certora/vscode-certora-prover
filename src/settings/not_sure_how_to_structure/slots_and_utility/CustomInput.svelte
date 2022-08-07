@@ -10,6 +10,7 @@
     type="text"
     bind:value={bindValue}
     on:input={change}
+    on:change={change}
     {placeholder}
   />
   {#if bindValue !== ''}
@@ -17,6 +18,7 @@
       class="clr_input"
       on:click={() => {
         bindValue = ''
+        change()
       }}
     >
       <svg

@@ -44,7 +44,8 @@
   function handleSelect(event) {}
 
   function handleClear() {
-    favouriteFood = undefined
+    $solidityObj.mainFile = ''
+    saveOnChange()
   }
 
   function openBrowser(fileType) {

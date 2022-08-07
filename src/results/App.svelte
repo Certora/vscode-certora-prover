@@ -204,6 +204,16 @@
         runs = setStatus(e.data.payload, STATUS.ready)
         break
       }
+      case EventTypesFromExtension.BlockRun: {
+        log({
+          action: 'Received "block-run" command',
+          source: Sources.ResultsWebview,
+          info: e.data.payload,
+        })
+        console.log('Recieved "block-run" with payload: ', e.data.payload)
+        runs = setStatus(e.data.payload, STATUS.finishSetup)
+        break
+      }
       case EventTypesFromExtension.ClearAllJobs: {
         log({
           action: 'Received "clear-all-jobs" command',
