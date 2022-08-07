@@ -50,6 +50,22 @@ export function selectNavMenu(str) {
   })
 }
 
+// export const formObj = writable({
+//   mainSolidityFile: '',
+//   mainContractName: '',
+//   specFile: '',
+//   solidityCompiler: '',
+//   useAdditionalContracts: false,
+//   additionalContracts: [],
+//   link: [],
+//   extendedSettings: [],
+//   useStaging: false,
+//   branch: '',
+//   cacheName: '',
+//   message: '',
+//   additionalSettings: [],
+// })
+
 export const solidityObj = writable({
   mainFile: '',
   mainContract: '',

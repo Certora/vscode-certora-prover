@@ -1,7 +1,10 @@
 import * as vscode from 'vscode'
 import { SmartContractsFilesWatcher } from './SmartContractsFilesWatcher'
 import { getNonce } from './utils/getNonce'
-import { createAndOpenConfFile } from './utils/createAndOpenConfFile'
+import {
+  createAndOpenConfFile,
+  createConfFile,
+} from './utils/createAndOpenConfFile'
 import { log, Sources } from './utils/log'
 import { CommandFromSettingsWebview, EventFromSettingsWebview } from './types'
 
@@ -49,8 +52,8 @@ export class SettingsPanel {
               source: Sources.Extension,
               info: e.payload,
             })
-            createAndOpenConfFile(e.payload)
-            this._panel?.dispose()
+            createConfFile(e.payload) // create the .conf file out out of the [Form] object
+            // this._panel?.dispose()
             break
           }
           case CommandFromSettingsWebview.OpenBrowser: {

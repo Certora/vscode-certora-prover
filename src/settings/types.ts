@@ -4,10 +4,11 @@ export type AdditionalContract = {
 }
 
 export type Link = {
-  id: string
+  id?: string
+  variable: string
   contractName: string
-  fieldName: string
-  associatedContractName: string
+  fieldName?: string
+  associatedContractName?: string
 }
 
 export type AdditionalSetting = {
@@ -35,6 +36,53 @@ export type Form = {
   cacheName: string
   message: string
   additionalSettings: AdditionalSetting[]
+}
+
+export type Compiler = {
+  exe: string
+  ver: string
+}
+
+export type SolidityPackageDir = {
+  packageName: string
+  path: string
+}
+
+// solidity part of the new settings view
+export type SolidityObj = {
+  mainFile: string
+  mainContract: string
+  linking: Link[]
+  specifiMethod: string
+  compiler: Compiler
+  solidityArgument: string
+  solidityPackageDir: SolidityPackageDir[]
+}
+
+export type Property = {
+  name: string
+  value: string
+}
+
+// spec part of the new settings view
+export type SpecObj = {
+  specFile: string
+  rules: string
+  duration: string
+  inherit: string
+  optimisticLoop: boolean
+  loopUnroll: string
+  properties: Property[]
+  runOnStg: boolean
+  branchName: string
+  localTypeChecking: boolean
+  shortOutput: boolean
+  multiAssert: boolean
+}
+
+export type NewForm = {
+  solidyObj: SolidityObj
+  specObj: SpecObj
 }
 
 export enum EventTypesFromExtension {

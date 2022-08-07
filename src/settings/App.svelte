@@ -11,7 +11,7 @@
   // new cutting edge stuff
   import { log, Sources } from './utils/log'
   import { confFileToFormData } from './utils/confFileToFormData'
-  import type { Form } from './types'
+  import type { ConfFile, Form, NewForm } from './types'
   import { EventTypesFromExtension, EventsFromExtension } from './types'
   import RenamedMainWrapper from './not_sure_how_to_structure/RenamedMainWrapper.svelte'
   // testing files with store
@@ -39,12 +39,12 @@
     useAdditionalContracts: false,
     additionalContracts: solidityFiles.map(file => ({ file, name: '' })),
     link: [
-      {
-        id: nanoid(),
-        contractName: '',
-        fieldName: '',
-        associatedContractName: '',
-      },
+      // {
+      //   id: nanoid(),
+      //   contractName: '',
+      //   fieldName: '',
+      //   associatedContractName: '',
+      // },
     ],
     extendedSettings: [{ id: nanoid(), flag: '' }],
     useStaging: true,
@@ -90,12 +90,17 @@
           source: Sources.SettingsWebview,
           info: e.data.payload,
         })
-        form = confFileToFormData(e.data.payload)
-        const parsedSpecFilePath = form.specFile.split('/')
-        const specFileName = parsedSpecFilePath[parsedSpecFilePath.length - 1]
-        submitButtonText = `Save ${
-          form.mainContractName
-        }.${specFileName.replace('.spec', '')}.conf`
+        let newForm: NewForm = confFileToFormData(e.data.payload) // change the conf file info form data for the settings form
+        console.log('new form:', newForm)
+        // const parsedSpecFilePath = form.specFile.split('/')
+        // const specFileName = parsedSpecFilePath[parsedSpecFilePath.length - 1]
+        // submitButtonText = `Save ${
+        //   form.mainContractName
+        // }.${specFileName.replace('.spec', '')}.conf`
+        $solidityObj.mainContract = newForm.solidyObj.mainContract
+        $solidityObj.mainFile = newForm.solidyObj.mainFile
+        $solidityObj.compiler.ver = newForm.solidyObj.compiler.ver
+        $specObj.specFile = newForm.specObj.specFile
         break
       case EventTypesFromExtension.FileChosen:
         log({

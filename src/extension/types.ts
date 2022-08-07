@@ -142,6 +142,61 @@ export type InputFormData = {
   }[]
 }
 
+export type Compiler = {
+  exe: string
+  ver: string
+}
+
+export type SolidityPackageDir = {
+  packageName: string
+  path: string
+}
+
+export type Link = {
+  id?: string
+  variable: string
+  contractName: string
+  fieldName?: string
+  associatedContractName?: string
+}
+
+// solidity part of the new settings view
+export type SolidityObj = {
+  mainFile: string
+  mainContract: string
+  linking: Link[]
+  specifiMethod: string
+  compiler: Compiler
+  solidityArgument: string
+  solidityPackageDir: SolidityPackageDir[]
+}
+
+export type Property = {
+  name: string
+  value: string
+}
+
+// spec part of the new settings view
+export type SpecObj = {
+  specFile: string
+  rules: string
+  duration: string
+  inherit: string
+  optimisticLoop: boolean
+  loopUnroll: string
+  properties: Property[]
+  runOnStg: boolean
+  branchName: string
+  localTypeChecking: boolean
+  shortOutput: boolean
+  multiAssert: boolean
+}
+
+export type NewForm = {
+  solidyObj: SolidityObj
+  specObj: SpecObj
+}
+
 export enum CommandFromResultsWebview {
   NavigateToCode = 'navigate-to-code',
   StopScript = 'stop-script',
@@ -187,7 +242,7 @@ export type EventFromSettingsWebview =
     }
   | {
       command: CommandFromSettingsWebview.CreateConfFile
-      payload: InputFormData
+      payload: NewForm
     }
   | {
       command: CommandFromSettingsWebview.OpenBrowser

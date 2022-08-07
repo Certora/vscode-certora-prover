@@ -11,6 +11,7 @@
     resetNav,
     solidityObj,
     solFilesArr,
+    specObj,
   } from './stores/store.js'
 
   let items = [
@@ -30,7 +31,11 @@
 
   function handleSelectSol(event) {
     $solidityObj.mainFile = event.detail.value
+    saveOnChange()
   }
+
+  //todo: add handleSelect for every field
+
   function handleSelect(event) {}
 
   function handleClear() {
@@ -45,6 +50,22 @@
     vscode.postMessage({
       command: 'open-browser',
       payload: fileType,
+    })
+  }
+
+  function saveOnChange() {
+    let form = {
+      solidyObj: $solidityObj,
+      specObj: $specObj,
+    }
+    log({
+      action: 'Send "create-conf-file" command',
+      source: Sources.SettingsWebview,
+      info: form,
+    })
+    vscode.postMessage({
+      command: 'create-conf-file',
+      payload: form,
     })
   }
 </script>
