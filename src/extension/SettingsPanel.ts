@@ -86,7 +86,7 @@ export class SettingsPanel {
               compilerDirectory += '/'
             }
             const form: InputFormData = {
-              name: confFileDisplayName,
+              name: confFileName,
               mainSolidityFile: e.payload.solidyObj.mainFile,
               mainContractName: e.payload.solidyObj.mainContract,
               specFile: e.payload.specObj.specFile,
@@ -102,11 +102,47 @@ export class SettingsPanel {
               message: '',
               additionalSettings: [],
             }
+
+            if (e.payload.specObj.optimisticLoop) {
+              form.additionalSettings.push({
+                id: 'optimistic_loop',
+                option: '--optimistic_loop',
+                value: '',
+              })
+            }
+
+            if (e.payload.solidyObj.solidityPackageDir.length > 0) {
+              let packages = ''
+              e.payload.solidyObj.solidityPackageDir.forEach(element => {
+                packages += element.packageName
+                packages += '='
+                packages += element.path
+                packages += ' '
+              })
+              form.additionalSettings.push({
+                id: 'packages',
+                option: '--packages',
+                value: packages,
+              })
+            }
             createAndOpenConfFile(form)
-            SettingsPanel.resultsWebviewProvider.postMessage({
-              type: 'allow-run',
-              payload: confFileName,
-            })
+            console.log(form, 'form')
+            if (
+              form.mainContractName !== '' &&
+              form.mainSolidityFile !== '' &&
+              form.specFile !== ''
+            ) {
+              SettingsPanel.resultsWebviewProvider.postMessage({
+                type: 'allow-run',
+                payload: confFileName,
+              })
+            } else {
+              SettingsPanel.resultsWebviewProvider.postMessage({
+                type: 'block-run',
+                payload: confFileName,
+              })
+            }
+
             // this._panel?.dispose()
             // createConfFile(e.payload) // create the .conf file out out of the [Form] object
             // this._panel?.dispose()
