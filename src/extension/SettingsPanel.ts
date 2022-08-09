@@ -112,12 +112,14 @@ export class SettingsPanel {
               })
             }
 
-            if (e.payload.solidyObj.solidityPackageDir.length > 0) {
-              const solDir = e.payload.solidyObj.solidityPackageDir
-              let packages = ''
+            const solDir = e.payload.solidyObj.solidityPackageDir
+            if (solDir.length > 0 && solDir[0].packageName && solDir[0].path) {
+              let packages = '{'
               solDir.forEach(pack => {
-                packages += pack.packageName + '=' + pack.path + ' '
+                packages +=
+                  '"' + pack.packageName + '"' + ':"' + pack.path + '"' + ','
               })
+              packages = packages.replace(/.$/, '}')
               form.additionalSettings.push({
                 id: 'packages',
                 option: '--packages',

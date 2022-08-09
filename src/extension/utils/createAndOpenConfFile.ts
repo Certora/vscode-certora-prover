@@ -20,8 +20,10 @@ function setAdditionalSetting(val?: string) {
   if (val === 'true' || !val) return true
   if (val === 'false') return false
   if (/^[0-9]+$/.exec(val)) return Number(val)
+  console.log(val, 'value')
   const mapRegex = /^{(".+":".+")(,".+":".+")*}/g
   if (mapRegex.exec(val)) {
+    console.log('map regex')
     return JSON.parse(val)
   }
   // for --settings flags:
