@@ -13,6 +13,7 @@ import {
   InputFormData,
 } from './types'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
+import { stringify } from 'querystring'
 
 export class SettingsPanel {
   public static currentPanel?: SettingsPanel
@@ -112,12 +113,10 @@ export class SettingsPanel {
             }
 
             if (e.payload.solidyObj.solidityPackageDir.length > 0) {
+              const solDir = e.payload.solidyObj.solidityPackageDir
               let packages = ''
-              e.payload.solidyObj.solidityPackageDir.forEach(element => {
-                packages += element.packageName
-                packages += '='
-                packages += element.path
-                packages += ' '
+              solDir.forEach(pack => {
+                packages += pack.packageName + '=' + pack.path + ' '
               })
               form.additionalSettings.push({
                 id: 'packages',

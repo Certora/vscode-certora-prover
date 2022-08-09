@@ -98,6 +98,7 @@ export function activate(context: vscode.ExtensionContext): void {
     }
     if (solidityPackageDirectories !== '{}') {
       confFileDefault['--packages'] = solidityPackageDirectories
+      console.log(solidityPackageDirectories, 'solidity package dir')
     }
     if (optimisticLoop) {
       confFileDefault['--optimistic_loop'] = true

@@ -183,22 +183,26 @@
                         <div class="input_wrapper">
                           <div class="dark_input">
                             <h3>Solidity package directories</h3>
-                            <Select
+                            <CustomInput
                               {items}
                               {Icon}
                               {ClearIcon}
-                              on:select={handleSelect}
+                              bind:bindValue={$solidityObj.solidityPackageDir[0]
+                                .packageName}
+                              change={handleSelectInputField}
                               on:clear={handleClear}
                               placeholder="Package name"
                             />
                           </div>
                           <div class="dark_input">
                             <h3>&nbsp;</h3>
-                            <Select
+                            <CustomInput
                               {items}
                               {Icon}
                               {ClearIcon}
-                              on:select={handleSelect}
+                              bind:bindValue={$solidityObj.solidityPackageDir[0]
+                                .path}
+                              change={handleSelectInputField}
                               on:clear={handleClear}
                               placeholder=".../path"
                             />
