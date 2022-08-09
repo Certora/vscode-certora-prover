@@ -171,6 +171,21 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
     }
   }
 
+  if (confFile['--packages']) {
+    console.log('packages detected', confFile['--packages'])
+    const jsonPackages = JSON.parse(confFile['--packages'].toString())
+    console.log('json packages', jsonPackages)
+    Object.entries(jsonPackages).forEach(key => {
+      const packArray = key.toString().split(',')
+      const tempPackage = {
+        packageName: packArray[0],
+        path: packArray[1],
+      }
+      form.solidyObj.solidityPackageDir.push(tempPackage)
+    })
+    console.log(form.solidyObj.solidityPackageDir, 'packageDir after addition')
+  }
+
   // if (
   //   form.useAdditionalContracts &&
   //   Array.isArray(confFile.link) &&

@@ -180,6 +180,7 @@
                             />
                           </div>
                         </div>
+                        <!-- add 'each' here for package directories and add the option to manually ass package -->
                         <div class="input_wrapper">
                           <div class="dark_input">
                             <h3>Solidity package directories</h3>

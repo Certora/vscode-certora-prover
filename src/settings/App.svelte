@@ -107,7 +107,13 @@
         $solidityObj.mainFile = newForm.solidyObj.mainFile
         $solidityObj.compiler.ver = newForm.solidyObj.compiler.ver
         $solidityObj.compiler.exe = newForm.solidyObj.compiler.exe
+        const packDir = newForm.solidyObj.solidityPackageDir
+        console.log('packages from the default settings: ', packDir)
+        if (packDir.length > 0) {
+          $solidityObj.solidityPackageDir = packDir
+        }
         $specObj.specFile = newForm.specObj.specFile
+        console.log($solidityObj, 'sol obj after adding default settings')
         break
       case EventTypesFromExtension.FileChosen:
         log({
