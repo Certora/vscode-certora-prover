@@ -123,6 +123,7 @@
                 <CustomInput
                   placeholder="All rules"
                   bind:bindValue={$specObj.rules}
+                  change={saveOnChange}
                 />
               </div>
             </div>
@@ -150,7 +151,7 @@
                   <input
                     type="checkbox"
                     bind:checked={$specObj.optimisticLoop}
-                    change={saveOnChange}
+                    on:change={saveOnChange}
                   />
                   <span class="checkmark" />
                 </label>
@@ -163,6 +164,7 @@
                 <CustomInput
                   placeholder="0"
                   bind:bindValue={$specObj.loopUnroll}
+                  change={saveOnChange}
                 />
               </div>
             </div>
@@ -200,7 +202,11 @@
                   <h3>Staging</h3>
                   <label class="checkbox_container"
                     >Run on the Staging Environment
-                    <input type="checkbox" bind:checked={$specObj.runOnStg} />
+                    <input
+                      type="checkbox"
+                      bind:checked={$specObj.runOnStg}
+                      on:change={saveOnChange}
+                    />
                     <span class="checkmark" />
                   </label>
                 </div>
@@ -211,6 +217,7 @@
                   <CustomInput
                     placeholder="default: master"
                     bind:bindValue={$specObj.branchName}
+                    change={saveOnChange}
                   />
                 </div>
               </div>
@@ -221,6 +228,7 @@
                     <input
                       type="checkbox"
                       bind:checked={$specObj.localTypeChecking}
+                      on:change={saveOnChange}
                     />
                     <span class="checkmark" />
                   </label>
@@ -231,6 +239,7 @@
                     <input
                       type="checkbox"
                       bind:checked={$specObj.shortOutput}
+                      on:change={saveOnChange}
                     />
                     <span class="checkmark" />
                   </label>
@@ -241,6 +250,7 @@
                     <input
                       type="checkbox"
                       bind:checked={$specObj.multiAssert}
+                      on:change={saveOnChange}
                     />
                     <span class="checkmark" />
                   </label>

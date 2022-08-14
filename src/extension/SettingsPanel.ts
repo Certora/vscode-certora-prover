@@ -97,18 +97,86 @@ export class SettingsPanel {
               additionalContracts: [],
               link: [],
               extendedSettings: [],
-              useStaging: false,
-              branch: '',
+              useStaging: e.payload.specObj.runOnStg,
+              branch: e.payload.specObj.branchName,
               cacheName: '',
               message: '',
               additionalSettings: [],
             }
 
-            if (e.payload.specObj.optimisticLoop) {
+            form.additionalSettings.push({
+              id: 'optimistic_loop',
+              option: '--optimistic_loop',
+              value: e.payload.specObj.optimisticLoop.toString(),
+            })
+
+            if (e.payload.specObj.multiAssert) {
               form.additionalSettings.push({
-                id: 'optimistic_loop',
-                option: '--optimistic_loop',
-                value: '',
+                id: 'multi_assert',
+                option: '--multi_assert_check',
+                value: e.payload.specObj.multiAssert.toString(),
+              })
+            }
+
+            if (e.payload.specObj.duration) {
+              form.additionalSettings.push({
+                id: 'duration',
+                option: '--smt_timeout',
+                value: e.payload.specObj.duration,
+              })
+            }
+
+            if (e.payload.specObj.loopUnroll) {
+              form.additionalSettings.push({
+                id: 'loop_unroll',
+                option: '--loop_iter',
+                value: e.payload.specObj.loopUnroll,
+              })
+            }
+
+            form.additionalSettings.push({
+              id: 'typecheck_only',
+              option: '--disableLocalTypeChecking',
+              value: (!(e.payload.specObj
+                .localTypeChecking as boolean)).toString(),
+            })
+
+            if (e.payload.specObj.runOnStg) {
+              form.useStaging = true
+              form.branch = e.payload.specObj.branchName
+            }
+
+            if (e.payload.specObj.rules) {
+              const rules = e.payload.specObj.rules.trim().replace(',', ' ')
+              form.additionalSettings.push({
+                id: 'rule',
+                option: '--rule',
+                value: rules,
+              })
+            }
+
+            if (e.payload.solidyObj.specifiMethod) {
+              form.additionalSettings.push({
+                id: 'method',
+                option: '--method',
+                value: e.payload.solidyObj.specifiMethod,
+              })
+            }
+
+            if (e.payload.specObj.shortOutput) {
+              form.additionalSettings.push({
+                id: 'short_output',
+                option: '--short_output',
+                value: e.payload.specObj.shortOutput.toString(),
+              })
+            }
+
+            const solArag = e.payload.solidyObj.solidityArgument
+            if (solArag && solArag.startsWith('[') && solArag.endsWith(']')) {
+              form.additionalSettings.push({
+                id: 'solc_args',
+                option: '--solc_args',
+                value: solArag,
               })
             }
 
@@ -124,6 +192,22 @@ export class SettingsPanel {
                 id: 'packages',
                 option: '--packages',
                 value: packages,
+              })
+            }
+
+            const linking = e.payload.solidyObj.linking
+            if (
+              linking.length > 0 &&
+              linking[0].variable &&
+              linking[0].contractName
+            ) {
+              linking.forEach(link => {
+                form.link.push({
+                  id: '',
+                  contractName: form.mainContractName,
+                  fieldName: link.variable,
+                  associatedContractName: link.contractName,
+                })
               })
             }
             createAndOpenConfFile(form)

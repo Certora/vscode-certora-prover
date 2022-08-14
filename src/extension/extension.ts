@@ -4,6 +4,7 @@ import { SettingsPanel } from './SettingsPanel'
 import { ScriptRunner } from './ScriptRunner'
 import { ConfFile, InputFormData, ConfNameMap } from './types'
 import { createAndOpenConfFile } from './utils/createAndOpenConfFile'
+import { type } from 'os'
 
 export function activate(context: vscode.ExtensionContext): void {
   function showSettings(name: ConfNameMap) {
@@ -90,7 +91,7 @@ export function activate(context: vscode.ExtensionContext): void {
     }
 
     if (solcArgs) {
-      confFileDefault['--solc-args'] = [solcArgs]
+      confFileDefault['--solc_args'] = [solcArgs]
     }
     if (defaultDirectoryForPackagesDependencies) {
       confFileDefault['--packages_path'] =
@@ -103,10 +104,10 @@ export function activate(context: vscode.ExtensionContext): void {
     if (optimisticLoop) {
       confFileDefault['--optimistic_loop'] = true
     }
-    if (loopUnroll !== 1) {
+    if (loopUnroll) {
       confFileDefault['--loop_iter'] = loopUnroll
     }
-    if (duration !== 600) {
+    if (duration) {
       confFileDefault['--smt_timeout'] = duration
     }
     if (additionalSettings !== '{}') {
@@ -122,7 +123,9 @@ export function activate(context: vscode.ExtensionContext): void {
     }
 
     if (!typeCheck) {
-      confFileDefault['--typecheck_only'] = true
+      confFileDefault['--disableLocalTypeChecking'] = true
+    } else if (typeCheck === true) {
+      confFileDefault['--disableLocalTypeChecking'] = false
     }
 
     return confFileDefault

@@ -71,7 +71,7 @@ function convertSourceFormDataToConfFileJSON(
   // better practice might be not creating the conf file if an input doesn't exists
   config.solc = inputFormData.solidityCompiler || 'solc'
 
-  if (inputFormData.useAdditionalContracts && inputFormData.link?.length > 0) {
+  if (inputFormData.link?.length > 0) {
     config.link = []
 
     inputFormData.link.forEach(group => {

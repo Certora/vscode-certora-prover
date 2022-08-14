@@ -107,13 +107,28 @@
         $solidityObj.mainFile = newForm.solidyObj.mainFile
         $solidityObj.compiler.ver = newForm.solidyObj.compiler.ver
         $solidityObj.compiler.exe = newForm.solidyObj.compiler.exe
+        $solidityObj.solidityArgument = newForm.solidyObj.solidityArgument
+        $solidityObj.specifiMethod = newForm.solidyObj.specifiMethod
+        $specObj.duration = newForm.specObj.duration
+        $specObj.loopUnroll = newForm.specObj.loopUnroll
+        $specObj.runOnStg = newForm.specObj.runOnStg
+        $specObj.branchName = newForm.specObj.branchName
+        $specObj.optimisticLoop = newForm.specObj.optimisticLoop
+        $specObj.specFile = newForm.specObj.specFile
+        $specObj.multiAssert = newForm.specObj.multiAssert
+        $specObj.localTypeChecking = newForm.specObj.localTypeChecking
+        $specObj.rules = newForm.specObj.rules
+        $specObj.shortOutput = newForm.specObj.shortOutput
         const packDir = newForm.solidyObj.solidityPackageDir
         console.log('packages from the default settings: ', packDir)
         if (packDir.length > 0) {
           $solidityObj.solidityPackageDir = packDir
         }
-        $specObj.specFile = newForm.specObj.specFile
         console.log($solidityObj, 'sol obj after adding default settings')
+        const linkingArr = newForm.solidyObj.linking
+        if (linkingArr.length > 0) {
+          $solidityObj.linking = linkingArr
+        }
         break
       case EventTypesFromExtension.FileChosen:
         log({

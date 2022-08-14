@@ -177,6 +177,7 @@
                             <CustomInput
                               placeholder="Argument"
                               bind:bindValue={$solidityObj.solidityArgument}
+                              change={handleSelectInputField}
                             />
                           </div>
                         </div>
@@ -233,12 +234,14 @@
                       <CustomInput
                         placeholder="Variable"
                         bind:bindValue={$solidityObj.linking[0].variable}
+                        change={saveOnChange}
                       />
                     </div>
                     <div class="dark_input">
                       <CustomInput
                         placeholder="Contract name"
                         bind:bindValue={$solidityObj.linking[0].contractName}
+                        change={saveOnChange}
                       />
                     </div>
                     <i class="codicon codicon-trash" />
@@ -264,6 +267,7 @@
                       <CustomInput
                         placeholder="method_name()"
                         bind:bindValue={$solidityObj.specifiMethod}
+                        change={saveOnChange}
                       />
                     </div>
                   </div>
