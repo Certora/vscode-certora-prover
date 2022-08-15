@@ -91,41 +91,43 @@ export function activate(context: vscode.ExtensionContext): void {
     }
 
     if (solcArgs) {
-      confFileDefault['--solc_args'] = [solcArgs]
+      confFileDefault.solc_args = [solcArgs]
     }
     if (defaultDirectoryForPackagesDependencies) {
-      confFileDefault['--packages_path'] =
-        defaultDirectoryForPackagesDependencies
+      confFileDefault.packages_path = defaultDirectoryForPackagesDependencies
     }
     if (solidityPackageDirectories !== '{}') {
-      confFileDefault['--packages'] = solidityPackageDirectories
+      confFileDefault.packages = solidityPackageDirectories
       console.log(solidityPackageDirectories, 'solidity package dir')
     }
     if (optimisticLoop) {
-      confFileDefault['--optimistic_loop'] = true
+      confFileDefault.optimistic_loop = true
     }
     if (loopUnroll) {
-      confFileDefault['--loop_iter'] = loopUnroll
+      confFileDefault.loop_iter = loopUnroll
     }
     if (duration) {
-      confFileDefault['--smt_timeout'] = duration
+      confFileDefault.smt_timeout = duration
     }
     if (additionalSettings !== '{}') {
-      const settingsArray: string[] = []
+      // const settingsArray: string[] = []
+      // Object.entries(JSON.parse(additionalSettings)).forEach(([key, value]) => {
+      //   if (!key.startsWith('-')) {
+      //     key = '-' + key
+      //   }
+      //   const setting = key + (value ? '=' + value : '')
+      //   settingsArray.push(setting)
+      // })
+      // confFileDefault.settings = settingsArray
       Object.entries(JSON.parse(additionalSettings)).forEach(([key, value]) => {
-        if (!key.startsWith('-')) {
-          key = '-' + key
-        }
-        const setting = key + (value ? '=' + value : '')
-        settingsArray.push(setting)
+        confFileDefault[key.toString()] = value as string
       })
-      confFileDefault['--settings'] = settingsArray
     }
 
     if (!typeCheck) {
-      confFileDefault['--disableLocalTypeChecking'] = true
+      confFileDefault.disableLocalTypeChecking = true
     } else if (typeCheck === true) {
-      confFileDefault['--disableLocalTypeChecking'] = false
+      confFileDefault.disableLocalTypeChecking = false
     }
 
     return confFileDefault

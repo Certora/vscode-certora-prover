@@ -99,8 +99,8 @@
         "title": "Prover Advanced Settings",
         "order": 3,
         "properties": {
-          "AdditionalSetting": {
-            "markdownDescription": "[Additional settings explanation](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html)\n\n**For example:**\n\n```solver: z3```",
+          "AdditionalFlags": {
+            "markdownDescription": "[Additional flags explanation](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html)\n\n**For example:**\n\n```solver: z3```",
             "type": "object",
             "order": 0,
             "additionalProperties": "string",

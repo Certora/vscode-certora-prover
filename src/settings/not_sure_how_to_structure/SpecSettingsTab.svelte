@@ -174,22 +174,24 @@
           <CollapseCard>
             <div slot="header" class="header header_contract">
               <i class="codicon codicon-gear" />
-              <h3>Additional prover settings</h3>
+              <h3>Additional Flags</h3>
               <i class="codicon codicon-chevron-up" />
             </div>
             <div slot="body" class="card_body_wrapper">
-              <h3>Properties</h3>
+              <h3>Flag</h3>
               <div class="input_wrapper">
                 <div class="dark_input">
                   <CustomInput
-                    placeholder="Property name"
+                    placeholder="flag name"
                     bind:bindValue={$specObj.properties[0].name}
+                    change={saveOnChange}
                   />
                 </div>
                 <div class="dark_input">
                   <CustomInput
-                    placeholder="Property value"
+                    placeholder="flag value"
                     bind:bindValue={$specObj.properties[0].value}
+                    change={saveOnChange}
                   />
                 </div>
                 <i class="codicon codicon-trash" />

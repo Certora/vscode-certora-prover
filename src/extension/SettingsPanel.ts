@@ -106,14 +106,14 @@ export class SettingsPanel {
 
             form.additionalSettings.push({
               id: 'optimistic_loop',
-              option: '--optimistic_loop',
+              option: 'optimistic_loop',
               value: e.payload.specObj.optimisticLoop.toString(),
             })
 
             if (e.payload.specObj.multiAssert) {
               form.additionalSettings.push({
                 id: 'multi_assert',
-                option: '--multi_assert_check',
+                option: 'multi_assert_check',
                 value: e.payload.specObj.multiAssert.toString(),
               })
             }
@@ -121,22 +121,22 @@ export class SettingsPanel {
             if (e.payload.specObj.duration) {
               form.additionalSettings.push({
                 id: 'duration',
-                option: '--smt_timeout',
+                option: 'smt_timeout',
                 value: e.payload.specObj.duration,
               })
             }
 
             if (e.payload.specObj.loopUnroll) {
               form.additionalSettings.push({
-                id: 'loop_unroll',
-                option: '--loop_iter',
+                id: 'loop_iter',
+                option: 'loop_iter',
                 value: e.payload.specObj.loopUnroll,
               })
             }
 
             form.additionalSettings.push({
               id: 'typecheck_only',
-              option: '--disableLocalTypeChecking',
+              option: 'disableLocalTypeChecking',
               value: (!(e.payload.specObj
                 .localTypeChecking as boolean)).toString(),
             })
@@ -150,7 +150,7 @@ export class SettingsPanel {
               const rules = e.payload.specObj.rules.trim().replace(',', ' ')
               form.additionalSettings.push({
                 id: 'rule',
-                option: '--rule',
+                option: 'rule',
                 value: rules,
               })
             }
@@ -158,7 +158,7 @@ export class SettingsPanel {
             if (e.payload.solidyObj.specifiMethod) {
               form.additionalSettings.push({
                 id: 'method',
-                option: '--method',
+                option: 'method',
                 value: e.payload.solidyObj.specifiMethod,
               })
             }
@@ -166,7 +166,7 @@ export class SettingsPanel {
             if (e.payload.specObj.shortOutput) {
               form.additionalSettings.push({
                 id: 'short_output',
-                option: '--short_output',
+                option: 'short_output',
                 value: e.payload.specObj.shortOutput.toString(),
               })
             }
@@ -175,13 +175,18 @@ export class SettingsPanel {
             if (solArag && solArag.startsWith('[') && solArag.endsWith(']')) {
               form.additionalSettings.push({
                 id: 'solc_args',
-                option: '--solc_args',
+                option: 'solc_args',
                 value: solArag,
               })
             }
 
             const solDir = e.payload.solidyObj.solidityPackageDir
-            if (solDir.length > 0 && solDir[0].packageName && solDir[0].path) {
+            if (
+              solDir &&
+              solDir.length > 0 &&
+              solDir[0].packageName &&
+              solDir[0].path
+            ) {
               let packages = '{'
               solDir.forEach(pack => {
                 packages +=
@@ -190,8 +195,23 @@ export class SettingsPanel {
               packages = packages.replace(/.$/, '}')
               form.additionalSettings.push({
                 id: 'packages',
-                option: '--packages',
+                option: 'packages',
                 value: packages,
+              })
+            }
+
+            const additionalSettings = e.payload.specObj.properties
+            if (
+              additionalSettings &&
+              additionalSettings.length > 0 &&
+              additionalSettings[0].name
+            ) {
+              additionalSettings.forEach(flag => {
+                form.additionalSettings.push({
+                  id: flag.name,
+                  option: flag.name,
+                  value: flag.value,
+                })
               })
             }
 

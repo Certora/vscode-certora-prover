@@ -94,10 +94,20 @@ const stableFields = [
   'verify',
   'solc',
   'link',
-  'settings',
   'staging',
   'cache',
   'msg',
+  'multi_assert_check',
+  'packages',
+  'rule',
+  'solc_args',
+  'smt_timeout',
+  'loop_iter',
+  'method',
+  'short_output',
+  'disableLocalTypeChecking',
+  'optimistic_loop',
+  'packages_path',
 ]
 
 function getAdditionalSettings(confFile: ConfFile) {
@@ -184,26 +194,26 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
     })
   }
 
-  if (confFile['--multi_assert_check']) {
+  if (confFile.multi_assert_check) {
     form.specObj.multiAssert = true
   }
 
-  if (confFile['--optimistic_loop']) {
+  if (confFile.optimistic_loop) {
     form.specObj.optimisticLoop = true
   }
 
-  if (confFile['--packages']) {
+  if (confFile.packages) {
     console.log(
       'packages detected',
-      confFile['--packages'],
+      confFile.packages,
       'type: ',
-      typeof confFile['--packages'],
+      typeof confFile.packages,
     )
     let jsonPackages = {}
-    if (typeof confFile['--packages'] === 'string') {
-      jsonPackages = JSON.parse(confFile['--packages'].toString())
-    } else if (typeof confFile['--packages'] === 'object') {
-      jsonPackages = confFile['--packages']
+    if (typeof confFile.packages === 'string') {
+      jsonPackages = JSON.parse(confFile.packages.toString())
+    } else if (typeof confFile.packages === 'object') {
+      jsonPackages = confFile.packages
     }
     console.log('json packages', jsonPackages)
     Object.entries(jsonPackages).forEach(key => {
@@ -217,34 +227,33 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
     console.log(form.solidyObj.solidityPackageDir, 'packageDir after addition')
   }
 
-  if (confFile['--rule']) {
-    form.specObj.rules = (confFile['--rule'] as string).replace(' ', ',')
+  if (confFile.rule) {
+    form.specObj.rules = (confFile.rule as string).replace(' ', ',')
   }
 
-  if (confFile['--solc_args']) {
-    form.solidyObj.solidityArgument = confFile['--solc_args'].toString()
+  if (confFile.solc_args) {
+    form.solidyObj.solidityArgument = confFile.solc_args.toString()
   }
 
-  if (confFile['--smt_timeout']) {
-    form.specObj.duration = confFile['--smt_timeout'].toString()
+  if (confFile.smt_timeout) {
+    form.specObj.duration = confFile.smt_timeout.toString()
   }
 
-  if (confFile['--loop_iter']) {
-    form.specObj.loopUnroll = confFile['--loop_iter'].toString()
+  if (confFile.loop_iter) {
+    form.specObj.loopUnroll = confFile.loop_iter.toString()
   }
 
-  if (confFile['--method']) {
-    form.solidyObj.specifiMethod = confFile['--method'].toString()
+  if (confFile.method) {
+    form.solidyObj.specifiMethod = confFile.method.toString()
   }
 
-  if (confFile['--short_output'] !== undefined) {
-    form.specObj.shortOutput = confFile['--short_output'] as boolean
+  if (confFile.short_output !== undefined) {
+    form.specObj.shortOutput = confFile.short_output as boolean
   }
 
-  if (confFile['--disableLocalTypeChecking'] !== undefined) {
-    form.specObj.localTypeChecking = !confFile[
-      '--disableLocalTypeChecking'
-    ] as boolean
+  if (confFile.disableLocalTypeChecking !== undefined) {
+    form.specObj.localTypeChecking =
+      !confFile.disableLocalTypeChecking as boolean
   }
   // if (
   //   form.useAdditionalContracts &&
@@ -286,15 +295,14 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
   //   form.message = confFile.msg as string
   // }
 
-  // const additionalSettings = getAdditionalSettings(confFile)
+  const additionalSettings = getAdditionalSettings(confFile)
 
-  // if (Object.keys(additionalSettings).length > 0) {
-  //   form.additionalSettings = Object.keys(additionalSettings).map(key => ({
-  //     id: nanoid(),
-  //     option: key as string,
-  //     value: additionalSettings[key].toString(),
-  //   }))
-  // }
+  if (Object.keys(additionalSettings).length > 0) {
+    form.specObj.properties = Object.keys(additionalSettings).map(key => ({
+      name: key as string,
+      value: additionalSettings[key].toString(),
+    }))
+  }
 
   return form
 }

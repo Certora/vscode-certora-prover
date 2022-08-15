@@ -120,14 +120,16 @@
         $specObj.rules = newForm.specObj.rules
         $specObj.shortOutput = newForm.specObj.shortOutput
         const packDir = newForm.solidyObj.solidityPackageDir
-        console.log('packages from the default settings: ', packDir)
         if (packDir.length > 0) {
           $solidityObj.solidityPackageDir = packDir
         }
-        console.log($solidityObj, 'sol obj after adding default settings')
         const linkingArr = newForm.solidyObj.linking
         if (linkingArr.length > 0) {
           $solidityObj.linking = linkingArr
+        }
+        const properties = newForm.specObj.properties
+        if (properties.length > 0) {
+          $specObj.properties = properties
         }
         break
       case EventTypesFromExtension.FileChosen:
