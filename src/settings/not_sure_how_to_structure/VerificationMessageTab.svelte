@@ -1,6 +1,24 @@
 <script>
   import CustomInput from './slots_and_utility/CustomInput.svelte'
-  import { verification_message } from './stores/store.js'
+  import { verification_message, solidityObj, specObj } from './stores/store.js'
+
+  function saveOnChange() {
+    console.log($verification_message, '===verification message')
+    let form = {
+      solidyObj: $solidityObj,
+      specObj: $specObj,
+      verificatoinMessage: $verification_message,
+    }
+    // log({
+    //   action: 'Send "create-conf-file" command',
+    //   source: Sources.SettingsWebview,
+    //   info: form,
+    // })
+    vscode.postMessage({
+      command: 'create-conf-file',
+      payload: form,
+    })
+  }
 </script>
 
 <div class="card_parent_wrapper bg_dark">
@@ -14,6 +32,7 @@
         <CustomInput
           placeholder="Text message"
           bind:bindValue={$verification_message}
+          change={saveOnChange}
         />
       </div>
     </div>

@@ -11,6 +11,7 @@ import {
   ConfNameMap,
   EventFromSettingsWebview,
   InputFormData,
+  SolidityObj,
 } from './types'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { stringify } from 'querystring'
@@ -104,6 +105,10 @@ export class SettingsPanel {
               additionalSettings: [],
             }
 
+            if (e.payload.verificatoinMessage as string) {
+              form.message = e.payload.verificatoinMessage as string
+            }
+
             form.additionalSettings.push({
               id: 'optimistic_loop',
               option: 'optimistic_loop',
@@ -144,6 +149,14 @@ export class SettingsPanel {
             if (e.payload.specObj.runOnStg) {
               form.useStaging = true
               form.branch = e.payload.specObj.branchName
+            }
+
+            if (e.payload.solidyObj.solidityPackageDefaultPath) {
+              form.additionalSettings.push({
+                id: 'packages_path',
+                option: 'packages_path',
+                value: e.payload.solidyObj.solidityPackageDefaultPath,
+              })
             }
 
             if (e.payload.specObj.rules) {

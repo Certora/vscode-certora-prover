@@ -174,6 +174,7 @@ export type SolidityObj = {
   specifiMethod: string
   compiler: Compiler
   solidityArgument: string
+  solidityPackageDefaultPath: string
   solidityPackageDir: SolidityPackageDir[]
 }
 
@@ -201,6 +202,7 @@ export type SpecObj = {
 export type NewForm = {
   solidyObj: SolidityObj
   specObj: SpecObj
+  verificatoinMessage: string
 }
 
 export enum CommandFromResultsWebview {

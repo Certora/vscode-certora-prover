@@ -73,6 +73,7 @@ export const solidityObj = writable({
   specifiMethod: '',
   compiler: { exe: '', ver: '' },
   solidityArgument: '',
+  solidityPackageDefaultPath: '',
   solidityPackageDir: [
     {
       packageName: '',

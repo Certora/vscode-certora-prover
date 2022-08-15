@@ -20,6 +20,7 @@
     specFilesArr,
     solidityObj,
     specObj,
+    verification_message,
   } from './not_sure_how_to_structure/stores/store.js'
 
   $: $solidityObj, console.log($solidityObj.compiler.ver)
@@ -119,6 +120,7 @@
         $specObj.localTypeChecking = newForm.specObj.localTypeChecking
         $specObj.rules = newForm.specObj.rules
         $specObj.shortOutput = newForm.specObj.shortOutput
+        $verification_message = newForm.verificatoinMessage
         const packDir = newForm.solidyObj.solidityPackageDir
         if (packDir.length > 0) {
           $solidityObj.solidityPackageDir = packDir

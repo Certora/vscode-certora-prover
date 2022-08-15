@@ -4,6 +4,7 @@ import { log, Sources } from '../utils/log'
 // import { InputFormData, ConfFile } from '../types'
 
 import { InputFormData, NewForm, SolidityObj } from '../types'
+import { format } from 'path'
 
 type ConfFile = {
   files?: string[]

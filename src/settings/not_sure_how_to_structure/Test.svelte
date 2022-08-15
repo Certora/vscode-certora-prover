@@ -12,6 +12,7 @@
     solidityObj,
     solFilesArr,
     specObj,
+    verification_message,
   } from './stores/store.js'
 
   let items = [
@@ -63,6 +64,7 @@
     let form = {
       solidyObj: $solidityObj,
       specObj: $specObj,
+      verificatoinMessage: $verification_message,
     }
     log({
       action: 'Send "create-conf-file" command',

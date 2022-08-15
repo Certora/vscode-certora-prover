@@ -4,7 +4,11 @@
   import CollapseCard from './slots_and_utility/CollapseCard.svelte'
   import CustomInput from './slots_and_utility/CustomInput.svelte'
   import Icon from './slots_and_utility/Icon.svelte'
-  import { writableArray_Spec, specObj } from './stores/store.js'
+  import {
+    writableArray_Spec,
+    specObj,
+    verification_message,
+  } from './stores/store.js'
   import { navState, specFilesArr, solidityObj } from './stores/store.js'
   import { refreshFiles } from '../utils/refreshFiles'
   import { log, Sources } from '../utils/log'
@@ -53,6 +57,7 @@
     let form = {
       solidyObj: $solidityObj,
       specObj: $specObj,
+      verificatoinMessage: $verification_message,
     }
     log({
       action: 'Send "create-conf-file" command',

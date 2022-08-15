@@ -71,6 +71,7 @@ const newForm: NewForm = {
       ver: '',
     },
     solidityArgument: '',
+    solidityPackageDefaultPath: '',
     solidityPackageDir: [],
   },
   specObj: {
@@ -87,6 +88,7 @@ const newForm: NewForm = {
     shortOutput: false,
     multiAssert: false,
   },
+  verificatoinMessage: '',
 }
 
 const stableFields = [
@@ -255,6 +257,11 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
     form.specObj.localTypeChecking =
       !confFile.disableLocalTypeChecking as boolean
   }
+
+  if (confFile.msg) {
+    form.verificatoinMessage = confFile.msg
+  }
+
   // if (
   //   form.useAdditionalContracts &&
   //   Array.isArray(confFile.link) &&
