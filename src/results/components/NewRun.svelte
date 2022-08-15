@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte'
+  import { getIconPath } from '../utils/getIconPath'
 
   import {
     Verification,
@@ -303,13 +304,22 @@
 
 <div class="body">
   {#if doRename}
-    <input
-      class="input"
-      value={namesMap.get(runName) || ''}
-      placeholder="Enter run name"
-      on:keypress={onKeyPress}
-      on:change={onChange}
-    />
+    <div class="renameInput">
+      <img
+        class="icon"
+        width="16"
+        height="16"
+        src={getIconPath('pending.svg')}
+        alt=""
+      />
+      <input
+        class="input"
+        value={namesMap.get(runName) || ''}
+        placeholder="Enter run name"
+        on:keypress={onKeyPress}
+        on:change={onChange}
+      />
+    </div>
   {:else if !nowRunning}
     <div class="results">
       <Pane
@@ -377,12 +387,24 @@
     overflow: hidden;
   }
 
-  .input {
-    width: 97.5%;
-    border-width: 1px;
-    border-style: solid;
-    border-color: var(--vscode-inputValidation-infoBorder);
-    background-color: var(--list-active-selection-background);
-    color: white;
+  .renameInput {
+    background-color: var(--vscode-editor-inactiveSelectionBackground);
+    .icon {
+      position: relative;
+      /* width: 14px;
+      height: 14px; */
+      left: 22px;
+      top: 3px;
+    }
+    .input {
+      width: 92%;
+      border-width: 1px;
+      border-style: solid;
+      border-color: var(--vscode-inputValidation-infoBorder);
+      background-color: var(--vscode-editor-inactiveSelectionBackground);
+      color: white;
+      margin-left: 24px;
+      margin-right: 0;
+    }
   }
 </style>

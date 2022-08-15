@@ -93,17 +93,9 @@
           info: e.data.payload,
         })
 
-        // console.log(e.data.payload, e.data.payload[1])
-        // form = confFileToFormData(e.data.payload[0], e.data.payload[1])
-        // submitButtonText = 'Save'
-
         let newForm: NewForm = confFileToFormData(e.data.payload[0]) // change the conf file info form data for the settings form
         console.log('new form:', newForm)
-        // const parsedSpecFilePath = form.specFile.split('/')
-        // const specFileName = parsedSpecFilePath[parsedSpecFilePath.length - 1]
-        // submitButtonText = `Save ${
-        //   form.mainContractName
-        // }.${specFileName.replace('.spec', '')}.conf`
+
         $solidityObj.mainContract = newForm.solidyObj.mainContract
         $solidityObj.mainFile = newForm.solidyObj.mainFile
         $solidityObj.compiler.ver = newForm.solidyObj.compiler.ver
