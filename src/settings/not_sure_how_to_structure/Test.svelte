@@ -28,8 +28,6 @@
     { value: 'ice-cream', label: 'Ice Cream', group: 'Sweet' },
   ]
 
-  let favouriteFood = undefined
-
   function handleSelectSol(event) {
     $solidityObj.mainFile = event.detail.value
     saveOnChange()
@@ -40,7 +38,46 @@
     saveOnChange()
   }
 
-  //todo: add handleSelect for every field
+  function createNewPackage() {
+    const newPackage = {
+      packageName: '',
+      path: '',
+    }
+    const newPackageDir = $solidityObj.solidityPackageDir
+    newPackageDir.push(newPackage)
+    $solidityObj.solidityPackageDir = newPackageDir
+    saveOnChange()
+  }
+
+  function createNewLink() {
+    const newLink = { variable: '', contractName: '' }
+    const newLinking = $solidityObj.linking
+    newLinking.push(newLink)
+    $solidityObj.linking = newLinking
+    saveOnChange()
+  }
+
+  function deletePackage(indexToDelete) {
+    const newPackageDir = []
+    $solidityObj.solidityPackageDir.forEach((singlePackage, index) => {
+      if (index !== indexToDelete) {
+        newPackageDir.push(singlePackage)
+      }
+    })
+    $solidityObj.solidityPackageDir = newPackageDir
+    saveOnChange()
+  }
+
+  function deleteLink(indexToDelete) {
+    const newLinking = []
+    $solidityObj.linking.forEach((link, index) => {
+      if (index !== indexToDelete) {
+        newLinking.push(link)
+      }
+    })
+    $solidityObj.linking = newLinking
+    saveOnChange()
+  }
 
   function handleSelect(event) {}
 
@@ -183,38 +220,43 @@
                             />
                           </div>
                         </div>
-                        <!-- add 'each' here for package directories and add the option to manually ass package -->
-                        <div class="input_wrapper">
-                          <div class="dark_input">
-                            <h3>Solidity package directories</h3>
-                            <CustomInput
-                              {items}
-                              {Icon}
-                              {ClearIcon}
-                              bind:bindValue={$solidityObj.solidityPackageDir[0]
-                                .packageName}
-                              change={handleSelectInputField}
-                              on:clear={handleClear}
-                              placeholder="Package name"
+                        {#each $solidityObj.solidityPackageDir as _, index}
+                          <div class="input_wrapper">
+                            <div class="dark_input">
+                              <h3>Solidity package directories</h3>
+                              <CustomInput
+                                {items}
+                                {Icon}
+                                {ClearIcon}
+                                bind:bindValue={$solidityObj.solidityPackageDir[
+                                  index
+                                ].packageName}
+                                change={handleSelectInputField}
+                                on:clear={handleClear}
+                                placeholder="Package name"
+                              />
+                            </div>
+                            <div class="dark_input">
+                              <h3>&nbsp;</h3>
+                              <CustomInput
+                                {items}
+                                {Icon}
+                                {ClearIcon}
+                                bind:bindValue={$solidityObj.solidityPackageDir[
+                                  index
+                                ].path}
+                                change={handleSelectInputField}
+                                on:clear={handleClear}
+                                placeholder=".../path"
+                              />
+                            </div>
+                            <i
+                              class="codicon codicon-trash"
+                              on:click={() => deletePackage(index)}
                             />
                           </div>
-                          <div class="dark_input">
-                            <h3>&nbsp;</h3>
-                            <CustomInput
-                              {items}
-                              {Icon}
-                              {ClearIcon}
-                              bind:bindValue={$solidityObj.solidityPackageDir[0]
-                                .path}
-                              change={handleSelectInputField}
-                              on:clear={handleClear}
-                              placeholder=".../path"
-                            />
-                          </div>
-                          <i class="codicon codicon-trash" />
-                        </div>
-
-                        <button class="btn_add"
+                        {/each}
+                        <button class="btn_add" on:click={createNewPackage}
                           ><i class="codicon codicon-add" /> Add Directory</button
                         >
                       </div>
@@ -231,25 +273,30 @@
                   <i class="codicon codicon-chevron-up" />
                 </div>
                 <div slot="body" class="card_body_wrapper">
-                  <div class="input_wrapper">
-                    <div class="dark_input">
-                      <CustomInput
-                        placeholder="Variable"
-                        bind:bindValue={$solidityObj.linking[0].variable}
-                        change={saveOnChange}
+                  {#each $solidityObj.linking as _, index}
+                    <div class="input_wrapper">
+                      <div class="dark_input">
+                        <CustomInput
+                          placeholder="Variable"
+                          bind:bindValue={$solidityObj.linking[index].variable}
+                          change={saveOnChange}
+                        />
+                      </div>
+                      <div class="dark_input">
+                        <CustomInput
+                          placeholder="Contract name"
+                          bind:bindValue={$solidityObj.linking[index]
+                            .contractName}
+                          change={saveOnChange}
+                        />
+                      </div>
+                      <i
+                        class="codicon codicon-trash"
+                        on:click={() => deleteLink(index)}
                       />
                     </div>
-                    <div class="dark_input">
-                      <CustomInput
-                        placeholder="Contract name"
-                        bind:bindValue={$solidityObj.linking[0].contractName}
-                        change={saveOnChange}
-                      />
-                    </div>
-                    <i class="codicon codicon-trash" />
-                  </div>
-
-                  <button class="btn_add"
+                  {/each}
+                  <button class="btn_add" on:click={createNewLink}
                     ><i class="codicon codicon-add" /> Add Link</button
                   >
                 </div>

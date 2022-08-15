@@ -42,6 +42,28 @@
     $solidityObj.compiler.ver !== ''
   )
 
+  function createNewFlag() {
+    const newFlag = {
+      name: '',
+      value: '',
+    }
+    const newProperties = $specObj.properties
+    newProperties.push(newFlag)
+    $specObj.properties = newProperties
+    saveOnChange()
+  }
+
+  function deleteFleg(indexToDelete) {
+    const newProperties = []
+    $specObj.properties.forEach((prop, index) => {
+      if (index !== indexToDelete) {
+        newProperties.push(prop)
+      }
+    })
+    $specObj.properties = newProperties
+    saveOnChange()
+  }
+
   function openBrowser(fileType) {
     log({
       action: 'Send "open-browser" command',
@@ -184,24 +206,29 @@
             </div>
             <div slot="body" class="card_body_wrapper">
               <h3>Flag</h3>
-              <div class="input_wrapper">
-                <div class="dark_input">
-                  <CustomInput
-                    placeholder="flag name"
-                    bind:bindValue={$specObj.properties[0].name}
-                    change={saveOnChange}
+              {#each $specObj.properties as _, index}
+                <div class="input_wrapper">
+                  <div class="dark_input">
+                    <CustomInput
+                      placeholder="flag name"
+                      bind:bindValue={$specObj.properties[index].name}
+                      change={saveOnChange}
+                    />
+                  </div>
+                  <div class="dark_input">
+                    <CustomInput
+                      placeholder="flag value"
+                      bind:bindValue={$specObj.properties[index].value}
+                      change={saveOnChange}
+                    />
+                  </div>
+                  <i
+                    class="codicon codicon-trash"
+                    on:click={() => deleteFleg(index)}
                   />
                 </div>
-                <div class="dark_input">
-                  <CustomInput
-                    placeholder="flag value"
-                    bind:bindValue={$specObj.properties[0].value}
-                    change={saveOnChange}
-                  />
-                </div>
-                <i class="codicon codicon-trash" />
-              </div>
-              <button class="btn_add"
+              {/each}
+              <button class="btn_add" on:click={createNewFlag}
                 ><i class="codicon codicon-add" /> Add Property</button
               >
               <div class="input_wrapper input_single">
