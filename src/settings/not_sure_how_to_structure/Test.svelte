@@ -8,9 +8,7 @@
 
   import {
     navState,
-    resetNav,
     solidityObj,
-    solFilesArr,
     solAdditionalContracts,
   } from './stores/store.js'
   import SolidityFiles from './SolidityFiles.svelte'
@@ -63,6 +61,7 @@
   }
 
   function handleSelectSol(event, fileType, index) {
+    console.log(event)
     if (event.detail.value === 'Browse...') {
       loadFilesFolder(fileType, index)
       return
@@ -97,7 +96,7 @@
   // add files from folder
   function loadFilesFolder(fileType, index) {
     // clear just incase
-    handleClear(index)
+    handleClear(null, index)
     console.log(fileType)
     console.log(index)
   }
@@ -135,8 +134,11 @@
   // objects
 </script>
 
-<button on:click={() => console.log($solidityObj.mainFile)}
-  >test btn (i log main file)</button
+<button
+  on:click={() => {
+    console.log($solidityObj.mainFile)
+    console.log($solAdditionalContracts)
+  }}>test btn (i log main file)</button
 >
 <div class="card_parent_wrapper bg_dark">
   <CollapseCard bind:open={$navState.solCheck.active} resetNavProp={true}>
@@ -170,7 +172,7 @@
                     {Icon}
                     {ClearIcon}
                     on:select={e => handleSelectSol(e, 'sol')}
-                    on:clear={e => handleClear()}
+                    on:clear={e => handleClear(e)}
                     placeholder="Main solidity file"
                     bind:value={$solidityObj.mainFile}
                   />
@@ -342,11 +344,11 @@
       {#each $solAdditionalContracts as file, index}
         <SolidityFiles
           {index}
-          {solidityIconsObj}
           {solFiles}
           {updateItems}
           {handleClear}
           {handleSelectSol}
+          {loadFilesFolder}
         />
       {/each}
       <button class="btn_add" on:click={addNewFile}

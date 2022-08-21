@@ -5,83 +5,35 @@
   import Icon from './slots_and_utility/Icon.svelte'
   import CustomItem from './slots_and_utility/CustomItem.svelte'
   import CustomInput from './slots_and_utility/CustomInput.svelte'
-  import {
-    // re,ove solidtyObj when done
-    solidityObj,
-    solFilesArr,
-    solAdditionalContracts,
-  } from './stores/store.js'
+  import { solAdditionalContracts } from './stores/store.js'
 
   //   slots
   export let index
-  export let solidityIconsObj
   export let updateItems
   export let solFiles
+  export let handleSelectSol
+  export let handleClear
+  export let loadFilesFolder
 
-  let items = [
-    { value: 'Browse...', label: 'Browse...', path: 'src/somefolder' },
-    {
-      value: 'chocolate asdsadas asdsadsad asdsad',
-      label: 'Chocolate sdfdsfsdfs sdf sdfdsfsdf ',
-      group: 'Sweet',
-      monkey: 'monkey',
-    },
-    { value: 'pizza', label: 'Pizza', group: 'Savory' },
-    {
-      value: 'src/somefolder/cake.sol',
-      label: 'Cake.sol',
-      path: 'src/somefolder',
-    },
-    { value: 'cookies', label: 'Cookies', group: 'Savory' },
-    { value: 'ice-cream', label: 'Ice Cream', group: 'Sweet' },
-  ]
-
-  // browse logic option one
-  let test = 'test'
-  $: test, testFunc()
-  function testFunc() {
-    if (test && test.value && test.value === 'Browse...') {
-      test = undefined
-    }
-    console.log(test)
-  }
-
-  // browse logic option 2 .sol
-  function handleSelectSol(event) {
-    if (event.detail.value === 'Browse...') {
-      console.log('did something')
-      handleClear()
-      return
-    }
-    testObj.selected = true
-    $solidityObj.mainFile = event.detail.value
-  }
-
-  function handleSelect(event) {}
-
-  function handleClear() {
-    testObj.selected = false
-  }
-  function someFunc() {
-    console.log('doing stuffs')
-  }
-  let testObj = {
-    selected: false,
-    info: 'abc',
-    someFunc: someFunc,
+  let isSolidityListOpen = false
+  let solidityIconsObj = {
+    selected: isSolidityListOpen,
+    loadFilesFolder: loadFilesFolder,
+    fileType: 'sol',
+    index: index,
+    ifoText: 'some string',
+    infoLink: 'www.google.com',
   }
 
   // push new linking/directory
   function pushNewObj(arr, obj) {
     arr.push(obj)
-    // $solidityObj.solidityPackageDir = $solidityObj.solidityPackageDir
-    $solidityObj = $solidityObj
+    $solAdditionalContracts[index] = $solAdditionalContracts[index]
   }
   // remove from linking/directory
-  function removeObj(arr, index) {
-    arr.splice(index, 1)
-    // $solidityObj.solidityPackageDir = $solidityObj.solidityPackageDir
-    $solidityObj = $solidityObj
+  function removeObj(arr, i) {
+    arr.splice(i, 1)
+    $solAdditionalContracts[index] = $solAdditionalContracts[index]
   }
 
   // remove solidity file by index
@@ -89,9 +41,6 @@
     $solAdditionalContracts.splice(index, 1)
     $solAdditionalContracts = $solAdditionalContracts
   }
-
-  let solInputValue = ''
-  let isSolidityListOpen = false
 </script>
 
 <div class="card_body_wrapper_parent bg_light">
@@ -124,10 +73,10 @@
               Item={CustomItem}
               {Icon}
               {ClearIcon}
-              on:select={e => handleSelectSol(e, index)}
-              on:clear={() => handleClear(index)}
+              on:select={e => handleSelectSol(e, 'sol', index)}
+              on:clear={e => handleClear(e, index)}
               placeholder="Additional solidity file"
-              bind:value={solInputValue}
+              bind:value={$solAdditionalContracts[index].mainFile}
             />
           </button>
         </div>
@@ -177,7 +126,7 @@
             <i class="codicon codicon-chevron-up" />
           </div>
           <div slot="body" class="card_body_wrapper">
-            {#each $solAdditionalContracts[index].linking as obj, index}
+            {#each $solAdditionalContracts[index].linking as obj, i}
               <div class="input_wrapper">
                 <div class="dark_input">
                   <CustomInput
@@ -195,7 +144,7 @@
                   class="codicon codicon-trash"
                   on:click={removeObj(
                     $solAdditionalContracts[index].linking,
-                    index,
+                    i,
                   )}
                 />
               </div>
