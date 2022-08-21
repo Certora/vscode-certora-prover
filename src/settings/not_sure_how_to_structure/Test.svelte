@@ -128,10 +128,6 @@
     // LOL auto completed
     infoLink: 'www.google.com',
   }
-
-  // functions to pass down to solfiles and make them take pareameters
-  // loadFilesFolder(), isSolidityListOpen() - let isSolidityListOpen = false,
-  // objects
 </script>
 
 <button
@@ -145,7 +141,7 @@
     <div slot="header" class="header header_contracts">
       <i class="codicon codicon-file" />
       <h3>Solidity contracts</h3>
-      <i class="codicon codicon-settings" />
+      <!-- <i class="codicon codicon-settings" /> -->
       <i class="codicon codicon-chevron-up" />
     </div>
     <div slot="body">
