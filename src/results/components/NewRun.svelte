@@ -389,15 +389,20 @@
 
   .renameInput {
     background-color: var(--vscode-editor-inactiveSelectionBackground);
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
     .icon {
       position: relative;
-      /* width: 14px;
-      height: 14px; */
       left: 22px;
       top: 3px;
     }
     .input {
-      width: 92%;
+      display: flex;
+      flex-direction: row;
+      width: 90%;
+      display: inline;
+      overflow: hidden;
       border-width: 1px;
       border-style: solid;
       border-color: var(--vscode-inputValidation-infoBorder);
