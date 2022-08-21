@@ -52,16 +52,12 @@
 
   // on click on the input get al the files (sol or spec) based on what os passded to the function
   function updateItems(fileType) {
-    // passing sol or spce to file Type
-    if (fileType === 'sol') {
-      // this is actually pushing some fake value in (for testing only) just replace with an array of the new values from the file system like you see in the specFiles
-      solFiles = [
-        ...solFiles,
-        { value: 'Browse...', label: 'Browse...', path: 'src/somefolder' },
-      ]
-      return
-    }
-    specFiles = [
+    // not really expecting anything but sol here
+    // might bove elsewhere later and make it more reusable
+    if (fileType !== 'sol') return
+    // this is actually pushing some fake value in (for testing only) just replace with an array of the new values from the file system like you see in the specFiles
+    solFiles = [
+      ...solFiles,
       { value: 'Browse...', label: 'Browse...', path: 'src/somefolder' },
     ]
   }
@@ -78,29 +74,27 @@
   //     console.log("one")
   //   }
 
-  let solInputValue = ''
   // browse logic option 2 .sol bind to input event
   // fires on:select={handleSelectSol}
-  function handleSelectSol(event, index) {
+  function handleSelectSol(event, fileType, index) {
     if (event.detail.value === 'Browse...') {
-      loadFilesFolder()
+      loadFilesFolder(fileType, index)
       return
     }
     if (index) {
-      $solAdditionalContracts[index] = event.detail.value
+      $solAdditionalContracts[index].mainFile = event.detail
       return
     }
-    $solidityObj.mainFile = event.detail.value
+    $solidityObj.mainFile = event.detail
   }
 
-  function handleClear(index) {
+  function handleClear(e, index) {
+    // e is passes on by default here
     if (index) {
       $solAdditionalContracts[index].mainFile = ''
-      solInputValue = ''
       return
     }
     $solidityObj.mainFile = ''
-    solInputValue = ''
   }
 
   // push new linking/directory
@@ -115,21 +109,11 @@
   }
 
   // add files from folder
-  function loadFilesFolder(index) {
-    // reset first
+  function loadFilesFolder(fileType, index) {
+    // clear just incase
     handleClear(index)
-    // solInputValue = what is returned from file picker function
-    let solInputValue = {
-      value: 'file-6/src/somefolder',
-      label: 'file-6',
-      path: 'src/somefolder',
-    }
-
-    if (index) {
-      $solAdditionalContracts[index].mainFile = solInputValue.value
-      return
-    }
-    $solidityObj.mainFile = solInputValue.value
+    console.log(fileType)
+    console.log(index)
   }
 
   // add new empty solidity file push new obj to array
@@ -154,6 +138,7 @@
     // passing just the function and the info icon text for now
     selected: isSolidityListOpen,
     loadFilesFolder: loadFilesFolder,
+    fileType: 'sol',
     ifoText: 'some string',
     // LOL auto completed
     infoLink: 'www.google.com',
@@ -164,6 +149,9 @@
   // objects
 </script>
 
+<button on:click={() => console.log($solidityObj.mainFile)}
+  >test btn (i log main file)</button
+>
 <div class="card_parent_wrapper bg_dark">
   <CollapseCard bind:open={$navState.solCheck.active} resetNavProp={true}>
     <div slot="header" class="header header_contracts">
@@ -196,10 +184,10 @@
                     Item={CustomItem}
                     {Icon}
                     {ClearIcon}
-                    on:select={handleSelectSol}
-                    on:clear={handleClear}
+                    on:select={e => handleSelectSol(e, 'sol')}
+                    on:clear={e => handleClear()}
                     placeholder="Main solidity file"
-                    bind:value={solInputValue}
+                    bind:value={$solidityObj.mainFile}
                   />
                 </button>
               </div>

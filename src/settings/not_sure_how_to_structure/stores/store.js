@@ -53,6 +53,8 @@ export function selectNavMenu(str) {
   })
 }
 
+// sadly default mainFile : { value: '', label: '', path: '' }
+// has to be an empty string instead or else it renders the input with an empty value
 export const solidityObj = writable({
   mainFile: '',
   mainContract: '',

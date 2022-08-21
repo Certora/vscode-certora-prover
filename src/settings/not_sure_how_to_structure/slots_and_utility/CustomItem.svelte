@@ -38,7 +38,7 @@
     {@html getOptionLabel(item, filterText)}
   </span>
   <span>
-    {item.path}
+    {item.label}
   </span>
 </div>
 

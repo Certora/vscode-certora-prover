@@ -24,7 +24,10 @@
   >
     <i class="codicon codicon-info" />
   </button>
-  <button on:click|stopPropagation={$$props.loadFilesFolder}>
+  <button
+    on:click|stopPropagation={() =>
+      $$props.loadFilesFolder($$props.fileType, $$props.index)}
+  >
     <i class="codicon codicon-folder-opened" />
   </button>
 </div>
