@@ -62,20 +62,6 @@
     ]
   }
 
-  // browse logic option 1 bind to input value
-  // however it keeps firing on click as well might be cause it is wrapped in a button?
-  // let test = ''
-  // $: test, testFunc()
-  // function testFunc(){
-  //     if(test && test.value && test.value === 'Browse...'){
-  //       test = ''
-  //     }
-  //     $solidityObj.mainFile = test.value
-  //     console.log("one")
-  //   }
-
-  // browse logic option 2 .sol bind to input event
-  // fires on:select={handleSelectSol}
   function handleSelectSol(event, fileType, index) {
     if (event.detail.value === 'Browse...') {
       loadFilesFolder(fileType, index)
@@ -178,7 +164,6 @@
                 >
                   <Select
                     listOpen={isSolidityListOpen}
-                    listOffset="0"
                     iconProps={solidityIconsObj}
                     items={solFiles}
                     Item={CustomItem}

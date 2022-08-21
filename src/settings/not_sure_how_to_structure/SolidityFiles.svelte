@@ -119,7 +119,6 @@
           >
             <Select
               listOpen={isSolidityListOpen}
-              listOffset="0"
               iconProps={solidityIconsObj}
               items={solFiles}
               Item={CustomItem}
