@@ -1,5 +1,6 @@
 <script>
   import Select from 'svelte-select'
+  import { each } from 'svelte/internal'
   import ClearIcon from './slots_and_utility/ClearIcon.svelte'
   import CollapseCard from './slots_and_utility/CollapseCard.svelte'
   import CustomInput from './slots_and_utility/CustomInput.svelte'
@@ -31,6 +32,17 @@
     $solidityObj.mainContract !== '' &&
     $solidityObj.compiler.ver !== ''
   )
+
+  // push new linking/directory
+  function pushNewObj(arr, obj) {
+    arr.push(obj)
+    $specObj = $specObj
+  }
+  // remove from linking/directory
+  function removeObj(arr, index) {
+    arr.splice(index, 1)
+    $specObj = $specObj
+  }
 </script>
 
 <div class="card_parent_wrapper bg_dark">
@@ -123,23 +135,32 @@
             </div>
             <div slot="body" class="card_body_wrapper">
               <h3>Properties</h3>
-              <div class="input_wrapper">
-                <div class="dark_input">
-                  <CustomInput
-                    placeholder="Property name"
-                    bind:bindValue={$specObj.properties[0].name}
+              {#each $specObj.properties as obj, index}
+                <div class="input_wrapper">
+                  <div class="dark_input">
+                    <CustomInput
+                      placeholder="Property name"
+                      bind:bindValue={obj.name}
+                    />
+                  </div>
+                  <div class="dark_input">
+                    <CustomInput
+                      placeholder="Property value"
+                      bind:bindValue={obj.value}
+                    />
+                  </div>
+                  <i
+                    class="codicon codicon-trash"
+                    on:click={removeObj($specObj.properties, index)}
                   />
                 </div>
-                <div class="dark_input">
-                  <CustomInput
-                    placeholder="Property value"
-                    bind:bindValue={$specObj.properties[0].value}
-                  />
-                </div>
-                <i class="codicon codicon-trash" />
-              </div>
-              <button class="btn_add"
-                ><i class="codicon codicon-add" /> Add Property</button
+              {/each}
+              <button
+                class="btn_add"
+                on:click={pushNewObj($specObj.properties, {
+                  name: '',
+                  value: '',
+                })}><i class="codicon codicon-add" /> Add Property</button
               >
               <div class="input_wrapper input_single">
                 <div class="dark_input ">

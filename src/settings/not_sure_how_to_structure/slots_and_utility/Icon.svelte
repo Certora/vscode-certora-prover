@@ -1,22 +1,92 @@
-<svg
-  xmlns="http://www.w3.org/2000/svg"
-  width="16"
-  height="16"
-  viewBox="0 0 20 20"
-  fill="none"
+<script>
+  // expected obj
+  // let solidityIconsObj = {
+  //   selected: isSolidityListOpen,
+  //   loadFilesFolder: loadFilesFolder,
+  //   ifoText: 'some string',
+  //   infoLink: 'www.google.com'
+  // }
+
+  let showInfo = false
+  let mouse_is_on_show_info = false
+  function checkMouseLeave() {
+    setTimeout(() => {
+      if (mouse_is_on_show_info) return
+      showInfo = false
+    }, 100)
+  }
+</script>
+
+<div class="icon_wrapper" class:selected={$$props.selected}>
+  <button
+    on:mouseenter={() => (showInfo = true)}
+    on:mouseleave={checkMouseLeave}
+  >
+    <i class="codicon codicon-info" />
+  </button>
+  <button on:click|stopPropagation={$$props.loadFilesFolder}>
+    <i class="codicon codicon-folder-opened" />
+  </button>
+</div>
+<div
+  class="showtxt"
+  class:hovering={showInfo}
+  on:mouseenter={() => (mouse_is_on_show_info = true)}
+  on:mouseleave={() => {
+    ;(showInfo = false), (mouse_is_on_show_info = false)
+  }}
 >
-  <g opacity="0.7">
-    <path
-      d="M12.1867 2C11.0844 2 10.0711 2.30222 9.14667 2.90667C8.25778 3.47556 7.58222 4.25778 7.12 5.25333C6.69333 6.24889 6.55111 7.28 6.69333 8.34667C6.87111 9.41333 7.31556 10.3378 8.02667 11.12L2.69333 17.2533L3.44 17.8933L8.77333 11.8133C9.73333 12.56 10.8 12.9511 11.9733 12.9867C13.1822 13.0222 14.2844 12.7022 15.28 12.0267C16.2756 11.3511 16.9689 10.4444 17.36 9.30667C17.7511 8.16889 17.7689 7.03111 17.4133 5.89333C17.0578 4.72 16.3822 3.77778 15.3867 3.06667C14.4267 2.35556 13.36 2 12.1867 2ZM12.1867 11.9733C11.3689 11.9733 10.6044 11.7778 9.89333 11.3867C9.21778 10.9956 8.66667 10.4622 8.24 9.78667C7.84889 9.07556 7.65333 8.31111 7.65333 7.49333C7.65333 6.67556 7.84889 5.92889 8.24 5.25333C8.66667 4.54222 9.21778 3.99111 9.89333 3.6C10.6044 3.20889 11.3689 3.01333 12.1867 3.01333C13.0044 3.01333 13.7511 3.20889 14.4267 3.6C15.1022 3.99111 15.6356 4.54222 16.0267 5.25333C16.4533 5.92889 16.6667 6.67556 16.6667 7.49333C16.6667 8.31111 16.4533 9.07556 16.0267 9.78667C15.6356 10.4622 15.1022 11.0133 14.4267 11.44C13.7511 11.8311 13.0044 12.0267 12.1867 12.0267V11.9733Z"
-      fill="#CCCCCC"
-    />
-  </g>
-</svg>
+  <p>
+    {$$props.ifoText}
+  </p>
+  <a href={$$props.infoLink}>link to documentation</a>
+</div>
 
 <style>
-  svg {
+  .icon_wrapper {
     order: 3;
-    margin-right: -4px;
+    /* margin-right: -4px; */
     margin-left: auto;
+    display: flex;
+    z-index: 3;
+  }
+  button {
+    background: none;
+    border: 0;
+    cursor: pointer;
+    padding: 1px 3px;
+    border-radius: 5px;
+    padding: 2px;
+    margin-left: 4px;
+  }
+  button:hover {
+    background-color: rgba(90, 93, 94, 0.31);
+  }
+  .selected {
+    /* margin-right: 14px; */
+  }
+
+  .showtxt {
+    display: none;
+    position: absolute;
+    background: var(--vscode-editorWidget-background);
+    border: 1px solid var(--vscode-editorWidget-border);
+    top: 29px;
+    left: -1px;
+    width: calc(100% - 16px);
+    flex-direction: column;
+    text-align: left;
+    padding: 8px;
+  }
+  .showtxt a {
+    margin-top: 8px;
+    text-decoration: none;
+  }
+  .showtxt p {
+    margin: 0;
+  }
+
+  .hovering {
+    display: flex;
   }
 </style>

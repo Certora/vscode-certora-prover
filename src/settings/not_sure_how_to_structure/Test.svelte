@@ -3,37 +3,165 @@
   import ClearIcon from './slots_and_utility/ClearIcon.svelte'
   import CollapseCard from './slots_and_utility/CollapseCard.svelte'
   import Icon from './slots_and_utility/Icon.svelte'
+  import CustomItem from './slots_and_utility/CustomItem.svelte'
   import CustomInput from './slots_and_utility/CustomInput.svelte'
+
   import {
     navState,
     resetNav,
     solidityObj,
     solFilesArr,
+    solAdditionalContracts,
   } from './stores/store.js'
+  import SolidityFiles from './SolidityFiles.svelte'
 
-  let items = [
+  // this items arrary contains all the solidity files and should update on when updateItems is fired
+  // some fake stuff
+  // ********** IMPORTANT **********
+  // ********** FIRST OBJECT IN THE ARRAY MUST BE { value: 'Browse...', label: 'Browse...', path: 'src/somefolder' }
+  // this brows object is needed to fire up a function to browse files (the path key is useless but might as well)
+  $: solFiles = [
+    { value: 'Browse...', label: 'Browse...', path: 'src/somefolder' },
+    { value: 'src/somefolder/file-1', label: 'file-1', path: 'src/somefolder' },
     {
-      value: 'chocolate',
-      label: 'Chocolate',
-      group: 'Sweet',
-      monkey: 'monkey',
+      value: 'file-2/src/somefolder1',
+      label: 'file-2',
+      path: 'src/somefolder1',
     },
-    { value: 'pizza', label: 'Pizza', group: 'Savory' },
-    { value: 'cake', label: 'Cake', group: 'Sweet' },
-    { value: 'cookies', label: 'Cookies', group: 'Savory' },
-    { value: 'ice-cream', label: 'Ice Cream', group: 'Sweet' },
+    {
+      value: 'file-3/src/somefolder2',
+      label: 'file-3',
+      path: 'src/somefolder2',
+    },
+    {
+      value: 'file-4/src/somefolder3',
+      label: 'file-4',
+      path: 'src/somefolder3',
+    },
+    {
+      value: 'file-5/src/somefolder4',
+      label: 'file-5',
+      path: 'src/somefolder4',
+    },
+    {
+      value: 'file-6/src/somefolder5',
+      label: 'file-6',
+      path: 'src/somefolder5',
+    },
   ]
 
-  let favouriteFood = undefined
+  // on click on the input get al the files (sol or spec) based on what os passded to the function
+  function updateItems(fileType) {
+    // passing sol or spce to file Type
+    if (fileType === 'sol') {
+      // this is actually pushing some fake value in (for testing only) just replace with an array of the new values from the file system like you see in the specFiles
+      solFiles = [
+        ...solFiles,
+        { value: 'Browse...', label: 'Browse...', path: 'src/somefolder' },
+      ]
+      return
+    }
+    specFiles = [
+      { value: 'Browse...', label: 'Browse...', path: 'src/somefolder' },
+    ]
+  }
 
-  function handleSelectSol(event) {
+  // browse logic option 1 bind to input value
+  // however it keeps firing on click as well might be cause it is wrapped in a button?
+  // let test = ''
+  // $: test, testFunc()
+  // function testFunc(){
+  //     if(test && test.value && test.value === 'Browse...'){
+  //       test = ''
+  //     }
+  //     $solidityObj.mainFile = test.value
+  //     console.log("one")
+  //   }
+
+  let solInputValue = ''
+  // browse logic option 2 .sol bind to input event
+  // fires on:select={handleSelectSol}
+  function handleSelectSol(event, index) {
+    if (event.detail.value === 'Browse...') {
+      loadFilesFolder()
+      return
+    }
+    if (index) {
+      $solAdditionalContracts[index] = event.detail.value
+      return
+    }
     $solidityObj.mainFile = event.detail.value
   }
-  function handleSelect(event) {}
 
-  function handleClear() {
-    favouriteFood = undefined
+  function handleClear(index) {
+    if (index) {
+      $solAdditionalContracts[index].mainFile = ''
+      solInputValue = ''
+      return
+    }
+    $solidityObj.mainFile = ''
+    solInputValue = ''
   }
+
+  // push new linking/directory
+  function pushNewObj(arr, obj) {
+    arr.push(obj)
+    $solidityObj = $solidityObj
+  }
+  // remove from linking/directory
+  function removeObj(arr, index) {
+    arr.splice(index, 1)
+    $solidityObj = $solidityObj
+  }
+
+  // add files from folder
+  function loadFilesFolder(index) {
+    // reset first
+    handleClear(index)
+    // solInputValue = what is returned from file picker function
+    let solInputValue = {
+      value: 'file-6/src/somefolder',
+      label: 'file-6',
+      path: 'src/somefolder',
+    }
+
+    if (index) {
+      $solAdditionalContracts[index].mainFile = solInputValue.value
+      return
+    }
+    $solidityObj.mainFile = solInputValue.value
+  }
+
+  // add new empty solidity file push new obj to array
+  function addNewFile() {
+    $solAdditionalContracts = [
+      ...$solAdditionalContracts,
+      {
+        mainFile: '',
+        mainContract: '',
+        linking: [{ variable: '', contractName: '' }],
+        specifiMethod: '',
+        compiler: { exe: '', ver: '' },
+      },
+    ]
+  }
+
+  let isSolidityListOpen = false
+  // icon props expect an object
+  let solidityIconsObj = {
+    // bind to some variable later to check if the input is selected
+    // logic for later only show info icon when selected
+    // passing just the function and the info icon text for now
+    selected: isSolidityListOpen,
+    loadFilesFolder: loadFilesFolder,
+    ifoText: 'some string',
+    // LOL auto completed
+    infoLink: 'www.google.com',
+  }
+
+  // functions to pass down to solfiles and make them take pareameters
+  // loadFilesFolder(), isSolidityListOpen() - let isSolidityListOpen = false,
+  // objects
 </script>
 
 <div class="card_parent_wrapper bg_dark">
@@ -56,14 +184,24 @@
             <div class="input_wrapper" style="margin-top: 8px;">
               <div class="dark_input">
                 <h3>Source<span>*</span></h3>
-                <Select
-                  items={$solFilesArr}
-                  {Icon}
-                  {ClearIcon}
-                  on:select={handleSelectSol}
-                  on:clear={handleClear}
-                  placeholder="Main solidity file"
-                />
+                <button
+                  on:click={() => updateItems('sol')}
+                  style="background: transparent; padding:0; border:none;"
+                >
+                  <Select
+                    listOpen={isSolidityListOpen}
+                    listOffset="0"
+                    iconProps={solidityIconsObj}
+                    items={solFiles}
+                    Item={CustomItem}
+                    {Icon}
+                    {ClearIcon}
+                    on:select={handleSelectSol}
+                    on:clear={handleClear}
+                    placeholder="Main solidity file"
+                    bind:value={solInputValue}
+                  />
+                </button>
               </div>
               <div class="dark_input">
                 <h3>Main contract name<span>*</span></h3>
@@ -99,7 +237,6 @@
                         bind:bindValue={$solidityObj.compiler.ver}
                       />
                     </div>
-                    <i class="codicon codicon-trash" />
                   </div>
 
                   <!-- validation message -->
@@ -111,7 +248,7 @@
 
                   <!-- advanced settings -->
                   <div class="card_body_wrapper_parent bg_light mt-8px">
-                    <CollapseCard>
+                    <CollapseCard open={false}>
                       <div slot="header" class="header header_contract">
                         <i class="codicon codicon-gear" />
                         <h3>Advanced Settings</h3>
@@ -127,33 +264,38 @@
                             />
                           </div>
                         </div>
-                        <div class="input_wrapper">
-                          <div class="dark_input">
-                            <h3>Solidity package directories</h3>
-                            <Select
-                              {items}
-                              {Icon}
-                              {ClearIcon}
-                              on:select={handleSelect}
-                              on:clear={handleClear}
-                              placeholder="Package name"
+                        {#each $solidityObj.solidityPackageDir as obj, index}
+                          <div class="input_wrapper">
+                            <div class="dark_input">
+                              <h3>Solidity package directories</h3>
+                              <CustomInput
+                                placeholder="Package name"
+                                bind:bindValue={obj.packageName}
+                              />
+                            </div>
+                            <div class="dark_input">
+                              <h3>&nbsp;</h3>
+                              <CustomInput
+                                placeholder=".../path"
+                                bind:bindValue={obj.path}
+                              />
+                            </div>
+                            <i
+                              class="codicon codicon-trash"
+                              on:click={removeObj(
+                                $solidityObj.solidityPackageDir,
+                                index,
+                              )}
                             />
                           </div>
-                          <div class="dark_input">
-                            <h3>&nbsp;</h3>
-                            <Select
-                              {items}
-                              {Icon}
-                              {ClearIcon}
-                              on:select={handleSelect}
-                              on:clear={handleClear}
-                              placeholder=".../path"
-                            />
-                          </div>
-                          <i class="codicon codicon-trash" />
-                        </div>
+                        {/each}
 
-                        <button class="btn_add"
+                        <button
+                          class="btn_add"
+                          on:click={pushNewObj(
+                            $solidityObj.solidityPackageDir,
+                            { packageName: '', path: '' },
+                          )}
                           ><i class="codicon codicon-add" /> Add Directory</button
                         >
                       </div>
@@ -162,38 +304,47 @@
                 </div>
               </CollapseCard>
             </div>
+            <!-- linking -->
             <div class="card_body_wrapper_parent bg_dark mt-8px">
-              <CollapseCard>
+              <CollapseCard open={false}>
                 <div slot="header" class="header header_contract">
                   <i class="codicon codicon-gear" />
                   <h3>Linking</h3>
                   <i class="codicon codicon-chevron-up" />
                 </div>
                 <div slot="body" class="card_body_wrapper">
-                  <div class="input_wrapper">
-                    <div class="dark_input">
-                      <CustomInput
-                        placeholder="Variable"
-                        bind:bindValue={$solidityObj.linking[0].variable}
+                  {#each $solidityObj.linking as obj, index}
+                    <div class="input_wrapper">
+                      <div class="dark_input">
+                        <CustomInput
+                          placeholder="Variable"
+                          bind:bindValue={obj.variable}
+                        />
+                      </div>
+                      <div class="dark_input">
+                        <CustomInput
+                          placeholder="Contract name"
+                          bind:bindValue={obj.contractName}
+                        />
+                      </div>
+                      <i
+                        class="codicon codicon-trash"
+                        on:click={removeObj($solidityObj.linking, index)}
                       />
                     </div>
-                    <div class="dark_input">
-                      <CustomInput
-                        placeholder="Contract name"
-                        bind:bindValue={$solidityObj.linking[0].contractName}
-                      />
-                    </div>
-                    <i class="codicon codicon-trash" />
-                  </div>
-
-                  <button class="btn_add"
-                    ><i class="codicon codicon-add" /> Add Link</button
+                  {/each}
+                  <button
+                    class="btn_add"
+                    on:click={pushNewObj($solidityObj.linking, {
+                      variable: '',
+                      contractName: '',
+                    })}><i class="codicon codicon-add" /> Add Link</button
                   >
                 </div>
               </CollapseCard>
             </div>
             <div class="card_body_wrapper_parent bg_dark mt-8px">
-              <CollapseCard>
+              <CollapseCard open={false}>
                 <div slot="header" class="header header_contract">
                   <i class="codicon codicon-gear" />
                   <h3>Specific method</h3>
@@ -215,10 +366,25 @@
           </div>
         </CollapseCard>
       </div>
-
-      <button class="btn_add"
+      {#each $solAdditionalContracts as file, index}
+        <SolidityFiles
+          {index}
+          {solidityIconsObj}
+          {solFiles}
+          {updateItems}
+          {handleClear}
+          {handleSelectSol}
+        />
+      {/each}
+      <button class="btn_add" on:click={addNewFile}
         ><i class="codicon codicon-add" /> Add another contract</button
       >
     </div>
   </CollapseCard>
 </div>
+
+<style>
+  :global(.listContainer) {
+    width: max-content !important;
+  }
+</style>
