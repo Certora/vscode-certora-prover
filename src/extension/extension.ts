@@ -4,7 +4,6 @@ import { SettingsPanel } from './SettingsPanel'
 import { ScriptRunner } from './ScriptRunner'
 import { ConfFile, InputFormData, ConfNameMap } from './types'
 import { createAndOpenConfFile } from './utils/createAndOpenConfFile'
-import { type } from 'os'
 
 export function activate(context: vscode.ExtensionContext): void {
   function showSettings(name: ConfNameMap) {
@@ -98,7 +97,6 @@ export function activate(context: vscode.ExtensionContext): void {
     }
     if (solidityPackageDirectories !== '{}') {
       confFileDefault.packages = solidityPackageDirectories
-      console.log(solidityPackageDirectories, 'solidity package dir')
     }
     if (optimisticLoop) {
       confFileDefault.optimistic_loop = true
@@ -110,15 +108,6 @@ export function activate(context: vscode.ExtensionContext): void {
       confFileDefault.smt_timeout = duration
     }
     if (additionalSettings !== '{}') {
-      // const settingsArray: string[] = []
-      // Object.entries(JSON.parse(additionalSettings)).forEach(([key, value]) => {
-      //   if (!key.startsWith('-')) {
-      //     key = '-' + key
-      //   }
-      //   const setting = key + (value ? '=' + value : '')
-      //   settingsArray.push(setting)
-      // })
-      // confFileDefault.settings = settingsArray
       Object.entries(JSON.parse(additionalSettings)).forEach(([key, value]) => {
         confFileDefault[key.toString()] = value as string
       })
@@ -146,9 +135,9 @@ export function activate(context: vscode.ExtensionContext): void {
       SettingsPanel.setResultsWebviewProvider(resultsWebviewProvider)
       SettingsPanel.render(context.extensionUri, name, confFileContent)
     } catch (e) {
-      // vscode.window.showErrorMessage(
-      //   `Can't read conf file: ${confFile}. Error: ${e}`,
-      // )
+      vscode.window.showErrorMessage(
+        `Can't read conf file: ${confFile}. Error: ${e}`,
+      )
     }
   }
 
@@ -175,14 +164,14 @@ export function activate(context: vscode.ExtensionContext): void {
         const content = encoder.encode(JSON.stringify(confFileContent, null, 2))
         await vscode.workspace.fs.writeFile(newConfFileUri, content)
       } catch (e) {
-        // vscode.window.showErrorMessage(`Can't create conf file. Error: ${e}`)
+        vscode.window.showErrorMessage(`Can't create conf file. Error: ${e}`)
       }
       SettingsPanel.setResultsWebviewProvider(resultsWebviewProvider)
       SettingsPanel.render(context.extensionUri, duplicated, confFileContent)
     } catch (e) {
-      // vscode.window.showErrorMessage(
-      //   `Can't read conf file: ${confFile}. Error: ${e}`,
-      // )
+      vscode.window.showErrorMessage(
+        `Can't read conf file: ${confFile}. Error: ${e}`,
+      )
     }
   }
 

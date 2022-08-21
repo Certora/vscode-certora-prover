@@ -94,7 +94,6 @@
         })
 
         let newForm: NewForm = confFileToFormData(e.data.payload[0]) // change the conf file info form data for the settings form
-        console.log('new form:', newForm)
 
         $solidityObj.mainContract = newForm.solidyObj.mainContract
         $solidityObj.mainFile = newForm.solidyObj.mainFile

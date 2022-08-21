@@ -1,64 +1,4 @@
-// import { nanoid } from 'nanoid'
-// import type { Form, ConfFile } from '../types'
-
-// const emptyForm: Form = {
-//   name: '',
-//   mainSolidityFile: '',
-//   mainContractName: '',
-//   specFile: '',
-//   solidityCompiler: '',
-//   useAdditionalContracts: false,
-//   additionalContracts: [],
-//   link: [
-//     {
-//       id: nanoid(),
-//       contractName: '',
-//       fieldName: '',
-//       associatedContractName: '',
-//     },
-//   ],
-//   extendedSettings: [{ id: nanoid(), flag: '' }],
-//   useStaging: false,
-//   branch: 'master',
-//   cacheName: '',
-//   message: '',
-//   additionalSettings: [
-//     {
-//       id: nanoid(),
-//       option: '',
-//       value: '',
-//     },
-//   ],
-import type { Form, ConfFile, NewForm } from '../types'
-
-// const emptyForm: Form = {
-//   mainSolidityFile: '',
-//   mainContractName: '',
-//   specFile: '',
-//   solidityCompiler: '',
-//   useAdditionalContracts: false,
-//   additionalContracts: [],
-//   link: [
-//     {
-//       id: nanoid(),
-//       contractName: '',
-//       fieldName: '',
-//       associatedContractName: '',
-//     },
-//   ],
-//   extendedSettings: [{ id: nanoid(), flag: '' }],
-//   useStaging: true,
-//   branch: 'master',
-//   cacheName: '',
-//   message: '',
-//   additionalSettings: [
-//     {
-//       id: nanoid(),
-//       option: '',
-//       value: '',
-//     },
-//   ],
-// }
+import type { ConfFile, NewForm } from '../types'
 
 const newForm: NewForm = {
   solidyObj: {
@@ -122,40 +62,16 @@ function getAdditionalSettings(confFile: ConfFile) {
   return copy
 }
 
-// export function confFileToFormData(confFile: ConfFile, name: string): Form {
-//   const form = emptyForm as Form
-//   form.name = name
 export function confFileToFormData(confFile: ConfFile): NewForm {
   const form = newForm as NewForm
 
   if (Array.isArray(confFile.files) && confFile.files.length > 0) {
-    console.log('conf files content: ', confFile.files)
     form.solidyObj.mainFile = confFile.files[0] as string
 
     if (form.solidyObj.mainFile.includes(':')) {
       form.solidyObj.mainFile = form.solidyObj.mainFile.split(':')[0]
       form.solidyObj.mainContract = confFile.files[0].split(':')[1]
     }
-    // if (confFile.files.length > 1) {
-    //   const [, ...additional] = confFile.files
-
-    //   form.useAdditionalContracts = true
-    //   form.additionalContracts = additional.map(contract => {
-    //     const [file, name] = contract.split(':')
-
-    //     if (file && name) {
-    //       return {
-    //         file,
-    //         name,
-    //       }
-    //     }
-
-    //     return {
-    //       file: contract,
-    //       name: '',
-    //     }
-    //   })
-    // }
   }
 
   if (Array.isArray(confFile.verify) && confFile.verify.length === 1) {
@@ -186,7 +102,6 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
   if (confFile.link && confFile.link.length > 0) {
     confFile.link.forEach(link => {
       const linkArr = link.split(/[:=]/)
-      console.log(linkArr)
       if (linkArr.length === 3) {
         form.solidyObj.linking.push({
           variable: linkArr[1],
@@ -205,19 +120,12 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
   }
 
   if (confFile.packages) {
-    console.log(
-      'packages detected',
-      confFile.packages,
-      'type: ',
-      typeof confFile.packages,
-    )
     let jsonPackages = {}
     if (typeof confFile.packages === 'string') {
       jsonPackages = JSON.parse(confFile.packages.toString())
     } else if (typeof confFile.packages === 'object') {
       jsonPackages = confFile.packages
     }
-    console.log('json packages', jsonPackages)
     Object.entries(jsonPackages).forEach(key => {
       const packArray = key.toString().split(',')
       const tempPackage = {
@@ -226,7 +134,6 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
       }
       form.solidyObj.solidityPackageDir.push(tempPackage)
     })
-    console.log(form.solidyObj.solidityPackageDir, 'packageDir after addition')
   }
 
   if (confFile.rule) {
@@ -262,45 +169,10 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
     form.verificatoinMessage = confFile.msg
   }
 
-  // if (
-  //   form.useAdditionalContracts &&
-  //   Array.isArray(confFile.link) &&
-  //   confFile.link.length > 0
-  // ) {
-  //   form.solidyObj.linking = confFile.link.map((linkItem: string) => {
-  //     const [contractName, fieldNameAndAssociatedContractName] =
-  //       linkItem.split(':')
-  //     const [fieldName, associatedContractName] =
-  //       fieldNameAndAssociatedContractName.split('=')
-
-  //     return {
-  //       id: nanoid(),
-  //       contractName,
-  //       fieldName,
-  //       associatedContractName,
-  //     }
-  //   })
-  // }
-
-  // if (Array.isArray(confFile.settings) && confFile.settings.length > 0) {
-  //   form.extendedSettings = confFile.settings.map((flag: string) => ({
-  //     id: nanoid(),
-  //     flag,
-  //   }))
-  // }
-
   if (confFile.staging) {
     form.specObj.runOnStg = true
     form.specObj.branchName = confFile.staging as string
   }
-
-  // if (confFile.cache) {
-  //   form.cacheName = confFile.cache as string
-  // }
-
-  // if (confFile.msg) {
-  //   form.message = confFile.msg as string
-  // }
 
   const additionalSettings = getAdditionalSettings(confFile)
 

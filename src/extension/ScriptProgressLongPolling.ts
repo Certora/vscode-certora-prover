@@ -23,9 +23,7 @@ export class ScriptProgressLongPolling {
       if (url) {
         const creationTimeUrl = getCreationTimeUrl(url)
         if (creationTimeUrl) {
-          console.log(creationTimeUrl)
           const { data } = await axios.get<CreationTime>(creationTimeUrl)
-          console.log(data)
           postTime = data.postTime
         }
       }
@@ -53,22 +51,15 @@ export class ScriptProgressLongPolling {
       const dataToUI = await this.prepareDataToUI(data, url)
 
       if (data.jobStatus === 'FAILED') {
-        // window.showErrorMessage(data.cloudErrorMessages.join('. '))
         return
       }
 
       if (data.jobEnded && data.jobStatus === 'SUCCEEDED' && dataToUI) {
         if (Object.keys(dataToUI.verificationProgress).length === 0) {
-          // window.showErrorMessage(
-          //   `Job ${dataToUI.jobId} completed successfully, with an empty output. Please contact Certora team`,
-          // )
           return
         }
 
         callback(dataToUI)
-        // window.showInformationMessage(
-        //   `Job ${dataToUI.jobId} completed successfully. Checked spec file: ${dataToUI.verificationProgress.spec}`,
-        // )
         return
       }
 

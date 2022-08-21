@@ -3,17 +3,11 @@
   import { verification_message, solidityObj, specObj } from './stores/store.js'
 
   function saveOnChange() {
-    console.log($verification_message, '===verification message')
     let form = {
       solidyObj: $solidityObj,
       specObj: $specObj,
       verificatoinMessage: $verification_message,
     }
-    // log({
-    //   action: 'Send "create-conf-file" command',
-    //   source: Sources.SettingsWebview,
-    //   info: form,
-    // })
     vscode.postMessage({
       command: 'create-conf-file',
       payload: form,

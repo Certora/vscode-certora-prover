@@ -118,11 +118,6 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
               info: e.payload,
             })
             if (typeof this.duplicate === 'function') {
-              console.log(
-                'typeof from duplicate',
-                typeof e.payload,
-                typeof e.payload[0],
-              )
               this.duplicate(e.payload[0], e.payload[1])
             }
             break
@@ -169,7 +164,6 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   private async getCreationTime(creationTimeUrl: string): Promise<void> {
     try {
       const { data } = await axios.get<CreationTime>(creationTimeUrl)
-      console.log(data)
 
       log({
         action: 'Send "set-creation-time" command',

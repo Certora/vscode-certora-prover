@@ -98,17 +98,6 @@ export class ScriptRunner {
     this.addRunningScript(confFile, pid)
 
     if (this.script) {
-      // window
-      //   .showInformationMessage(
-      //     `The script with the conf file ${confFile} has been launched`,
-      //     'Show The Script Output',
-      //   )
-      //   .then(action => {
-      //     if (action === 'Show The Script Output') {
-      //       channel.show()
-      //     }
-      //   })
-
       this.script.stdout.on('data', async data => {
         let str = data.toString() as string
         // remove all the bash color characters
@@ -131,12 +120,10 @@ export class ScriptRunner {
       })
 
       this.script.stderr.on('data', () => {
-        // window.showErrorMessage(`${data}`)
         this.removeRunningScript(pid)
       })
 
       this.script.on('error', () => {
-        // window.showErrorMessage(`${error}`)
         this.removeRunningScript(pid)
       })
 
@@ -150,21 +137,6 @@ export class ScriptRunner {
             payload: this.getConfFileName(confFile).replace('.conf', ''),
           })
         }
-
-        // const action = await window.showInformationMessage(
-        //   `The script for the conf file ${confFile} exited with code ${code}.`,
-        //   'Open Execution Log File',
-        // )
-
-        // if (action === 'Open Execution Log File') {
-        //   const logFilePath = Uri.joinPath(
-        //     path.uri,
-        //     'certora-logs',
-        //     `${this.getConfFileName(confFile)}-${ts}.log`,
-        //   )
-        //   const document = await workspace.openTextDocument(logFilePath)
-        //   await window.showTextDocument(document)
-        // }
       })
     }
   }

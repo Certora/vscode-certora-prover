@@ -69,11 +69,9 @@ export function smartMergeVerificationResult(
         ' spec=' +
         tree.spec,
     )
-    console.log(results[index])
     mergeVerification(results[index], newResult)
   } else {
     addJobIdToProperties(newResult)
-    console.log(newResult)
     // create a new Verification object and push to the Verification[]
     const newVerification: Verification = {
       name: name, // todo: add the righ name
@@ -86,8 +84,6 @@ export function smartMergeVerificationResult(
 }
 
 function mergeVerification(prevResult: Verification, newJob: Job): void {
-  console.log('mergeVerification')
-  console.log(newJob.jobId)
   const prevJobs: Job[] = prevResult.jobs
   // Look for the same jobId
   const index = prevJobs.findIndex(job => job.jobId === newJob.jobId)

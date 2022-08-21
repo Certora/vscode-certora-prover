@@ -34,7 +34,6 @@
   }
 
   function handleSelectInputField(event) {
-    console.log('event was handled')
     saveOnChange()
   }
 

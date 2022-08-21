@@ -3,7 +3,7 @@ import { SmartContractsFilesWatcher } from './SmartContractsFilesWatcher'
 import { getNonce } from './utils/getNonce'
 import {
   createAndOpenConfFile,
-  createConfFile,
+  processForm,
 } from './utils/createAndOpenConfFile'
 import { log, Sources } from './utils/log'
 import {
@@ -11,10 +11,8 @@ import {
   ConfNameMap,
   EventFromSettingsWebview,
   InputFormData,
-  SolidityObj,
 } from './types'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
-import { stringify } from 'querystring'
 
 export class SettingsPanel {
   public static currentPanel?: SettingsPanel
@@ -24,7 +22,6 @@ export class SettingsPanel {
   private editConfFile?: Record<string, unknown>
   private static allPanels: SettingsPanel[] = []
   private curConfFileDisplayName: string
-  // private static allowRun: ((runName: string) => void) | null = null
   private static resultsWebviewProvider: ResultsWebviewProvider
 
   private constructor(
@@ -80,171 +77,8 @@ export class SettingsPanel {
               source: Sources.Extension,
               info: e.payload,
             })
-            // temp:
-            console.log('from create-conf-file: ', confFileDisplayName)
-
-            let compilerDirectory: string = e.payload.solidyObj.compiler.exe
-            if (compilerDirectory !== '') {
-              compilerDirectory += '/'
-            }
-            const form: InputFormData = {
-              name: confFileName,
-              mainSolidityFile: e.payload.solidyObj.mainFile,
-              mainContractName: e.payload.solidyObj.mainContract,
-              specFile: e.payload.specObj.specFile,
-              solidityCompiler:
-                compilerDirectory + e.payload.solidyObj.compiler.ver,
-              useAdditionalContracts: false,
-              additionalContracts: [],
-              link: [],
-              extendedSettings: [],
-              useStaging: e.payload.specObj.runOnStg,
-              branch: e.payload.specObj.branchName,
-              cacheName: '',
-              message: '',
-              additionalSettings: [],
-            }
-
-            if (e.payload.verificatoinMessage as string) {
-              form.message = e.payload.verificatoinMessage as string
-            }
-
-            form.additionalSettings.push({
-              id: 'optimistic_loop',
-              option: 'optimistic_loop',
-              value: e.payload.specObj.optimisticLoop.toString(),
-            })
-
-            if (e.payload.specObj.multiAssert) {
-              form.additionalSettings.push({
-                id: 'multi_assert',
-                option: 'multi_assert_check',
-                value: e.payload.specObj.multiAssert.toString(),
-              })
-            }
-
-            if (e.payload.specObj.duration) {
-              form.additionalSettings.push({
-                id: 'duration',
-                option: 'smt_timeout',
-                value: e.payload.specObj.duration,
-              })
-            }
-
-            if (e.payload.specObj.loopUnroll) {
-              form.additionalSettings.push({
-                id: 'loop_iter',
-                option: 'loop_iter',
-                value: e.payload.specObj.loopUnroll,
-              })
-            }
-
-            form.additionalSettings.push({
-              id: 'typecheck_only',
-              option: 'disableLocalTypeChecking',
-              value: (!(e.payload.specObj
-                .localTypeChecking as boolean)).toString(),
-            })
-
-            if (e.payload.specObj.runOnStg) {
-              form.useStaging = true
-              form.branch = e.payload.specObj.branchName
-            }
-
-            if (e.payload.solidyObj.solidityPackageDefaultPath) {
-              form.additionalSettings.push({
-                id: 'packages_path',
-                option: 'packages_path',
-                value: e.payload.solidyObj.solidityPackageDefaultPath,
-              })
-            }
-
-            if (e.payload.specObj.rules) {
-              const rules = e.payload.specObj.rules.trim().replace(',', ' ')
-              form.additionalSettings.push({
-                id: 'rule',
-                option: 'rule',
-                value: rules,
-              })
-            }
-
-            if (e.payload.solidyObj.specifiMethod) {
-              form.additionalSettings.push({
-                id: 'method',
-                option: 'method',
-                value: e.payload.solidyObj.specifiMethod,
-              })
-            }
-
-            if (e.payload.specObj.shortOutput) {
-              form.additionalSettings.push({
-                id: 'short_output',
-                option: 'short_output',
-                value: e.payload.specObj.shortOutput.toString(),
-              })
-            }
-
-            const solArag = e.payload.solidyObj.solidityArgument
-            if (solArag && solArag.startsWith('[') && solArag.endsWith(']')) {
-              form.additionalSettings.push({
-                id: 'solc_args',
-                option: 'solc_args',
-                value: solArag,
-              })
-            }
-
-            const solDir = e.payload.solidyObj.solidityPackageDir
-            if (
-              solDir &&
-              solDir.length > 0 &&
-              solDir[0].packageName &&
-              solDir[0].path
-            ) {
-              let packages = '{'
-              solDir.forEach(pack => {
-                packages +=
-                  '"' + pack.packageName + '"' + ':"' + pack.path + '"' + ','
-              })
-              packages = packages.replace(/.$/, '}')
-              form.additionalSettings.push({
-                id: 'packages',
-                option: 'packages',
-                value: packages,
-              })
-            }
-
-            const additionalSettings = e.payload.specObj.properties
-            if (
-              additionalSettings &&
-              additionalSettings.length > 0 &&
-              additionalSettings[0].name
-            ) {
-              additionalSettings.forEach(flag => {
-                form.additionalSettings.push({
-                  id: flag.name,
-                  option: flag.name,
-                  value: flag.value,
-                })
-              })
-            }
-
-            const linking = e.payload.solidyObj.linking
-            if (
-              linking.length > 0 &&
-              linking[0].variable &&
-              linking[0].contractName
-            ) {
-              linking.forEach(link => {
-                form.link.push({
-                  id: '',
-                  contractName: form.mainContractName,
-                  fieldName: link.variable,
-                  associatedContractName: link.contractName,
-                })
-              })
-            }
+            const form: InputFormData = processForm(e.payload, confFileName)
             createAndOpenConfFile(form)
-            console.log(form, 'form')
             if (
               form.mainContractName !== '' &&
               form.mainSolidityFile !== '' &&
@@ -260,10 +94,6 @@ export class SettingsPanel {
                 payload: confFileName,
               })
             }
-
-            // this._panel?.dispose()
-            // createConfFile(e.payload) // create the .conf file out out of the [Form] object
-            // this._panel?.dispose()
             break
           }
           case CommandFromSettingsWebview.OpenBrowser: {
@@ -368,7 +198,6 @@ export class SettingsPanel {
 
     vscode.window.showOpenDialog(options).then(fileUri => {
       if (fileUri && fileUri[0]) {
-        console.log('Selected file: ' + fileUri[0].fsPath)
         this._panel.webview.postMessage({
           type: 'file-chosen',
           payload: fileUri[0].fsPath.replace(uri.path + '/', ''),

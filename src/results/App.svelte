@@ -56,15 +56,7 @@
   }
 
   function newFetchOutput(e: CustomEvent<Assert | Rule>, vr: Verification) {
-    console.log(e.detail)
-    console.log(vr)
     let clickedRuleOrAssert = e.detail
-
-    // if (!clickedRuleOrAssert.output) {
-    //   console.log('set data from newFetch')
-    //   clearOutput()
-    //   return
-    // }
 
     const index = vr.jobs.findIndex(
       job => job.jobId === clickedRuleOrAssert.jobId,
@@ -84,36 +76,6 @@
     }
   }
 
-  // function retrieveRules(jobs: Job[]): Rule[] {
-  //   // rulesArrays = [Rule[] A, Rule[]B,...]
-  //   const rulesArrays: Rule[][] = jobs.map(
-  //     job => job.verificationProgress.rules,
-  //   )
-  //   return [].concat(...rulesArrays)
-  // }
-
-  // function fetchOutput(e: CustomEvent<Assert | Rule>, job: Job) {
-  //   log({
-  //     action: 'Try to fetch output',
-  //     source: Sources.ResultsWebview,
-  //     info: {
-  //       outputField: e.detail.output,
-  //     },
-  //   })
-
-  //   if (!e.detail.output) {
-  //     clearOutput()
-  //     return
-  //   }
-
-  //   const outputUrl = `${job.progressUrl.replace(
-  //     'progress',
-  //     'result',
-  //   )}&output=${e.detail.output}`
-
-  //   getOutput(outputUrl)
-  // }
-
   function selectCalltraceFunction(e: CustomEvent<CallTraceFunction>) {
     selectedCalltraceFunction = e.detail
   }
@@ -126,16 +88,6 @@
   const listener = (e: MessageEvent<EventsFromExtension>) => {
     switch (e.data.type) {
       case EventTypesFromExtension.ReceiveNewJobResult: {
-        // log({
-        //   action: 'Received "receive-new-job-result" command',
-        //   source: Sources.ResultsWebview,
-        //   info: {
-        //     currentResults: results,
-        //     newResult: e.data.payload,
-        //   },
-        // })
-        // mergeResults(results, e.data.payload)
-        // results = results
         log({
           action: 'Smart merge current results with new result',
           source: Sources.ResultsWebview,
@@ -158,7 +110,7 @@
             updatedVerificationResults: verificationResults,
           },
         })
-        console.log('run next from smart merge (verification)')
+        // when we recieve the results of the last run, we run the next job!
         runNext()
         break
       }
@@ -176,9 +128,8 @@
             }
           })
         })
-
+        // if there is no running script - run next
         if (e.data.payload.length === 0) {
-          console.log('runNext from running-scripts-changed')
           runNext()
         }
         break
@@ -200,7 +151,7 @@
           source: Sources.ResultsWebview,
           info: e.data.payload,
         })
-        console.log('Recieved "allow-run" with payload: ', e.data.payload)
+        // status is changed to 'ready' when job is allowed to run
         runs = setStatus(e.data.payload, STATUS.ready)
         break
       }
@@ -210,7 +161,7 @@
           source: Sources.ResultsWebview,
           info: e.data.payload,
         })
-        console.log('Recieved "block-run" with payload: ', e.data.payload)
+        // status is changed to 'finish setup' when job isn't allowed to run
         runs = setStatus(e.data.payload, STATUS.finishSetup)
         break
       }
@@ -231,7 +182,6 @@
           action: 'Received "create-new-job" command',
           source: Sources.ResultsWebview,
         })
-
         createRun({ id: runs.length, name: '', status: STATUS.finishSetup })
         break
       }
@@ -259,7 +209,6 @@
     runs.forEach(run => {
       if (run.name === runName) {
         run.status = value
-        console.log('name: ', runName, 'set status to: ', run.status)
       }
     })
     return runs
