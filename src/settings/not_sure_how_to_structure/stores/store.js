@@ -7,6 +7,9 @@ export const writableArray_Spec_Properties = writable([])
 export const writableArray_Solidity = writable([])
 export const writableArray_Solidity_Linking = writable([])
 export const writableArray_Solidity_Package_Directories = writable([])
+
+export const solAdditionalContracts = writable([])
+
 // verification message
 export const verification_message = writable('')
 
@@ -50,22 +53,8 @@ export function selectNavMenu(str) {
   })
 }
 
-// export const formObj = writable({
-//   mainSolidityFile: '',
-//   mainContractName: '',
-//   specFile: '',
-//   solidityCompiler: '',
-//   useAdditionalContracts: false,
-//   additionalContracts: [],
-//   link: [],
-//   extendedSettings: [],
-//   useStaging: false,
-//   branch: '',
-//   cacheName: '',
-//   message: '',
-//   additionalSettings: [],
-// })
-
+// sadly default mainFile : { value: '', label: '', path: '' }
+// has to be an empty string instead or else it renders the input with an empty value
 export const solidityObj = writable({
   mainFile: '',
   mainContract: '',

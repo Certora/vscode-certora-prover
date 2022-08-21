@@ -3,9 +3,11 @@
   import ClearIcon from './slots_and_utility/ClearIcon.svelte'
   import CollapseCard from './slots_and_utility/CollapseCard.svelte'
   import Icon from './slots_and_utility/Icon.svelte'
+  import CustomItem from './slots_and_utility/CustomItem.svelte'
   import CustomInput from './slots_and_utility/CustomInput.svelte'
   import { refreshFiles } from '../utils/refreshFiles'
   import { log, Sources } from '../utils/log'
+
   import {
     navState,
     resetNav,
@@ -13,77 +15,99 @@
     solFilesArr,
     specObj,
     verification_message,
+    solAdditionalContracts,
   } from './stores/store.js'
+  import SolidityFiles from './SolidityFiles.svelte'
 
-  let items = [
-    {
-      value: 'chocolate',
-      label: 'Chocolate',
-      group: 'Sweet',
-      monkey: 'monkey',
-    },
-    { value: 'pizza', label: 'Pizza', group: 'Savory' },
-    { value: 'cake', label: 'Cake', group: 'Sweet' },
-    { value: 'cookies', label: 'Cookies', group: 'Savory' },
-    { value: 'ice-cream', label: 'Ice Cream', group: 'Sweet' },
-  ]
+  // this items arrary contains all the solidity files and should update on when updateItems is fired
+  // some fake stuff
+  // ********** IMPORTANT **********
+  // ********** FIRST OBJECT IN THE ARRAY MUST BE { value: 'Browse...', label: 'Browse...', path: 'src/somefolder' }
+  // this brows object is needed to fire up a function to browse files (the path key is useless but might as well)
+  // $: solFiles = [
+  //   { value: 'Browse...', label: 'Browse...', path: 'src/somefolder' },
+  //   { value: 'src/somefolder/file-1', label: 'file-1', path: 'src/somefolder' },
+  //   {
+  //     value: 'file-2/src/somefolder1',
+  //     label: 'file-2',
+  //     path: 'src/somefolder1',
+  //   },
+  //   {
+  //     value: 'file-3/src/somefolder2',
+  //     label: 'file-3',
+  //     path: 'src/somefolder2',
+  //   },
+  //   {
+  //     value: 'file-4/src/somefolder3',
+  //     label: 'file-4',
+  //     path: 'src/somefolder3',
+  //   },
+  //   {
+  //     value: 'file-5/src/somefolder4',
+  //     label: 'file-5',
+  //     path: 'src/somefolder4',
+  //   },
+  //   {
+  //     value: 'file-6/src/somefolder5',
+  //     label: 'file-6',
+  //     path: 'src/somefolder5',
+  //   },
+  // ]
 
-  function handleSelectSol(event) {
-    $solidityObj.mainFile = event.detail.value
-    saveOnChange()
-  }
+  // function handleSelectSol(event) {
+  //   $solidityObj.mainFile = event.detail.value
+  //   saveOnChange()
+  // }
 
   function handleSelectInputField(event) {
     saveOnChange()
   }
 
-  function createNewPackage() {
-    const newPackage = {
-      packageName: '',
-      path: '',
-    }
-    const newPackageDir = $solidityObj.solidityPackageDir
-    newPackageDir.push(newPackage)
-    $solidityObj.solidityPackageDir = newPackageDir
-    saveOnChange()
-  }
+  // function createNewPackage() {
+  //   const newPackage = {
+  //     packageName: '',
+  //     path: '',
+  //   }
+  //   const newPackageDir = $solidityObj.solidityPackageDir
+  //   newPackageDir.push(newPackage)
+  //   $solidityObj.solidityPackageDir = newPackageDir
+  //   saveOnChange()
+  // }
 
-  function createNewLink() {
-    const newLink = { variable: '', contractName: '' }
-    const newLinking = $solidityObj.linking
-    newLinking.push(newLink)
-    $solidityObj.linking = newLinking
-    saveOnChange()
-  }
+  // function createNewLink() {
+  //   const newLink = { variable: '', contractName: '' }
+  //   const newLinking = $solidityObj.linking
+  //   newLinking.push(newLink)
+  //   $solidityObj.linking = newLinking
+  //   saveOnChange()
+  // }
 
-  function deletePackage(indexToDelete) {
-    const newPackageDir = []
-    $solidityObj.solidityPackageDir.forEach((singlePackage, index) => {
-      if (index !== indexToDelete) {
-        newPackageDir.push(singlePackage)
-      }
-    })
-    $solidityObj.solidityPackageDir = newPackageDir
-    saveOnChange()
-  }
+  // function deletePackage(indexToDelete) {
+  //   const newPackageDir = []
+  //   $solidityObj.solidityPackageDir.forEach((singlePackage, index) => {
+  //     if (index !== indexToDelete) {
+  //       newPackageDir.push(singlePackage)
+  //     }
+  //   })
+  //   $solidityObj.solidityPackageDir = newPackageDir
+  //   saveOnChange()
+  // }
 
-  function deleteLink(indexToDelete) {
-    const newLinking = []
-    $solidityObj.linking.forEach((link, index) => {
-      if (index !== indexToDelete) {
-        newLinking.push(link)
-      }
-    })
-    $solidityObj.linking = newLinking
-    saveOnChange()
-  }
+  // function deleteLink(indexToDelete) {
+  //   const newLinking = []
+  //   $solidityObj.linking.forEach((link, index) => {
+  //     if (index !== indexToDelete) {
+  //       newLinking.push(link)
+  //     }
+  //   })
+  //   $solidityObj.linking = newLinking
+  //   saveOnChange()
+  // }
 
-  function handleSelect(event) {}
-
-  function handleClear() {
-    $solidityObj.mainFile = ''
-    saveOnChange()
-  }
+  // function handleClear() {
+  //   $solidityObj.mainFile = ''
+  //   saveOnChange()
+  // }
 
   function openBrowser(fileType) {
     log({
@@ -112,8 +136,99 @@
       payload: form,
     })
   }
+
+  // on click on the input get al the files (sol or spec) based on what os passded to the function
+  function updateItems(fileType) {
+    // not really expecting anything but sol here
+    // might bove elsewhere later and make it more reusable
+    if (fileType !== 'sol') return
+    // this is actually pushing some fake value in (for testing only) just replace with an array of the new values from the file system like you see in the specFiles
+    solFiles = [
+      ...solFiles,
+      { value: 'Browse...', label: 'Browse...', path: 'src/somefolder' },
+    ]
+  }
+
+  function handleSelectSol(event, fileType, index) {
+    if (event.detail.value === 'Browse...') {
+      loadFilesFolder(fileType, index)
+      return
+    }
+    if (index) {
+      $solAdditionalContracts[index].mainFile = event.detail
+      return
+    }
+    $solidityObj.mainFile = event.detail
+    saveOnChange()
+  }
+
+  function handleClear(e, index) {
+    // e is passes on by default here
+    if (index) {
+      $solAdditionalContracts[index].mainFile = ''
+      return
+    }
+    $solidityObj.mainFile = ''
+    saveOnChange()
+  }
+
+  // push new linking/directory
+  function pushNewObj(arr, obj) {
+    arr.push(obj)
+    $solidityObj = $solidityObj
+    saveOnChange()
+  }
+  // remove from linking/directory
+  function removeObj(arr, index) {
+    arr.splice(index, 1)
+    $solidityObj = $solidityObj
+    saveOnChange()
+  }
+
+  // add files from folder
+  function loadFilesFolder(fileType, index) {
+    // clear just incase
+    handleClear(index)
+    console.log(fileType)
+    console.log(index)
+  }
+
+  // add new empty solidity file push new obj to array
+  function addNewFile() {
+    $solAdditionalContracts = [
+      ...$solAdditionalContracts,
+      {
+        mainFile: '',
+        mainContract: '',
+        linking: [{ variable: '', contractName: '' }],
+        specifiMethod: '',
+        compiler: { exe: '', ver: '' },
+      },
+    ]
+  }
+
+  let isSolidityListOpen = false
+  // icon props expect an object
+  let solidityIconsObj = {
+    // bind to some variable later to check if the input is selected
+    // logic for later only show info icon when selected
+    // passing just the function and the info icon text for now
+    selected: isSolidityListOpen,
+    loadFilesFolder: loadFilesFolder,
+    fileType: 'sol',
+    ifoText: 'some string',
+    // LOL auto completed
+    infoLink: 'www.google.com',
+  }
+
+  // functions to pass down to solfiles and make them take pareameters
+  // loadFilesFolder(), isSolidityListOpen() - let isSolidityListOpen = false,
+  // objects
 </script>
 
+<button on:click={() => console.log($solidityObj.mainFile)}
+  >test btn (i log main file)</button
+>
 <div class="card_parent_wrapper bg_dark">
   <CollapseCard bind:open={$navState.solCheck.active} resetNavProp={true}>
     <div slot="header" class="header header_contracts">
@@ -134,24 +249,24 @@
             <div class="input_wrapper" style="margin-top: 8px;">
               <div class="dark_input">
                 <h3>Source<span>*</span></h3>
-                <!-- refresh files when component is pressed -->
-                <div on:click={refreshFiles}>
+
+                <button
+                  on:click={() => refreshFiles}
+                  style="background: transparent; padding:0; border:none;"
+                >
                   <Select
+                    listOpen={isSolidityListOpen}
+                    iconProps={solidityIconsObj}
                     items={$solFilesArr}
-                    value={$solidityObj.mainFile}
+                    Item={CustomItem}
                     {Icon}
                     {ClearIcon}
-                    on:select={handleSelectSol}
-                    on:clear={handleClear}
+                    on:select={e => handleSelectSol(e, 'sol')}
+                    on:clear={e => handleClear()}
                     placeholder="Main solidity file"
+                    bind:value={$solidityObj.mainFile}
                   />
-                </div>
-                <!-- browse example -->
-                <button
-                  on:click={() => {
-                    openBrowser('sol')
-                  }}>Browse</button
-                >
+                </button>
               </div>
               <div class="dark_input">
                 <h3>Main contract name<span>*</span></h3>
@@ -190,7 +305,6 @@
                         change={handleSelectInputField}
                       />
                     </div>
-                    <i class="codicon codicon-trash" />
                   </div>
 
                   <!-- validation message -->
@@ -202,7 +316,7 @@
 
                   <!-- advanced settings -->
                   <div class="card_body_wrapper_parent bg_light mt-8px">
-                    <CollapseCard>
+                    <CollapseCard open={false}>
                       <div slot="header" class="header header_contract">
                         <i class="codicon codicon-gear" />
                         <h3>Advanced Settings</h3>
@@ -224,7 +338,6 @@
                             <div class="dark_input">
                               <h3>Solidity package directories</h3>
                               <CustomInput
-                                {items}
                                 {Icon}
                                 {ClearIcon}
                                 bind:bindValue={$solidityObj.solidityPackageDir[
@@ -238,7 +351,6 @@
                             <div class="dark_input">
                               <h3>&nbsp;</h3>
                               <CustomInput
-                                {items}
                                 {Icon}
                                 {ClearIcon}
                                 bind:bindValue={$solidityObj.solidityPackageDir[
@@ -251,11 +363,20 @@
                             </div>
                             <i
                               class="codicon codicon-trash"
-                              on:click={() => deletePackage(index)}
+                              on:click={removeObj(
+                                $solidityObj.solidityPackageDir,
+                                index,
+                              )}
                             />
                           </div>
                         {/each}
-                        <button class="btn_add" on:click={createNewPackage}
+
+                        <button
+                          class="btn_add"
+                          on:click={pushNewObj(
+                            $solidityObj.solidityPackageDir,
+                            { packageName: '', path: '' },
+                          )}
                           ><i class="codicon codicon-add" /> Add Directory</button
                         >
                       </div>
@@ -264,8 +385,9 @@
                 </div>
               </CollapseCard>
             </div>
+            <!-- linking -->
             <div class="card_body_wrapper_parent bg_dark mt-8px">
-              <CollapseCard>
+              <CollapseCard open={false}>
                 <div slot="header" class="header header_contract">
                   <i class="codicon codicon-gear" />
                   <h3>Linking</h3>
@@ -291,18 +413,22 @@
                       </div>
                       <i
                         class="codicon codicon-trash"
-                        on:click={() => deleteLink(index)}
+                        on:click={removeObj($solidityObj.linking, index)}
                       />
                     </div>
                   {/each}
-                  <button class="btn_add" on:click={createNewLink}
-                    ><i class="codicon codicon-add" /> Add Link</button
+                  <button
+                    class="btn_add"
+                    on:click={pushNewObj($solidityObj.linking, {
+                      variable: '',
+                      contractName: '',
+                    })}><i class="codicon codicon-add" /> Add Link</button
                   >
                 </div>
               </CollapseCard>
             </div>
             <div class="card_body_wrapper_parent bg_dark mt-8px">
-              <CollapseCard>
+              <CollapseCard open={false}>
                 <div slot="header" class="header header_contract">
                   <i class="codicon codicon-gear" />
                   <h3>Specific method</h3>
@@ -325,10 +451,25 @@
           </div>
         </CollapseCard>
       </div>
-
-      <button class="btn_add"
+      {#each $solAdditionalContracts as file, index}
+        <SolidityFiles
+          {index}
+          {solidityIconsObj}
+          {solFiles}
+          {updateItems}
+          {handleClear}
+          {handleSelectSol}
+        />
+      {/each}
+      <button class="btn_add" on:click={addNewFile}
         ><i class="codicon codicon-add" /> Add another contract</button
       >
     </div>
   </CollapseCard>
 </div>
+
+<style>
+  :global(.listContainer) {
+    width: max-content !important;
+  }
+</style>

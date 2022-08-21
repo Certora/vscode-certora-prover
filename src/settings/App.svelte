@@ -23,7 +23,7 @@
     verification_message,
   } from './not_sure_how_to_structure/stores/store.js'
 
-  $: $solidityObj, console.log($solidityObj.compiler.ver)
+  $: $solidityObj, console.log($solidityObj)
 
   let solidityFiles: string[] = []
   let solidityFilesNew
@@ -70,16 +70,17 @@
           source: Sources.SettingsWebview,
           info: e.data.payload,
         })
+        // todo: files as filename, pathToFile
         solidityFiles = e.data.payload.sol
         solidityFilesNew = solidityFiles.map(str => {
           return { value: str, label: str }
         })
-
+        solidityFilesNew.unshift({ value: 'Browse...', label: 'Browse...' })
         specFiles = e.data.payload.spec
         specFilesNew = specFiles.map(str => {
           return { value: str, label: str }
         })
-
+        specFilesNew.unshift({ value: 'Browse...', label: 'Browse...' })
         // very bad temp timeout
         setTimeout(() => {
           solFilesArr.set(solidityFilesNew)
@@ -499,10 +500,10 @@
     --itemIsActiveBG: var(--vscode-editorSuggestWidget-selectedBackground);
     --itemISActiveColor: var(--vscode-editorSuggestWidget-highlightForeground);
     /* close icon */
-    --clearSelectRight: 0;
+    --clearSelectRight: 52px;
     --clearSelectTop: 0;
     --clearSelectBottom: 0;
-    --clearSelectWidth: 16px;
+    --clearSelectWidth: 20px;
   }
 
   :global(input.simple_txt_input) {
@@ -556,5 +557,19 @@
   }
   :global(.input_error_message a) {
     margin-left: auto;
+  }
+
+  /* global close icon */
+  :global(.codicon-close) {
+    border-radius: 5px;
+    padding: 2px;
+  }
+  :global(.codicon-close:hover) {
+    cursor: pointer;
+    background-color: rgba(90, 93, 94, 0.31);
+  }
+
+  :global(button:hover, input:hover) {
+    cursor: pointer;
   }
 </style>

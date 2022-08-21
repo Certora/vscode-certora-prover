@@ -1,5 +1,6 @@
 <script>
   import Select from 'svelte-select'
+  import { each } from 'svelte/internal'
   import ClearIcon from './slots_and_utility/ClearIcon.svelte'
   import CollapseCard from './slots_and_utility/CollapseCard.svelte'
   import CustomInput from './slots_and_utility/CustomInput.svelte'
@@ -12,24 +13,11 @@
   import { navState, specFilesArr, solidityObj } from './stores/store.js'
   import { refreshFiles } from '../utils/refreshFiles'
   import { log, Sources } from '../utils/log'
-  let items = [
-    {
-      value: 'chocolate',
-      label: 'Chocolate',
-      group: 'Sweet',
-      monkey: 'monkey',
-    },
-    { value: 'pizza', label: 'Pizza', group: 'Savory' },
-    { value: 'cake', label: 'Cake', group: 'Sweet' },
-    { value: 'cookies', label: 'Cookies', group: 'Savory' },
-    { value: 'ice-cream', label: 'Ice Cream', group: 'Sweet' },
-  ]
 
   function handleSelectSpec(event) {
     $specObj.specFile = event.detail.value
     saveOnChange()
   }
-  function handleSelect(event) {}
 
   function handleClear() {
     $specObj.specFile = ''
@@ -42,38 +30,38 @@
     $solidityObj.compiler.ver !== ''
   )
 
-  function createNewFlag() {
-    const newFlag = {
-      name: '',
-      value: '',
-    }
-    const newProperties = $specObj.properties
-    newProperties.push(newFlag)
-    $specObj.properties = newProperties
-    saveOnChange()
-  }
+  // function createNewFlag() {
+  //   const newFlag = {
+  //     name: '',
+  //     value: '',
+  //   }
+  //   const newProperties = $specObj.properties
+  //   newProperties.push(newFlag)
+  //   $specObj.properties = newProperties
+  //   saveOnChange()
+  // }
 
-  function deleteFleg(indexToDelete) {
-    const newProperties = []
-    $specObj.properties.forEach((prop, index) => {
-      if (index !== indexToDelete) {
-        newProperties.push(prop)
-      }
-    })
-    $specObj.properties = newProperties
-    saveOnChange()
-  }
+  // function deleteFleg(indexToDelete) {
+  //   const newProperties = []
+  //   $specObj.properties.forEach((prop, index) => {
+  //     if (index !== indexToDelete) {
+  //       newProperties.push(prop)
+  //     }
+  //   })
+  //   $specObj.properties = newProperties
+  //   saveOnChange()
+  // }
 
-  function openBrowser(fileType) {
-    log({
-      action: 'Send "open-browser" command',
-      source: Sources.SettingsWebview,
-    })
-    vscode.postMessage({
-      command: 'open-browser',
-      payload: fileType,
-    })
-  }
+  // function openBrowser(fileType) {
+  //   log({
+  //     action: 'Send "open-browser" command',
+  //     source: Sources.SettingsWebview,
+  //   })
+  //   vscode.postMessage({
+  //     command: 'open-browser',
+  //     payload: fileType,
+  //   })
+  // }
 
   function saveOnChange() {
     let form = {
@@ -90,6 +78,19 @@
       command: 'create-conf-file',
       payload: form,
     })
+  }
+
+  // push new linking/directory
+  function pushNewObj(arr, obj) {
+    arr.push(obj)
+    $specObj = $specObj
+    saveOnChange()
+  }
+  // remove from linking/directory
+  function removeObj(arr, index) {
+    arr.splice(index, 1)
+    $specObj = $specObj
+    saveOnChange()
   }
 </script>
 
@@ -131,11 +132,11 @@
                   />
                 </div>
                 <!-- browse example -->
-                <button
+                <!-- <button
                   on:click={() => {
                     openBrowser('spec')
                   }}>Browse</button
-                >
+                > -->
                 <!-- <Select
                   items={$specFilesArr}
                   {Icon}
@@ -224,12 +225,16 @@
                   </div>
                   <i
                     class="codicon codicon-trash"
-                    on:click={() => deleteFleg(index)}
+                    on:click={removeObj($specObj.properties, index)}
                   />
                 </div>
               {/each}
-              <button class="btn_add" on:click={createNewFlag}
-                ><i class="codicon codicon-add" /> Add Property</button
+              <button
+                class="btn_add"
+                on:click={pushNewObj($specObj.properties, {
+                  name: '',
+                  value: '',
+                })}><i class="codicon codicon-add" /> Add Property</button
               >
               <div class="input_wrapper input_single">
                 <div class="dark_input ">
