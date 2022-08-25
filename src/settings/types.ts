@@ -81,7 +81,7 @@ export type SpecObj = {
   shortOutput: boolean
   multiAssert: boolean
 }
-
+// todo: change to multiple solidity / spec
 export type NewForm = {
   solidyObj: SolidityObj
   specObj: SpecObj

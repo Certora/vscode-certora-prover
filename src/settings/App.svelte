@@ -73,7 +73,8 @@
         // todo: files as filename, pathToFile
         solidityFiles = e.data.payload.sol
         solidityFilesNew = solidityFiles.map(str => {
-          return { value: str, label: str }
+          const tempLabel = str.split('/').reverse()[0]
+          return { value: str, label: tempLabel }
         })
         solidityFilesNew.unshift({ value: 'Browse...', label: 'Browse...' })
         specFiles = e.data.payload.spec
