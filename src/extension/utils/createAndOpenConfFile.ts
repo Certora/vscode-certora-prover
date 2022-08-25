@@ -64,7 +64,19 @@ function convertSourceFormDataToConfFileJSON(
   }
   // either use user input or vscode settings
   // better practice might be not creating the conf file if an input doesn't exists
-  config.solc = inputFormData.solidityCompiler || 'solc'
+  if (
+    inputFormData.useAdditionalContracts &&
+    inputFormData.solc_map.length > 1
+  ) {
+    config.solc_map = '{'
+    inputFormData.solc_map.forEach(map => {
+      config.solc_map +=
+        '"' + map.contract + '":"' + map.solidityCompiler + '",'
+    })
+    config.solc_map = JSON.parse(config.solc_map.replace(/.$/, '}'))
+  } else {
+    config.solc = inputFormData.solidityCompiler || 'solc'
+  }
 
   if (inputFormData.link?.length > 0) {
     config.link = []
@@ -132,18 +144,54 @@ export function processForm(
     cacheName: '',
     message: '',
     additionalSettings: [],
+    solc_map: [],
   }
 
-  console.log('form at the moment: ', form)
+  console.log('form at the moment: ', newForm)
 
   if (
     newForm.solidityAdditionalContracts &&
     newForm.solidityAdditionalContracts.length > 0
   ) {
-    console.log('=== additional contracts detected ===')
     form.useAdditionalContracts = true
-    newForm.solidityAdditionalContracts.forEach(contract => {
-      form.additionalContracts.push({ file: contract.mainContract })
+    form.solc_map.push({
+      contract: form.mainContractName,
+      solidityCompiler: form.solidityCompiler,
+    })
+
+    newForm.solidityAdditionalContracts.forEach(solObj => {
+      if (solObj.mainContract) {
+        form.additionalContracts.push({
+          file: solObj.mainFile.value,
+          name: solObj.mainContract,
+        })
+
+        const linking = solObj.linking
+        if (
+          linking.length > 0 &&
+          linking[0].variable &&
+          linking[0].contractName
+        ) {
+          linking.forEach(link => {
+            form.link.push({
+              id: '',
+              contractName: form.mainContractName,
+              fieldName: link.variable,
+              associatedContractName: link.contractName,
+            })
+          })
+        }
+        if (solObj.compiler.ver) {
+          let compDir: string = solObj.compiler.exe
+          if (compDir !== '') {
+            compDir += '/'
+          }
+          form.solc_map.push({
+            contract: solObj.mainContract,
+            solidityCompiler: compDir + solObj.compiler.ver,
+          })
+        }
+      }
     })
   }
 

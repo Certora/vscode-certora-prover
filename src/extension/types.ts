@@ -141,6 +141,7 @@ export type InputFormData = {
     option: string
     value: string
   }[]
+  solc_map: { contract: string; solidityCompiler: string }[]
 }
 
 export type ConfNameMap = {
@@ -284,6 +285,7 @@ export type ConfFile = {
   staging?: string
   cache?: string
   msg?: string
+  solc_map?: string
 } & Record<string, boolean | string | string[] | number>
 
 export type Message = {

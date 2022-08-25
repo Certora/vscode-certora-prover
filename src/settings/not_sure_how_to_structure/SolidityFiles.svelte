@@ -14,6 +14,7 @@
   export let handleClear
   export let loadFilesFolder
   export let infoObjArr
+  export let saveOnChange
 
   let isSolidityListOpen = false
   let solidityIconsObj = {
@@ -44,10 +45,11 @@
 
   function handleSelectSol(event, index) {
     if (event.detail.value === 'Browse...') {
-      loadFilesFolder(fileType, index)
+      loadFilesFolder('sol', index)
       return
     }
     $solAdditionalContracts[index].mainFile = event.detail
+    saveOnChange()
   }
 </script>
 
@@ -96,6 +98,7 @@
             infoObj={infoObjArr.contractName}
             placeholder="className()"
             bind:bindValue={$solAdditionalContracts[index].mainContract}
+            change={saveOnChange}
           />
         </div>
       </div>
@@ -118,6 +121,7 @@
                   infoObj={infoObjArr.solPackages}
                   placeholder="CVT-Executables-Mac"
                   bind:bindValue={$solAdditionalContracts[index].compiler.exe}
+                  change={saveOnChange}
                 />
               </div>
               <div class="dark_input">
@@ -127,6 +131,7 @@
                   infoObj={infoObjArr.solCompiler}
                   placeholder="version: solc7.6"
                   bind:bindValue={$solAdditionalContracts[index].compiler.ver}
+                  change={saveOnChange}
                 />
               </div>
             </div>
@@ -148,6 +153,7 @@
                     infoObj={infoObjArr.link}
                     placeholder="Variable"
                     bind:bindValue={obj.variable}
+                    change={saveOnChange}
                   />
                 </div>
                 <div class="dark_input">
@@ -155,6 +161,7 @@
                     infoObj={infoObjArr.link}
                     placeholder="Contract name"
                     bind:bindValue={obj.contractName}
+                    change={saveOnChange}
                   />
                 </div>
                 <i
@@ -190,6 +197,7 @@
                   infoObj={infoObjArr.method}
                   placeholder="method_name()"
                   bind:bindValue={$solAdditionalContracts[index].specifiMethod}
+                  change={saveOnChange}
                 />
               </div>
             </div>

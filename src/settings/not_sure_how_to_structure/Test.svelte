@@ -170,7 +170,7 @@
       solidyObj: $solidityObj,
       specObj: $specObj,
       verificatoinMessage: $verification_message,
-      solAdditionalContracts: $solAdditionalContracts,
+      solidityAdditionalContracts: $solAdditionalContracts,
     }
     log({
       action: 'Send "create-conf-file" command',
@@ -197,7 +197,7 @@
 
   function handleSelectSol(event) {
     if (event.detail.value === 'Browse...') {
-      loadFilesFolder(fileType, index)
+      loadFilesFolder('sol', 0)
       return
     }
     $solidityObj.mainFile = event.detail
@@ -527,6 +527,7 @@
           {handleClear}
           {loadFilesFolder}
           {infoObjArr}
+          {saveOnChange}
         />
       {/each}
       <button class="btn_add" on:click={addNewFile}

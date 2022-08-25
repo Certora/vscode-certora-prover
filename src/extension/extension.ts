@@ -26,6 +26,7 @@ export function activate(context: vscode.ExtensionContext): void {
       cacheName: '',
       message: '',
       additionalSettings: [],
+      solc_map: [],
     }
     createAndOpenConfFile(emptyForm)
     SettingsPanel.setResultsWebviewProvider(resultsWebviewProvider)
