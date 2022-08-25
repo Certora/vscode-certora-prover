@@ -18,6 +18,52 @@
   } from './stores/store.js'
   import SolidityFiles from './SolidityFiles.svelte'
 
+  let infoObjArr = {
+    mainFile: {
+      infoText: 'pick main solidity file',
+      infoLink:
+        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html',
+    },
+    contractName: {
+      infoText: 'pick main contract',
+      infoLink:
+        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html',
+    },
+    solCompiler: {
+      infoText: 'type solidity compiler \n example: solc8.1',
+      infoLink:
+        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#solc',
+    },
+    solPackages: {
+      infoText:
+        'Use this option to provide a path to the Solidity compiler executable file. We check in all directories in the $PATH environment variable for an executable with this name. If --solc is not used, we look for an executable called solc, or solc.exe on windows platforms.',
+      infoLink:
+        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#solc',
+    },
+    solc_args: {
+      infoText:
+        'Gets a list of arguments to pass to the Solidity compiler. The arguments will be passed as is, without any formatting, in the same order.',
+      infoLink:
+        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#solc-args',
+    },
+    package: {
+      infoText:
+        'For each package, gets the path to a directory including that Solidity package.',
+      infoLink:
+        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#packages',
+    },
+    link: {
+      infoText: 'Links a slot in a contract with another contract.',
+      infoLink:
+        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#link',
+    },
+    method: {
+      infoText:
+        'Parametric rules will only verify the method with the given signature, instead of all public and external methods of the contract. Note that you will need to wrap the method’s signature with quotes, as the shell doesn’t interpret parenthesis correctly otherwise.',
+      infoLink:
+        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#method',
+    },
+  }
   // this items arrary contains all the solidity files and should update on when updateItems is fired
   // some fake stuff
   // ********** IMPORTANT **********
@@ -211,9 +257,8 @@
     selected: isSolidityListOpen,
     loadFilesFolder: loadFilesFolder,
     fileType: 'sol',
-    ifoText: 'some string',
-    // LOL auto completed
-    infoLink: 'www.google.com',
+    ifoText: infoObjArr.mainFile.infoText,
+    infoLink: infoObjArr.mainFile.infoLink,
   }
 </script>
 
@@ -260,6 +305,7 @@
               <div class="dark_input">
                 <h3>Main contract name<span>*</span></h3>
                 <CustomInput
+                  infoObj={infoObjArr.contractName}
                   placeholder="className()"
                   bind:bindValue={$solidityObj.mainContract}
                   change={handleSelectInputField}
@@ -282,6 +328,7 @@
                         Directory containing solidity packages<span>*</span>
                       </h3>
                       <CustomInput
+                        infoObj={infoObjArr.solPackages}
                         placeholder="CVT-Executables-Mac"
                         bind:bindValue={$solidityObj.compiler.exe}
                         change={handleSelectInputField}
@@ -291,6 +338,7 @@
                       <h3>Default soldity version to use<span>*</span></h3>
                       <!-- no placeholder, this filed should have the default compiler selected by default -->
                       <CustomInput
+                        infoObj={infoObjArr.solCompiler}
                         placeholder="version: solc7.6"
                         bind:bindValue={$solidityObj.compiler.ver}
                         change={handleSelectInputField}
@@ -317,6 +365,7 @@
                           <div class="dark_input">
                             <h3>Solidity Argument</h3>
                             <CustomInput
+                              infoObj={infoObjArr.solc_args}
                               placeholder="Argument"
                               bind:bindValue={$solidityObj.solidityArgument}
                               change={handleSelectInputField}
@@ -364,6 +413,7 @@
                             <div class="input_wrapper mt-8px">
                               <div class="dark_input">
                                 <CustomInput
+                                  infoObj={infoObjArr.package}
                                   placeholder="Package name"
                                   bind:bindValue={obj.packageName}
                                   change={handleSelectInputField}
@@ -371,6 +421,7 @@
                               </div>
                               <div class="dark_input">
                                 <CustomInput
+                                  infoObj={infoObjArr.package}
                                   placeholder=".../path"
                                   bind:bindValue={obj.path}
                                   change={handleSelectInputField}
@@ -413,6 +464,7 @@
                     <div class="input_wrapper mt-8px">
                       <div class="dark_input">
                         <CustomInput
+                          infoObj={infoObjArr.link}
                           placeholder="Variable"
                           bind:bindValue={$solidityObj.linking[index].variable}
                           change={saveOnChange}
@@ -420,6 +472,7 @@
                       </div>
                       <div class="dark_input">
                         <CustomInput
+                          infoObj={infoObjArr.link}
                           placeholder="Contract name"
                           bind:bindValue={$solidityObj.linking[index]
                             .contractName}
@@ -453,6 +506,7 @@
                     <div class="dark_input">
                       <h3>Function name</h3>
                       <CustomInput
+                        infoObj={infoObjArr.method}
                         placeholder="method_name()"
                         bind:bindValue={$solidityObj.specifiMethod}
                         change={saveOnChange}
@@ -472,6 +526,7 @@
           {updateItems}
           {handleClear}
           {loadFilesFolder}
+          {infoObjArr}
         />
       {/each}
       <button class="btn_add" on:click={addNewFile}
