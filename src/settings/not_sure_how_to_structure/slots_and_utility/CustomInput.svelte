@@ -2,13 +2,10 @@
   export let placeholder = 'placeholder'
   export let bindValue
 
-  // expected obj
-  // let solidityIconsObj = {
-  //   selected: isSolidityListOpen,
-  //   loadFilesFolder: loadFilesFolder,
-  //   ifoText: 'some string',
-  //   infoLink: 'www.google.com'
-  // }
+  export let infoObj = {
+    infoText: 'some text...',
+    infoLink: 'https://google.com',
+  }
 
   let mouse_is_on_input = false
   let icon_wrapper = false
@@ -70,11 +67,9 @@
     }}
   >
     <p>
-      <!-- {$$props.ifoText} -->
-      some text...
+      {infoObj.infoText}
     </p>
-    <!-- <a href={$$props.infoLink}>link to documentation</a> -->
-    <a href="https://google.com">link to documentation</a>
+    <a href={infoObj.infoLink}>link to documentation</a>
   </div>
 </div>
 
