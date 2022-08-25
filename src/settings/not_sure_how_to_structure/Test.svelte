@@ -10,11 +10,7 @@
 
   import {
     navState,
-    resetNav,
     solidityObj,
-    solFilesArr,
-    specObj,
-    verification_message,
     solAdditionalContracts,
   } from './stores/store.js'
   import SolidityFiles from './SolidityFiles.svelte'
@@ -149,13 +145,9 @@
     ]
   }
 
-  function handleSelectSol(event, fileType, index) {
+  function handleSelectSol(event) {
     if (event.detail.value === 'Browse...') {
       loadFilesFolder(fileType, index)
-      return
-    }
-    if (index) {
-      $solAdditionalContracts[index].mainFile = event.detail
       return
     }
     $solidityObj.mainFile = event.detail
@@ -188,9 +180,7 @@
   // add files from folder
   function loadFilesFolder(fileType, index) {
     // clear just incase
-    handleClear(index)
-    console.log(fileType)
-    console.log(index)
+    handleClear(null, index)
     openBrowser(fileType) //todo add index
   }
 
@@ -221,33 +211,27 @@
     // LOL auto completed
     infoLink: 'www.google.com',
   }
-
-  // functions to pass down to solfiles and make them take pareameters
-  // loadFilesFolder(), isSolidityListOpen() - let isSolidityListOpen = false,
-  // objects
 </script>
 
-<button on:click={() => console.log($solidityObj.mainFile)}
-  >test btn (i log main file)</button
->
-<div class="card_parent_wrapper bg_dark">
-  <CollapseCard bind:open={$navState.solCheck.active} resetNavProp={true}>
+<div class="card_parent_wrapper bg_dark border-rd">
+  <CollapseCard
+    chevron="padding-right:16px;"
+    bind:open={$navState.solCheck.active}
+    resetNavProp={true}
+  >
     <div slot="header" class="header header_contracts">
       <i class="codicon codicon-file" />
       <h3>Solidity contracts</h3>
-      <i class="codicon codicon-settings" />
-      <i class="codicon codicon-chevron-up" />
     </div>
-    <div slot="body">
-      <div class="card_body_wrapper_parent bg_light">
-        <CollapseCard>
-          <div slot="header" class="header header_contract no_border_padding">
+    <div slot="body" class="p-16 pt-0">
+      <div class="bg_light border-rd">
+        <CollapseCard chevron="padding-right:12px;">
+          <div slot="header" class="p-12 header header_contract">
             <i class="codicon codicon-file" />
             <h3>Main contract</h3>
-            <i class="codicon codicon-chevron-up" />
           </div>
-          <div slot="body" class="card_body_wrapper">
-            <div class="input_wrapper" style="margin-top: 8px;">
+          <div slot="body" class="p-12 pt-0">
+            <div class="input_wrapper">
               <div class="dark_input">
                 <h3>Source<span>*</span></h3>
 
@@ -262,8 +246,8 @@
                     Item={CustomItem}
                     {Icon}
                     {ClearIcon}
-                    on:select={e => handleSelectSol(e, 'sol')}
-                    on:clear={e => handleClear()}
+                    on:select={handleSelectSol}
+                    on:clear={e => handleClear(e)}
                     placeholder="Main solidity file"
                     bind:value={$solidityObj.mainFile}
                   />
@@ -278,14 +262,16 @@
                 />
               </div>
             </div>
-            <div class="card_body_wrapper_parent bg_dark mt-8px">
-              <CollapseCard>
-                <div slot="header" class="header header_contract">
+            <div class="border-rd bg_dark mt-8px">
+              <CollapseCard chevron="padding-right:8px;">
+                <div slot="header" class="p-8 header header_contract">
                   <i class="codicon codicon-gear" />
                   <h3>Compiler</h3>
-                  <i class="codicon codicon-chevron-up" />
+                  <h3 style="margin-left:auto; text-transform:initial;">
+                    {$solidityObj.compiler.ver}
+                  </h3>
                 </div>
-                <div slot="body" class="card_body_wrapper">
+                <div slot="body" class="most_inner_card">
                   <div class="input_wrapper">
                     <div class="dark_input">
                       <h3>
@@ -316,14 +302,13 @@
                   </div> -->
 
                   <!-- advanced settings -->
-                  <div class="card_body_wrapper_parent bg_light mt-8px">
-                    <CollapseCard open={false}>
-                      <div slot="header" class="header header_contract">
+                  <div class="border-rd bg_light mt-8px">
+                    <CollapseCard open={false} chevron="padding-right:8px;">
+                      <div slot="header" class="p-8 header header_contract">
                         <i class="codicon codicon-gear" />
                         <h3>Advanced Settings</h3>
-                        <i class="codicon codicon-chevron-up" />
                       </div>
-                      <div slot="body" class="card_body_wrapper">
+                      <div slot="body" class="most_inner_card border_light">
                         <div class="input_wrapper input_single">
                           <div class="dark_input">
                             <h3>Solidity Argument</h3>
@@ -334,7 +319,7 @@
                             />
                           </div>
                         </div>
-                        {#each $solidityObj.solidityPackageDir as _, index}
+                        <!-- {#each $solidityObj.solidityPackageDir as _, index}
                           <div class="input_wrapper">
                             <div class="dark_input">
                               <h3>Solidity package directories</h3>
@@ -359,18 +344,42 @@
                                 ].path}
                                 change={handleSelectInputField}
                                 on:clear={handleClear}
-                                placeholder=".../path"
+                                placeholder=".../path" -->
+                        <div
+                          class="dark_input border_light mt-8px"
+                          style="border-top: 1px solid var(--vscode-foreground); padding-top:8px;"
+                        >
+                          <h3
+                            style="font-size: 12px;
+                          line-height: 14px;
+                          font-weight: 500;"
+                          >
+                            Solidity package directories
+                          </h3>
+                          {#each $solidityObj.solidityPackageDir as obj, index}
+                            <div class="input_wrapper mt-8px">
+                              <div class="dark_input">
+                                <CustomInput
+                                  placeholder="Package name"
+                                  bind:bindValue={obj.packageName}
+                                />
+                              </div>
+                              <div class="dark_input">
+                                <CustomInput
+                                  placeholder=".../path"
+                                  bind:bindValue={obj.path}
+                                />
+                              </div>
+                              <i
+                                class="codicon codicon-trash"
+                                on:click={removeObj(
+                                  $solidityObj.solidityPackageDir,
+                                  index,
+                                )}
                               />
                             </div>
-                            <i
-                              class="codicon codicon-trash"
-                              on:click={removeObj(
-                                $solidityObj.solidityPackageDir,
-                                index,
-                              )}
-                            />
-                          </div>
-                        {/each}
+                          {/each}
+                        </div>
 
                         <button
                           class="btn_add"
@@ -387,16 +396,15 @@
               </CollapseCard>
             </div>
             <!-- linking -->
-            <div class="card_body_wrapper_parent bg_dark mt-8px">
-              <CollapseCard open={false}>
-                <div slot="header" class="header header_contract">
+            <div class="border-rd bg_dark mt-8px">
+              <CollapseCard open={false} chevron="padding-right:8px;">
+                <div slot="header" class="p-8 header header_contract">
                   <i class="codicon codicon-gear" />
                   <h3>Linking</h3>
-                  <i class="codicon codicon-chevron-up" />
                 </div>
-                <div slot="body" class="card_body_wrapper">
-                  {#each $solidityObj.linking as _, index}
-                    <div class="input_wrapper">
+                <div slot="body" class="most_inner_card">
+                  {#each $solidityObj.linking as obj, index}
+                    <div class="input_wrapper mt-8px">
                       <div class="dark_input">
                         <CustomInput
                           placeholder="Variable"
@@ -428,14 +436,13 @@
                 </div>
               </CollapseCard>
             </div>
-            <div class="card_body_wrapper_parent bg_dark mt-8px">
-              <CollapseCard open={false}>
-                <div slot="header" class="header header_contract">
+            <div class="border-rd bg_dark mt-8px">
+              <CollapseCard open={false} chevron="padding-right:8px;">
+                <div slot="header" class="p-8 header header_contract">
                   <i class="codicon codicon-gear" />
                   <h3>Specific method</h3>
-                  <i class="codicon codicon-chevron-up" />
                 </div>
-                <div slot="body" class="card_body_wrapper">
+                <div slot="body" class="most_inner_card">
                   <div class="input_wrapper input_single">
                     <div class="dark_input">
                       <h3>Function name</h3>
@@ -455,11 +462,10 @@
       {#each $solAdditionalContracts as file, index}
         <SolidityFiles
           {index}
-          {solidityIconsObj}
           {solFiles}
           {updateItems}
           {handleClear}
-          {handleSelectSol}
+          {loadFilesFolder}
         />
       {/each}
       <button class="btn_add" on:click={addNewFile}

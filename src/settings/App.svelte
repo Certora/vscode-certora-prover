@@ -341,6 +341,39 @@
   :global(a) {
     color: var(--vscode-foreground);
   }
+
+  /* butoon/icons hover */
+  :global(.codicon-trash) {
+    cursor: pointer;
+    border-radius: 5px;
+    padding: 2px;
+  }
+  :global(.codicon-trash:hover) {
+    /* need to match to templates? */
+    background-color: rgba(90, 93, 94, 0.31);
+  }
+
+  :global(.border-rd) {
+    border-radius: 4px;
+  }
+  /* padding helpers */
+
+  :global(.p-16) {
+    padding: 16px;
+  }
+  :global(.p-12) {
+    padding: 12px;
+  }
+  :global(.p-8) {
+    padding: 8px;
+  }
+  :global(.pt-24) {
+    padding-top: 24px;
+  }
+  :global(.pt-0) {
+    padding-top: 0;
+  }
+
   /* bg helpers */
   :global(.bg_dark) {
     background: var(--vscode-menu-background);
@@ -363,7 +396,7 @@
   }
 
   :global(.btn_add i) {
-    font-size: 12px;
+    font-size: 12px !important;
     margin: auto 4px auto 0;
   }
   :global(.btn_add:hover) {
@@ -395,16 +428,27 @@
   }
 
   /* wrapper element needs 0 margin in order to avoid jumpy animation */
+
+  :global(.most_inner_card) {
+    margin: 0 8px;
+    padding: 8px 0;
+    border-top: 1px solid var(--vscode-menu-separatorBackground);
+  }
+  :global(.most_inner_card .codicon-trash) {
+    margin: auto 0 5px;
+  }
+  :global(.border_light) {
+    border-color: var(--vscode-foreground);
+  }
+  /* some classes here need to go */
   :global(.card_body_wrapper) {
     margin: 0;
-  }
-  :global(.card_body_wrapper .codicon-trash) {
-    margin: auto -1px 1px 0;
-  }
-  :global(.card_parent_wrapper) {
     border-radius: 4px;
+  }
+
+  :global(.card_parent_wrapper) {
     margin-bottom: 8px;
-    padding: 16px;
+    /* padding: 16px; */
   }
 
   :global(.card_body_wrapper_parent) {
@@ -415,12 +459,14 @@
   :global(.header_contracts) {
     display: flex;
     width: 100%;
-    margin: 12px 0;
+    padding: 1rem;
   }
   :global(.header_contracts h3) {
     line-height: 15px;
     margin: 0;
     text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 500;
   }
   :global(.header_contracts .codicon-file) {
     height: min-content;
@@ -430,23 +476,13 @@
     height: min-content;
     margin: auto 0 auto auto;
   }
-  :global(.header_contracts .codicon-chevron-up) {
-    height: min-content;
-    margin: auto 0 auto 6px;
-  }
+
   :global(.header_contract) {
     transition: all 0.2s ease;
     display: flex;
     width: 100%;
   }
 
-  :global(.card.open
-      > .card-header
-      > .header_contract:not(.no_border_padding)) {
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--vscode-menu-separatorBackground);
-    margin-bottom: 8px;
-  }
   :global(.header_contract h3) {
     font-size: 12px;
     line-height: 14px;
@@ -561,11 +597,11 @@
   }
 
   /* global close icon */
-  :global(.codicon-close) {
+  :global(.codicon-close, .codicon-info, .codicon-trash) {
     border-radius: 5px;
     padding: 2px;
   }
-  :global(.codicon-close:hover) {
+  :global(.codicon-close:hover, .codicon-info:hover, .codicon-trash:hover) {
     cursor: pointer;
     background-color: rgba(90, 93, 94, 0.31);
   }

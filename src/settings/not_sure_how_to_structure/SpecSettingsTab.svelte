@@ -1,27 +1,93 @@
 <script>
   import Select from 'svelte-select'
-  import { each } from 'svelte/internal'
   import ClearIcon from './slots_and_utility/ClearIcon.svelte'
   import CollapseCard from './slots_and_utility/CollapseCard.svelte'
   import CustomInput from './slots_and_utility/CustomInput.svelte'
   import Icon from './slots_and_utility/Icon.svelte'
-  import {
-    writableArray_Spec,
-    specObj,
-    verification_message,
-  } from './stores/store.js'
-  import { navState, specFilesArr, solidityObj } from './stores/store.js'
-  import { refreshFiles } from '../utils/refreshFiles'
-  import { log, Sources } from '../utils/log'
+  // import {
+  //   writableArray_Spec,
+  //   specObj,
+  //   verification_message,
+  // } from './stores/store.js'
+  // import { navState, specFilesArr, solidityObj } from './stores/store.js'
+  // import { refreshFiles } from '../utils/refreshFiles'
+  // import { log, Sources } from '../utils/log'
 
-  function handleSelectSpec(event) {
-    $specObj.specFile = event.detail.value
-    saveOnChange()
+  // function handleSelectSpec(event) {
+  //   $specObj.specFile = event.detail.value
+  //   saveOnChange()
+  // }
+
+  // function handleClear() {
+  //   $specObj.specFile = ''
+  //   saveOnChange()
+  import CustomItem from './slots_and_utility/CustomItem.svelte'
+  import { navState, specObj, solidityObj } from './stores/store.js'
+
+  // this items arrary contains all the solidity files and should update on when updateItems is fired
+  // some fake stuff
+  // ********** IMPORTANT **********
+  // ********** FIRST OBJECT IN THE ARRAY MUST BE { value: 'Browse...', label: 'Browse...', path: 'src/somefolder' }
+  // this brows object is needed to fire up a function to browse files (the path key is useless but might as well)
+  $: specFiles = [
+    { value: 'Browse...', label: 'Browse...', path: 'src/somefolder' },
+    { value: 'src/somefolder/file-1', label: 'file-1', path: 'src/somefolder' },
+    {
+      value: 'file-2/src/somefolder1',
+      label: 'file-2',
+      path: 'src/somefolder1',
+    },
+    {
+      value: 'file-3/src/somefolder2',
+      label: 'file-3',
+      path: 'src/somefolder2',
+    },
+    {
+      value: 'file-4/src/somefolder3',
+      label: 'file-4',
+      path: 'src/somefolder3',
+    },
+    {
+      value: 'file-5/src/somefolder4',
+      label: 'file-5',
+      path: 'src/somefolder4',
+    },
+    {
+      value: 'file-6/src/somefolder5',
+      label: 'file-6',
+      path: 'src/somefolder5',
+    },
+  ]
+
+  // on click on the input get al the files (sol or spec) based on what os passded to the function
+  function updateItems(fileType) {
+    // not really expecting anything but sol here
+    // might bove elsewhere later and make it more reusable
+    if (fileType !== 'spec') return
+    // this is actually pushing some fake value in (for testing only) just replace with an array of the new values from the file system like you see in the specFiles
+    specFiles = [
+      ...specFiles,
+      { value: 'Browse...', label: 'Browse...', path: 'src/somefolder' },
+    ]
   }
 
-  function handleClear() {
-    $specObj.specFile = ''
-    saveOnChange()
+  function handleSelectSpec(event, fileType, index) {
+    if (event.detail.value === 'Browse...') {
+      loadFilesFolder(fileType, index)
+      return
+    }
+    $specObj.mainFile = event.detail
+  }
+
+  function handleClear(e, index) {
+    $specObj.mainFile = ''
+  }
+  // add files from folder
+  function loadFilesFolder(fileType, index) {
+    // clear just incase
+    handleClear(null, index)
+    console.log(fileType)
+    console.log(index)
   }
 
   $: solDisabledState = !(
@@ -92,6 +158,20 @@
     $specObj = $specObj
     saveOnChange()
   }
+
+  let isSpecListOpen = false
+  // icon props expect an object
+  let specIconsObj = {
+    // bind to some variable later to check if the input is selected
+    // logic for later only show info icon when selected
+    // passing just the function and the info icon text for now
+    selected: isSpecListOpen,
+    loadFilesFolder: loadFilesFolder,
+    fileType: 'spec',
+    ifoText: 'some string',
+    // LOL auto completed
+    infoLink: 'www.google.com',
+  }
 </script>
 
 <div class="card_parent_wrapper bg_dark">
@@ -103,8 +183,7 @@
     <div slot="header" class="header header_contracts">
       <i class="codicon codicon-file" />
       <h3>Certora spec</h3>
-      <i class="codicon codicon-settings" />
-      <i class="codicon codicon-chevron-up" />
+      <!-- <i class="codicon codicon-settings" /> -->
     </div>
     <div slot="body">
       <div class="card_body_wrapper_parent bg_light">
@@ -112,7 +191,6 @@
           <div slot="header" class="header header_contract no_border_padding">
             <i class="codicon codicon-file" />
             <h3>Main SPEC FILE</h3>
-            <i class="codicon codicon-chevron-up" />
           </div>
           <div slot="body" class="card_body_wrapper">
             <div class="input_wrapper" style="margin-top: 8px;">
@@ -120,7 +198,7 @@
                 <h3>Certore specification file<span>*</span></h3>
 
                 <!-- refresh files when component is pressed -->
-                <div on:click={refreshFiles}>
+                <!-- <div on:click={refreshFiles}>
                   <Select
                     items={$specFilesArr}
                     value={$specObj.specFile}
@@ -130,21 +208,27 @@
                     on:clear={handleClear}
                     placeholder=".spec file"
                   />
-                </div>
-                <!-- browse example -->
-                <!-- <button
-                  on:click={() => {
-                    openBrowser('spec')
-                  }}>Browse</button
-                > -->
-                <!-- <Select
-                  items={$specFilesArr}
-                  {Icon}
-                  {ClearIcon}
-                  on:select={handleSelectSpec}
-                  on:clear={handleClear}
-                  placeholder=".spec file"
-                /> -->
+                </div> -->
+
+                <!-- ======= -->
+                <button
+                  on:click={() => updateItems('spec')}
+                  style="background: transparent; padding:0; border:none;"
+                >
+                  <Select
+                    listOpen={isSpecListOpen}
+                    iconProps={specIconsObj}
+                    items={specFiles}
+                    Item={CustomItem}
+                    {Icon}
+                    {ClearIcon}
+                    on:select={e => handleSelectSpec(e, 'spec')}
+                    on:clear={e => handleClear(e)}
+                    placeholder=".spec file"
+                    bind:value={$specObj.specFile}
+                  />
+                </button>
+                <!-- >>>>>>> natti_new -->
               </div>
               <div class="dark_input">
                 <h3>Rules<span>*</span></h3>
@@ -202,8 +286,8 @@
           <CollapseCard>
             <div slot="header" class="header header_contract">
               <i class="codicon codicon-gear" />
-              <h3>Additional Flags</h3>
-              <i class="codicon codicon-chevron-up" />
+
+              <h3>Additional prover settings</h3>
             </div>
             <div slot="body" class="card_body_wrapper">
               <h3>Flag</h3>
