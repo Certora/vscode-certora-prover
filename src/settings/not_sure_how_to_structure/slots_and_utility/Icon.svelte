@@ -56,13 +56,16 @@
   button {
     background: none;
     border: 0;
-    cursor: pointer;
-    padding: 1px 3px;
-    border-radius: 5px;
-    padding: 2px;
+    padding: 0;
     margin-left: 4px;
   }
-  button:hover {
+
+  .codicon-folder-opened {
+    border-radius: 5px;
+    padding: 2px;
+  }
+  .codicon-folder-opened:hover {
+    cursor: pointer;
     background-color: rgba(90, 93, 94, 0.31);
   }
   .selected {

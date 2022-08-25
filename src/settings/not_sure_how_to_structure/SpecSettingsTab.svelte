@@ -115,7 +115,6 @@
       <i class="codicon codicon-file" />
       <h3>Certora spec</h3>
       <!-- <i class="codicon codicon-settings" /> -->
-      <i class="codicon codicon-chevron-up" />
     </div>
     <div slot="body">
       <div class="card_body_wrapper_parent bg_light">
@@ -123,7 +122,6 @@
           <div slot="header" class="header header_contract no_border_padding">
             <i class="codicon codicon-file" />
             <h3>Main SPEC FILE</h3>
-            <i class="codicon codicon-chevron-up" />
           </div>
           <div slot="body" class="card_body_wrapper">
             <div class="input_wrapper" style="margin-top: 8px;">
@@ -143,7 +141,7 @@
                     on:select={e => handleSelectSpec(e, 'spec')}
                     on:clear={e => handleClear(e)}
                     placeholder=".spec file"
-                    bind:value={$specObj.mainFile}
+                    bind:value={$specObj.specFile}
                   />
                 </button>
               </div>
@@ -200,7 +198,6 @@
             <div slot="header" class="header header_contract">
               <i class="codicon codicon-gear" />
               <h3>Additional prover settings</h3>
-              <i class="codicon codicon-chevron-up" />
             </div>
             <div slot="body" class="card_body_wrapper">
               <h3>Properties</h3>

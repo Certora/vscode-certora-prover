@@ -11,7 +11,6 @@
   export let index
   export let updateItems
   export let solFiles
-  export let handleSelectSol
   export let handleClear
   export let loadFilesFolder
 
@@ -41,6 +40,14 @@
     $solAdditionalContracts.splice(index, 1)
     $solAdditionalContracts = $solAdditionalContracts
   }
+
+  function handleSelectSol(event, index) {
+    if (event.detail.value === 'Browse...') {
+      loadFilesFolder(fileType, index)
+      return
+    }
+    $solAdditionalContracts[index].mainFile = event.detail
+  }
 </script>
 
 <div class="card_body_wrapper_parent bg_light">
@@ -55,7 +62,6 @@
         class="codicon codicon-trash"
         on:click|stopPropagation={() => removeSolFile(index)}
       />
-      <i class="codicon codicon-chevron-up" />
     </div>
     <div slot="body" class="card_body_wrapper">
       <div class="input_wrapper" style="margin-top: 8px;">
@@ -73,7 +79,7 @@
               Item={CustomItem}
               {Icon}
               {ClearIcon}
-              on:select={e => handleSelectSol(e, 'sol', index)}
+              on:select={e => handleSelectSol(e, index)}
               on:clear={e => handleClear(e, index)}
               placeholder="Additional solidity file"
               bind:value={$solAdditionalContracts[index].mainFile}
@@ -93,7 +99,6 @@
           <div slot="header" class="header header_contract">
             <i class="codicon codicon-gear" />
             <h3>Compiler</h3>
-            <i class="codicon codicon-chevron-up" />
           </div>
           <div slot="body" class="card_body_wrapper">
             <div class="input_wrapper">
@@ -123,7 +128,6 @@
           <div slot="header" class="header header_contract">
             <i class="codicon codicon-gear" />
             <h3>Linking</h3>
-            <i class="codicon codicon-chevron-up" />
           </div>
           <div slot="body" class="card_body_wrapper">
             {#each $solAdditionalContracts[index].linking as obj, i}
@@ -164,7 +168,6 @@
           <div slot="header" class="header header_contract">
             <i class="codicon codicon-gear" />
             <h3>Specific method</h3>
-            <i class="codicon codicon-chevron-up" />
           </div>
           <div slot="body" class="card_body_wrapper">
             <div class="input_wrapper input_single">
