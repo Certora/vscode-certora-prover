@@ -74,7 +74,8 @@
         solidityFiles = e.data.payload.sol
         solidityFilesNew = solidityFiles.map(str => {
           const tempLabel = str.split('/').reverse()[0]
-          return { value: str, label: tempLabel }
+          const tempPath = str.replace(tempLabel, '')
+          return { value: str, label: tempLabel, path: tempPath }
         })
         solidityFilesNew.unshift({ value: 'Browse...', label: 'Browse...' })
         specFiles = e.data.payload.spec
@@ -134,7 +135,8 @@
           info: e.data.payload,
         })
         if (e.data.payload.endsWith('.sol')) {
-          $solidityObj.mainFile = e.data.payload
+          const fullPath = e.data.payload
+          $solidityObj.mainFile = fullPath
         } else if (e.data.payload.endsWith('.spec')) {
           $specObj.specFile = e.data.payload
         }

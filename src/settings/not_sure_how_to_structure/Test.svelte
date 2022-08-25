@@ -12,6 +12,9 @@
     navState,
     solidityObj,
     solAdditionalContracts,
+    specObj,
+    verification_message,
+    solFilesArr,
   } from './stores/store.js'
   import SolidityFiles from './SolidityFiles.svelte'
 
@@ -121,6 +124,7 @@
       solidyObj: $solidityObj,
       specObj: $specObj,
       verificatoinMessage: $verification_message,
+      solAdditionalContracts: $solAdditionalContracts,
     }
     log({
       action: 'Send "create-conf-file" command',
@@ -362,12 +366,14 @@
                                 <CustomInput
                                   placeholder="Package name"
                                   bind:bindValue={obj.packageName}
+                                  change={handleSelectInputField}
                                 />
                               </div>
                               <div class="dark_input">
                                 <CustomInput
                                   placeholder=".../path"
                                   bind:bindValue={obj.path}
+                                  change={handleSelectInputField}
                                 />
                               </div>
                               <i

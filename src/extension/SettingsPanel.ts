@@ -200,7 +200,7 @@ export class SettingsPanel {
       if (fileUri && fileUri[0]) {
         this._panel.webview.postMessage({
           type: 'file-chosen',
-          payload: fileUri[0].fsPath,
+          payload: fileUri[0].fsPath.replace(uri.path + '/', ''),
         })
       }
     })

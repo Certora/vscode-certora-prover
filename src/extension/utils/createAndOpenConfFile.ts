@@ -3,7 +3,7 @@ import { log, Sources } from '../utils/log'
 import { InputFormData, NewForm } from '../types'
 
 type ConfFile = {
-  files?: string[]
+  contracts?: string[]
   verify?: [string]
   solc?: string
   link?: string[]
@@ -34,7 +34,7 @@ function convertSourceFormDataToConfFileJSON(
   inputFormData: InputFormData,
 ): string {
   const config: ConfFile = {}
-  if (!Array.isArray(config.files)) config.files = []
+  if (!Array.isArray(config.contracts)) config.contracts = []
 
   if (inputFormData.specFile && inputFormData.mainContractName) {
     config.verify = [
@@ -44,11 +44,11 @@ function convertSourceFormDataToConfFileJSON(
 
   if (inputFormData.mainSolidityFile) {
     if (inputFormData.mainContractName) {
-      config.files.push(
+      config.contracts.push(
         `${inputFormData.mainSolidityFile}:${inputFormData.mainContractName}`,
       )
     } else {
-      config.files.push(inputFormData.mainSolidityFile)
+      config.contracts.push(inputFormData.mainSolidityFile)
     }
   }
 
@@ -57,7 +57,7 @@ function convertSourceFormDataToConfFileJSON(
     inputFormData.additionalContracts?.length > 0
   ) {
     inputFormData.additionalContracts.forEach(contract => {
-      config.files?.push(
+      config.contracts?.push(
         `${contract.file}${contract.name ? `:${contract.name}` : ''}`,
       )
     })
@@ -119,7 +119,7 @@ export function processForm(
   }
   const form: InputFormData = {
     name: confFileName,
-    mainSolidityFile: newForm.solidyObj.mainFile,
+    mainSolidityFile: newForm.solidyObj.mainFile.value,
     mainContractName: newForm.solidyObj.mainContract,
     specFile: newForm.specObj.specFile,
     solidityCompiler: compilerDirectory + newForm.solidyObj.compiler.ver,
@@ -132,6 +132,19 @@ export function processForm(
     cacheName: '',
     message: '',
     additionalSettings: [],
+  }
+
+  console.log('form at the moment: ', form)
+
+  if (
+    newForm.solidityAdditionalContracts &&
+    newForm.solidityAdditionalContracts.length > 0
+  ) {
+    console.log('=== additional contracts detected ===')
+    form.useAdditionalContracts = true
+    newForm.solidityAdditionalContracts.forEach(contract => {
+      form.additionalContracts.push({ file: contract.mainContract })
+    })
   }
 
   if (newForm.verificatoinMessage as string) {

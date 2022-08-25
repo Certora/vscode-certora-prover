@@ -11,7 +11,7 @@
   // } from './stores/store.js'
   // import { navState, specFilesArr, solidityObj } from './stores/store.js'
   // import { refreshFiles } from '../utils/refreshFiles'
-  // import { log, Sources } from '../utils/log'
+  import { log, Sources } from '../utils/log'
 
   // function handleSelectSpec(event) {
   //   $specObj.specFile = event.detail.value
@@ -22,7 +22,12 @@
   //   $specObj.specFile = ''
   //   saveOnChange()
   import CustomItem from './slots_and_utility/CustomItem.svelte'
-  import { navState, specObj, solidityObj } from './stores/store.js'
+  import {
+    navState,
+    specObj,
+    solidityObj,
+    verification_message,
+  } from './stores/store.js'
 
   // this items arrary contains all the solidity files and should update on when updateItems is fired
   // some fake stuff
@@ -253,6 +258,7 @@
                 <CustomInput
                   placeholder="Another contract to inherit se..."
                   bind:bindValue={$specObj.inherit}
+                  change={saveOnChange}
                 />
               </div>
             </div>

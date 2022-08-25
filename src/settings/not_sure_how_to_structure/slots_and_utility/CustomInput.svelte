@@ -1,6 +1,7 @@
 <script>
   export let placeholder = 'placeholder'
   export let bindValue
+  export let change
 
   // expected obj
   // let solidityIconsObj = {

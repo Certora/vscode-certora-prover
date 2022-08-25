@@ -168,7 +168,7 @@ export type Link = {
 
 // solidity part of the new settings view
 export type SolidityObj = {
-  mainFile: string
+  mainFile: { value: string; label: string; path: string }
   mainContract: string
   linking: Link[]
   specifiMethod: string
@@ -203,6 +203,7 @@ export type NewForm = {
   solidyObj: SolidityObj
   specObj: SpecObj
   verificatoinMessage: string
+  solidityAdditionalContracts?: SolidityObj[] // multiple contracts
 }
 
 export enum CommandFromResultsWebview {
@@ -275,7 +276,7 @@ export type EventFromSettingsWebview =
     }
 
 export type ConfFile = {
-  files?: string[]
+  contracts?: string[]
   verify?: [string]
   solc?: string
   link?: string[]

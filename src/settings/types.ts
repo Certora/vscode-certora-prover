@@ -86,6 +86,7 @@ export type NewForm = {
   solidyObj: SolidityObj
   specObj: SpecObj
   verificatoinMessage: string
+  solidityAdditionalContracts?: SolidityObj[] // multiple contracts
 }
 
 export enum EventTypesFromExtension {
@@ -95,7 +96,7 @@ export enum EventTypesFromExtension {
 }
 
 export type ConfFile = {
-  files?: string[]
+  contracts?: string[]
   verify?: [string]
   solc?: string
   link?: string[]

@@ -32,7 +32,7 @@ const newForm: NewForm = {
 }
 
 const stableFields = [
-  'files',
+  'contracts',
   'verify',
   'solc',
   'link',
