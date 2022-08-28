@@ -97,36 +97,7 @@
         })
 
         let newForm: NewForm = confFileToFormData(e.data.payload[0]) // change the conf file info form data for the settings form
-
-        $solidityObj.mainContract = newForm.solidyObj.mainContract
-        $solidityObj.mainFile = newForm.solidyObj.mainFile
-        $solidityObj.compiler.ver = newForm.solidyObj.compiler.ver
-        $solidityObj.compiler.exe = newForm.solidyObj.compiler.exe
-        $solidityObj.solidityArgument = newForm.solidyObj.solidityArgument
-        $solidityObj.specifiMethod = newForm.solidyObj.specifiMethod
-        $specObj.duration = newForm.specObj.duration
-        $specObj.loopUnroll = newForm.specObj.loopUnroll
-        $specObj.runOnStg = newForm.specObj.runOnStg
-        $specObj.branchName = newForm.specObj.branchName
-        $specObj.optimisticLoop = newForm.specObj.optimisticLoop
-        $specObj.specFile = newForm.specObj.specFile
-        $specObj.multiAssert = newForm.specObj.multiAssert
-        $specObj.localTypeChecking = newForm.specObj.localTypeChecking
-        $specObj.rules = newForm.specObj.rules
-        $specObj.shortOutput = newForm.specObj.shortOutput
-        $verification_message = newForm.verificatoinMessage
-        const packDir = newForm.solidyObj.solidityPackageDir
-        if (packDir.length > 0) {
-          $solidityObj.solidityPackageDir = packDir
-        }
-        const linkingArr = newForm.solidyObj.linking
-        if (linkingArr.length > 0) {
-          $solidityObj.linking = linkingArr
-        }
-        const properties = newForm.specObj.properties
-        if (properties.length > 0) {
-          $specObj.properties = properties
-        }
+        fillFields(newForm)
         break
       case EventTypesFromExtension.FileChosen:
         log({
@@ -143,6 +114,38 @@
         break
       default:
         break
+    }
+  }
+
+  function fillFields(newForm: NewForm) {
+    $solidityObj.mainContract = newForm.solidyObj.mainContract
+    $solidityObj.mainFile = newForm.solidyObj.mainFile
+    $solidityObj.compiler.ver = newForm.solidyObj.compiler.ver
+    $solidityObj.compiler.exe = newForm.solidyObj.compiler.exe
+    $solidityObj.solidityArgument = newForm.solidyObj.solidityArgument
+    $solidityObj.specifiMethod = newForm.solidyObj.specifiMethod
+    $specObj.duration = newForm.specObj.duration
+    $specObj.loopUnroll = newForm.specObj.loopUnroll
+    $specObj.runOnStg = newForm.specObj.runOnStg
+    $specObj.branchName = newForm.specObj.branchName
+    $specObj.optimisticLoop = newForm.specObj.optimisticLoop
+    $specObj.specFile = newForm.specObj.specFile
+    $specObj.multiAssert = newForm.specObj.multiAssert
+    $specObj.localTypeChecking = newForm.specObj.localTypeChecking
+    $specObj.rules = newForm.specObj.rules
+    $specObj.shortOutput = newForm.specObj.shortOutput
+    $verification_message = newForm.verificatoinMessage
+    const packDir = newForm.solidyObj.solidityPackageDir
+    if (packDir.length > 0) {
+      $solidityObj.solidityPackageDir = packDir
+    }
+    const linkingArr = newForm.solidyObj.linking
+    if (linkingArr.length > 0) {
+      $solidityObj.linking = linkingArr
+    }
+    const properties = newForm.specObj.properties
+    if (properties.length > 0) {
+      $specObj.properties = properties
     }
   }
 

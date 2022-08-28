@@ -74,7 +74,7 @@ export function smartMergeVerificationResult(
     addJobIdToProperties(newResult)
     // create a new Verification object and push to the Verification[]
     const newVerification: Verification = {
-      name: name, // todo: add the righ name
+      name: name,
       contract: tree.contract,
       spec: tree.spec,
       jobs: [newResult],

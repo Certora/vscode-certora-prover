@@ -1,4 +1,4 @@
-import type { ConfFile, NewForm } from '../types'
+import type { ConfFile, Link, NewForm, SolidityObj } from '../types'
 
 const newForm: NewForm = {
   solidyObj: {
@@ -181,6 +181,44 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
       name: key as string,
       value: additionalSettings[key].toString(),
     }))
+  }
+
+  // additional contracts
+  if (confFile.contracts.length > 1) {
+    const tempFormArr: SolidityObj[] = []
+    confFile.contracts.forEach(contractStr => {
+      if (!contractStr.includes(form.solidyObj.mainContract)) {
+        const tempForm: SolidityObj = {
+          mainFile: '',
+          mainContract: '',
+          linking: [],
+          specifiMethod: '',
+          compiler: {
+            exe: '',
+            ver: '',
+          },
+          solidityArgument: '',
+          solidityPackageDefaultPath: '',
+          solidityPackageDir: [],
+        }
+        const solArr = contractStr.split(':') || []
+        tempForm.mainFile = solArr[0] || ''
+        tempForm.mainContract = solArr[1] || ''
+
+        if (confFile.link) {
+          confFile.link.forEach(linkStr => {
+            const splittedLinkArr = linkStr.split(':')
+            if (splittedLinkArr[0] === tempForm.mainContract) {
+              const linkPropsArr = splittedLinkArr[1].split('=') || []
+              const tempLink: Link = {
+                variable: linkPropsArr[0] || '',
+                contractName: linkPropsArr[1] || '',
+              }
+            }
+          })
+        }
+      }
+    })
   }
 
   return form
