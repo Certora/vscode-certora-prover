@@ -6,6 +6,7 @@
   import Icon from './slots_and_utility/Icon.svelte'
   import CustomItem from './slots_and_utility/CustomItem.svelte'
   import { navState, specObj, solidityObj } from './stores/store.js'
+  import CheckBoxInfo from './slots_and_utility/CheckBoxInfo.svelte'
 
   // this items arrary contains all the solidity files and should update on when updateItems is fired
   // some fake stuff
@@ -59,11 +60,11 @@
       loadFilesFolder(fileType, index)
       return
     }
-    $specObj.mainFile = event.detail
+    $specObj.specFile = event.detail
   }
 
   function handleClear(e, index) {
-    $specObj.mainFile = ''
+    $specObj.specFile = ''
   }
   // add files from folder
   function loadFilesFolder(fileType, index) {
@@ -105,8 +106,9 @@
   }
 </script>
 
-<div class="card_parent_wrapper bg_dark">
+<div class="card_parent_wrapper bg_dark border-rd">
   <CollapseCard
+    chevron="padding-right:16px;"
     bind:open={$navState.specCheck.active}
     resetNavProp={true}
     bind:disabledState={solDisabledState}
@@ -116,20 +118,20 @@
       <h3>Certora spec</h3>
       <!-- <i class="codicon codicon-settings" /> -->
     </div>
-    <div slot="body">
-      <div class="card_body_wrapper_parent bg_light">
-        <CollapseCard>
-          <div slot="header" class="header header_contract no_border_padding">
+    <div slot="body" class="p-16 pt-0">
+      <div class="bg_light border-rd">
+        <CollapseCard chevron="padding-right:12px;">
+          <div slot="header" class="p-12 header header_contract">
             <i class="codicon codicon-file" />
             <h3>Main SPEC FILE</h3>
           </div>
-          <div slot="body" class="card_body_wrapper">
-            <div class="input_wrapper" style="margin-top: 8px;">
+          <div slot="body" class="p-12 pt-0">
+            <div class="input_wrapper">
               <div class="dark_input">
                 <h3>Certore specification file<span>*</span></h3>
                 <button
                   on:click={() => updateItems('spec')}
-                  style="background: transparent; padding:0; border:none;"
+                  style="background: transparent; padding:0; border:none; margin-top:auto;"
                 >
                   <Select
                     listOpen={isSpecListOpen}
@@ -146,7 +148,7 @@
                 </button>
               </div>
               <div class="dark_input">
-                <h3>Rules<span>*</span></h3>
+                <h3>Rules</h3>
                 <CustomInput
                   placeholder="All rules"
                   bind:bindValue={$specObj.rules}
@@ -154,36 +156,28 @@
               </div>
             </div>
             <div class="input_wrapper mt-24px">
-              <div class="dark_input">
+              <div class="dark_input" style="width: auto">
                 <h3>Duration</h3>
                 <CustomInput
                   placeholder="600s"
                   bind:bindValue={$specObj.duration}
                 />
               </div>
-              <div class="dark_input">
-                <h3>Inherit</h3>
-                <CustomInput
-                  placeholder="Another contract to inherit se..."
-                  bind:bindValue={$specObj.inherit}
-                />
-              </div>
-            </div>
-            <div class="input_wrapper mt-24px">
-              <div class="dark_input alternate_input">
-                <label class="checkbox_container" style="margin:0"
-                  >Optomistic loop
+              <div
+                class="dark_input check_box_wrapper"
+                style="width: auto; margin: auto 16px 8px auto;"
+              >
+                <label class="checkbox_container" style="margin: 0;">
+                  Optomistic loop
                   <input
                     type="checkbox"
                     bind:checked={$specObj.optimisticLoop}
                   />
                   <span class="checkmark" />
                 </label>
+                <CheckBoxInfo />
               </div>
-              <div
-                class="dark_input alternate_input"
-                style="width: auto; flex-grow:1;"
-              >
+              <div class="dark_input" style="width: auto">
                 <h3>Loop Unroll</h3>
                 <CustomInput
                   placeholder="0"
@@ -191,97 +185,105 @@
                 />
               </div>
             </div>
+            <div class="border-rd bg_dark mt-8px">
+              <CollapseCard open={false} chevron="padding-right:8px;">
+                <div slot="header" class="p-8 header header_contract">
+                  <i class="codicon codicon-gear" />
+                  <h3>Additional prover settings</h3>
+                </div>
+                <div slot="body" class="most_inner_card">
+                  <h3 class="header_single">Additional flags</h3>
+
+                  {#each $specObj.properties as obj, index}
+                    <div class="input_wrapper mt-8px">
+                      <div class="dark_input">
+                        <CustomInput
+                          placeholder="Property name"
+                          bind:bindValue={obj.name}
+                        />
+                      </div>
+                      <div class="dark_input">
+                        <CustomInput
+                          placeholder="Property value"
+                          bind:bindValue={obj.value}
+                        />
+                      </div>
+                      <i
+                        class="codicon codicon-trash"
+                        on:click={removeObj($specObj.properties, index)}
+                      />
+                    </div>
+                  {/each}
+                  <button
+                    class="btn_add"
+                    on:click={pushNewObj($specObj.properties, {
+                      name: '',
+                      value: '',
+                    })}><i class="codicon codicon-add" /> Add Flag</button
+                  >
+                  <h3 class="header_single mt-8px">Staging</h3>
+                  <div class="input_wrapper input_single mt-8px">
+                    <div class="dark_input check_box_wrapper">
+                      <label class="checkbox_container"
+                        >Run on the Staging Environment
+                        <input
+                          type="checkbox"
+                          bind:checked={$specObj.runOnStg}
+                        />
+                        <span class="checkmark" />
+                      </label>
+                      <CheckBoxInfo />
+                    </div>
+                  </div>
+                  <div class="input_wrapper input_single">
+                    <div class="dark_input">
+                      <h3>Branch Name</h3>
+                      <CustomInput
+                        placeholder="default: master"
+                        bind:bindValue={$specObj.branchName}
+                      />
+                    </div>
+                  </div>
+                  <div class="input_wrapper check_between ">
+                    <div class="dark_input alternate_input  check_box_wrapper">
+                      <label class="checkbox_container"
+                        >Local type checking
+                        <input
+                          type="checkbox"
+                          bind:checked={$specObj.localTypeChecking}
+                        />
+                        <span class="checkmark" />
+                      </label>
+                      <CheckBoxInfo />
+                    </div>
+                    <div class="dark_input alternate_input check_box_wrapper">
+                      <label class="checkbox_container"
+                        >Short output
+                        <input
+                          type="checkbox"
+                          bind:checked={$specObj.shortOutput}
+                        />
+                        <span class="checkmark" />
+                      </label>
+                      <CheckBoxInfo />
+                    </div>
+                    <div class="dark_input alternate_input check_box_wrapper">
+                      <label class="checkbox_container"
+                        >Multi assert
+                        <input
+                          type="checkbox"
+                          bind:checked={$specObj.multiAssert}
+                        />
+                        <span class="checkmark" />
+                      </label>
+                      <CheckBoxInfo />
+                    </div>
+                  </div>
+                </div>
+              </CollapseCard>
+            </div>
           </div>
         </CollapseCard>
-        <div class="card_body_wrapper_parent bg_dark mt-8px">
-          <CollapseCard>
-            <div slot="header" class="header header_contract">
-              <i class="codicon codicon-gear" />
-              <h3>Additional prover settings</h3>
-            </div>
-            <div slot="body" class="card_body_wrapper">
-              <h3>Properties</h3>
-              {#each $specObj.properties as obj, index}
-                <div class="input_wrapper">
-                  <div class="dark_input">
-                    <CustomInput
-                      placeholder="Property name"
-                      bind:bindValue={obj.name}
-                    />
-                  </div>
-                  <div class="dark_input">
-                    <CustomInput
-                      placeholder="Property value"
-                      bind:bindValue={obj.value}
-                    />
-                  </div>
-                  <i
-                    class="codicon codicon-trash"
-                    on:click={removeObj($specObj.properties, index)}
-                  />
-                </div>
-              {/each}
-              <button
-                class="btn_add"
-                on:click={pushNewObj($specObj.properties, {
-                  name: '',
-                  value: '',
-                })}><i class="codicon codicon-add" /> Add Property</button
-              >
-              <div class="input_wrapper input_single">
-                <div class="dark_input ">
-                  <h3>Staging</h3>
-                  <label class="checkbox_container"
-                    >Run on the Staging Environment
-                    <input type="checkbox" bind:checked={$specObj.runOnStg} />
-                    <span class="checkmark" />
-                  </label>
-                </div>
-              </div>
-              <div class="input_wrapper input_single">
-                <div class="dark_input">
-                  <h3>Branch Name</h3>
-                  <CustomInput
-                    placeholder="default: master"
-                    bind:bindValue={$specObj.branchName}
-                  />
-                </div>
-              </div>
-              <div class="input_wrapper check_between">
-                <div class="dark_input alternate_input ">
-                  <label class="checkbox_container"
-                    >Local type checking
-                    <input
-                      type="checkbox"
-                      bind:checked={$specObj.localTypeChecking}
-                    />
-                    <span class="checkmark" />
-                  </label>
-                </div>
-                <div class="dark_input alternate_input">
-                  <label class="checkbox_container"
-                    >Short output
-                    <input
-                      type="checkbox"
-                      bind:checked={$specObj.shortOutput}
-                    />
-                    <span class="checkmark" />
-                  </label>
-                </div>
-                <div class="dark_input alternate_input">
-                  <label class="checkbox_container"
-                    >Multi assert
-                    <input
-                      type="checkbox"
-                      bind:checked={$specObj.multiAssert}
-                    />
-                    <span class="checkmark" />
-                  </label>
-                </div>
-              </div>
-            </div>
-          </CollapseCard>
-        </div>
       </div>
     </div>
   </CollapseCard>
@@ -322,7 +324,7 @@
     display: block;
     position: relative;
     padding-left: 30px;
-    margin-bottom: 12px;
+    margin-bottom: 4px;
     cursor: pointer;
     font-size: 13px;
     -webkit-user-select: none;
@@ -384,5 +386,17 @@
     -webkit-transform: rotate(45deg);
     -ms-transform: rotate(45deg);
     transform: rotate(45deg);
+  }
+
+  .check_box_wrapper {
+    position: relative;
+    flex-direction: row;
+    gap: 8px;
+    white-space: nowrap;
+  }
+
+  .header_single {
+    font-size: 12px;
+    font-weight: 500;
   }
 </style>

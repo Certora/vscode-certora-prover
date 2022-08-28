@@ -6,8 +6,9 @@
 </script>
 
 <div class="main_wrapper">
-  <div class="left_wrapper"><RunSideNav /></div>
+  <div class="left_wrapper media"><RunSideNav /></div>
   <div class="right_wrapper">
+    <div class="top_nav"><RunSideNav /></div>
     <Test />
     <SpecSettingsTab />
     <VerificationMessageTab />
@@ -16,17 +17,41 @@
 
 <style>
   /* stylelint-disable */
-
+  .top_nav {
+    display: none;
+  }
   .main_wrapper {
     display: flex;
+    box-sizing: border-box;
+    /* width: 100%; */
+    /* overflow: hidden; */
   }
   .left_wrapper {
+    box-sizing: border-box;
     width: 30%;
     border-right: 1px solid var(--vscode-sideBarSectionHeader-border);
-    padding: 24px;
+    padding: 16px;
   }
   .right_wrapper {
+    box-sizing: border-box;
     width: 70%;
-    padding: 24px;
+    padding: 16px;
+  }
+  @media (max-width: 800px) {
+    .media {
+      display: none;
+    }
+    .right_wrapper {
+      width: 100%;
+      padding: 0;
+    }
+    .top_nav {
+      display: block;
+    }
+
+    :global(body) {
+      padding: 16px;
+      overflow-x: hidden;
+    }
   }
 </style>

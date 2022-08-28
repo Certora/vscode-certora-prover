@@ -108,7 +108,7 @@
 
   function handleSelectSol(event) {
     if (event.detail.value === 'Browse...') {
-      loadFilesFolder(fileType, index)
+      loadFilesFolder('sol', 0)
       return
     }
     $solidityObj.mainFile = event.detail

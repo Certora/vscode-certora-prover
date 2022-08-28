@@ -63,7 +63,10 @@
 
 <style>
   /* stylelint-disable */
-
+  H1 {
+    font-size: 20px;
+    font-weight: 600;
+  }
   h3 {
     margin: 0;
     font-size: 13px;
@@ -80,7 +83,7 @@
   .codicon-check {
     color: transparent;
     transition: color 0.2s ease-in-out;
-    margin-left: auto;
+    margin: auto 0 auto auto;
   }
   .checked .codicon-check {
     color: var(--vscode-testing-iconPassed);
@@ -109,5 +112,23 @@
   }
   .nav_settings_child i:nth-child(1) {
     margin: auto 6px auto 0;
+  }
+
+  button:disabled {
+    filter: brightness(60%);
+    /* color:var(--vscode-disabledForeground); */
+  }
+  button:not(:disabled):not(.active):hover {
+    background: var(--vscode-dropdown-background);
+  }
+  @media (max-width: 800px) {
+    .nav_settings {
+      flex-direction: row;
+      margin-bottom: 16px;
+    }
+    h3 {
+      font-size: 11px;
+      font-weight: normal;
+    }
   }
 </style>
