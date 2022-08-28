@@ -76,7 +76,7 @@
           <h3>Source<span>*</span></h3>
           <button
             on:click={() => updateItems('sol')}
-            style="background: transparent; padding:0; border:none;"
+            style="background: transparent; padding:0; border:none; margin-top:auto;"
           >
             <Select
               listOpen={isSolidityListOpen}

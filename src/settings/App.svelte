@@ -265,7 +265,7 @@
     padding: 44px 24px;
   }
   /* :global(body) {
-    padding: 26px 24px;
+    padding: 0 16px;
   } */
 
   :global(:root) {
