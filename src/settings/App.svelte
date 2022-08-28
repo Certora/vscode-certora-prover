@@ -21,6 +21,7 @@
     solidityObj,
     specObj,
     verification_message,
+    solAdditionalContracts,
   } from './not_sure_how_to_structure/stores/store.js'
 
   $: $solidityObj, console.log($solidityObj)
@@ -146,6 +147,9 @@
     const properties = newForm.specObj.properties
     if (properties.length > 0) {
       $specObj.properties = properties
+    }
+    if (newForm.solidityAdditionalContracts) {
+      $solAdditionalContracts = newForm.solidityAdditionalContracts
     }
   }
 

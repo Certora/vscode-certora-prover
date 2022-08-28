@@ -1,6 +1,6 @@
 import { workspace, Uri, window } from 'vscode'
 import { log, Sources } from '../utils/log'
-import { InputFormData, NewForm } from '../types'
+import { InputFormData, Link, NewForm, SolidityObj } from '../types'
 
 type ConfFile = {
   contracts?: string[]
@@ -175,7 +175,7 @@ export function processForm(
           linking.forEach(link => {
             form.link.push({
               id: '',
-              contractName: form.mainContractName,
+              contractName: solObj.mainContract,
               fieldName: link.variable,
               associatedContractName: link.contractName,
             })

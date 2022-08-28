@@ -28,7 +28,6 @@
     solidityObj,
     verification_message,
   } from './stores/store.js'
-  // import { navState, specObj, solidityObj } from './stores/store.js'
   import CheckBoxInfo from './slots_and_utility/CheckBoxInfo.svelte'
 
   // this items arrary contains all the solidity files and should update on when updateItems is fired
