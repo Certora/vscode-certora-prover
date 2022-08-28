@@ -133,7 +133,7 @@ export function processForm(
     name: confFileName,
     mainSolidityFile: newForm.solidyObj.mainFile.value,
     mainContractName: newForm.solidyObj.mainContract,
-    specFile: newForm.specObj.specFile,
+    specFile: newForm.specObj.specFile.value,
     solidityCompiler: compilerDirectory + newForm.solidyObj.compiler.ver,
     useAdditionalContracts: false,
     additionalContracts: [],
@@ -146,8 +146,6 @@ export function processForm(
     additionalSettings: [],
     solc_map: [],
   }
-
-  console.log('form at the moment: ', newForm)
 
   if (
     newForm.solidityAdditionalContracts &&

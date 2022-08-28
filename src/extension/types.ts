@@ -186,7 +186,7 @@ export type Property = {
 
 // spec part of the new settings view
 export type SpecObj = {
-  specFile: string
+  specFile: { value: string; label: string; path: string }
   rules: string
   duration: string
   inherit: string

@@ -78,12 +78,20 @@
           const tempPath = str.replace(tempLabel, '')
           return { value: str, label: tempLabel, path: tempPath }
         })
-        solidityFilesNew.unshift({ value: 'Browse...', label: 'Browse...' })
+        solidityFilesNew.unshift({
+          value: 'Browse...',
+          label: 'Browse...',
+          path: 'Browse',
+        })
         specFiles = e.data.payload.spec
         specFilesNew = specFiles.map(str => {
           return { value: str, label: str }
         })
-        specFilesNew.unshift({ value: 'Browse...', label: 'Browse...' })
+        specFilesNew.unshift({
+          value: 'Browse...',
+          label: 'Browse...',
+          path: 'Browse',
+        })
         // very bad temp timeout
         setTimeout(() => {
           solFilesArr.set(solidityFilesNew)

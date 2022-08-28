@@ -69,41 +69,7 @@
   // ********** IMPORTANT **********
   // ********** FIRST OBJECT IN THE ARRAY MUST BE { value: 'Browse...', label: 'Browse...', path: 'src/somefolder' }
   // this brows object is needed to fire up a function to browse files (the path key is useless but might as well)
-  $: solFiles = [
-    { value: 'Browse...', label: 'Browse...', path: 'src/somefolder' },
-    { value: 'src/somefolder/file-1', label: 'file-1', path: 'src/somefolder' },
-    {
-      value: 'file-2/src/somefolder1',
-      label: 'file-2',
-      path: 'src/somefolder1',
-    },
-    {
-      value: 'file-3/src/somefolder2',
-      label: 'file-3',
-      path: 'src/somefolder2',
-    },
-    {
-      value: 'file-4/src/somefolder3',
-      label: 'file-4',
-      path: 'src/somefolder3',
-    },
-    {
-      value: 'file-5/src/somefolder4',
-      label: 'file-5',
-      path: 'src/somefolder4',
-    },
-    {
-      value: 'file-6/src/somefolder5',
-      label: 'file-6',
-      path: 'src/somefolder5',
-    },
-  ]
-
-  // function handleSelectSol(event) {
-  //   $solidityObj.mainFile = event.detail.value
-  //   saveOnChange()
-  // }
-
+  $: solFiles = []
   function handleSelectInputField(event) {
     saveOnChange()
   }
@@ -188,10 +154,11 @@
     // not really expecting anything but sol here
     // might bove elsewhere later and make it more reusable
     if (fileType !== 'sol') return
+    refreshFiles()
     // this is actually pushing some fake value in (for testing only) just replace with an array of the new values from the file system like you see in the specFiles
     solFiles = [
-      ...solFiles,
-      { value: 'Browse...', label: 'Browse...', path: 'src/somefolder' },
+      ...$solFilesArr,
+      // { value: 'Browse...', label: 'Browse...', path: 'Browse...' },
     ]
   }
 
@@ -246,6 +213,7 @@
         compiler: { exe: '', ver: '' },
       },
     ]
+    saveOnChange()
   }
 
   let isSolidityListOpen = false
