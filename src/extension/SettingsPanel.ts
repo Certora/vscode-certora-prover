@@ -80,9 +80,9 @@ export class SettingsPanel {
             const form: InputFormData = processForm(e.payload, confFileName)
             createAndOpenConfFile(form)
             if (
-              form.mainContractName !== '' &&
-              form.mainSolidityFile !== '' &&
-              form.specFile !== ''
+              form.mainContractName &&
+              form.mainSolidityFile &&
+              form.specFile
             ) {
               SettingsPanel.resultsWebviewProvider.postMessage({
                 type: 'allow-run',
