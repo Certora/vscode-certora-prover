@@ -1,5 +1,4 @@
-import type common from 'mocha/lib/interfaces/common'
-import type { ConfFile, Link, NewForm, SolidityObj, SpecObj } from '../types'
+import type { ConfFile, NewForm, SolidityObj, SpecObj } from '../types'
 
 const newForm: NewForm = {
   solidyObj: {

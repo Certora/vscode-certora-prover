@@ -17,6 +17,7 @@
     solFilesArr,
   } from './stores/store.js'
   import SolidityFiles from './SolidityFiles.svelte'
+  import { onMount } from 'svelte'
 
   let infoObjArr = {
     mainFile: {

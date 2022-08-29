@@ -4,6 +4,7 @@ import { SettingsPanel } from './SettingsPanel'
 import { ScriptRunner } from './ScriptRunner'
 import { ConfFile, InputFormData, ConfNameMap } from './types'
 import { createAndOpenConfFile } from './utils/createAndOpenConfFile'
+import { confFileToFormData } from './utils/confFileToInputForm'
 
 export function activate(context: vscode.ExtensionContext): void {
   function showSettings(name: ConfNameMap) {
@@ -11,23 +12,11 @@ export function activate(context: vscode.ExtensionContext): void {
 
     if (!path) return
     const confFileDefault = getDefaultSettings()
-    const emptyForm: InputFormData = {
-      name: name.fileName,
-      mainSolidityFile: '',
-      mainContractName: '',
-      specFile: '',
-      solidityCompiler: '',
-      useAdditionalContracts: false,
-      additionalContracts: [],
-      link: [],
-      extendedSettings: [],
-      useStaging: false,
-      branch: '',
-      cacheName: '',
-      message: '',
-      additionalSettings: [],
-      solc_map: [],
-    }
+    const emptyForm: InputFormData = confFileToFormData(
+      confFileDefault,
+      name.fileName,
+    )
+
     createAndOpenConfFile(emptyForm)
     SettingsPanel.setResultsWebviewProvider(resultsWebviewProvider)
     SettingsPanel.render(context.extensionUri, name, confFileDefault)

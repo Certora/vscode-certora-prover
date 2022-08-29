@@ -11,7 +11,7 @@
   // new cutting edge stuff
   import { log, Sources } from './utils/log'
   import { confFileToFormData } from './utils/confFileToFormData'
-  import type { ConfFile, Form, NewForm } from './types'
+  import type { Form, NewForm } from './types'
   import { EventTypesFromExtension, EventsFromExtension } from './types'
   import RenamedMainWrapper from './not_sure_how_to_structure/RenamedMainWrapper.svelte'
   // testing files with store
@@ -138,6 +138,8 @@
     $solidityObj.compiler.exe = newForm.solidyObj.compiler.exe
     $solidityObj.solidityArgument = newForm.solidyObj.solidityArgument
     $solidityObj.specifiMethod = newForm.solidyObj.specifiMethod
+    $solidityObj.solidityPackageDefaultPath =
+      newForm.solidyObj.solidityPackageDefaultPath
     $specObj.duration = newForm.specObj.duration
     $specObj.loopUnroll = newForm.specObj.loopUnroll
     $specObj.runOnStg = newForm.specObj.runOnStg
