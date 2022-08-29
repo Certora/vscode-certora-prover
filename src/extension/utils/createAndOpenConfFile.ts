@@ -98,9 +98,7 @@ function convertSourceFormDataToConfFileJSON(
     })
   }
 
-  if (inputFormData.useStaging) {
-    config.staging = inputFormData.branch
-  }
+  config.staging = inputFormData.branch || 'master'
 
   if (inputFormData.cacheName) {
     config.cache = inputFormData.cacheName

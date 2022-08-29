@@ -4,78 +4,18 @@
   import CollapseCard from './slots_and_utility/CollapseCard.svelte'
   import CustomInput from './slots_and_utility/CustomInput.svelte'
   import Icon from './slots_and_utility/Icon.svelte'
-  // import {
-  //   writableArray_Spec,
-  //   specObj,
-  //   verification_message,
-  // } from './stores/store.js'
-  // import { navState, specFilesArr, solidityObj } from './stores/store.js'
-  // import { refreshFiles } from '../utils/refreshFiles'
   import { log, Sources } from '../utils/log'
 
-  // function handleSelectSpec(event) {
-  //   $specObj.specFile = event.detail.value
-  //   saveOnChange()
-  // }
-
-  // function handleClear() {
-  //   $specObj.specFile = ''
-  //   saveOnChange()
   import CustomItem from './slots_and_utility/CustomItem.svelte'
   import {
     navState,
     specObj,
     solidityObj,
     verification_message,
+    specFilesArr,
   } from './stores/store.js'
   import CheckBoxInfo from './slots_and_utility/CheckBoxInfo.svelte'
-
-  // this items arrary contains all the solidity files and should update on when updateItems is fired
-  // some fake stuff
-  // ********** IMPORTANT **********
-  // ********** FIRST OBJECT IN THE ARRAY MUST BE { value: 'Browse...', label: 'Browse...', path: 'src/somefolder' }
-  // this brows object is needed to fire up a function to browse files (the path key is useless but might as well)
-  $: specFiles = [
-    { value: 'Browse...', label: 'Browse...', path: 'src/somefolder' },
-    { value: 'src/somefolder/file-1', label: 'file-1', path: 'src/somefolder' },
-    {
-      value: 'file-2/src/somefolder1',
-      label: 'file-2',
-      path: 'src/somefolder1',
-    },
-    {
-      value: 'file-3/src/somefolder2',
-      label: 'file-3',
-      path: 'src/somefolder2',
-    },
-    {
-      value: 'file-4/src/somefolder3',
-      label: 'file-4',
-      path: 'src/somefolder3',
-    },
-    {
-      value: 'file-5/src/somefolder4',
-      label: 'file-5',
-      path: 'src/somefolder4',
-    },
-    {
-      value: 'file-6/src/somefolder5',
-      label: 'file-6',
-      path: 'src/somefolder5',
-    },
-  ]
-
-  // on click on the input get al the files (sol or spec) based on what os passded to the function
-  function updateItems(fileType) {
-    // not really expecting anything but sol here
-    // might bove elsewhere later and make it more reusable
-    if (fileType !== 'spec') return
-    // this is actually pushing some fake value in (for testing only) just replace with an array of the new values from the file system like you see in the specFiles
-    specFiles = [
-      ...specFiles,
-      { value: 'Browse...', label: 'Browse...', path: 'src/somefolder' },
-    ]
-  }
+  import { refreshFiles } from '../utils/refreshFiles'
 
   function handleSelectSpec(event, fileType, index) {
     if (event.detail.value === 'Browse...') {
@@ -83,17 +23,27 @@
       return
     }
     $specObj.specFile = event.detail
+    saveOnChange()
   }
 
   function handleClear(e, index) {
     $specObj.specFile = ''
+    saveOnChange()
   }
   // add files from folder
   function loadFilesFolder(fileType, index) {
-    // clear just incase
-    handleClear(null, index)
-    console.log(fileType)
-    console.log(index)
+    openBrowser(fileType, index)
+  }
+
+  function openBrowser(fileType, index = -1) {
+    log({
+      action: 'Send "open-browser" command',
+      source: Sources.SettingsWebview,
+    })
+    vscode.postMessage({
+      command: 'open-browser',
+      payload: [fileType, index],
+    })
   }
 
   $: solDisabledState = !(
@@ -101,39 +51,6 @@
     $solidityObj.mainContract !== '' &&
     $solidityObj.compiler.ver !== ''
   )
-
-  // function createNewFlag() {
-  //   const newFlag = {
-  //     name: '',
-  //     value: '',
-  //   }
-  //   const newProperties = $specObj.properties
-  //   newProperties.push(newFlag)
-  //   $specObj.properties = newProperties
-  //   saveOnChange()
-  // }
-
-  // function deleteFleg(indexToDelete) {
-  //   const newProperties = []
-  //   $specObj.properties.forEach((prop, index) => {
-  //     if (index !== indexToDelete) {
-  //       newProperties.push(prop)
-  //     }
-  //   })
-  //   $specObj.properties = newProperties
-  //   saveOnChange()
-  // }
-
-  // function openBrowser(fileType) {
-  //   log({
-  //     action: 'Send "open-browser" command',
-  //     source: Sources.SettingsWebview,
-  //   })
-  //   vscode.postMessage({
-  //     command: 'open-browser',
-  //     payload: fileType,
-  //   })
-  // }
 
   function saveOnChange() {
     let form = {
@@ -203,29 +120,14 @@
             <div class="input_wrapper">
               <div class="dark_input">
                 <h3>Certore specification file<span>*</span></h3>
-
-                <!-- refresh files when component is pressed -->
-                <!-- <div on:click={refreshFiles}>
-                  <Select
-                    items={$specFilesArr}
-                    value={$specObj.specFile}
-                    {Icon}
-                    {ClearIcon}
-                    on:select={handleSelectSpec}
-                    on:clear={handleClear}
-                    placeholder=".spec file"
-                  />
-                </div> -->
-
-                <!-- ======= -->
                 <button
-                  on:click={() => updateItems('spec')}
+                  on:click={() => refreshFiles()}
                   style="background: transparent; padding:0; border:none; margin-top:auto;"
                 >
                   <Select
                     listOpen={isSpecListOpen}
                     iconProps={specIconsObj}
-                    items={specFiles}
+                    items={$specFilesArr}
                     Item={CustomItem}
                     {Icon}
                     {ClearIcon}
@@ -235,7 +137,6 @@
                     bind:value={$specObj.specFile}
                   />
                 </button>
-                <!-- >>>>>>> natti_new -->
               </div>
               <div class="dark_input">
                 <h3>Rules</h3>
@@ -280,105 +181,6 @@
                 />
               </div>
             </div>
-            <!-- <<<<<<< HEAD -->
-            <!-- </div>
-        </CollapseCard>
-        <div class="card_body_wrapper_parent bg_dark mt-8px">
-          <CollapseCard>
-            <div slot="header" class="header header_contract">
-              <i class="codicon codicon-gear" />
-
-              <h3>Additional prover settings</h3>
-            </div>
-            <div slot="body" class="card_body_wrapper">
-              <h3>Flag</h3>
-              {#each $specObj.properties as _, index}
-                <div class="input_wrapper">
-                  <div class="dark_input">
-                    <CustomInput
-                      placeholder="flag name"
-                      bind:bindValue={$specObj.properties[index].name}
-                      change={saveOnChange}
-                    />
-                  </div>
-                  <div class="dark_input">
-                    <CustomInput
-                      placeholder="flag value"
-                      bind:bindValue={$specObj.properties[index].value}
-                      change={saveOnChange}
-                    />
-                  </div>
-                  <i
-                    class="codicon codicon-trash"
-                    on:click={removeObj($specObj.properties, index)}
-                  />
-                </div>
-              {/each}
-              <button
-                class="btn_add"
-                on:click={pushNewObj($specObj.properties, {
-                  name: '',
-                  value: '',
-                })}><i class="codicon codicon-add" /> Add Property</button
-              >
-              <div class="input_wrapper input_single">
-                <div class="dark_input ">
-                  <h3>Staging</h3>
-                  <label class="checkbox_container"
-                    >Run on the Staging Environment
-                    <input
-                      type="checkbox"
-                      bind:checked={$specObj.runOnStg}
-                      on:change={saveOnChange}
-                    />
-                    <span class="checkmark" />
-                  </label>
-                </div>
-              </div>
-              <div class="input_wrapper input_single">
-                <div class="dark_input">
-                  <h3>Branch Name</h3>
-                  <CustomInput
-                    placeholder="default: master"
-                    bind:bindValue={$specObj.branchName}
-                    change={saveOnChange}
-                  />
-                </div>
-              </div>
-              <div class="input_wrapper check_between">
-                <div class="dark_input alternate_input ">
-                  <label class="checkbox_container"
-                    >Local type checking
-                    <input
-                      type="checkbox"
-                      bind:checked={$specObj.localTypeChecking}
-                      on:change={saveOnChange}
-                    />
-                    <span class="checkmark" />
-                  </label>
-                </div>
-                <div class="dark_input alternate_input">
-                  <label class="checkbox_container"
-                    >Short output
-                    <input
-                      type="checkbox"
-                      bind:checked={$specObj.shortOutput}
-                      on:change={saveOnChange}
-                    />
-                    <span class="checkmark" />
-                  </label>
-                </div>
-                <div class="dark_input alternate_input">
-                  <label class="checkbox_container"
-                    >Multi assert
-                    <input
-                      type="checkbox"
-                      bind:checked={$specObj.multiAssert}
-                      on:change={saveOnChange}
-                    />
-                    <span class="checkmark" />
-                  </label> -->
-            <!-- ======= -->
             <div class="border-rd bg_dark mt-8px">
               <CollapseCard open={false} chevron="padding-right:8px;">
                 <div slot="header" class="p-8 header header_contract">
@@ -394,12 +196,14 @@
                         <CustomInput
                           placeholder="Property name"
                           bind:bindValue={obj.name}
+                          change={saveOnChange}
                         />
                       </div>
                       <div class="dark_input">
                         <CustomInput
                           placeholder="Property value"
                           bind:bindValue={obj.value}
+                          change={saveOnChange}
                         />
                       </div>
                       <i
@@ -435,6 +239,7 @@
                       <CustomInput
                         placeholder="default: master"
                         bind:bindValue={$specObj.branchName}
+                        change={saveOnChange}
                       />
                     </div>
                   </div>
