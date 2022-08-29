@@ -64,70 +64,15 @@
         'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#method',
     },
   }
-  // this items arrary contains all the solidity files and should update on when updateItems is fired
-  // some fake stuff
-  // ********** IMPORTANT **********
-  // ********** FIRST OBJECT IN THE ARRAY MUST BE { value: 'Browse...', label: 'Browse...', path: 'src/somefolder' }
-  // this brows object is needed to fire up a function to browse files (the path key is useless but might as well)
-  $: solFiles = []
-  function handleSelectInputField(event) {
-    saveOnChange()
-  }
 
-  // function createNewPackage() {
-  //   const newPackage = {
-  //     packageName: '',
-  //     path: '',
-  //   }
-  //   const newPackageDir = $solidityObj.solidityPackageDir
-  //   newPackageDir.push(newPackage)
-  //   $solidityObj.solidityPackageDir = newPackageDir
-  //   saveOnChange()
-  // }
-
-  // function createNewLink() {
-  //   const newLink = { variable: '', contractName: '' }
-  //   const newLinking = $solidityObj.linking
-  //   newLinking.push(newLink)
-  //   $solidityObj.linking = newLinking
-  //   saveOnChange()
-  // }
-
-  // function deletePackage(indexToDelete) {
-  //   const newPackageDir = []
-  //   $solidityObj.solidityPackageDir.forEach((singlePackage, index) => {
-  //     if (index !== indexToDelete) {
-  //       newPackageDir.push(singlePackage)
-  //     }
-  //   })
-  //   $solidityObj.solidityPackageDir = newPackageDir
-  //   saveOnChange()
-  // }
-
-  // function deleteLink(indexToDelete) {
-  //   const newLinking = []
-  //   $solidityObj.linking.forEach((link, index) => {
-  //     if (index !== indexToDelete) {
-  //       newLinking.push(link)
-  //     }
-  //   })
-  //   $solidityObj.linking = newLinking
-  //   saveOnChange()
-  // }
-
-  // function handleClear() {
-  //   $solidityObj.mainFile = ''
-  //   saveOnChange()
-  // }
-
-  function openBrowser(fileType) {
+  function openBrowser(fileType, index = -1) {
     log({
       action: 'Send "open-browser" command',
       source: Sources.SettingsWebview,
     })
     vscode.postMessage({
       command: 'open-browser',
-      payload: fileType,
+      payload: [fileType, index],
     })
   }
 
@@ -149,32 +94,20 @@
     })
   }
 
-  // on click on the input get al the files (sol or spec) based on what os passded to the function
-  function updateItems(fileType) {
-    // not really expecting anything but sol here
-    // might bove elsewhere later and make it more reusable
-    if (fileType !== 'sol') return
-    refreshFiles()
-    // this is actually pushing some fake value in (for testing only) just replace with an array of the new values from the file system like you see in the specFiles
-    solFiles = [
-      ...$solFilesArr,
-      // { value: 'Browse...', label: 'Browse...', path: 'Browse...' },
-    ]
-  }
-
   function handleSelectSol(event) {
     if (event.detail.value === 'Browse...') {
-      loadFilesFolder('sol', 0)
+      loadFilesFolder('sol')
       return
     }
     $solidityObj.mainFile = event.detail
     saveOnChange()
   }
 
-  function handleClear(e, index) {
+  function handleClear(e, index = -1) {
     // e is passes on by default here
-    if (index) {
+    if (index > -1) {
       $solAdditionalContracts[index].mainFile = ''
+      saveOnChange()
       return
     }
     $solidityObj.mainFile = ''
@@ -185,7 +118,7 @@
   function pushNewObj(arr, obj) {
     arr.push(obj)
     $solidityObj = $solidityObj
-    saveOnChange()
+    // saveOnChange()
   }
   // remove from linking/directory
   function removeObj(arr, index) {
@@ -196,9 +129,7 @@
 
   // add files from folder
   function loadFilesFolder(fileType, index) {
-    // clear just incase
-    handleClear(null, index)
-    openBrowser(fileType) //todo add index
+    openBrowser(fileType, index)
   }
 
   // add new empty solidity file push new obj to array
@@ -276,7 +207,7 @@
                   infoObj={infoObjArr.contractName}
                   placeholder="className()"
                   bind:bindValue={$solidityObj.mainContract}
-                  change={handleSelectInputField}
+                  change={saveOnChange}
                 />
               </div>
             </div>
@@ -299,7 +230,7 @@
                         infoObj={infoObjArr.solPackages}
                         placeholder="CVT-Executables-Mac"
                         bind:bindValue={$solidityObj.compiler.exe}
-                        change={handleSelectInputField}
+                        change={saveOnChange}
                       />
                     </div>
                     <div class="dark_input">
@@ -309,19 +240,10 @@
                         infoObj={infoObjArr.solCompiler}
                         placeholder="version: solc7.6"
                         bind:bindValue={$solidityObj.compiler.ver}
-                        change={handleSelectInputField}
+                        change={saveOnChange}
                       />
                     </div>
                   </div>
-
-                  <!-- validation message -->
-                  <!-- <div class="input_error_message">
-                    <i class="codicon codicon-warning" />
-                    Validation message
-                    <a target="_blank">Optional link to docs</a>
-                  </div> -->
-
-                  <!-- advanced settings -->
                   <div class="border-rd bg_light mt-8px">
                     <CollapseCard open={false} chevron="padding-right:8px;">
                       <div slot="header" class="p-8 header header_contract">
@@ -336,36 +258,10 @@
                               infoObj={infoObjArr.solc_args}
                               placeholder="Argument"
                               bind:bindValue={$solidityObj.solidityArgument}
-                              change={handleSelectInputField}
+                              change={saveOnChange}
                             />
                           </div>
                         </div>
-                        <!-- {#each $solidityObj.solidityPackageDir as _, index}
-                          <div class="input_wrapper">
-                            <div class="dark_input">
-                              <h3>Solidity package directories</h3>
-                              <CustomInput
-                                {Icon}
-                                {ClearIcon}
-                                bind:bindValue={$solidityObj.solidityPackageDir[
-                                  index
-                                ].packageName}
-                                change={handleSelectInputField}
-                                on:clear={handleClear}
-                                placeholder="Package name"
-                              />
-                            </div>
-                            <div class="dark_input">
-                              <h3>&nbsp;</h3>
-                              <CustomInput
-                                {Icon}
-                                {ClearIcon}
-                                bind:bindValue={$solidityObj.solidityPackageDir[
-                                  index
-                                ].path}
-                                change={handleSelectInputField}
-                                on:clear={handleClear}
-                                placeholder=".../path" -->
                         <div
                           class="dark_input border_light mt-8px"
                           style="border-top: 1px solid var(--vscode-foreground); padding-top:8px;"
@@ -384,7 +280,7 @@
                                   infoObj={infoObjArr.package}
                                   placeholder="Package name"
                                   bind:bindValue={obj.packageName}
-                                  change={handleSelectInputField}
+                                  change={saveOnChange}
                                 />
                               </div>
                               <div class="dark_input">
@@ -392,7 +288,7 @@
                                   infoObj={infoObjArr.package}
                                   placeholder=".../path"
                                   bind:bindValue={obj.path}
-                                  change={handleSelectInputField}
+                                  change={saveOnChange}
                                 />
                               </div>
                               <i
@@ -490,8 +386,6 @@
       {#each $solAdditionalContracts as file, index}
         <SolidityFiles
           {index}
-          {solFiles}
-          {updateItems}
           {handleClear}
           {loadFilesFolder}
           {infoObjArr}

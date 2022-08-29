@@ -49,6 +49,7 @@
         class="codicon codicon-close"
         on:click={() => {
           bindValue = ''
+          change()
           icon_wrapper = false
         }}
       />

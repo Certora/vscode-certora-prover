@@ -273,7 +273,7 @@ export type EventFromSettingsWebview =
     }
   | {
       command: CommandFromSettingsWebview.OpenBrowser
-      payload: string
+      payload: [string, number]
     }
 
 export type ConfFile = {

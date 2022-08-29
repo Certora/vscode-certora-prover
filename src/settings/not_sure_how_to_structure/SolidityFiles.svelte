@@ -5,12 +5,11 @@
   import Icon from './slots_and_utility/Icon.svelte'
   import CustomItem from './slots_and_utility/CustomItem.svelte'
   import CustomInput from './slots_and_utility/CustomInput.svelte'
-  import { solAdditionalContracts } from './stores/store.js'
+  import { solAdditionalContracts, solFilesArr } from './stores/store.js'
+  import { refreshFiles } from '../utils/refreshFiles'
 
   //   slots
   export let index
-  export let updateItems
-  export let solFiles
   export let handleClear
   export let loadFilesFolder
   export let infoObjArr
@@ -30,17 +29,20 @@
   function pushNewObj(arr, obj) {
     arr.push(obj)
     $solAdditionalContracts[index] = $solAdditionalContracts[index]
+    // saveOnChange()
   }
   // remove from linking/directory
   function removeObj(arr, i) {
     arr.splice(i, 1)
     $solAdditionalContracts[index] = $solAdditionalContracts[index]
+    saveOnChange()
   }
 
   // remove solidity file by index
   function removeSolFile(index) {
     $solAdditionalContracts.splice(index, 1)
     $solAdditionalContracts = $solAdditionalContracts
+    saveOnChange()
   }
 
   function handleSelectSol(event, index) {
@@ -75,13 +77,13 @@
         <div class="dark_input">
           <h3>Source<span>*</span></h3>
           <button
-            on:click={() => updateItems('sol')}
+            on:click={() => refreshFiles()}
             style="background: transparent; padding:0; border:none; margin-top:auto;"
           >
             <Select
               listOpen={isSolidityListOpen}
               iconProps={solidityIconsObj}
-              items={solFiles}
+              items={$solFilesArr}
               Item={CustomItem}
               {Icon}
               {ClearIcon}

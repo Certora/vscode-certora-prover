@@ -118,5 +118,5 @@ export type EventsFromExtension =
     }
   | {
       type: EventTypesFromExtension.FileChosen
-      payload: string
+      payload: [string, number]
     }

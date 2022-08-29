@@ -102,7 +102,7 @@ export class SettingsPanel {
               source: Sources.Extension,
               info: e.payload,
             })
-            this.openOsPicker(e.payload)
+            this.openOsPicker(e.payload[0], e.payload[1])
             break
           }
           default:
@@ -183,7 +183,7 @@ export class SettingsPanel {
    * @param editConfFile conf file content
    */
 
-  private openOsPicker(fileType: string) {
+  private openOsPicker(fileType: string, index: number) {
     const uri =
       vscode.workspace.workspaceFolders?.[0].uri || vscode.Uri.parse('')
     const options: vscode.OpenDialogOptions = {
@@ -200,7 +200,7 @@ export class SettingsPanel {
       if (fileUri && fileUri[0]) {
         this._panel.webview.postMessage({
           type: 'file-chosen',
-          payload: fileUri[0].fsPath.replace(uri.path + '/', ''),
+          payload: [fileUri[0].fsPath.replace(uri.path + '/', ''), index],
         })
       }
     })

@@ -114,11 +114,16 @@
           source: Sources.SettingsWebview,
           info: e.data.payload,
         })
-        if (e.data.payload.endsWith('.sol')) {
-          const fullPath = e.data.payload
-          $solidityObj.mainFile = fullPath
-        } else if (e.data.payload.endsWith('.spec')) {
-          $specObj.specFile = e.data.payload
+        const fileName = e.data.payload[0]
+        const index = e.data.payload[1]
+        if (fileName.endsWith('.sol')) {
+          if (index === -1) {
+            $solidityObj.mainFile = fileName
+          } else if ($solAdditionalContracts.length > index) {
+            $solAdditionalContracts[index].mainFile = fileName
+          }
+        } else if (fileName.endsWith('.spec')) {
+          $specObj.specFile = fileName
         }
         break
       default:
