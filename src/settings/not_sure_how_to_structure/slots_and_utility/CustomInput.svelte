@@ -1,11 +1,53 @@
 <script>
+  // import { emailValidator, requiredValidator } from './validations/validators.js'
+  import {
+    emailValidator,
+    spaceAndDashValidator,
+    numberValidator,
+    filePathValidator,
+    compilerValidator,
+  } from './validations/validators.js'
+  import { createFieldValidator } from './validations/validation.js'
+  // const [ validity, validate ] = createFieldValidator(requiredValidator(), emailValidator())
+
   export let placeholder = 'placeholder'
   export let bindValue
 
   export let infoObj = {
     infoText: 'some text...',
     infoLink: 'https://google.com',
+    validator: '',
   }
+  let validator
+
+  function setValidator() {
+    if (!infoObj.validator || infoObj.validator === 'alphaNum') {
+      validator = emailValidator()
+      return
+    }
+    if (infoObj.validator === 'number') {
+      validator = numberValidator()
+      return
+    }
+    if (infoObj.validator === 'spaceAndDash') {
+      validator = spaceAndDashValidator()
+      return
+    }
+    // validator = emailValidator()
+    if (infoObj.validator === 'filePathValidator') {
+      validator = filePathValidator()
+      return
+    }
+
+    if (infoObj.validator === 'compilerValidator') {
+      validator = compilerValidator()
+      return
+    }
+    validator = compilerValidator()
+  }
+  setValidator()
+
+  let [validity, validate] = createFieldValidator(validator)
 
   let mouse_is_on_input = false
   let icon_wrapper = false
@@ -26,7 +68,7 @@
   }
 </script>
 
-<div>
+<div class="main_wrapper">
   <input
     class="simple_txt_input"
     type="text"
@@ -34,8 +76,17 @@
     {placeholder}
     on:mouseenter={() => (mouse_is_on_input = true)}
     on:mouseleave={checkMouseLeaveInput}
+    class:field-danger={!$validity.valid}
+    use:validate={bindValue}
   />
 
+  {#if $validity.dirty && !$validity.valid}
+    <!-- validation message -->
+    <div class="input_error_message mt-8px">
+      <i class="codicon codicon-warning" />
+      {$validity.message}
+    </div>
+  {/if}
   <div
     class="icon_wrapper"
     on:mouseenter={() => (icon_wrapper = true)}
@@ -75,8 +126,10 @@
 
 <style>
   /* stylelint-disable */
-
-  div {
+  /* *{
+    box-sizing: border-box;
+  } */
+  .main_wrapper {
     position: relative;
     margin-top: auto;
   }
@@ -84,15 +137,12 @@
   .icon_wrapper {
     position: absolute;
     right: 4px;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 5px;
+    /* top: 50%;
+    transform: translateY(-50%); */
     display: flex;
     align-items: center;
     gap: 4px;
-  }
-
-  input {
-    width: -webkit-fill-available;
   }
   i {
     color: var(--dropdown-text-color);
@@ -109,7 +159,7 @@
     flex-direction: column;
     text-align: left;
     padding: 8px;
-    z-index: 1;
+    z-index: 3;
   }
   .showtxt a {
     margin-top: 8px;
@@ -121,5 +171,28 @@
 
   .hovering {
     display: flex;
+  }
+
+  .simple_txt_input {
+    box-sizing: border-box;
+    border: none;
+    color: var(--vscode-foreground);
+    padding: 6px 4px;
+    height: 30px;
+    width: -webkit-fill-available;
+    background: var(--vscode-dropdown-background);
+    font-size: var(--inputFontSize, 14px);
+  }
+  .simple_txt_input:hover,
+  .simple_txt_input:focus,
+  .field-danger {
+    cursor: pointer;
+    outline: 1px solid var(--vscode-inputValidation-infoBorder);
+    outline-offset: -1px;
+  }
+  .simple_txt_input.field-danger,
+  .field-danger:focus,
+  .field-danger:hover {
+    outline-color: var(--vscode-editorError-foreground);
   }
 </style>

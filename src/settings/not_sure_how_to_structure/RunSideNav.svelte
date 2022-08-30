@@ -70,6 +70,7 @@
   h3 {
     margin: 0;
     font-size: 13px;
+    margin-right: 6px;
   }
   i {
     display: flex;
@@ -108,7 +109,7 @@
     background: var(--vscode-list-activeSelectionBackground);
   }
   .nav_settings_child i:nth-child(3) {
-    margin-left: auto 0 auto auto;
+    margin: auto 0 auto auto;
   }
   .nav_settings_child i:nth-child(1) {
     margin: auto 6px auto 0;

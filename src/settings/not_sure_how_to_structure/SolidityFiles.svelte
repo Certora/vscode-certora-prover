@@ -176,26 +176,6 @@
           </div>
         </CollapseCard>
       </div>
-      <div class="border-rd bg_dark mt-8px">
-        <CollapseCard open={false} chevron="padding-right:8px;">
-          <div slot="header" class="p-8 header header_contract">
-            <i class="codicon codicon-gear" />
-            <h3>Specific method</h3>
-          </div>
-          <div slot="body" class="most_inner_card">
-            <div class="input_wrapper input_single">
-              <div class="dark_input">
-                <h3>Function name</h3>
-                <CustomInput
-                  infoObj={infoObjArr.method}
-                  placeholder="method_name()"
-                  bind:bindValue={$solAdditionalContracts[index].specifiMethod}
-                />
-              </div>
-            </div>
-          </div>
-        </CollapseCard>
-      </div>
     </div>
   </CollapseCard>
 </div>

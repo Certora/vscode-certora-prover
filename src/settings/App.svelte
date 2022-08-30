@@ -356,7 +356,7 @@
     border-top: 1px solid var(--vscode-menu-separatorBackground);
   }
   :global(.most_inner_card .codicon-trash) {
-    margin: auto 0 5px;
+    margin: 6px 0 auto;
   }
   :global(.border_light) {
     border-color: var(--vscode-foreground);
@@ -464,22 +464,6 @@
     --clearSelectWidth: 20px;
   }
 
-  :global(input.simple_txt_input) {
-    cursor: default;
-    border: none;
-    color: var(--vscode-foreground);
-    padding: 6px 4px;
-    height: 18px;
-    width: auto;
-    background: var(--vscode-dropdown-background);
-    font-size: var(--inputFontSize, 14px);
-    outline-color: var(--vscode-inputValidation-infoBorder);
-  }
-  :global(input.simple_txt_input:hover) {
-    outline: 1px solid var(--vscode-inputValidation-infoBorder);
-    outline-offset: -1px;
-  }
-
   :global(.dark_input .item) {
     position: relative;
     padding-left: 22px;
@@ -506,12 +490,15 @@
     margin-top: 8px;
     display: flex;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 500;
     line-height: 15px;
+    position: absolute;
+    width: -webkit-fill-available;
+    z-index: 2;
   }
 
   :global(.input_error_message i) {
-    margin-right: 4px;
+    margin: auto 8px auto 0;
   }
   :global(.input_error_message a) {
     margin-left: auto;
@@ -529,5 +516,17 @@
 
   :global(button:hover, input:hover) {
     cursor: pointer;
+  }
+
+  @media (max-width: 470px) {
+    :global(.input_wrapper) {
+      flex-direction: column;
+    }
+    :global(.input_wrapper > div) {
+      width: 100%;
+    }
+    :global(.input_wrapper > .codicon-trash) {
+      width: min-content;
+    }
   }
 </style>

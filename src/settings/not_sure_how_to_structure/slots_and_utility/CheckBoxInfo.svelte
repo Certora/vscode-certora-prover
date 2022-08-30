@@ -41,14 +41,16 @@
     position: absolute;
     background: var(--vscode-editorWidget-background);
     border: 1px solid var(--vscode-editorWidget-border);
-    top: 30px;
+    top: 25px;
     left: 0;
-    min-width: max-content;
     width: 100%;
+    overflow: hidden;
+    word-break: break-word;
+    white-space: break-spaces;
     flex-direction: column;
     text-align: left;
     padding: 8px;
-    z-index: 1;
+    z-index: 3;
   }
   .showtxt a {
     margin-top: 8px;

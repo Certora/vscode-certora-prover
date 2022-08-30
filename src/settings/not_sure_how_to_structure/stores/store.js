@@ -61,7 +61,12 @@ export const solidityObj = writable({
   linking: [{ variable: '', contractName: '' }],
   specifiMethod: '',
   compiler: { exe: '', ver: '' },
-  solidityArgument: '',
+  solidityArgs: [
+    {
+      key: '',
+      value: '',
+    },
+  ],
   solidityPackageDir: [
     {
       packageName: '',

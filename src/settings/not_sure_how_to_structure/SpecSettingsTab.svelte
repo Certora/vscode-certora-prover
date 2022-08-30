@@ -43,6 +43,69 @@
     },
   ]
 
+  let infoObjArr = {
+    specFile: {
+      infoText: 'pick spec file',
+      infoLink:
+        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html',
+    },
+    rules: {
+      infoText:
+        'Formally verifies one or more given properties instead of the whole specification file. An invariant can also be selected.',
+      infoLink:
+        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#rules',
+      validator: 'alphaNum',
+    },
+    duration: {
+      infoText: 'Sets the maximal timeout for all the SMT solvers.',
+      infoLink:
+        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#smt-timeout',
+      validator: 'number',
+    },
+    optimistic_loop: {
+      infoText:
+        'The Certora Prover unrolls loops - if the loop should be executed three times, it will copy the code inside the loop three times. After we finish the loop’s iterations, we add an assertion to verify we have actually finished running the loop',
+      infoLink:
+        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#optimistic-loop',
+    },
+    loop_iter: {
+      infoText:
+        'The Certora Prover unrolls loops - if the loop should be executed three times, it will copy the code inside the loop three times. After we finish the loop’s iterations, we add an assertion to verify we have actually finished running the loop',
+      infoLink:
+        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#loop-iter',
+      validator: 'number',
+    },
+    flag: {
+      infoText:
+        'additional flags - you can find all available flags in the documentation',
+      infoLink:
+        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html',
+      validator: 'alphaNum',
+    },
+    stg: {
+      infoText: 'run on staging environment',
+      infoLink:
+        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html',
+      validator: 'alphaNum',
+    },
+    typecheck_only: {
+      infoText:
+        'Stops after running the Solidity compiler and type checking of the spec, before submitting the verification task.',
+      infoLink:
+        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#typecheck-only',
+    },
+    short_output: {
+      infoText: 'Reduces the verbosity of the tool.',
+      infoLink:
+        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#short-output',
+    },
+    multi_assert_check: {
+      infoText:
+        'This mode checks each assertion statement that occurs in a rule, separately.',
+      infoLink:
+        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#multi-assert-check',
+    },
+  }
   // on click on the input get al the files (sol or spec) based on what os passded to the function
   function updateItems(fileType) {
     // not really expecting anything but sol here
@@ -100,9 +163,8 @@
     selected: isSpecListOpen,
     loadFilesFolder: loadFilesFolder,
     fileType: 'spec',
-    ifoText: 'some string',
-    // LOL auto completed
-    infoLink: 'www.google.com',
+    ifoText: infoObjArr.specFile.infoText,
+    infoLink: infoObjArr.specFile.infoLink,
   }
 </script>
 
@@ -128,7 +190,7 @@
           <div slot="body" class="p-12 pt-0">
             <div class="input_wrapper">
               <div class="dark_input">
-                <h3>Certore specification file<span>*</span></h3>
+                <h3>Certora specification file<span>*</span></h3>
                 <button
                   on:click={() => updateItems('spec')}
                   style="background: transparent; padding:0; border:none; margin-top:auto;"
@@ -152,20 +214,22 @@
                 <CustomInput
                   placeholder="All rules"
                   bind:bindValue={$specObj.rules}
+                  infoObj={infoObjArr.rules}
                 />
               </div>
             </div>
             <div class="input_wrapper mt-24px">
-              <div class="dark_input" style="width: auto">
+              <div class="dark_input input_x3">
                 <h3>Duration</h3>
                 <CustomInput
                   placeholder="600s"
                   bind:bindValue={$specObj.duration}
+                  infoObj={infoObjArr.duration}
                 />
               </div>
               <div
-                class="dark_input check_box_wrapper"
-                style="width: auto; margin: auto 16px 8px auto;"
+                class="dark_input check_box_wrapper input_x3"
+                style="margin: auto 16px 8px auto;"
               >
                 <label class="checkbox_container" style="margin: 0;">
                   Optomistic loop
@@ -175,13 +239,14 @@
                   />
                   <span class="checkmark" />
                 </label>
-                <CheckBoxInfo />
+                <CheckBoxInfo infoObj={infoObjArr.optimistic_loop} />
               </div>
-              <div class="dark_input" style="width: auto">
+              <div class="dark_input input_x3">
                 <h3>Loop Unroll</h3>
                 <CustomInput
                   placeholder="0"
                   bind:bindValue={$specObj.loopUnroll}
+                  infoObj={infoObjArr.loop_iter}
                 />
               </div>
             </div>
@@ -200,12 +265,14 @@
                         <CustomInput
                           placeholder="Property name"
                           bind:bindValue={obj.name}
+                          infoObj={infoObjArr.flag}
                         />
                       </div>
                       <div class="dark_input">
                         <CustomInput
                           placeholder="Property value"
                           bind:bindValue={obj.value}
+                          infoObj={infoObjArr.flag}
                         />
                       </div>
                       <i
@@ -232,7 +299,7 @@
                         />
                         <span class="checkmark" />
                       </label>
-                      <CheckBoxInfo />
+                      <CheckBoxInfo infoObj={infoObjArr.stg} />
                     </div>
                   </div>
                   <div class="input_wrapper input_single">
@@ -241,6 +308,7 @@
                       <CustomInput
                         placeholder="default: master"
                         bind:bindValue={$specObj.branchName}
+                        infoObj={infoObjArr.stg}
                       />
                     </div>
                   </div>
@@ -254,7 +322,7 @@
                         />
                         <span class="checkmark" />
                       </label>
-                      <CheckBoxInfo />
+                      <CheckBoxInfo infoObj={infoObjArr.typecheck_only} />
                     </div>
                     <div class="dark_input alternate_input check_box_wrapper">
                       <label class="checkbox_container"
@@ -265,7 +333,7 @@
                         />
                         <span class="checkmark" />
                       </label>
-                      <CheckBoxInfo />
+                      <CheckBoxInfo infoObj={infoObjArr.short_output} />
                     </div>
                     <div class="dark_input alternate_input check_box_wrapper">
                       <label class="checkbox_container"
@@ -276,7 +344,7 @@
                         />
                         <span class="checkmark" />
                       </label>
-                      <CheckBoxInfo />
+                      <CheckBoxInfo infoObj={infoObjArr.multi_assert_check} />
                     </div>
                   </div>
                 </div>
@@ -398,5 +466,16 @@
   .header_single {
     font-size: 12px;
     font-weight: 500;
+  }
+
+  .input_x3 {
+    width: auto;
+    max-width: 30%;
+  }
+  @media (max-width: 470px) {
+    .input_x3 {
+      width: 100%;
+      max-width: 100%;
+    }
   }
 </style>
