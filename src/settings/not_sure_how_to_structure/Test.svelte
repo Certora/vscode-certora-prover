@@ -17,7 +17,7 @@
     solFilesArr,
   } from './stores/store.js'
   import SolidityFiles from './SolidityFiles.svelte'
-
+  // emailValidator ,spaceAndDashValidator, numberValidator, compilerValidator, filePathVlidator
   let infoObjArr = {
     mainFile: {
       infoText: 'pick main solidity file',
@@ -28,40 +28,47 @@
       infoText: 'pick main contract',
       infoLink:
         'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html',
+      validator: 'alphaNum',
     },
     solCompiler: {
       infoText: 'type solidity compiler \n example: solc8.1',
       infoLink:
         'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#solc',
+      validator: 'compilerValidator',
     },
     solPackages: {
       infoText:
         'Use this option to provide a path to the Solidity compiler executable file. We check in all directories in the $PATH environment variable for an executable with this name. If --solc is not used, we look for an executable called solc, or solc.exe on windows platforms.',
       infoLink:
         'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#solc',
+      validator: 'filePathValidator',
     },
     solc_args: {
       infoText:
         'Gets a list of arguments to pass to the Solidity compiler. The arguments will be passed as is, without any formatting, in the same order.',
       infoLink:
         'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#solc-args',
+      validator: 'alphaNum',
     },
     package: {
       infoText:
         'For each package, gets the path to a directory including that Solidity package.',
       infoLink:
         'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#packages',
+      validator: 'filePathValidator',
     },
     link: {
       infoText: 'Links a slot in a contract with another contract.',
       infoLink:
         'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#link',
+      validator: 'alphaNum',
     },
     method: {
       infoText:
         'Parametric rules will only verify the method with the given signature, instead of all public and external methods of the contract. Note that you will need to wrap the method’s signature with quotes, as the shell doesn’t interpret parenthesis correctly otherwise.',
       infoLink:
         'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#method',
+      validator: 'alphaNum',
     },
   }
 
@@ -139,7 +146,6 @@
         mainFile: '',
         mainContract: '',
         linking: [{ variable: '', contractName: '' }],
-        specifiMethod: '',
         compiler: { exe: '', ver: '' },
       },
     ]
@@ -221,9 +227,7 @@
                 <div slot="body" class="most_inner_card">
                   <div class="input_wrapper">
                     <div class="dark_input">
-                      <h3>
-                        Directory containing solidity packages<span>*</span>
-                      </h3>
+                      <h3>Directory containing compilers</h3>
                       <CustomInput
                         infoObj={infoObjArr.solPackages}
                         placeholder="CVT-Executables-Mac"
@@ -242,6 +246,7 @@
                       />
                     </div>
                   </div>
+                  <!-- advanced settings -->
                   <div class="border-rd bg_light mt-8px">
                     <CollapseCard open={false} chevron="padding-right:8px;">
                       <div slot="header" class="p-8 header header_contract">
@@ -249,17 +254,50 @@
                         <h3>Advanced Settings</h3>
                       </div>
                       <div slot="body" class="most_inner_card border_light">
-                        <div class="input_wrapper input_single">
-                          <div class="dark_input">
-                            <h3>Solidity Argument</h3>
-                            <CustomInput
-                              infoObj={infoObjArr.solc_args}
-                              placeholder="Argument"
-                              bind:bindValue={$solidityObj.solidityArgument}
-                              change={saveOnChange}
-                            />
-                          </div>
+                        <div class="dark_input">
+                          <h3
+                            style="font-size: 12px;
+                          line-height: 14px;
+                          font-weight: 500;"
+                          >
+                            Solidity Arguments
+                          </h3>
+                          {#each $solidityObj.solidityArgs as obj, index}
+                            <div class="input_wrapper mt-8px">
+                              <div class="dark_input">
+                                <CustomInput
+                                  infoObj={infoObjArr.solc_args}
+                                  placeholder="key"
+                                  bind:bindValue={obj.key}
+                                  change={saveOnChange}
+                                />
+                              </div>
+                              <div class="dark_input">
+                                <CustomInput
+                                  infoObj={infoObjArr.solc_args}
+                                  placeholder="value"
+                                  bind:bindValue={obj.value}
+                                  change={saveOnChange}
+                                />
+                              </div>
+                              <i
+                                class="codicon codicon-trash"
+                                on:click={removeObj(
+                                  $solidityObj.solidityArgs,
+                                  index,
+                                )}
+                              />
+                            </div>
+                          {/each}
                         </div>
+                        <button
+                          class="btn_add"
+                          on:click={pushNewObj($solidityObj.solidityArgs, {
+                            key: '',
+                            value: '',
+                          })}
+                          ><i class="codicon codicon-add" /> Add Directory</button
+                        >
                         <div
                           class="dark_input border_light mt-8px"
                           style="border-top: 1px solid var(--vscode-foreground); padding-top:8px;"

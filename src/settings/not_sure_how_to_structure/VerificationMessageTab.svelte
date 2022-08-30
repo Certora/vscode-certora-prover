@@ -19,6 +19,16 @@
       payload: form,
     })
   }
+
+  let infoObjArr = {
+    msg: {
+      infoText:
+        'Adds a message description to your run, similar to a commit message. ',
+      infoLink:
+        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#msg',
+      validator: 'alphaNum',
+    },
+  }
 </script>
 
 <div class="card_parent_wrapper bg_dark border-rd">
@@ -33,6 +43,7 @@
           placeholder="Text message"
           bind:bindValue={$verification_message}
           change={saveOnChange}
+          infoObj={infoObjArr.msg}
         />
       </div>
     </div>

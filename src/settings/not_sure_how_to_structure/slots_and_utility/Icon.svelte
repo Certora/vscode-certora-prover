@@ -83,7 +83,7 @@
     flex-direction: column;
     text-align: left;
     padding: 8px;
-    z-index: 1;
+    z-index: 3;
   }
   .showtxt a {
     margin-top: 8px;

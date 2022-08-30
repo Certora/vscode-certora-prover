@@ -37,7 +37,7 @@
     width: 70%;
     padding: 16px;
   }
-  @media (max-width: 800px) {
+  @media (max-width: 820px) {
     .media {
       display: none;
     }
