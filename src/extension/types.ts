@@ -139,7 +139,7 @@ export type InputFormData = {
   additionalSettings: {
     id: string
     option: string
-    value: string
+    value: string | string[]
   }[]
   solc_map: { contract: string; solidityCompiler: string }[]
 }

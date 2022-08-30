@@ -64,7 +64,7 @@
         'Formally verifies one or more given properties instead of the whole specification file. An invariant can also be selected.',
       infoLink:
         'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#rules',
-      validator: 'alphaNum',
+      validator: 'spaceAndDashValidator',
     },
     duration: {
       infoText: 'Sets the maximal timeout for all the SMT solvers.',
@@ -288,7 +288,7 @@
               <div class="dark_input input_x3">
                 <h3>Loop Unroll</h3>
                 <CustomInput
-                  placeholder="0"
+                  placeholder="1"
                   bind:bindValue={$specObj.loopUnroll}
                   change={saveOnChange}
                   infoObj={infoObjArr.loop_iter}

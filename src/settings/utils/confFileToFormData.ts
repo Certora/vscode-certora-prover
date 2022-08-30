@@ -173,7 +173,7 @@ function processSpecAttributes(confFile: ConfFile, specObj: SpecObj) {
   }
 
   if (confFile.rule) {
-    specObj.rules = (confFile.rule as string).replace(' ', ',')
+    specObj.rules = confFile.rule.toString().replace(/[[]]/, '')
   }
 
   if (confFile.smt_timeout) {

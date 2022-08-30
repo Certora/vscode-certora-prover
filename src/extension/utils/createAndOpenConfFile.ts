@@ -112,7 +112,7 @@ function convertSourceFormDataToConfFileJSON(
   if (inputFormData.additionalSettings?.length) {
     inputFormData.additionalSettings.forEach(({ option, value }) => {
       if (option) {
-        config[option] = setAdditionalSetting(value)
+        config[option] = setAdditionalSetting(value as string)
       }
     })
   }
@@ -307,9 +307,7 @@ export function processForm(
 
   addAdditionalSetting('smt_timeout', newForm.specObj.duration, form)
 
-  if (newForm.specObj.loopUnroll !== '0') {
-    addAdditionalSetting('loop_iter', newForm.specObj.loopUnroll, form)
-  }
+  addAdditionalSetting('loop_iter', newForm.specObj.loopUnroll, form)
 
   addAdditionalSetting(
     'disableLocalTypeChecking',
@@ -328,11 +326,14 @@ export function processForm(
     form,
   )
 
-  addAdditionalSetting(
-    'rule',
-    newForm.specObj.rules.trim().replace(',', ' '),
-    form,
-  )
+  if (newForm.specObj.rules) {
+    const rulesArr = newForm.specObj.rules.trim().split(',')
+    form.additionalSettings.push({
+      id: 'rule',
+      option: 'rule',
+      value: rulesArr,
+    })
+  }
 
   addAdditionalSetting('method', newForm.solidyObj.specifiMethod, form)
 
