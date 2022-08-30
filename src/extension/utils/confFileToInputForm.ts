@@ -54,15 +54,15 @@ export function confFileToFormData(
 
   form.name = name
 
-  if (Array.isArray(confFile.contracts) && confFile.contracts.length > 0) {
-    form.mainSolidityFile = confFile.contracts[0] as string
+  if (Array.isArray(confFile.files) && confFile.files.length > 0) {
+    form.mainSolidityFile = confFile.files[0] as string
 
     if (form.mainSolidityFile.includes(':')) {
       form.mainSolidityFile = form.mainSolidityFile.split(':')[0]
     }
 
-    if (confFile.contracts.length > 1) {
-      const [, ...additional] = confFile.contracts
+    if (confFile.files.length > 1) {
+      const [, ...additional] = confFile.files
 
       form.useAdditionalContracts = true
       form.additionalContracts = additional.map(contract => {

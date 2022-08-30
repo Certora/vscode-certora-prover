@@ -3,7 +3,7 @@ import { log, Sources } from '../utils/log'
 import { InputFormData, NewForm, SolidityObj } from '../types'
 
 type ConfFile = {
-  contracts?: string[]
+  files?: string[]
   verify?: [string]
   solc?: string
   link?: string[]
@@ -34,7 +34,7 @@ function convertSourceFormDataToConfFileJSON(
   inputFormData: InputFormData,
 ): string {
   const config: ConfFile = {}
-  if (!Array.isArray(config.contracts)) config.contracts = []
+  if (!Array.isArray(config.files)) config.files = []
 
   if (inputFormData.specFile && inputFormData.mainContractName) {
     config.verify = [
@@ -44,11 +44,11 @@ function convertSourceFormDataToConfFileJSON(
 
   if (inputFormData.mainSolidityFile) {
     if (inputFormData.mainContractName) {
-      config.contracts.push(
+      config.files.push(
         `${inputFormData.mainSolidityFile}:${inputFormData.mainContractName}`,
       )
     } else {
-      config.contracts.push(inputFormData.mainSolidityFile)
+      config.files.push(inputFormData.mainSolidityFile)
     }
   }
 
@@ -57,7 +57,7 @@ function convertSourceFormDataToConfFileJSON(
     inputFormData.additionalContracts?.length > 0
   ) {
     inputFormData.additionalContracts.forEach(contract => {
-      config.contracts?.push(
+      config.files?.push(
         `${contract.file}${contract.name ? `:${contract.name}` : ''}`,
       )
     })

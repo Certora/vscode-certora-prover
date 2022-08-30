@@ -32,7 +32,7 @@ const newForm: NewForm = {
 }
 
 const stableFields = [
-  'contracts',
+  'files',
   'verify',
   'solc',
   'link',
@@ -194,12 +194,12 @@ function processSpecAttributes(confFile: ConfFile, specObj: SpecObj) {
 export function confFileToFormData(confFile: ConfFile): NewForm {
   const form = newForm as NewForm
 
-  if (Array.isArray(confFile.contracts) && confFile.contracts.length > 0) {
-    form.solidyObj.mainFile = confFile.contracts[0] as string
+  if (Array.isArray(confFile.files) && confFile.files.length > 0) {
+    form.solidyObj.mainFile = confFile.files[0] as string
 
     if (form.solidyObj.mainFile.includes(':')) {
       form.solidyObj.mainFile = form.solidyObj.mainFile.split(':')[0]
-      form.solidyObj.mainContract = confFile.contracts[0].split(':')[1]
+      form.solidyObj.mainContract = confFile.files[0].split(':')[1]
     }
   }
 
@@ -223,7 +223,7 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
   }
 
   // additional contracts
-  if (confFile.contracts?.length > 1) {
+  if (confFile.files?.length > 1) {
     processAdditionalContracts(confFile, form)
   }
   return form
@@ -236,9 +236,9 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
  */
 function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
   const tempFormArr: SolidityObj[] = []
-  confFile.contracts.forEach(contractStr => {
+  confFile.files.forEach((contractStr, index) => {
     const solArr = contractStr.split(':') || []
-    if (solArr.length === 2 && solArr[1] !== form.solidyObj.mainContract) {
+    if (solArr.length === 2 && index !== 0) {
       // create contract
       const tempForm: SolidityObj = {
         mainFile: '',

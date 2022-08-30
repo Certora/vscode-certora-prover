@@ -96,7 +96,7 @@ export enum EventTypesFromExtension {
 }
 
 export type ConfFile = {
-  contracts?: string[]
+  files?: string[]
   verify?: [string]
   solc?: string
   link?: string[]
