@@ -167,6 +167,11 @@ export type Link = {
   associatedContractName?: string
 }
 
+export type SolcArg = {
+  key: string
+  value: string
+}
+
 // solidity part of the new settings view
 export type SolidityObj = {
   mainFile: { value: string; label: string; path: string }
@@ -174,7 +179,7 @@ export type SolidityObj = {
   linking: Link[]
   specifiMethod: string
   compiler: Compiler
-  solidityArgument: string
+  solidityArgs: SolcArg[]
   solidityPackageDefaultPath: string
   solidityPackageDir: SolidityPackageDir[]
 }

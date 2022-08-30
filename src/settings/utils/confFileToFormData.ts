@@ -10,7 +10,7 @@ const newForm: NewForm = {
       exe: '',
       ver: '',
     },
-    solidityArgument: '',
+    solidityArgs: [],
     solidityPackageDefaultPath: '',
     solidityPackageDir: [],
   },
@@ -135,7 +135,22 @@ function processSolidityAttributes(
   }
 
   if (confFile.solc_args) {
-    solidityObj.solidityArgument = confFile.solc_args.toString()
+    const solcArgsArr = confFile.solc_args
+      .toString()
+      .replace(/[[]']/, '')
+      .split(',')
+    solcArgsArr.forEach(arg => {
+      const tempArg = { key: '', value: '' }
+      if (arg.includes('--')) {
+        tempArg.key = arg.replace('--', '')
+        solidityObj.solidityArgs.push(tempArg)
+      } else {
+        const index = solidityObj.solidityArgs.length - 1
+        solidityObj.solidityArgs[index].value = arg
+      }
+    })
+  } else {
+    solidityObj.solidityArgs.push({ key: '', value: '' })
   }
 
   if (confFile.method) {
@@ -249,7 +264,7 @@ function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
           exe: '',
           ver: '',
         },
-        solidityArgument: '',
+        solidityArgs: [],
         solidityPackageDefaultPath: '',
         solidityPackageDir: [],
       }

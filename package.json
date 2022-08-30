@@ -47,10 +47,10 @@
         "order": 1,
         "properties": {
           "SolidityArguments": {
-            "markdownDescription": "A list of arguments to pass to the Solidity compiler.\nThe arguments will be passed as is, without any formatting, in the same order.\n\n**Example:**\n\n```js\n['--optimize', '--optimize-runs', '200']\n```",
-            "type": "string",
-            "pattern": "^(\\[(\\'.+\\',(\\s?))*((\\'.+\\')*)\\])*$",
-            "patternErrorMessage": "Input must be an array of string commands",
+            "markdownDescription": "A list of arguments to pass to the Solidity compiler.\nNo need to add ```'--'``` to the keys.",
+            "type": "object",
+            "additionalProperties": "string",
+            "properties": {},
             "order": 0
           },
           "Solidity.DefaultDirectoryForPackagesDependencies": {

@@ -98,7 +98,7 @@
     $solidityObj.mainFile = newForm.solidyObj.mainFile
     $solidityObj.compiler.ver = newForm.solidyObj.compiler.ver
     $solidityObj.compiler.exe = newForm.solidyObj.compiler.exe
-    $solidityObj.solidityArgument = newForm.solidyObj.solidityArgument
+    $solidityObj.solidityArgs = newForm.solidyObj.solidityArgs
     $solidityObj.specifiMethod = newForm.solidyObj.specifiMethod
     $solidityObj.solidityPackageDefaultPath =
       newForm.solidyObj.solidityPackageDefaultPath

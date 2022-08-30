@@ -34,8 +34,9 @@ export function activate(context: vscode.ExtensionContext): void {
     const solc: string =
       vscode.workspace.getConfiguration().get('SolcExecutable') || ''
 
-    const solcArgs: string =
-      vscode.workspace.getConfiguration().get('SolidityArguments') || ''
+    const solcArgs: string = JSON.stringify(
+      vscode.workspace.getConfiguration().get('SolidityArguments'),
+    )
 
     const defaultDirectoryForPackagesDependencies: string =
       vscode.workspace
@@ -79,8 +80,23 @@ export function activate(context: vscode.ExtensionContext): void {
       staging: branch,
     }
 
-    if (solcArgs) {
-      confFileDefault.solc_args = [solcArgs]
+    if (solcArgs !== '{}') {
+      console.log(solcArgs, 'omg solc args')
+      confFileDefault.solc_args = ''
+      const tempArgs = JSON.parse(solcArgs)
+      console.log(tempArgs, Object.entries(tempArgs), 'omg temp args')
+      Object.entries(tempArgs).forEach(arg => {
+        let tempValue = arg[1]
+        if (tempValue) {
+          tempValue += ','
+        }
+        confFileDefault.solc_args +=
+          '--' + arg[0].replace('--', '') + ',' + tempValue
+      })
+      confFileDefault.solc_args = confFileDefault.solc_args
+        .toString()
+        .replace(/.$/, '')
+        .split(',')
     }
     if (defaultDirectoryForPackagesDependencies) {
       confFileDefault.packages_path = defaultDirectoryForPackagesDependencies

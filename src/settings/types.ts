@@ -49,6 +49,11 @@ export type SolidityPackageDir = {
   path: string
 }
 
+export type SolcArg = {
+  key: string
+  value: string
+}
+
 // solidity part of the new settings view
 export type SolidityObj = {
   mainFile: string
@@ -56,7 +61,7 @@ export type SolidityObj = {
   linking: Link[]
   specifiMethod: string
   compiler: Compiler
-  solidityArgument: string
+  solidityArgs: SolcArg[]
   solidityPackageDefaultPath: string
   solidityPackageDir: SolidityPackageDir[]
 }

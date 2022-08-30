@@ -1,6 +1,6 @@
 import { workspace, Uri, window } from 'vscode'
 import { log, Sources } from '../utils/log'
-import { InputFormData, NewForm, SolidityObj } from '../types'
+import { InputFormData, NewForm, SolcArg, SolidityObj } from '../types'
 
 type ConfFile = {
   files?: string[]
@@ -166,6 +166,31 @@ function addAdditionalSetting(
   }
 }
 
+function addSolcArguments(
+  flag: string,
+  solcArgs: SolcArg[],
+  form: InputFormData,
+) {
+  if (solcArgs) {
+    let strSolcArgs = '['
+    solcArgs.forEach(arg => {
+      if (arg.key && arg.value) {
+        strSolcArgs += '--' + arg.key + ',' + arg.value + ','
+      } else if (arg.key) {
+        strSolcArgs += '--' + arg.key + ','
+      }
+    })
+    if (strSolcArgs !== '[') {
+      strSolcArgs = strSolcArgs.replace(/.$/, ']')
+      form.additionalSettings.push({
+        id: flag,
+        option: flag,
+        value: strSolcArgs,
+      })
+    }
+  }
+}
+
 /**
  * add additional contracts information to the [form]
  * @param solidityAdditionalContracts additional contracts to add
@@ -315,7 +340,7 @@ export function processForm(
     form,
   )
 
-  addAdditionalSetting('solc_args', newForm.solidyObj.solidityArgument, form)
+  addSolcArguments('solc_args', newForm.solidyObj.solidityArgs, form)
 
   processPackages(newForm.solidyObj, form)
 
