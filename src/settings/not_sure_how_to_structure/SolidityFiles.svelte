@@ -29,7 +29,6 @@
   function pushNewObj(arr, obj) {
     arr.push(obj)
     $solAdditionalContracts[index] = $solAdditionalContracts[index]
-    // saveOnChange()
   }
   // remove from linking/directory
   function removeObj(arr, i) {

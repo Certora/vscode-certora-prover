@@ -17,7 +17,6 @@
     solFilesArr,
   } from './stores/store.js'
   import SolidityFiles from './SolidityFiles.svelte'
-  import { onMount } from 'svelte'
 
   let infoObjArr = {
     mainFile: {
@@ -119,7 +118,6 @@
   function pushNewObj(arr, obj) {
     arr.push(obj)
     $solidityObj = $solidityObj
-    // saveOnChange()
   }
   // remove from linking/directory
   function removeObj(arr, index) {
@@ -145,7 +143,6 @@
         compiler: { exe: '', ver: '' },
       },
     ]
-    saveOnChange()
   }
 
   let isSolidityListOpen = false

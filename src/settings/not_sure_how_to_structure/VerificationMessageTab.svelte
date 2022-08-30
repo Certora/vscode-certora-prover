@@ -1,12 +1,18 @@
 <script>
   import CustomInput from './slots_and_utility/CustomInput.svelte'
-  import { verification_message, solidityObj, specObj } from './stores/store.js'
+  import {
+    verification_message,
+    solidityObj,
+    specObj,
+    solAdditionalContracts,
+  } from './stores/store.js'
 
   function saveOnChange() {
     let form = {
       solidyObj: $solidityObj,
       specObj: $specObj,
       verificatoinMessage: $verification_message,
+      solidityAdditionalContracts: $solAdditionalContracts,
     }
     vscode.postMessage({
       command: 'create-conf-file',

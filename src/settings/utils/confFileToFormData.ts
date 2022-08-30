@@ -237,7 +237,8 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
 function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
   const tempFormArr: SolidityObj[] = []
   confFile.contracts.forEach(contractStr => {
-    if (!contractStr.includes(form.solidyObj.mainContract)) {
+    const solArr = contractStr.split(':') || []
+    if (solArr.length === 2 && solArr[1] !== form.solidyObj.mainContract) {
       // create contract
       const tempForm: SolidityObj = {
         mainFile: '',
@@ -252,7 +253,6 @@ function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
         solidityPackageDefaultPath: '',
         solidityPackageDir: [],
       }
-      const solArr = contractStr.split(':') || []
       tempForm.mainFile = solArr[0] || ''
       tempForm.mainContract = solArr[1] || ''
 

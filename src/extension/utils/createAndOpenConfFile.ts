@@ -97,8 +97,9 @@ function convertSourceFormDataToConfFileJSON(
       config.settings?.push(flag)
     })
   }
-
-  config.staging = inputFormData.branch || 'master'
+  if (inputFormData.useStaging) {
+    config.staging = inputFormData.branch || 'master'
+  }
 
   if (inputFormData.cacheName) {
     config.cache = inputFormData.cacheName
@@ -183,7 +184,7 @@ function processAdditionalContracts(
   solidityAdditionalContracts.forEach(solObj => {
     if (solObj.mainContract) {
       form.additionalContracts.push({
-        file: solObj.mainFile.value,
+        file: solObj.mainFile.value.toString(),
         name: solObj.mainContract,
       })
 

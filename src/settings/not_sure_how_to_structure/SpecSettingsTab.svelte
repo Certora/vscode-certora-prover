@@ -13,6 +13,7 @@
     solidityObj,
     verification_message,
     specFilesArr,
+    solAdditionalContracts,
   } from './stores/store.js'
   import CheckBoxInfo from './slots_and_utility/CheckBoxInfo.svelte'
   import { refreshFiles } from '../utils/refreshFiles'
@@ -57,6 +58,7 @@
       solidyObj: $solidityObj,
       specObj: $specObj,
       verificatoinMessage: $verification_message,
+      solidityAdditionalContracts: $solAdditionalContracts,
     }
     log({
       action: 'Send "create-conf-file" command',
@@ -227,6 +229,7 @@
                         <input
                           type="checkbox"
                           bind:checked={$specObj.runOnStg}
+                          on:change={saveOnChange}
                         />
                         <span class="checkmark" />
                       </label>
@@ -250,6 +253,7 @@
                         <input
                           type="checkbox"
                           bind:checked={$specObj.localTypeChecking}
+                          on:change={saveOnChange}
                         />
                         <span class="checkmark" />
                       </label>
@@ -261,6 +265,7 @@
                         <input
                           type="checkbox"
                           bind:checked={$specObj.shortOutput}
+                          on:change={saveOnChange}
                         />
                         <span class="checkmark" />
                       </label>
@@ -272,13 +277,13 @@
                         <input
                           type="checkbox"
                           bind:checked={$specObj.multiAssert}
+                          on:change={saveOnChange}
                         />
                         <span class="checkmark" />
                       </label>
                       <CheckBoxInfo />
                     </div>
                   </div>
-                  <!-- >>>>>>> natti_new -->
                 </div>
               </CollapseCard>
             </div>
@@ -310,12 +315,12 @@
     font-size: 13px;
   }
 
-  .alternate_input h3 {
+  /* .alternate_input h3 {
     white-space: nowrap;
     width: max-content;
     font-size: 13px;
     margin: auto 8px auto 0;
-  }
+  } */
   :global(.alternate_input div) {
     flex-grow: 1;
   }
