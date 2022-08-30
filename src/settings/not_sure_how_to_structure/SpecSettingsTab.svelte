@@ -472,6 +472,11 @@
     width: auto;
     max-width: 30%;
   }
+  @media (max-width: 570px) {
+    .check_between {
+      flex-direction: column;
+    }
+  }
   @media (max-width: 470px) {
     .input_x3 {
       width: 100%;

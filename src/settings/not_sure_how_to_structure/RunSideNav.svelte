@@ -122,7 +122,7 @@
   button:not(:disabled):not(.active):hover {
     background: var(--vscode-dropdown-background);
   }
-  @media (max-width: 800px) {
+  @media (max-width: 820px) {
     .nav_settings {
       flex-direction: row;
       margin-bottom: 16px;
