@@ -16,7 +16,7 @@ type ConfFile = {
 function setAdditionalSetting(val?: string) {
   if (val === 'true' || !val) return true
   if (val === 'false') return false
-  if (/^[0-9]+$/.exec(val)) return Number(val)
+  if (/^[0-9]+$/.exec(val)) return val
   const mapRegex = /^{(".+":".+")(,".+":".+")*}/g
   if (mapRegex.exec(val)) {
     return JSON.parse(val)
@@ -307,7 +307,9 @@ export function processForm(
 
   addAdditionalSetting('smt_timeout', newForm.specObj.duration, form)
 
-  addAdditionalSetting('loop_iter', newForm.specObj.loopUnroll, form)
+  if (newForm.specObj.loopUnroll !== '0') {
+    addAdditionalSetting('loop_iter', newForm.specObj.loopUnroll, form)
+  }
 
   addAdditionalSetting(
     'disableLocalTypeChecking',

@@ -107,7 +107,7 @@ export function activate(context: vscode.ExtensionContext): void {
     if (optimisticLoop) {
       confFileDefault.optimistic_loop = true
     }
-    if (loopUnroll) {
+    if (loopUnroll && loopUnroll !== 0) {
       confFileDefault.loop_iter = loopUnroll
     }
     if (duration) {
