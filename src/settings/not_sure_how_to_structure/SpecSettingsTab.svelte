@@ -14,6 +14,7 @@
     verification_message,
     specFilesArr,
     solAdditionalContracts,
+    checkMyInputs,
   } from './stores/store.js'
   import CheckBoxInfo from './slots_and_utility/CheckBoxInfo.svelte'
   import { refreshFiles } from '../utils/refreshFiles'
@@ -164,11 +165,17 @@
   )
 
   function saveOnChange() {
+    let inputs = document.querySelectorAll('.simple_txt_input')
+    inputs = Array.from(inputs)
+    $checkMyInputs = inputs.some(el => {
+      if (el.classList.contains('field-danger')) return true
+    })
     let form = {
       solidyObj: $solidityObj,
       specObj: $specObj,
       verificatoinMessage: $verification_message,
       solidityAdditionalContracts: $solAdditionalContracts,
+      checkMyInputs: $checkMyInputs,
     }
     log({
       action: 'Send "create-conf-file" command',

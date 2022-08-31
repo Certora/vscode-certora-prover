@@ -29,6 +29,7 @@ const newForm: NewForm = {
     multiAssert: false,
   },
   verificatoinMessage: '',
+  checkMyInputs: false,
 }
 
 const stableFields = [

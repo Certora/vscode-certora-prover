@@ -77,12 +77,19 @@
           info: e.data.payload,
         })
         const fileName = e.data.payload[0]
+        const contractName = fileName
+          .toString()
+          .split('/')
+          .reverse()[0]
+          .replace('.sol', '')
         const index = e.data.payload[1]
         if (fileName.endsWith('.sol')) {
           if (index === -1) {
             $solidityObj.mainFile = fileName
+            $solidityObj.mainContract = contractName
           } else if ($solAdditionalContracts.length > index) {
             $solAdditionalContracts[index].mainFile = fileName
+            $solAdditionalContracts[index].mainContract = contractName
           }
         } else if (fileName.endsWith('.spec')) {
           $specObj.specFile = fileName

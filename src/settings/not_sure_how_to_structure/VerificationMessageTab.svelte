@@ -5,14 +5,21 @@
     solidityObj,
     specObj,
     solAdditionalContracts,
+    checkMyInputs,
   } from './stores/store.js'
 
   function saveOnChange() {
+    let inputs = document.querySelectorAll('.simple_txt_input')
+    inputs = Array.from(inputs)
+    $checkMyInputs = inputs.some(el => {
+      if (el.classList.contains('field-danger')) return true
+    })
     let form = {
       solidyObj: $solidityObj,
       specObj: $specObj,
       verificatoinMessage: $verification_message,
       solidityAdditionalContracts: $solAdditionalContracts,
+      checkMyInputs: $checkMyInputs,
     }
     vscode.postMessage({
       command: 'create-conf-file',

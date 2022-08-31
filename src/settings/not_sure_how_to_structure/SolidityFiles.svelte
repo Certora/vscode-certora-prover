@@ -50,6 +50,15 @@
       return
     }
     $solAdditionalContracts[index].mainFile = event.detail
+    if ($solAdditionalContracts[index].mainFile) {
+      $solAdditionalContracts[index].mainContract = $solAdditionalContracts[
+        index
+      ].mainFile.label
+        .toString()
+        .split('/')
+        .reverse()[0]
+        .replace('.sol', '')
+    }
     saveOnChange()
   }
 </script>

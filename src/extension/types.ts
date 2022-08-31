@@ -210,6 +210,7 @@ export type NewForm = {
   specObj: SpecObj
   verificatoinMessage: string
   solidityAdditionalContracts?: SolidityObj[] // multiple contracts
+  checkMyInputs: boolean
 }
 
 export enum CommandFromResultsWebview {

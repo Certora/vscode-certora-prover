@@ -15,6 +15,7 @@
     specObj,
     verification_message,
     solFilesArr,
+    checkMyInputs,
   } from './stores/store.js'
   import SolidityFiles from './SolidityFiles.svelte'
   // emailValidator ,spaceAndDashValidator, numberValidator, compilerValidator, filePathVlidator
@@ -84,11 +85,17 @@
   }
 
   function saveOnChange() {
+    let inputs = document.querySelectorAll('.simple_txt_input')
+    inputs = Array.from(inputs)
+    $checkMyInputs = inputs.some(el => {
+      if (el.classList.contains('field-danger')) return true
+    })
     let form = {
       solidyObj: $solidityObj,
       specObj: $specObj,
       verificatoinMessage: $verification_message,
       solidityAdditionalContracts: $solAdditionalContracts,
+      checkMyInputs: $checkMyInputs,
     }
     log({
       action: 'Send "create-conf-file" command',
@@ -107,6 +114,13 @@
       return
     }
     $solidityObj.mainFile = event.detail
+    if ($solidityObj.mainFile) {
+      $solidityObj.mainContract = $solidityObj.mainFile.label
+        .toString()
+        .split('/')
+        .reverse()[0]
+        .replace('.sol', '')
+    }
     saveOnChange()
   }
 
