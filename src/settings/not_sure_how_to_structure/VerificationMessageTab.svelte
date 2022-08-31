@@ -26,7 +26,7 @@
         'Adds a message description to your run, similar to a commit message. ',
       infoLink:
         'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#msg',
-      validator: 'alphaNum',
+      validator: 'spaceAndDash',
     },
   }
 </script>

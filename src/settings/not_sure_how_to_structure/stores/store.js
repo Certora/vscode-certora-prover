@@ -1,15 +1,7 @@
 import { writable } from 'svelte/store'
-
-// spec writable arrays
-export const writableArray_Spec = writable([])
-export const writableArray_Spec_Properties = writable([])
-// solidity writable arrays
-export const writableArray_Solidity = writable([])
-export const writableArray_Solidity_Linking = writable([])
-export const writableArray_Solidity_Package_Directories = writable([])
+export const checkMyInputs = writable(false)
 
 export const solAdditionalContracts = writable([])
-
 // verification message
 export const verification_message = writable('')
 

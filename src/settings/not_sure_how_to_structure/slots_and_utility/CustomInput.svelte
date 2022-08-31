@@ -10,9 +10,12 @@
   import { createFieldValidator } from './validations/validation.js'
   // const [ validity, validate ] = createFieldValidator(requiredValidator(), emailValidator())
 
+  import { checkMyInputs } from '../stores/store'
   export let placeholder = 'placeholder'
   export let bindValue
+
   export let change
+  // export const inputName =''
 
   export let infoObj = {
     infoText: 'some text...',
@@ -34,7 +37,7 @@
       validator = spaceAndDashValidator()
       return
     }
-    // validator = emailValidator()
+
     if (infoObj.validator === 'filePathValidator') {
       validator = filePathValidator()
       return
@@ -48,7 +51,7 @@
   }
   setValidator()
 
-  let [validity, validate] = createFieldValidator(validator)
+  const [validity, validate] = createFieldValidator(validator)
 
   let mouse_is_on_input = false
   let icon_wrapper = false
@@ -66,6 +69,21 @@
       mouse_is_on_input = false
       icon_wrapper = false
     }, 100)
+  }
+
+  $: $validity, checkAllInputs()
+
+  function checkAllInputs() {
+    // get all the inputs
+    // setTimeout is there to "hack" the fact that the store value is updated before the dom error message
+    setTimeout(() => {
+      let inputs = document.querySelectorAll('.simple_txt_input')
+      inputs = Array.from(inputs)
+      $checkMyInputs = inputs.some(el => {
+        if (el.classList.contains('field-danger')) return true
+      })
+      console.log($checkMyInputs)
+    })
   }
 </script>
 
