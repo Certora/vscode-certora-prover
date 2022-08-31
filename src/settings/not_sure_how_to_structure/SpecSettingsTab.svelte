@@ -64,7 +64,7 @@
         'Formally verifies one or more given properties instead of the whole specification file. An invariant can also be selected.',
       infoLink:
         'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#rules',
-      validator: 'spaceAndDashValidator',
+      validator: 'spaceAndDash',
     },
     duration: {
       infoText: 'Sets the maximal timeout for all the SMT solvers.',
