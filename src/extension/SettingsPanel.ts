@@ -77,17 +77,27 @@ export class SettingsPanel {
               source: Sources.Extension,
               info: e.payload,
             })
-            const form: InputFormData = processForm(e.payload, confFileName)
-            createAndOpenConfFile(form)
-            if (
-              form.mainContractName &&
-              form.mainSolidityFile &&
-              form.specFile
-            ) {
-              SettingsPanel.resultsWebviewProvider.postMessage({
-                type: 'allow-run',
-                payload: confFileName,
-              })
+            // if the content is all valid - save into conf file, else - block run
+            // eslint-disable-next-line no-constant-condition
+            if (true) {
+              const form: InputFormData = processForm(e.payload, confFileName)
+              createAndOpenConfFile(form)
+              if (
+                form.mainContractName &&
+                form.mainSolidityFile &&
+                form.solidityCompiler &&
+                form.specFile
+              ) {
+                SettingsPanel.resultsWebviewProvider.postMessage({
+                  type: 'allow-run',
+                  payload: confFileName,
+                })
+              } else {
+                SettingsPanel.resultsWebviewProvider.postMessage({
+                  type: 'block-run',
+                  payload: confFileName,
+                })
+              }
             } else {
               SettingsPanel.resultsWebviewProvider.postMessage({
                 type: 'block-run',

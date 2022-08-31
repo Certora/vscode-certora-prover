@@ -94,8 +94,8 @@
   }
 
   function fillFields(newForm: NewForm) {
-    $solidityObj.mainContract = newForm.solidyObj.mainContract
     $solidityObj.mainFile = newForm.solidyObj.mainFile
+    $solidityObj.mainContract = newForm.solidyObj.mainContract
     $solidityObj.compiler.ver = newForm.solidyObj.compiler.ver
     $solidityObj.compiler.exe = newForm.solidyObj.compiler.exe
     $solidityObj.solidityArgs = newForm.solidyObj.solidityArgs
