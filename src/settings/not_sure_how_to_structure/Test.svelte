@@ -234,20 +234,20 @@
                 <div slot="body" class="most_inner_card">
                   <div class="input_wrapper">
                     <div class="dark_input">
-                      <h3>Directory containing compilers</h3>
-                      <CustomInput
-                        infoObj={infoObjArr.solPackages}
-                        placeholder="CVT-Executables-Mac"
-                        bind:bindValue={$solidityObj.compiler.exe}
-                      />
-                    </div>
-                    <div class="dark_input">
-                      <h3>Default soldity version to use<span>*</span></h3>
+                      <h3>Soldity compiler to use<span>*</span></h3>
                       <!-- no placeholder, this filed should have the default compiler selected by default -->
                       <CustomInput
                         infoObj={infoObjArr.solCompiler}
                         placeholder="version: solc7.6"
                         bind:bindValue={$solidityObj.compiler.ver}
+                      />
+                    </div>
+                    <div class="dark_input">
+                      <h3>Directory containing compilers (Optional)</h3>
+                      <CustomInput
+                        infoObj={infoObjArr.solPackages}
+                        placeholder="CVT-Executables-Mac"
+                        bind:bindValue={$solidityObj.compiler.exe}
                       />
                     </div>
                   </div>
