@@ -31,17 +31,14 @@ export class SmartContractsFilesWatcher {
   }
 
   public async init(webview: vscode.Webview | undefined): Promise<void> {
-    const MAX_RESULTS = 25
     this.webview = webview
     const solidityFiles = await vscode.workspace.findFiles(
       '**/*.{sol}',
       '{.certora_config,.git,emv-*,**/emv-*,**/*.certora_config}/**',
-      MAX_RESULTS,
     )
     const specFiles = await vscode.workspace.findFiles(
       '**/*.{spec}',
       '{.certora_config,.git,emv-*,**/emv-*,**/*.certora_config}/**',
-      MAX_RESULTS,
     )
     this.files = solidityFiles.concat(specFiles)
     this.nofifyWebviewAboutSolFilesUpdated()
