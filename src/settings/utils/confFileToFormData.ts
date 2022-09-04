@@ -1,4 +1,10 @@
-import type { ConfFile, NewForm, SolidityObj, SpecObj } from '../types'
+import type {
+  ConfFile,
+  NewForm,
+  SolidityObj,
+  SolidityPackageDir,
+  SpecObj,
+} from '../types'
 
 const newForm: NewForm = {
   solidyObj: {
@@ -84,19 +90,12 @@ function processCompiler(solc: string, solidityObj: SolidityObj) {
  * @param packages packages in conf file format
  * @param solidityObj solidity object
  */
-function processPackages(packages: unknown, solidityObj: SolidityObj) {
-  // todo: make sure packages always recieved with the same type
-  let jsonPackages = {}
-  if (typeof packages === 'string') {
-    jsonPackages = JSON.parse(packages.toString())
-  } else if (typeof packages === 'object') {
-    jsonPackages = packages
-  }
-  Object.entries(jsonPackages).forEach(key => {
-    const packArray = key.toString().split(',')
-    const tempPackage = {
-      packageName: packArray[0].toString(),
-      path: packArray[1].toString(),
+function processPackages(packages: string[], solidityObj: SolidityObj) {
+  packages.forEach(packageStr => {
+    const packageArray = packageStr.split('=')
+    const tempPackage: SolidityPackageDir = {
+      packageName: packageArray[0],
+      path: packageArray[1],
     }
     solidityObj.solidityPackageDir.push(tempPackage)
   })

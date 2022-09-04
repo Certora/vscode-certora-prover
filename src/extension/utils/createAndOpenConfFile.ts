@@ -237,15 +237,18 @@ function processAdditionalContracts(
 function processPackages(solObj: SolidityObj, form: InputFormData) {
   const solDir = solObj.solidityPackageDir
   if (solDir && solDir.length > 0) {
-    let packages = '{'
+    const packages: string[] = []
     solDir.forEach(pack => {
       if (pack.packageName && pack.path) {
-        packages += '"' + pack.packageName + '"' + ':"' + pack.path + '"' + ','
+        packages.push(pack.packageName + '=' + pack.path)
       }
     })
-    if (packages !== '{') {
-      packages = packages.replace(/.$/, '}')
-      addAdditionalSetting('packages', packages, form)
+    if (packages.length > 0) {
+      form.additionalSettings.push({
+        id: 'packages',
+        option: 'packages',
+        value: packages,
+      })
     }
   }
 }

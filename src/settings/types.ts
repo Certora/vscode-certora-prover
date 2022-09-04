@@ -111,6 +111,7 @@ export type ConfFile = {
   cache?: string
   msg?: string
   solc_map?: JSON
+  packages?: string[]
 } & Record<string, boolean | string>
 
 export type EventsFromExtension =
