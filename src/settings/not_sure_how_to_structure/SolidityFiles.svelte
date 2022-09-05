@@ -97,7 +97,7 @@
               {ClearIcon}
               on:select={e => handleSelectSol(e, index)}
               on:clear={e => handleClear(e, index)}
-              placeholder="Additional solidity file"
+              placeholder="Search..."
               bind:value={$solAdditionalContracts[index].mainFile}
             />
           </button>
@@ -106,7 +106,7 @@
           <h3>Main contract name</h3>
           <CustomInput
             infoObj={infoObjArr.contractName}
-            placeholder="className()"
+            placeholder="Contract"
             bind:bindValue={$solAdditionalContracts[index].mainContract}
             change={saveOnChange}
           />
@@ -129,7 +129,7 @@
                 <!-- no placeholder, this filed should have the default compiler selected by default -->
                 <CustomInput
                   infoObj={infoObjArr.solCompiler}
-                  placeholder="version: solc7.6"
+                  placeholder="exaple: solc7.6"
                   bind:bindValue={$solAdditionalContracts[index].compiler.ver}
                   change={saveOnChange}
                 />
