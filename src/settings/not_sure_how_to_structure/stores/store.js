@@ -1,6 +1,8 @@
 import { writable } from 'svelte/store'
 export const checkMyInputs = writable(false)
 
+export const RunName = writable('')
+
 export const solAdditionalContracts = writable([])
 // verification message
 export const verification_message = writable('')

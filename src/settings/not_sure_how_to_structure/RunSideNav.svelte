@@ -5,6 +5,7 @@
     solidityObj,
     specObj,
     verification_message,
+    RunName,
   } from './stores/store.js'
   $: solDisabledState =
     $solidityObj.mainFile !== '' &&
@@ -12,7 +13,7 @@
     $solidityObj.compiler.ver !== ''
 </script>
 
-<h1>My run name settings</h1>
+<h1>{$RunName} settings</h1>
 <div class="nav_settings">
   <button
     class="nav_settings_child "

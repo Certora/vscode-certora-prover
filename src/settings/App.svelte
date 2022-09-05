@@ -14,6 +14,7 @@
     specObj,
     verification_message,
     solAdditionalContracts,
+    RunName,
   } from './not_sure_how_to_structure/stores/store.js'
 
   $: $solidityObj, console.log($solidityObj)
@@ -66,7 +67,7 @@
           source: Sources.SettingsWebview,
           info: e.data.payload,
         })
-
+        $RunName = e.data.payload[1]
         let newForm: NewForm = confFileToFormData(e.data.payload[0]) // change the conf file info form data for the settings form
         fillFields(newForm)
         break

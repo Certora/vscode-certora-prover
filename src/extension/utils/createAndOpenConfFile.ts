@@ -68,12 +68,19 @@ function convertSourceFormDataToConfFileJSON(
     inputFormData.useAdditionalContracts &&
     inputFormData.solc_map.length > 1
   ) {
-    config.solc_map = '{'
-    inputFormData.solc_map.forEach(map => {
-      config.solc_map +=
-        '"' + map.contract + '":"' + map.solidityCompiler + '",'
+    const findSimilar = inputFormData.solc_map.every(sm => {
+      return sm.solidityCompiler === inputFormData.solc_map[0].solidityCompiler
     })
-    config.solc_map = JSON.parse(config.solc_map.replace(/.$/, '}'))
+    if (findSimilar) {
+      config.solc = inputFormData.solc_map[0].solidityCompiler || 'solc'
+    } else {
+      config.solc_map = '{'
+      inputFormData.solc_map.forEach(map => {
+        config.solc_map +=
+          '"' + map.contract + '":"' + map.solidityCompiler + '",'
+      })
+      config.solc_map = JSON.parse(config.solc_map.replace(/.$/, '}'))
+    }
   } else {
     config.solc = inputFormData.solidityCompiler || 'solc'
   }
