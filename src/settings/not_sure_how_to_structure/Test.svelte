@@ -6,7 +6,6 @@
   import CustomItem from './slots_and_utility/CustomItem.svelte'
   import CustomInput from './slots_and_utility/CustomInput.svelte'
   import { refreshFiles } from '../utils/refreshFiles'
-  import { log, Sources } from '../utils/log'
 
   import {
     navState,
@@ -84,30 +83,6 @@
     })
   }
 
-  function saveOnChange() {
-    let inputs = document.querySelectorAll('.simple_txt_input')
-    inputs = Array.from(inputs)
-    $checkMyInputs = inputs.some(el => {
-      if (el.classList.contains('field-danger')) return true
-    })
-    let form = {
-      solidyObj: $solidityObj,
-      specObj: $specObj,
-      verificatoinMessage: $verification_message,
-      solidityAdditionalContracts: $solAdditionalContracts,
-      checkMyInputs: $checkMyInputs,
-    }
-    log({
-      action: 'Send "create-conf-file" command',
-      source: Sources.SettingsWebview,
-      info: form,
-    })
-    vscode.postMessage({
-      command: 'create-conf-file',
-      payload: form,
-    })
-  }
-
   function handleSelectSol(event) {
     if (event.detail.value === 'Browse...') {
       loadFilesFolder('sol')
@@ -121,18 +96,15 @@
         .reverse()[0]
         .replace('.sol', '')
     }
-    saveOnChange()
   }
 
   function handleClear(e, index = -1) {
     // e is passes on by default here
     if (index > -1) {
       $solAdditionalContracts[index].mainFile = ''
-      saveOnChange()
       return
     }
     $solidityObj.mainFile = ''
-    saveOnChange()
   }
 
   // push new linking/directory
@@ -144,7 +116,6 @@
   function removeObj(arr, index) {
     arr.splice(index, 1)
     $solidityObj = $solidityObj
-    saveOnChange()
   }
 
   // add files from folder
@@ -225,7 +196,6 @@
                   infoObj={infoObjArr.contractName}
                   placeholder="Contract"
                   bind:bindValue={$solidityObj.mainContract}
-                  change={saveOnChange}
                 />
               </div>
             </div>
@@ -247,7 +217,6 @@
                         infoObj={infoObjArr.solCompiler}
                         placeholder="example: solc7.6"
                         bind:bindValue={$solidityObj.compiler.ver}
-                        change={saveOnChange}
                       />
                     </div>
                     <div class="dark_input">
@@ -256,7 +225,6 @@
                         infoObj={infoObjArr.solPackages}
                         placeholder="CVT-Executables-Mac"
                         bind:bindValue={$solidityObj.compiler.exe}
-                        change={saveOnChange}
                       />
                     </div>
                   </div>
@@ -283,7 +251,6 @@
                                   infoObj={infoObjArr.solc_args}
                                   placeholder="flag"
                                   bind:bindValue={obj.key}
-                                  change={saveOnChange}
                                 />
                               </div>
                               <div class="dark_input">
@@ -291,7 +258,6 @@
                                   infoObj={infoObjArr.solc_args}
                                   placeholder="value (optional)"
                                   bind:bindValue={obj.value}
-                                  change={saveOnChange}
                                 />
                               </div>
                               <i
@@ -330,7 +296,6 @@
                                   infoObj={infoObjArr.package}
                                   placeholder="Package name"
                                   bind:bindValue={obj.packageName}
-                                  change={saveOnChange}
                                 />
                               </div>
                               <div class="dark_input">
@@ -338,7 +303,6 @@
                                   infoObj={infoObjArr.package}
                                   placeholder=".../path"
                                   bind:bindValue={obj.path}
-                                  change={saveOnChange}
                                 />
                               </div>
                               <i
@@ -381,7 +345,6 @@
                           infoObj={infoObjArr.link}
                           placeholder="Variable"
                           bind:bindValue={$solidityObj.linking[index].variable}
-                          change={saveOnChange}
                         />
                       </div>
                       <div class="dark_input">
@@ -390,7 +353,6 @@
                           placeholder="Contract name"
                           bind:bindValue={$solidityObj.linking[index]
                             .contractName}
-                          change={saveOnChange}
                         />
                       </div>
                       <i
@@ -423,7 +385,6 @@
                         infoObj={infoObjArr.method}
                         placeholder="method_name()"
                         bind:bindValue={$solidityObj.specifiMethod}
-                        change={saveOnChange}
                       />
                     </div>
                   </div>
@@ -434,13 +395,7 @@
         </CollapseCard>
       </div>
       {#each $solAdditionalContracts as file, index}
-        <SolidityFiles
-          {index}
-          {handleClear}
-          {loadFilesFolder}
-          {infoObjArr}
-          {saveOnChange}
-        />
+        <SolidityFiles {index} {handleClear} {loadFilesFolder} {infoObjArr} />
       {/each}
       <button class="btn_add" on:click={addNewFile}
         ><i class="codicon codicon-add" /> Add another contract</button

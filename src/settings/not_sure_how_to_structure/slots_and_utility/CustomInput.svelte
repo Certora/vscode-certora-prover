@@ -14,9 +14,6 @@
   export let placeholder = 'placeholder'
   export let bindValue
 
-  export let change
-  // export const inputName =''
-
   export let infoObj = {
     infoText: 'some text...',
     infoLink: 'https://google.com',
@@ -92,8 +89,6 @@
     class="simple_txt_input"
     type="text"
     bind:value={bindValue}
-    on:input={change}
-    on:change={change}
     {placeholder}
     on:mouseenter={() => (mouse_is_on_input = true)}
     on:mouseleave={checkMouseLeaveInput}
@@ -118,7 +113,6 @@
         class="codicon codicon-close"
         on:click={() => {
           bindValue = ''
-          change()
           icon_wrapper = false
         }}
       />

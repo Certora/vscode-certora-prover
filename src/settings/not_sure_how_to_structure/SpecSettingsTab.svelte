@@ -135,12 +135,10 @@
       return
     }
     $specObj.specFile = event.detail
-    saveOnChange()
   }
 
   function handleClear(e, index) {
     $specObj.specFile = ''
-    saveOnChange()
   }
   // add files from folder
   function loadFilesFolder(fileType, index) {
@@ -164,41 +162,15 @@
     $solidityObj.compiler.ver !== ''
   )
 
-  function saveOnChange() {
-    let inputs = document.querySelectorAll('.simple_txt_input')
-    inputs = Array.from(inputs)
-    $checkMyInputs = inputs.some(el => {
-      if (el.classList.contains('field-danger')) return true
-    })
-    let form = {
-      solidyObj: $solidityObj,
-      specObj: $specObj,
-      verificatoinMessage: $verification_message,
-      solidityAdditionalContracts: $solAdditionalContracts,
-      checkMyInputs: $checkMyInputs,
-    }
-    log({
-      action: 'Send "create-conf-file" command',
-      source: Sources.SettingsWebview,
-      info: form,
-    })
-    vscode.postMessage({
-      command: 'create-conf-file',
-      payload: form,
-    })
-  }
-
   // push new linking/directory
   function pushNewObj(arr, obj) {
     arr.push(obj)
     $specObj = $specObj
-    saveOnChange()
   }
   // remove from linking/directory
   function removeObj(arr, index) {
     arr.splice(index, 1)
     $specObj = $specObj
-    saveOnChange()
   }
 
   let isSpecListOpen = false
@@ -261,7 +233,6 @@
                 <CustomInput
                   placeholder="deafult: all rules"
                   bind:bindValue={$specObj.rules}
-                  change={saveOnChange}
                   infoObj={infoObjArr.rules}
                 />
               </div>
@@ -272,7 +243,6 @@
                 <CustomInput
                   placeholder="default: 600"
                   bind:bindValue={$specObj.duration}
-                  change={saveOnChange}
                   infoObj={infoObjArr.duration}
                 />
               </div>
@@ -286,7 +256,6 @@
                   <input
                     type="checkbox"
                     bind:checked={$specObj.optimisticLoop}
-                    on:change={saveOnChange}
                   />
                   <span class="checkmark" />
                 </label>
@@ -297,7 +266,6 @@
                 <CustomInput
                   placeholder="default: 1"
                   bind:bindValue={$specObj.loopUnroll}
-                  change={saveOnChange}
                   infoObj={infoObjArr.loop_iter}
                 />
               </div>
@@ -317,7 +285,6 @@
                         <CustomInput
                           placeholder="flag"
                           bind:bindValue={obj.name}
-                          change={saveOnChange}
                           infoObj={infoObjArr.flag}
                         />
                       </div>
@@ -325,7 +292,6 @@
                         <CustomInput
                           placeholder="value (optional)"
                           bind:bindValue={obj.value}
-                          change={saveOnChange}
                           infoObj={infoObjArr.flag}
                         />
                       </div>
@@ -350,7 +316,6 @@
                         <input
                           type="checkbox"
                           bind:checked={$specObj.runOnStg}
-                          on:change={saveOnChange}
                         />
                         <span class="checkmark" />
                       </label>
@@ -363,7 +328,6 @@
                       <CustomInput
                         placeholder="default: master"
                         bind:bindValue={$specObj.branchName}
-                        change={saveOnChange}
                         infoObj={infoObjArr.stg}
                       />
                     </div>
@@ -375,7 +339,6 @@
                         <input
                           type="checkbox"
                           bind:checked={$specObj.localTypeChecking}
-                          on:change={saveOnChange}
                         />
                         <span class="checkmark" />
                       </label>
@@ -387,7 +350,6 @@
                         <input
                           type="checkbox"
                           bind:checked={$specObj.shortOutput}
-                          on:change={saveOnChange}
                         />
                         <span class="checkmark" />
                       </label>
@@ -399,7 +361,6 @@
                         <input
                           type="checkbox"
                           bind:checked={$specObj.multiAssert}
-                          on:change={saveOnChange}
                         />
                         <span class="checkmark" />
                       </label>

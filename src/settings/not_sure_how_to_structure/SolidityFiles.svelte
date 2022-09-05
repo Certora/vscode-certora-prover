@@ -13,7 +13,6 @@
   export let handleClear
   export let loadFilesFolder
   export let infoObjArr
-  export let saveOnChange
 
   let isSolidityListOpen = false
   let solidityIconsObj = {
@@ -25,6 +24,8 @@
     infoLink: infoObjArr.mainFile.infoText,
   }
 
+  // $: $solAdditionalContracts, save()
+
   // push new linking/directory
   function pushNewObj(arr, obj) {
     arr.push(obj)
@@ -34,14 +35,12 @@
   function removeObj(arr, i) {
     arr.splice(i, 1)
     $solAdditionalContracts[index] = $solAdditionalContracts[index]
-    saveOnChange()
   }
 
   // remove solidity file by index
   function removeSolFile(index) {
     $solAdditionalContracts.splice(index, 1)
     $solAdditionalContracts = $solAdditionalContracts
-    saveOnChange()
   }
 
   function handleSelectSol(event, index) {
@@ -59,7 +58,6 @@
         .reverse()[0]
         .replace('.sol', '')
     }
-    saveOnChange()
   }
 </script>
 
@@ -108,7 +106,6 @@
             infoObj={infoObjArr.contractName}
             placeholder="Contract"
             bind:bindValue={$solAdditionalContracts[index].mainContract}
-            change={saveOnChange}
           />
         </div>
       </div>
@@ -131,7 +128,6 @@
                   infoObj={infoObjArr.solCompiler}
                   placeholder="exaple: solc7.6"
                   bind:bindValue={$solAdditionalContracts[index].compiler.ver}
-                  change={saveOnChange}
                 />
               </div>
               <div class="dark_input">
@@ -140,7 +136,6 @@
                   infoObj={infoObjArr.solPackages}
                   placeholder="CVT-Executables-Mac"
                   bind:bindValue={$solAdditionalContracts[index].compiler.exe}
-                  change={saveOnChange}
                 />
               </div>
             </div>
@@ -162,7 +157,6 @@
                     infoObj={infoObjArr.link}
                     placeholder="Variable"
                     bind:bindValue={obj.variable}
-                    change={saveOnChange}
                   />
                 </div>
                 <div class="dark_input">
@@ -170,7 +164,6 @@
                     infoObj={infoObjArr.link}
                     placeholder="Contract name"
                     bind:bindValue={obj.contractName}
-                    change={saveOnChange}
                   />
                 </div>
                 <i

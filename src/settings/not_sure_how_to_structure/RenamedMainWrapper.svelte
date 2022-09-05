@@ -3,6 +3,52 @@
   import SpecSettingsTab from './SpecSettingsTab.svelte'
   import Test from './Test.svelte'
   import VerificationMessageTab from './VerificationMessageTab.svelte'
+  import {
+    checkMyInputs,
+    solidityObj,
+    specObj,
+    verification_message,
+    solAdditionalContracts,
+  } from './stores/store.js'
+  import { log, Sources } from '../utils/log'
+
+  $: $solidityObj | $specObj | $verification_message | $solAdditionalContracts,
+    save()
+
+  function save() {
+    let inputs = document.querySelectorAll('.simple_txt_input')
+    inputs = Array.from(inputs)
+    $checkMyInputs = inputs.some(el => {
+      return el.classList.contains('field-danger')
+    })
+    let form = {
+      solidyObj: $solidityObj,
+      specObj: $specObj,
+      verificatoinMessage: $verification_message,
+      solidityAdditionalContracts: $solAdditionalContracts,
+      checkMyInputs: $checkMyInputs,
+    }
+    log({
+      action: 'Send "create-conf-file" command',
+      source: Sources.SettingsWebview,
+      info: form,
+    })
+    vscode.postMessage({
+      command: 'create-conf-file',
+      payload: form,
+    })
+  }
+
+  export function openBrowser(fileType, index = -1) {
+    log({
+      action: 'Send "open-browser" command',
+      source: Sources.SettingsWebview,
+    })
+    vscode.postMessage({
+      command: 'open-browser',
+      payload: [fileType, index],
+    })
+  }
 </script>
 
 <div class="main_wrapper">
