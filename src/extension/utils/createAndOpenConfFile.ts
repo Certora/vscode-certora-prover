@@ -30,6 +30,25 @@ function setAdditionalSetting(val?: string) {
   return val
 }
 
+function additionalContractsSolc(
+  config: ConfFile,
+  inputFormData: InputFormData,
+) {
+  const findSimilar = inputFormData.solc_map.every(sm => {
+    return sm.solidityCompiler === inputFormData.solc_map[0].solidityCompiler
+  })
+  if (findSimilar) {
+    config.solc = inputFormData.solc_map[0].solidityCompiler || 'solc'
+  } else {
+    config.solc_map = '{'
+    inputFormData.solc_map.forEach(map => {
+      config.solc_map +=
+        '"' + map.contract + '":"' + map.solidityCompiler + '",'
+    })
+    config.solc_map = JSON.parse(config.solc_map.replace(/.$/, '}'))
+  }
+}
+
 function convertSourceFormDataToConfFileJSON(
   inputFormData: InputFormData,
 ): string {
@@ -62,25 +81,11 @@ function convertSourceFormDataToConfFileJSON(
       )
     })
   }
-  // either use user input or vscode settings
-  // better practice might be not creating the conf file if an input doesn't exists
   if (
     inputFormData.useAdditionalContracts &&
     inputFormData.solc_map.length > 1
   ) {
-    const findSimilar = inputFormData.solc_map.every(sm => {
-      return sm.solidityCompiler === inputFormData.solc_map[0].solidityCompiler
-    })
-    if (findSimilar) {
-      config.solc = inputFormData.solc_map[0].solidityCompiler || 'solc'
-    } else {
-      config.solc_map = '{'
-      inputFormData.solc_map.forEach(map => {
-        config.solc_map +=
-          '"' + map.contract + '":"' + map.solidityCompiler + '",'
-      })
-      config.solc_map = JSON.parse(config.solc_map.replace(/.$/, '}'))
-    }
+    additionalContractsSolc(config, inputFormData)
   } else {
     config.solc = inputFormData.solidityCompiler || 'solc'
   }

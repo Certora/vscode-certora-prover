@@ -199,7 +199,7 @@
           <div slot="body" class="p-12 pt-0">
             <div class="input_wrapper">
               <div class="dark_input">
-                <h3>Source<span>*</span></h3>
+                <h3>Main solidity file<span>*</span></h3>
 
                 <button
                   on:click={() => refreshFiles()}
@@ -214,7 +214,7 @@
                     {ClearIcon}
                     on:select={handleSelectSol}
                     on:clear={e => handleClear(e)}
-                    placeholder="Main solidity file"
+                    placeholder="Search..."
                     bind:value={$solidityObj.mainFile}
                   />
                 </button>
@@ -223,7 +223,7 @@
                 <h3>Main contract name<span>*</span></h3>
                 <CustomInput
                   infoObj={infoObjArr.contractName}
-                  placeholder="className()"
+                  placeholder="Contract"
                   bind:bindValue={$solidityObj.mainContract}
                   change={saveOnChange}
                 />
@@ -245,7 +245,7 @@
                       <!-- no placeholder, this filed should have the default compiler selected by default -->
                       <CustomInput
                         infoObj={infoObjArr.solCompiler}
-                        placeholder="version: solc7.6"
+                        placeholder="example: solc7.6"
                         bind:bindValue={$solidityObj.compiler.ver}
                         change={saveOnChange}
                       />
@@ -281,7 +281,7 @@
                               <div class="dark_input">
                                 <CustomInput
                                   infoObj={infoObjArr.solc_args}
-                                  placeholder="key"
+                                  placeholder="flag"
                                   bind:bindValue={obj.key}
                                   change={saveOnChange}
                                 />
@@ -289,7 +289,7 @@
                               <div class="dark_input">
                                 <CustomInput
                                   infoObj={infoObjArr.solc_args}
-                                  placeholder="value"
+                                  placeholder="value (optional)"
                                   bind:bindValue={obj.value}
                                   change={saveOnChange}
                                 />

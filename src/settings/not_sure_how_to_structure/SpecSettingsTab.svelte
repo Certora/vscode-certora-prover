@@ -62,7 +62,7 @@
     },
     rules: {
       infoText:
-        'Formally verifies one or more given properties instead of the whole specification file. An invariant can also be selected.',
+        'Rules separated by commas. \nFormally verifies one or more given properties instead of the whole specification file. An invariant can also be selected.',
       infoLink:
         'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#rules',
       validator: 'spaceAndDash',
@@ -251,7 +251,7 @@
                     {ClearIcon}
                     on:select={e => handleSelectSpec(e, 'spec')}
                     on:clear={e => handleClear(e)}
-                    placeholder=".spec file"
+                    placeholder="Search..."
                     bind:value={$specObj.specFile}
                   />
                 </button>
@@ -259,7 +259,7 @@
               <div class="dark_input">
                 <h3>Rules</h3>
                 <CustomInput
-                  placeholder="All rules"
+                  placeholder="deafult: all rules"
                   bind:bindValue={$specObj.rules}
                   change={saveOnChange}
                   infoObj={infoObjArr.rules}
@@ -270,7 +270,7 @@
               <div class="dark_input input_x3">
                 <h3>Duration</h3>
                 <CustomInput
-                  placeholder="600s"
+                  placeholder="default: 600"
                   bind:bindValue={$specObj.duration}
                   change={saveOnChange}
                   infoObj={infoObjArr.duration}
@@ -295,7 +295,7 @@
               <div class="dark_input input_x3">
                 <h3>Loop Unroll</h3>
                 <CustomInput
-                  placeholder="1"
+                  placeholder="default: 1"
                   bind:bindValue={$specObj.loopUnroll}
                   change={saveOnChange}
                   infoObj={infoObjArr.loop_iter}
@@ -315,7 +315,7 @@
                     <div class="input_wrapper mt-8px">
                       <div class="dark_input">
                         <CustomInput
-                          placeholder="Property name"
+                          placeholder="flag"
                           bind:bindValue={obj.name}
                           change={saveOnChange}
                           infoObj={infoObjArr.flag}
@@ -323,7 +323,7 @@
                       </div>
                       <div class="dark_input">
                         <CustomInput
-                          placeholder="Property value"
+                          placeholder="value (optional)"
                           bind:bindValue={obj.value}
                           change={saveOnChange}
                           infoObj={infoObjArr.flag}

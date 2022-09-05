@@ -33,7 +33,7 @@ export class SmartContractsFilesWatcher {
   public async init(webview: vscode.Webview | undefined): Promise<void> {
     this.webview = webview
     this.files = await vscode.workspace.findFiles(
-      '**/*.{sol, spec}',
+      '**/*.{sol,spec}',
       '{.certora_config,.git,emv-*,**/emv-*,**/*.certora_config}/**',
     )
     this.nofifyWebviewAboutSolFilesUpdated()
