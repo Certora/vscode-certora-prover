@@ -6,15 +6,13 @@
   import CustomItem from './slots_and_utility/CustomItem.svelte'
   import CustomInput from './slots_and_utility/CustomInput.svelte'
   import { refreshFiles } from '../utils/refreshFiles'
+  import { openBrowser } from '../utils/openBrowser'
 
   import {
     navState,
     solidityObj,
     solAdditionalContracts,
-    specObj,
-    verification_message,
     solFilesArr,
-    checkMyInputs,
   } from './stores/store.js'
   import SolidityFiles from './SolidityFiles.svelte'
   // emailValidator ,spaceAndDashValidator, numberValidator, compilerValidator, filePathVlidator
@@ -70,17 +68,6 @@
         'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#method',
       validator: 'alphaNum',
     },
-  }
-
-  function openBrowser(fileType, index = -1) {
-    log({
-      action: 'Send "open-browser" command',
-      source: Sources.SettingsWebview,
-    })
-    vscode.postMessage({
-      command: 'open-browser',
-      payload: [fileType, index],
-    })
   }
 
   function handleSelectSol(event) {

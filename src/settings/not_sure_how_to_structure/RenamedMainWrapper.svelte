@@ -38,17 +38,6 @@
       payload: form,
     })
   }
-
-  export function openBrowser(fileType, index = -1) {
-    log({
-      action: 'Send "open-browser" command',
-      source: Sources.SettingsWebview,
-    })
-    vscode.postMessage({
-      command: 'open-browser',
-      payload: [fileType, index],
-    })
-  }
 </script>
 
 <div class="main_wrapper">

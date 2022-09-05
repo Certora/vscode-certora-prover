@@ -4,17 +4,14 @@
   import CollapseCard from './slots_and_utility/CollapseCard.svelte'
   import CustomInput from './slots_and_utility/CustomInput.svelte'
   import Icon from './slots_and_utility/Icon.svelte'
-  import { log, Sources } from '../utils/log'
+  import { openBrowser } from '../utils/openBrowser'
 
   import CustomItem from './slots_and_utility/CustomItem.svelte'
   import {
     navState,
     specObj,
     solidityObj,
-    verification_message,
     specFilesArr,
-    solAdditionalContracts,
-    checkMyInputs,
   } from './stores/store.js'
   import CheckBoxInfo from './slots_and_utility/CheckBoxInfo.svelte'
   import { refreshFiles } from '../utils/refreshFiles'
@@ -143,17 +140,6 @@
   // add files from folder
   function loadFilesFolder(fileType, index) {
     openBrowser(fileType, index)
-  }
-
-  function openBrowser(fileType, index = -1) {
-    log({
-      action: 'Send "open-browser" command',
-      source: Sources.SettingsWebview,
-    })
-    vscode.postMessage({
-      command: 'open-browser',
-      payload: [fileType, index],
-    })
   }
 
   $: solDisabledState = !(
