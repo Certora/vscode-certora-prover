@@ -1,5 +1,7 @@
 import { writable } from 'svelte/store'
 export const checkMyInputs = writable(false)
+// filters
+export const filterSol = writable('')
 
 export const solAdditionalContracts = writable([])
 // verification message

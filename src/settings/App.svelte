@@ -260,7 +260,7 @@
   /* really bad start temporary selector */
   :global(*),
   :global(a) {
-    color: var(--vscode-foreground);
+    color: var(--button-primary-foreground) !important;
   }
 
   /* butoon/icons hover */

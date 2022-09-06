@@ -33,7 +33,7 @@
   }
 </script>
 
-<div class="item {itemClasses}">
+<div class="item {itemClasses}" class:sticky={!item.value}>
   <span>
     {@html getOptionLabel(item, filterText)}
   </span>
@@ -46,7 +46,7 @@
   /* stylelint-disable */
 
   .item {
-    cursor: default;
+    cursor: pointer;
     height: 18px;
     line-height: 18px;
     /* height: var(--height, 18px);
@@ -96,5 +96,15 @@
   .item.hover:not(.active) {
     background: var(--itemHoverBG, #e7f2ff);
     color: var(--itemHoverColor, inherit);
+  }
+
+  .sticky {
+  }
+
+  :global(.listItem:first-of-type) {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--badge-background);
   }
 </style>

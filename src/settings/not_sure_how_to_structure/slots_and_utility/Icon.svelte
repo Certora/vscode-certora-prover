@@ -46,6 +46,9 @@
 </div>
 
 <style>
+  .codicon {
+    color: var(--dropdown-text-color);
+  }
   .icon_wrapper {
     order: 3;
     /* margin-right: -4px; */
@@ -84,6 +87,7 @@
     text-align: left;
     padding: 8px;
     z-index: 3;
+    color: var(--dropdown-text-color);
   }
   .showtxt a {
     margin-top: 8px;

@@ -87,7 +87,7 @@
 
 <div class="main_wrapper">
   <input
-    class="simple_txt_input"
+    class="simple_txt_input monaco-inputbox idle"
     type="text"
     bind:value={bindValue}
     {placeholder}

@@ -47,8 +47,12 @@
     cursor: pointer;
     user-select: none;
     display: flex;
+    color: var(--button-secondary-foreground);
   }
 
+  .card-body {
+    color: var(--button-primary-foreground);
+  }
   .cursor_disabled,
   .cursor_disabled > .card-header {
     cursor: not-allowed;

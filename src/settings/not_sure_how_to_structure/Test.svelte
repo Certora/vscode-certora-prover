@@ -5,13 +5,14 @@
   import Icon from './slots_and_utility/Icon.svelte'
   import CustomItem from './slots_and_utility/CustomItem.svelte'
   import CustomInput from './slots_and_utility/CustomInput.svelte'
-
+  import SolidityFiles from './SolidityFiles.svelte'
   import {
+    filterSol,
     navState,
     solidityObj,
     solAdditionalContracts,
   } from './stores/store.js'
-  import SolidityFiles from './SolidityFiles.svelte'
+
   // emailValidator ,spaceAndDashValidator, numberValidator, compilerValidator, filePathVlidator
   let infoObjArr = {
     mainFile: {
@@ -71,9 +72,42 @@
   // ********** IMPORTANT **********
   // ********** FIRST OBJECT IN THE ARRAY MUST BE { value: 'Browse...', label: 'Browse...', path: 'src/somefolder' }
   // this brows object is needed to fire up a function to browse files (the path key is useless but might as well)
-  $: solFiles = [
-    { value: 'Browse...', label: 'Browse...', path: 'src/somefolder' },
+  let solFiles = [
     { value: 'src/somefolder/file-1', label: 'file-1', path: 'src/somefolder' },
+    { value: 'src/somefolder/file-1', label: 'file-1', path: 'src/somefolder' },
+    { value: 'src/somefolder/file-1', label: 'file-1', path: 'src/somefolder' },
+    {
+      value: 'src/somefolder/file-11',
+      label: 'file-11',
+      path: 'src/somefolder',
+    },
+    {
+      value: 'src/somefolder/file-11',
+      label: 'file-11',
+      path: 'src/somefolder',
+    },
+    { value: 'src/somefolder/file-1', label: 'file-1', path: 'src/somefolder' },
+    {
+      value: 'src/somefolder/file-11',
+      label: 'file-11',
+      path: 'src/somefolder',
+    },
+    {
+      value: 'src/somefolder/file-111',
+      label: 'file-111',
+      path: 'src/somefolder',
+    },
+    { value: 'src/somefolder/file-1', label: 'file-1', path: 'src/somefolder' },
+    {
+      value: 'src/somefolder/file-1111',
+      label: 'file-1111',
+      path: 'src/somefolder',
+    },
+    {
+      value: 'src/somefolder/file-1111',
+      label: 'file-1111',
+      path: 'src/somefolder',
+    },
     {
       value: 'file-2/src/somefolder1',
       label: 'file-2',
@@ -101,16 +135,25 @@
     },
   ]
 
+  // let filterCountObj = {
+  // allFiles:solFiles.length,
+  // filesShowing:15
+  // }
+  // let filteredFiles =[{ value: 'Browse...', label: 'Browse...', path: `Showing ${solFiles.slice(0, filterCountObj.filesShowing).length}/${filterCountObj.allFiles} files` }, ...solFiles.slice(0, filterCountObj.filesShowing)]
+
+  // because the input is initialized with an empty string, resetFiles() fires right away so these 2 variables can be declared with no value
+  let filteredFiles, filterCountObj
+
   // on click on the input get al the files (sol or spec) based on what os passded to the function
   function updateItems(fileType) {
     // not really expecting anything but sol here
     // might bove elsewhere later and make it more reusable
     if (fileType !== 'sol') return
     // this is actually pushing some fake value in (for testing only) just replace with an array of the new values from the file system like you see in the specFiles
-    solFiles = [
-      ...solFiles,
-      { value: 'Browse...', label: 'Browse...', path: 'src/somefolder' },
-    ]
+    // solFiles = [
+    //   ...solFiles,
+    //   { value: 'Browse...', label: 'Browse...', path: 'src/somefolder' },
+    // ]
   }
 
   function handleSelectSol(event) {
@@ -172,6 +215,64 @@
     ifoText: infoObjArr.mainFile.infoText,
     infoLink: infoObjArr.mainFile.infoLink,
   }
+
+  let filter = ''
+  $: if (filter === '') resetFiles()
+
+  function manageFiles(filter) {
+    // some times fires on empty string/delete and some times not
+    // if(filter === '') console.log('some times i work')
+    let newFilteredFiles = solFiles.filter(file => {
+      return file.label.includes(filter)
+    })
+
+    if (newFilteredFiles.length > filterCountObj.filesShowing) {
+      filteredFiles = [
+        {
+          value: 'Browse...',
+          label: 'Browse...',
+          path: `Showing ${filterCountObj.filesShowing}/${newFilteredFiles.length} files`,
+        },
+        ...newFilteredFiles.slice(0, filterCountObj.filesShowing),
+      ]
+      return filteredFiles
+    }
+
+    filteredFiles = [
+      {
+        value: 'Browse...',
+        label: 'Browse...',
+        path: `Showing ${newFilteredFiles.length}/${newFilteredFiles.length} files`,
+      },
+      ...newFilteredFiles,
+    ]
+    // filteredFiles = [{ selectable: false ,label: `Showing ${filterCountObj.filesShowing}/${filterCountObj.allFiles} files`, path:''},{ value: 'Browse...', label: 'Browse...', path: 'src/somefolder' }, ...newFilteredFiles]
+    return filteredFiles
+
+    //  0/0 logic / message
+  }
+
+  function promiseTest(filterText) {
+    return Promise.resolve(manageFiles(filterText))
+  }
+  // promiseTest('')
+
+  function resetFiles() {
+    filterCountObj = {
+      allFiles: solFiles.length,
+      filesShowing: 50,
+    }
+    filteredFiles = [
+      {
+        value: 'Browse...',
+        label: 'Browse...',
+        path: `Showing ${
+          solFiles.slice(0, filterCountObj.filesShowing).length
+        }/${filterCountObj.allFiles} files`,
+      },
+      ...solFiles.slice(0, filterCountObj.filesShowing),
+    ]
+  }
 </script>
 
 <div class="card_parent_wrapper bg_dark border-rd">
@@ -199,16 +300,22 @@
                   on:click={() => updateItems('sol')}
                   style="background: transparent; padding:0; border:none;"
                 >
+                  <!-- itemFilter: (label, filterText, option) => label === 'Ice Cream' -->
+                  <!--  itemFilter = {(label, filterText, option)=> {return option}} -->
+                  <!-- questionable -->
+                  <!-- itemFilter = {(label, filterText, option)=> {return option}} -->
                   <Select
+                    bind:filterText={filter}
+                    items={filteredFiles}
+                    loadOptions={promiseTest}
                     listOpen={isSolidityListOpen}
                     iconProps={solidityIconsObj}
-                    items={solFiles}
                     Item={CustomItem}
                     {Icon}
                     {ClearIcon}
                     on:select={handleSelectSol}
                     on:clear={e => handleClear(e)}
-                    placeholder="Main solidity file"
+                    placeholder="Type to filter..."
                     bind:value={$solidityObj.mainFile}
                   />
                 </button>
