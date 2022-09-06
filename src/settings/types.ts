@@ -99,6 +99,7 @@ export enum EventTypesFromExtension {
   SmartContractsFilesUpdated = 'smart-contracts-files-updated',
   EditConfFile = 'edit-conf-file',
   FileChosen = 'file-chosen',
+  MinorFilesChange = 'minor-files-change',
 }
 
 export type ConfFile = {
@@ -126,4 +127,11 @@ export type EventsFromExtension =
   | {
       type: EventTypesFromExtension.FileChosen
       payload: [string, number]
+    }
+  | {
+      type: EventTypesFromExtension.MinorFilesChange
+      payload: {
+        method: string
+        file: { vaule: string; label: string; path: string }
+      }
     }

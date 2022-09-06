@@ -33,28 +33,37 @@
           info: e.data.payload,
         })
         // todo: files as filename, pathToFile
-        solidityFiles = e.data.payload.sol
-        solidityFilesNew = solidityFiles.map(str => {
-          const tempLabel = str.split('/').reverse()[0]
-          const tempPath = str.replace(tempLabel, '')
-          return { value: str, label: tempLabel, path: tempPath }
-        })
-        solidityFilesNew.unshift({
-          value: 'Browse...',
-          label: 'Browse...',
-          path: 'Browse',
-        })
-        specFiles = e.data.payload.spec
-        specFilesNew = specFiles.map(str => {
-          const tempLabel = str.split('/').reverse()[0]
-          const tempPath = str.replace(tempLabel, '')
-          return { value: str, label: tempLabel, path: tempPath }
-        })
-        specFilesNew.unshift({
-          value: 'Browse...',
-          label: 'Browse...',
-          path: 'Browse',
-        })
+        solidityFilesNew = [
+          {
+            value: 'Browse...',
+            label: 'Browse...',
+            path: 'Browse',
+          },
+          ...e.data.payload.sol,
+        ]
+        // solidityFilesNew = solidityFiles.map(str => {
+        //   const tempLabel = str.split('/').reverse()[0]
+        //   const tempPath = str.replace(tempLabel, '')
+        //   return { value: str, label: tempLabel, path: tempPath }
+        // })
+        specFilesNew = [
+          {
+            value: 'Browse...',
+            label: 'Browse...',
+            path: 'Browse',
+          },
+          ...e.data.payload.spec,
+        ]
+        // specFilesNew = specFiles.map(str => {
+        //   const tempLabel = str.split('/').reverse()[0]
+        //   const tempPath = str.replace(tempLabel, '')
+        //   return { value: str, label: tempLabel, path: tempPath }
+        // })
+        // specFilesNew.unshift({
+        //   value: 'Browse...',
+        //   label: 'Browse...',
+        //   path: 'Browse',
+        // })
         // very bad temp timeout
         setTimeout(() => {
           solFilesArr.set(solidityFilesNew)
@@ -96,6 +105,21 @@
           $specObj.specFile = fileName
         }
         break
+      case EventTypesFromExtension.MinorFilesChange:
+        log({
+          action: 'Received "minor-files-change" command',
+          source: Sources.SettingsWebview,
+          info: e.data.payload,
+        })
+        // const method = e.data.payload.method
+        // const file = e.data.payload.file
+        // if (file.label.endsWith('sol')){
+        //   if (method === 'push') {
+        //     $solFilesArr.push(file)
+        //     $solFilesArr = $solFilesArr
+        //   }
+        // }
+        break
       default:
         break
     }
@@ -106,38 +130,6 @@
     $specObj = newForm.specObj
     $verification_message = newForm.verificatoinMessage
     $solAdditionalContracts = newForm.solidityAdditionalContracts || []
-    // $solidityObj.mainFile = newForm.solidyObj.mainFile
-    // $solidityObj.mainContract = newForm.solidyObj.mainContract
-    // $solidityObj.compiler.ver = newForm.solidyObj.compiler.ver
-    // $solidityObj.compiler.exe = newForm.solidyObj.compiler.exe
-    // $solidityObj.solidityArgs = newForm.solidyObj.solidityArgs
-    // $solidityObj.specifiMethod = newForm.solidyObj.specifiMethod
-    // $solidityObj.solidityPackageDefaultPath =
-    //   newForm.solidyObj.solidityPackageDefaultPath
-    // $specObj.duration = newForm.specObj.duration
-    // $specObj.loopUnroll = newForm.specObj.loopUnroll
-    // $specObj.runOnStg = newForm.specObj.runOnStg
-    // $specObj.branchName = newForm.specObj.branchName
-    // $specObj.optimisticLoop = newForm.specObj.optimisticLoop
-    // $specObj.specFile = newForm.specObj.specFile
-    // $specObj.multiAssert = newForm.specObj.multiAssert
-    // $specObj.localTypeChecking = newForm.specObj.localTypeChecking
-    // $specObj.rules = newForm.specObj.rules
-    // $specObj.shortOutput = newForm.specObj.shortOutput
-    // $verification_message = newForm.verificatoinMessage
-    // const packDir = newForm.solidyObj.solidityPackageDir
-    // if (packDir.length > 0) {
-    //   $solidityObj.solidityPackageDir = packDir
-    // }
-    // const linkingArr = newForm.solidyObj.linking
-    // if (linkingArr.length > 0) {
-    //   $solidityObj.linking = linkingArr
-    // }
-    // const properties = newForm.specObj.properties
-    // if (properties.length > 0) {
-    //   $specObj.properties = properties
-    // }
-    // $solAdditionalContracts = newForm.solidityAdditionalContracts || []
   }
 
   onMount(() => {

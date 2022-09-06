@@ -160,7 +160,6 @@
                 <h3>Main solidity file<span>*</span></h3>
 
                 <button
-                  on:click={() => refreshFiles()}
                   style="background: transparent; padding:0; border:none;"
                 >
                   <Select

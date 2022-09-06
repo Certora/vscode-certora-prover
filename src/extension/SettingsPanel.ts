@@ -150,6 +150,7 @@ export class SettingsPanel {
     confFileName: ConfNameMap,
     editConfFile?: Record<string, unknown>,
   ) {
+    console.log('create new panel!!!!!')
     const panel = vscode.window.createWebviewPanel(
       'certoraSettings',
       'Certora IDE Settings: ' + confFileName.displayName,

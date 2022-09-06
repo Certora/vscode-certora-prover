@@ -1,5 +1,4 @@
 import * as vscode from 'vscode'
-
 export class SmartContractsFilesWatcher {
   files: vscode.Uri[]
   fileSystemWatcher: vscode.FileSystemWatcher
@@ -36,37 +35,76 @@ export class SmartContractsFilesWatcher {
       '**/*.{sol,spec}',
       '{.certora_config,.git,emv-*,**/emv-*,**/*.certora_config}/**',
     )
-    this.nofifyWebviewAboutSolFilesUpdated()
+    this.sendFilesToWebview()
   }
 
   private create(file: vscode.Uri): void {
-    this.files.push(file)
-    this.nofifyWebviewAboutSolFilesUpdated()
+    // this.files.push(file)
+    // this.nofifyWebviewAboutSolFilesUpdated()
+    this.notifyWebviewAboutUpdates(file, 'push')
   }
 
   private update(file: vscode.Uri): void {
-    this.files = this.files.map(f => (f.fsPath === file.fsPath ? file : f))
-    this.nofifyWebviewAboutSolFilesUpdated()
+    // this.files = this.files.map(f => (f.fsPath === file.fsPath ? file : f))
+    // this.nofifyWebviewAboutSolFilesUpdated()
+    this.notifyWebviewAboutUpdates(file, 'map')
   }
 
   private remove(file: vscode.Uri): void {
-    this.files = this.files.filter(f => f.fsPath !== file.fsPath)
-    this.nofifyWebviewAboutSolFilesUpdated()
+    // this.files = this.files.filter(f => f.fsPath !== file.fsPath)
+    // this.nofifyWebviewAboutSolFilesUpdated()
+    this.notifyWebviewAboutUpdates(file, 'filter')
   }
 
-  private nofifyWebviewAboutSolFilesUpdated() {
+  private notifyWebviewAboutUpdates(file: vscode.Uri, method: string) {
     if (this.webview) {
-      const sol: string[] = []
-      const spec: string[] = []
+      const fileArr = file.path.split('/').reverse()
+      const fileObj = {
+        value: file.fsPath,
+        label: fileArr[0],
+        path: file.fsPath.replace(fileArr[0], ''),
+      }
+      console.log('minor-files-change', {
+        method,
+        fileObj,
+      })
+      this.webview.postMessage({
+        type: 'minor-files-change',
+        payload: {
+          method,
+          fileObj,
+        },
+      })
+    }
+  }
+
+  private sendFilesToWebview() {
+    if (this.webview) {
+      let sol: { value: string; label: string; path: string }[] = []
+      let spec: { value: string; label: string; path: string }[] = []
 
       this.files.forEach(file => {
         const path = vscode.workspace.asRelativePath(file)
-
-        if (file.path.endsWith('.sol')) {
-          sol.push(path)
-        } else {
-          spec.push(path)
+        const label = path.split('/').reverse()[0]
+        const fileObj = {
+          value: path,
+          label: label,
+          path: path.replace(label, ''),
         }
+
+        if (fileObj.label.endsWith('.sol')) {
+          sol.push(fileObj)
+        } else {
+          spec.push(fileObj)
+        }
+      })
+
+      sol = sol.sort((f1, f2) => {
+        return this.alphaSort(f1, f2)
+      })
+
+      spec = spec.sort((f1, f2) => {
+        return this.alphaSort(f1, f2)
       })
 
       this.webview.postMessage({
@@ -77,6 +115,25 @@ export class SmartContractsFilesWatcher {
         },
       })
     }
+  }
+
+  private alphaSort(
+    l1: { value: string; label: string; path: string },
+    l2: { value: string; label: string; path: string },
+  ): number {
+    if (l1.label > l2.label) {
+      return 1
+    }
+    if (l2.label > l1.label) {
+      return -1
+    }
+    if (l1.path > l2.path) {
+      return 1
+    }
+    if (l2.path > l1.path) {
+      return -1
+    }
+    return 0
   }
 
   public dispose(): void {
