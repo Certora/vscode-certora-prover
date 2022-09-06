@@ -11,6 +11,9 @@ export const verification_message = writable('')
 export const solFilesArr = writable([])
 export const specFilesArr = writable([])
 
+// is it reset?
+export const isReset = writable(true)
+
 // navigation
 export const navState = writable({
   file: 'some string',

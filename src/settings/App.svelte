@@ -17,7 +17,7 @@
     RunName,
   } from './not_sure_how_to_structure/stores/store.js'
 
-  $: $solidityObj, console.log($solidityObj)
+  // $: $solidityObj, console.log($solidityObj)
 
   let solidityFiles: string[] = []
   let solidityFilesNew
@@ -102,38 +102,42 @@
   }
 
   function fillFields(newForm: NewForm) {
-    $solidityObj.mainFile = newForm.solidyObj.mainFile
-    $solidityObj.mainContract = newForm.solidyObj.mainContract
-    $solidityObj.compiler.ver = newForm.solidyObj.compiler.ver
-    $solidityObj.compiler.exe = newForm.solidyObj.compiler.exe
-    $solidityObj.solidityArgs = newForm.solidyObj.solidityArgs
-    $solidityObj.specifiMethod = newForm.solidyObj.specifiMethod
-    $solidityObj.solidityPackageDefaultPath =
-      newForm.solidyObj.solidityPackageDefaultPath
-    $specObj.duration = newForm.specObj.duration
-    $specObj.loopUnroll = newForm.specObj.loopUnroll
-    $specObj.runOnStg = newForm.specObj.runOnStg
-    $specObj.branchName = newForm.specObj.branchName
-    $specObj.optimisticLoop = newForm.specObj.optimisticLoop
-    $specObj.specFile = newForm.specObj.specFile
-    $specObj.multiAssert = newForm.specObj.multiAssert
-    $specObj.localTypeChecking = newForm.specObj.localTypeChecking
-    $specObj.rules = newForm.specObj.rules
-    $specObj.shortOutput = newForm.specObj.shortOutput
+    $solidityObj = newForm.solidyObj
+    $specObj = newForm.specObj
     $verification_message = newForm.verificatoinMessage
-    const packDir = newForm.solidyObj.solidityPackageDir
-    if (packDir.length > 0) {
-      $solidityObj.solidityPackageDir = packDir
-    }
-    const linkingArr = newForm.solidyObj.linking
-    if (linkingArr.length > 0) {
-      $solidityObj.linking = linkingArr
-    }
-    const properties = newForm.specObj.properties
-    if (properties.length > 0) {
-      $specObj.properties = properties
-    }
     $solAdditionalContracts = newForm.solidityAdditionalContracts || []
+    // $solidityObj.mainFile = newForm.solidyObj.mainFile
+    // $solidityObj.mainContract = newForm.solidyObj.mainContract
+    // $solidityObj.compiler.ver = newForm.solidyObj.compiler.ver
+    // $solidityObj.compiler.exe = newForm.solidyObj.compiler.exe
+    // $solidityObj.solidityArgs = newForm.solidyObj.solidityArgs
+    // $solidityObj.specifiMethod = newForm.solidyObj.specifiMethod
+    // $solidityObj.solidityPackageDefaultPath =
+    //   newForm.solidyObj.solidityPackageDefaultPath
+    // $specObj.duration = newForm.specObj.duration
+    // $specObj.loopUnroll = newForm.specObj.loopUnroll
+    // $specObj.runOnStg = newForm.specObj.runOnStg
+    // $specObj.branchName = newForm.specObj.branchName
+    // $specObj.optimisticLoop = newForm.specObj.optimisticLoop
+    // $specObj.specFile = newForm.specObj.specFile
+    // $specObj.multiAssert = newForm.specObj.multiAssert
+    // $specObj.localTypeChecking = newForm.specObj.localTypeChecking
+    // $specObj.rules = newForm.specObj.rules
+    // $specObj.shortOutput = newForm.specObj.shortOutput
+    // $verification_message = newForm.verificatoinMessage
+    // const packDir = newForm.solidyObj.solidityPackageDir
+    // if (packDir.length > 0) {
+    //   $solidityObj.solidityPackageDir = packDir
+    // }
+    // const linkingArr = newForm.solidyObj.linking
+    // if (linkingArr.length > 0) {
+    //   $solidityObj.linking = linkingArr
+    // }
+    // const properties = newForm.specObj.properties
+    // if (properties.length > 0) {
+    //   $specObj.properties = properties
+    // }
+    // $solAdditionalContracts = newForm.solidityAdditionalContracts || []
   }
 
   onMount(() => {

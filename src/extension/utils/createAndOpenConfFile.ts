@@ -279,11 +279,15 @@ export function processForm(
   if (compilerDirectory !== '') {
     compilerDirectory += '/'
   }
+  const mainSolFile =
+    newForm.solidyObj.mainFile.path + newForm.solidyObj.mainFile.label
+  const mainSpecFile =
+    newForm.specObj.specFile.label + newForm.specObj.specFile.label
   const form: InputFormData = {
     name: confFileName,
-    mainSolidityFile: newForm.solidyObj.mainFile.value,
+    mainSolidityFile: mainSolFile,
     mainContractName: newForm.solidyObj.mainContract,
-    specFile: newForm.specObj.specFile.value,
+    specFile: mainSpecFile,
     solidityCompiler: compilerDirectory + newForm.solidyObj.compiler.ver,
     useAdditionalContracts: false,
     additionalContracts: [],

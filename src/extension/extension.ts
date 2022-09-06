@@ -81,10 +81,8 @@ export function activate(context: vscode.ExtensionContext): void {
     }
 
     if (solcArgs !== '{}') {
-      console.log(solcArgs, 'omg solc args')
       confFileDefault.solc_args = ''
       const tempArgs = JSON.parse(solcArgs)
-      console.log(tempArgs, Object.entries(tempArgs), 'omg temp args')
       Object.entries(tempArgs).forEach(arg => {
         let tempValue = arg[1]
         if (tempValue) {

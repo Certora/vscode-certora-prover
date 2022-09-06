@@ -9,13 +9,22 @@
     specObj,
     verification_message,
     solAdditionalContracts,
+    isReset,
   } from './stores/store.js'
   import { log, Sources } from '../utils/log'
 
-  $: $solidityObj | $specObj | $verification_message | $solAdditionalContracts,
+  $: $solidityObj ||
+    $specObj ||
+    $verification_message ||
+    $solAdditionalContracts ||
+    $checkMyInputs,
     save()
 
   function save() {
+    if ($isReset) {
+      $isReset = false
+      return
+    }
     let inputs = document.querySelectorAll('.simple_txt_input')
     inputs = Array.from(inputs)
     $checkMyInputs = inputs.some(el => {
