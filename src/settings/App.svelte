@@ -21,7 +21,92 @@
     solidityObj,
   } from './not_sure_how_to_structure/stores/store.js'
 
-  $: $solidityObj, console.log($solidityObj)
+  // fake load files at a later time
+
+  setTimeout(() => {
+    $solFilesArr = [
+      {
+        value: 'src/somefolder/file-1',
+        label: 'file-1',
+        path: 'src/somefolder',
+      },
+      {
+        value: 'src/somefolder/file-1',
+        label: 'file-1',
+        path: 'src/somefolder',
+      },
+      {
+        value: 'src/somefolder/file-1',
+        label: 'file-1',
+        path: 'src/somefolder',
+      },
+      {
+        value: 'src/somefolder/file-11',
+        label: 'file-11',
+        path: 'src/somefolder',
+      },
+      {
+        value: 'src/somefolder/file-11',
+        label: 'file-11',
+        path: 'src/somefolder',
+      },
+      {
+        value: 'src/somefolder/file-1',
+        label: 'file-1',
+        path: 'src/somefolder',
+      },
+      {
+        value: 'src/somefolder/file-11',
+        label: 'file-11',
+        path: 'src/somefolder',
+      },
+      {
+        value: 'src/somefolder/file-111',
+        label: 'file-111',
+        path: 'src/somefolder',
+      },
+      {
+        value: 'src/somefolder/file-1',
+        label: 'file-1',
+        path: 'src/somefolder',
+      },
+      {
+        value: 'src/somefolder/file-1111',
+        label: 'file-1111',
+        path: 'src/somefolder',
+      },
+      {
+        value: 'src/somefolder/file-1111',
+        label: 'file-1111',
+        path: 'src/somefolder',
+      },
+      {
+        value: 'file-2/src/somefolder1',
+        label: 'file-2',
+        path: 'src/somefolder1',
+      },
+      {
+        value: 'file-3/src/somefolder2',
+        label: 'file-3',
+        path: 'src/somefolder2',
+      },
+      {
+        value: 'file-4/src/somefolder3',
+        label: 'file-4',
+        path: 'src/somefolder3',
+      },
+      {
+        value: 'file-5/src/somefolder4',
+        label: 'file-5',
+        path: 'src/somefolder4',
+      },
+      {
+        value: 'file-6/src/somefolder5',
+        label: 'file-6',
+        path: 'src/somefolder5',
+      },
+    ]
+  })
 
   let solidityFiles: string[] = []
   let solidityFilesNew
