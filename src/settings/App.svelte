@@ -106,7 +106,7 @@
         path: 'src/somefolder5',
       },
     ]
-  })
+  }, 2000)
 
   let solidityFiles: string[] = []
   let solidityFilesNew

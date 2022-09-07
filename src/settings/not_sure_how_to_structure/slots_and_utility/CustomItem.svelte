@@ -31,6 +31,23 @@
     }
     itemClasses = classes.join(' ')
   }
+  let stringShrink = function () {
+    let splittedArr = item.path.split('/')
+    splittedArr = splittedArr.map(str => {
+      if (str.length < 7) return str
+      return `${
+        str.charAt(0) + str.charAt(1) + str.charAt(2) + str.charAt(3)
+      }...${
+        str.charAt(str.length - 4) +
+        str.charAt(str.length - 3) +
+        str.charAt(str.length - 2) +
+        str.charAt(str.length - 1)
+      }`
+    })
+    return `.../${splittedArr[splittedArr.length - 2]}/${
+      splittedArr[splittedArr.length - 1]
+    }`
+  }
 </script>
 
 <div class="item {itemClasses}" class:sticky={!item.value}>
@@ -38,7 +55,11 @@
     {@html getOptionLabel(item, filterText)}
   </span>
   <span>
-    {item.path}
+    {#if item.value !== 'Browse...'}
+      {stringShrink()}
+    {:else}
+      {item.path}
+    {/if}
   </span>
 </div>
 

@@ -460,5 +460,6 @@
 <style>
   :global(.listContainer) {
     width: max-content !important;
+    max-width: calc(100vw - 73px) !important;
   }
 </style>
