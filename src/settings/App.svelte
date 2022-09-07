@@ -8,68 +8,64 @@
   import RenamedMainWrapper from './not_sure_how_to_structure/RenamedMainWrapper.svelte'
   // testing files with store
   import {
-    solFilesArr,
-    specFilesArr,
     solidityObj,
     specObj,
     verification_message,
     solAdditionalContracts,
     RunName,
   } from './not_sure_how_to_structure/stores/store.js'
+  import { solFilesArr, specFilesArr } from '../../src/fileStore'
+  // import { refreshFiles } from './utils/refreshFiles';
 
-  // $: $solidityObj, console.log($solidityObj)
+  // const {solFilesArr, specFilesArr} = myFormStore
+
+  $: $solFilesArr, console.log('subscribe :(((', $solFilesArr)
+  console.log('console log before', $solFilesArr)
+
+  $solFilesArr = [{ value: ':(', label: ':((', path: 'D:' }]
+
+  console.log('console.log after', $solFilesArr)
 
   let solidityFiles: string[] = []
   let solidityFilesNew
   let specFiles: string[] = []
   let specFilesNew
 
+  // console.log('throw him to the console!!!!', $solF)
+
+  // $: $solF, console.log($solF, '==solFileArgs==')
+
   const listener = (e: MessageEvent<EventsFromExtension>) => {
     switch (e.data.type) {
-      case EventTypesFromExtension.SmartContractsFilesUpdated:
-        log({
-          action: 'Received "smart-contracts-files-updated" command',
-          source: Sources.SettingsWebview,
-          info: e.data.payload,
-        })
-        // todo: files as filename, pathToFile
-        solidityFilesNew = [
-          {
-            value: 'Browse...',
-            label: 'Browse...',
-            path: 'Browse',
-          },
-          ...e.data.payload.sol,
-        ]
-        // solidityFilesNew = solidityFiles.map(str => {
-        //   const tempLabel = str.split('/').reverse()[0]
-        //   const tempPath = str.replace(tempLabel, '')
-        //   return { value: str, label: tempLabel, path: tempPath }
-        // })
-        specFilesNew = [
-          {
-            value: 'Browse...',
-            label: 'Browse...',
-            path: 'Browse',
-          },
-          ...e.data.payload.spec,
-        ]
-        // specFilesNew = specFiles.map(str => {
-        //   const tempLabel = str.split('/').reverse()[0]
-        //   const tempPath = str.replace(tempLabel, '')
-        //   return { value: str, label: tempLabel, path: tempPath }
-        // })
-        // specFilesNew.unshift({
-        //   value: 'Browse...',
-        //   label: 'Browse...',
-        //   path: 'Browse',
-        // })
-        // very bad temp timeout
-        setTimeout(() => {
-          solFilesArr.set(solidityFilesNew)
-          specFilesArr.set(specFilesNew)
-        })
-        break
+      // case EventTypesFromExtension.SmartContractsFilesUpdated:
+      //   log({
+      //     action: 'Received "smart-contracts-files-updated" command',
+      //     source: Sources.SettingsWebview,
+      //     info: e.data.payload,
+      //   })
+
+      //   solidityFilesNew = [
+      //     {
+      //       value: 'Browse...',
+      //       label: 'Browse...',
+      //       path: 'Browse',
+      //     },
+      //     ...e.data.payload.sol,
+      //   ]
+      //   $solFilesArr = solidityFilesNew
+
+      //   specFilesNew = [
+      //     {
+      //       value: 'Browse...',
+      //       label: 'Browse...',
+      //       path: 'Browse',
+      //     },
+      //     ...e.data.payload.spec,
+      //   ]
+      //   $specFilesArr = specFilesNew
+      //   console.log($specFilesArr, 'spec files arr')
+
+      //   break
       case EventTypesFromExtension.EditConfFile:
         log({
           action: 'Received "edit-conf-file" command',
@@ -111,12 +107,15 @@
           source: Sources.SettingsWebview,
           info: e.data.payload,
         })
-        // const method = e.data.payload.method
+        // const method = e.data.payload.method || ''
         // const file = e.data.payload.file
+        // console.log('payload: ', method, file)
         // if (file.label.endsWith('sol')){
         //   if (method === 'push') {
-        //     $solFilesArr.push(file)
-        //     $solFilesArr = $solFilesArr
+        //     console.log('sol, push')
+        //     const newFilesArr = $solFilesArr
+        //     newFilesArr.push(file)
+        //     $solFilesArr = newFilesArr
         //   }
         // }
         break
@@ -141,6 +140,7 @@
   })
 </script>
 
+<h1>{$solFilesArr}</h1>
 <RenamedMainWrapper />
 
 <style lang="postcss">

@@ -1,4 +1,8 @@
 import { writable } from 'svelte/store'
+// import { solFilesArr, specFilesArr } from '../../../fileStore.ts'
+
+// export const solF = solFilesArr
+
 export const checkMyInputs = writable(false)
 
 export const RunName = writable('')

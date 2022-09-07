@@ -1,4 +1,12 @@
 import * as vscode from 'vscode'
+import { solFilesArr, specFilesArr } from '../fileStore'
+// import { RunName } from '../settings/not_sure_how_to_structure/stores/store.js'
+
+// console.log('sol and spec from watcher', RunName)
+
+// const solFilesArr = solFilesArr
+// const specFilesArr = specFilesArr
+
 export class SmartContractsFilesWatcher {
   files: vscode.Uri[]
   fileSystemWatcher: vscode.FileSystemWatcher
@@ -56,25 +64,31 @@ export class SmartContractsFilesWatcher {
     this.notifyWebviewAboutUpdates(file, 'filter')
   }
 
-  private notifyWebviewAboutUpdates(file: vscode.Uri, method: string) {
+  private notifyWebviewAboutUpdates(fileUri: vscode.Uri, method: string) {
     if (this.webview) {
-      const fileArr = file.path.split('/').reverse()
-      const fileObj = {
-        value: file.fsPath,
-        label: fileArr[0],
-        path: file.fsPath.replace(fileArr[0], ''),
-      }
+      const file = this.getFileFormat(fileUri)
       console.log('minor-files-change', {
         method,
-        fileObj,
+        file,
       })
       this.webview.postMessage({
         type: 'minor-files-change',
         payload: {
           method,
-          fileObj,
+          file,
         },
       })
+    }
+  }
+
+  private getFileFormat(fileUri: vscode.Uri) {
+    const path = vscode.workspace.asRelativePath(fileUri)
+    const fileArr = path.split('/').reverse()
+    const label = fileArr[0]
+    return {
+      value: fileUri.fsPath,
+      label: label,
+      path: path.replace(label, ''),
     }
   }
 
@@ -84,13 +98,7 @@ export class SmartContractsFilesWatcher {
       let spec: { value: string; label: string; path: string }[] = []
 
       this.files.forEach(file => {
-        const path = vscode.workspace.asRelativePath(file)
-        const label = path.split('/').reverse()[0]
-        const fileObj = {
-          value: path,
-          label: label,
-          path: path.replace(label, ''),
-        }
+        const fileObj = this.getFileFormat(file)
 
         if (fileObj.label.endsWith('.sol')) {
           sol.push(fileObj)
@@ -107,13 +115,24 @@ export class SmartContractsFilesWatcher {
         return this.alphaSort(f1, f2)
       })
 
-      this.webview.postMessage({
-        type: 'smart-contracts-files-updated',
-        payload: {
-          sol,
-          spec,
-        },
+      solFilesArr.subscribe(v => {
+        console.log(v, 'subscribe')
       })
+
+      solFilesArr.set(sol)
+      specFilesArr.set(spec)
+
+      // const thenable = this.webview.postMessage({
+      //   type: 'smart-contracts-files-updated',
+      //   payload: {
+      //     sol,
+      //     spec,
+      //   },
+      // })
+
+      // thenable.then(v => {
+      //   console.log(v, 'thenable')
+      // })
     }
   }
 

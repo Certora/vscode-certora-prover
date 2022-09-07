@@ -15,6 +15,10 @@
     solFilesArr,
   } from './stores/store.js'
   import SolidityFiles from './SolidityFiles.svelte'
+  // import { solFilesArr } from '../../fileStore.ts'
+
+  console.log(solFilesArr, 'solFilesArr')
+
   // emailValidator ,spaceAndDashValidator, numberValidator, compilerValidator, filePathVlidator
   let infoObjArr = {
     mainFile: {
