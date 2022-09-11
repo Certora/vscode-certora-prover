@@ -152,24 +152,28 @@
     if (!newFilteredFiles.length) return (filteredFiles = [])
     // if the amount of the filtered files is bigger than display limit slice and dice the array
     if (newFilteredFiles.length > filterCountObj.filesShowing) {
+      let sortedFiles = sortByAbc(
+        newFilteredFiles.slice(0, filterCountObj.filesShowing),
+      )
       filteredFiles = [
         {
           value: 'Browse...',
           label: 'Browse...',
           path: `Showing ${filterCountObj.filesShowing}/${newFilteredFiles.length} files`,
         },
-        ...newFilteredFiles.slice(0, filterCountObj.filesShowing),
+        ...sortedFiles,
       ]
       return
     }
     // amount of the filtered files is smaller or same as limit
+    let sortedFiles = sortByAbc(newFilteredFiles)
     filteredFiles = [
       {
         value: 'Browse...',
         label: 'Browse...',
         path: `Showing ${newFilteredFiles.length}/${newFilteredFiles.length} files`,
       },
-      ...newFilteredFiles,
+      ...sortedFiles,
     ]
     return
   }
@@ -180,21 +184,45 @@
       allFiles: $solFilesArr.length,
       filesShowing: maxFiles,
     }
+    let slicedArr = $solFilesArr.slice(0, filterCountObj.filesShowing)
+    let sortedFiles = sortByAbc(slicedArr)
     filteredFiles = [
       {
         value: 'Browse...',
         label: 'Browse...',
-        path: `Showing ${
-          $solFilesArr.slice(0, filterCountObj.filesShowing).length
-        }/${filterCountObj.allFiles} files`,
+        path: `Showing ${slicedArr.length}/${filterCountObj.allFiles} files`,
       },
-      ...$solFilesArr.slice(0, filterCountObj.filesShowing),
+      ...sortedFiles,
     ]
   }
 
   // updateItems needs redesign
   function updateItems() {
     // do nothing
+  }
+
+  // sort function
+  function sortByAbc(sortedfiles) {
+    let sorted = sortedfiles.sort((f1, f2) => {
+      return alphaSort(f1, f2)
+    })
+    console.log(sorted)
+    return sorted
+  }
+  function alphaSort(l1, l2) {
+    if (l1.label.toLowerCase() > l2.label.toLowerCase()) {
+      return 1
+    }
+    if (l2.label.toLowerCase() > l1.label.toLowerCase()) {
+      return -1
+    }
+    if (l1.path.toLowerCase() > l2.path.toLowerCase()) {
+      return 1
+    }
+    if (l2.path.toLowerCase() > l1.path.toLowerCase()) {
+      return -1
+    }
+    return 0
   }
 </script>
 

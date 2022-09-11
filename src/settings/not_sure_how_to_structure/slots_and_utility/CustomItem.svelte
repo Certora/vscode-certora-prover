@@ -44,9 +44,12 @@
         str.charAt(str.length - 1)
       }`
     })
-    return `.../${splittedArr[splittedArr.length - 2]}/${
-      splittedArr[splittedArr.length - 1]
-    }`
+    if (splittedArr[splittedArr.length - 2]) {
+      return `.../${splittedArr[splittedArr.length - 2]}/${
+        splittedArr[splittedArr.length - 1]
+      }`
+    }
+    return `.../${splittedArr[splittedArr.length - 1]}`
   }
 </script>
 

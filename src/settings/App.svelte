@@ -1,201 +1,47 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
-  import { nanoid } from 'nanoid'
-  import VerifyAdditionalContract from './components/VerifyAdditionalContract.svelte'
-  import Link from './components/Link.svelte'
-  import ExtendedSettings from './components/ExtendedSettings.svelte'
-  import BaseSetting from './components/BaseSetting.svelte'
-  import AdditionalSettings from './components/AdditionalSettings.svelte'
-  import OneFieldSetting from './components/OneFieldSetting.svelte'
-  import SettingWithFilePicker from './components/SettingWithFilePicker.svelte'
-  // new cutting edge stuff
   import { log, Sources } from './utils/log'
-  import { confFileToFormData } from './utils/confFileToFormData'
-  import type { Form } from './types'
   import { EventTypesFromExtension, EventsFromExtension } from './types'
   import RenamedMainWrapper from './not_sure_how_to_structure/RenamedMainWrapper.svelte'
-  // testing files with store
+
   import {
     solFilesArr,
     specFilesArr,
-    solidityObj,
   } from './not_sure_how_to_structure/stores/store.js'
 
-  // fake load files at a later time
-
-  setTimeout(() => {
-    $solFilesArr = [
-      {
-        value: 'src/somefolder/file-1',
-        label: 'file-1',
-        path: 'src/somefolder',
-      },
-      {
-        value: 'src/somefolder/file-1',
-        label: 'file-1',
-        path: 'src/somefolder',
-      },
-      {
-        value: 'src/somefolder/file-1',
-        label: 'file-1',
-        path: 'src/somefolder',
-      },
-      {
-        value: 'src/somefolder/file-11',
-        label: 'file-11',
-        path: 'src/somefolder',
-      },
-      {
-        value: 'src/somefolder/file-11',
-        label: 'file-11',
-        path: 'src/somefolder',
-      },
-      {
-        value: 'src/somefolder/file-1',
-        label: 'file-1',
-        path: 'src/somefolder',
-      },
-      {
-        value: 'src/somefolder/file-11',
-        label: 'file-11',
-        path: 'src/somefolder',
-      },
-      {
-        value: 'src/somefolder/file-111',
-        label: 'file-111',
-        path: 'src/somefolder',
-      },
-      {
-        value: 'src/somefolder/file-1',
-        label: 'file-1',
-        path: 'src/somefolder',
-      },
-      {
-        value: 'src/somefolder/file-1111',
-        label: 'file-1111',
-        path: 'src/somefolder',
-      },
-      {
-        value: 'src/somefolder/file-1111',
-        label: 'file-1111',
-        path: 'src/somefolder',
-      },
-      {
-        value: 'file-2/src/somefolder1',
-        label: 'file-2',
-        path: 'src/somefolder1',
-      },
-      {
-        value: 'file-3/src/somefolder2',
-        label: 'file-3',
-        path: 'src/somefolder2',
-      },
-      {
-        value: 'file-4/src/somefolder3',
-        label: 'file-4',
-        path: 'src/somefolder3',
-      },
-      {
-        value: 'file-5/src/somefolder4',
-        label: 'file-5',
-        path: 'src/somefolder4',
-      },
-      {
-        value: 'file-6/src/somefolder5',
-        label: 'file-6',
-        path: 'src/somefolder5',
-      },
-    ]
-  }, 2000)
-
-  let solidityFiles: string[] = []
-  let solidityFilesNew
-  let specFiles: string[] = []
-  let specFilesNew
-
-  let submitButtonText = 'Create conf file'
-  let test = false
-  let form: Form = {
-    mainSolidityFile: '',
-    mainContractName: '',
-    specFile: '',
-    solidityCompiler: '',
-    useAdditionalContracts: false,
-    additionalContracts: solidityFiles.map(file => ({ file, name: '' })),
-    link: [
-      {
-        id: nanoid(),
-        contractName: '',
-        fieldName: '',
-        associatedContractName: '',
-      },
-    ],
-    extendedSettings: [{ id: nanoid(), flag: '' }],
-    useStaging: true,
-    branch: 'master',
-    cacheName: '',
-    message: '',
-    additionalSettings: [
-      {
-        id: nanoid(),
-        option: '',
-        value: '',
-      },
-    ],
-  }
-
   const listener = (e: MessageEvent<EventsFromExtension>) => {
-    switch (e.data.type) {
-      case EventTypesFromExtension.SmartContractsFilesUpdated:
-        log({
-          action: 'Received "smart-contracts-files-updated" command',
-          source: Sources.SettingsWebview,
-          info: e.data.payload,
-        })
-        solidityFiles = e.data.payload.sol
-        solidityFilesNew = solidityFiles.map(str => {
-          return { value: str, label: str }
-        })
-        solidityFilesNew.unshift({ value: 'Browse...', label: 'Browse...' })
-        specFiles = e.data.payload.spec
-        specFilesNew = specFiles.map(str => {
-          return { value: str, label: str }
-        })
-        specFilesNew.unshift({ value: 'Browse...', label: 'Browse...' })
-        // very bad temp timeout
-        setTimeout(() => {
-          solFilesArr.set(solidityFilesNew)
-          specFilesArr.set(specFilesNew)
-        })
-        break
-      case EventTypesFromExtension.EditConfFile:
-        log({
-          action: 'Received "edit-conf-file" command',
-          source: Sources.SettingsWebview,
-          info: e.data.payload,
-        })
-        form = confFileToFormData(e.data.payload)
-        const parsedSpecFilePath = form.specFile.split('/')
-        const specFileName = parsedSpecFilePath[parsedSpecFilePath.length - 1]
-        submitButtonText = `Save ${
-          form.mainContractName
-        }.${specFileName.replace('.spec', '')}.conf`
-        break
-      default:
-        break
+    if (e.data.type === EventTypesFromExtension.SmartContractsFilesUpdated) {
+      log({
+        action: 'Received "smart-contracts-files-updated" command',
+        source: Sources.SettingsWebview,
+        info: e.data.payload,
+      })
+      $solFilesArr = e.data.payload.sol
+      $specFilesArr = e.data.payload.spec
     }
-  }
+    if (e.data.type === EventTypesFromExtension.notifyWebviewAboutUpdates) {
+      log({
+        action: 'Received "notifyWebviewAboutUpdates" command',
+        source: Sources.SettingsWebview,
+        info: e.data.payload,
+      })
 
-  function createConfFile() {
-    log({
-      action: 'Send "create-conf-file" command',
-      source: Sources.SettingsWebview,
-      info: form,
-    })
-    vscode.postMessage({
-      command: 'create-conf-file',
-      payload: form,
-    })
+      if (e.data.payload.method === 'push') {
+        if (e.data.payload.file.type === '.sol') {
+          $solFilesArr = [...$solFilesArr, e.data.payload.file]
+          return
+        }
+        $specFilesArr = [...$specFilesArr, e.data.payload.file]
+      }
+      if (e.data.payload.method === 'filter') {
+        let file = e.data.payload.file
+        if (e.data.payload.file.type === '.sol') {
+          $solFilesArr = $solFilesArr.filter(f => f.value !== file.value)
+          return
+        }
+        $specFilesArr = $specFilesArr.filter(f => f.value !== file.value)
+      }
+    }
   }
 
   onMount(() => {
@@ -207,86 +53,7 @@
   })
 </script>
 
-{#if test}
-  <div class="settings">
-    <h2 class="section-title">General</h2>
-    <SettingWithFilePicker
-      title="Main Solidity File"
-      description="Pick solidity file"
-      refreshButtonTitle="Update list of contracts"
-      files={solidityFiles}
-      bind:file={form.mainSolidityFile}
-    />
-    <!-- 
-      passing files from here to new settings 
-      this guy
-      files={solidityFiles}
- -->
-    <OneFieldSetting
-      title="Main Contract Name"
-      description="Contract name"
-      bind:value={form.mainContractName}
-    />
-    <SettingWithFilePicker
-      title="Spec File"
-      description="Spec file path"
-      refreshButtonTitle="Update list of spec files"
-      files={specFiles}
-      bind:file={form.specFile}
-    />
-    <OneFieldSetting
-      title="Solidity Compiler"
-      description="Solidity compiler executable file (expected to be added to the $PATH environment variable). By default, solc (or solc.exe on Windows) is used"
-      bind:value={form.solidityCompiler}
-    />
-    <VerifyAdditionalContract
-      {solidityFiles}
-      bind:useAdditionalContracts={form.useAdditionalContracts}
-      bind:additionalContracts={form.additionalContracts}
-    />
-    <Link
-      useAdditionalContracts={form.useAdditionalContracts}
-      bind:link={form.link}
-    />
-
-    <h2 class="section-title">Advanced</h2>
-    <ExtendedSettings bind:flags={form.extendedSettings} />
-    <BaseSetting title="Staging">
-      <div class="staging">
-        <vscode-checkbox
-          checked={form.useStaging}
-          on:change={e => (form.useStaging = e.target.checked)}
-        >
-          Run on the Staging Environment
-        </vscode-checkbox>
-        <vscode-text-field
-          disabled={!form.useStaging}
-          value={form.branch}
-          on:change={e => (form.branch = e.target.value)}
-        >
-          Branch name
-        </vscode-text-field>
-      </div>
-    </BaseSetting>
-    <OneFieldSetting
-      title="Cache Name"
-      description="Optimize the pre-analysis by using cache"
-      bind:value={form.cacheName}
-    />
-    <OneFieldSetting
-      title="Message"
-      description="Adds a message description to your run, similar to a commit message. This message will appear in the title of the completion email sent to you"
-      bind:value={form.message}
-    />
-    <AdditionalSettings bind:settings={form.additionalSettings} />
-    <div>
-      <vscode-button on:click={createConfFile}>{submitButtonText}</vscode-button
-      >
-    </div>
-  </div>
-{:else}
-  <RenamedMainWrapper />
-{/if}
+<RenamedMainWrapper />
 
 <style lang="postcss">
   /* stylelint-disable */
