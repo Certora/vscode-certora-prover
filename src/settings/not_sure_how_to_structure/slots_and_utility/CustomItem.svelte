@@ -34,7 +34,7 @@
   let stringShrink = function () {
     let splittedArr = item.path.split('/')
     splittedArr = splittedArr.map(str => {
-      if (str.length < 7) return str
+      if (str.length < 15) return str
       return `${
         str.charAt(0) + str.charAt(1) + str.charAt(2) + str.charAt(3)
       }...${
@@ -44,6 +44,7 @@
         str.charAt(str.length - 1)
       }`
     })
+    // debugger
     if (splittedArr[splittedArr.length - 2]) {
       return `.../${splittedArr[splittedArr.length - 2]}/${
         splittedArr[splittedArr.length - 1]

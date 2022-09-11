@@ -146,7 +146,7 @@
     }
     // filter all the files
     let newFilteredFiles = $solFilesArr.filter(file => {
-      return file.label.includes(filter)
+      return file.label.toLowerCase().includes(filter.toLowerCase())
     })
     // if no matches found return an empty array to display a message
     if (!newFilteredFiles.length) return (filteredFiles = [])
