@@ -16,6 +16,7 @@
     solAdditionalContracts,
     RunName,
   } from './not_sure_how_to_structure/stores/store.js'
+  import { refreshFiles } from './utils/refreshFiles'
 
   // $: $solidityObj, console.log($solidityObj)
 
@@ -133,6 +134,7 @@
   }
 
   onMount(() => {
+    refreshFiles()
     window.addEventListener('message', listener)
   })
 
