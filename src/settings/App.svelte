@@ -43,7 +43,7 @@
       })
 
       if (e.data.payload.method === 'push') {
-        if (e.data.payload.file.label.endsWith('.sol')) {
+        if (e.data.payload.file.type === '.sol') {
           $solFilesArr = [...$solFilesArr, e.data.payload.file]
           return
         }
@@ -51,7 +51,7 @@
       }
       if (e.data.payload.method === 'filter') {
         let file = e.data.payload.file
-        if (e.data.payload.file.label.endsWith('.sol')) {
+        if (e.data.payload.file.type === '.sol') {
           $solFilesArr = $solFilesArr.filter(f => f.value !== file.value)
           return
         }

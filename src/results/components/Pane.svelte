@@ -2,6 +2,7 @@
   import Toolbar from './Toolbar.svelte'
   import type { Action, Status } from '../types'
   import { getIconPath } from '../utils/getIconPath'
+  import { stat } from 'fs'
 
   export let title: string
   export let actions: Action[] = []
@@ -10,6 +11,7 @@
   export let status: string = ''
   export let inactiveSelected: boolean = false
   export let runFunc: () => void = null
+  export let editFunc = null
 
   let isExpanded = initialExpandedState
 
@@ -96,7 +98,7 @@
         height="16"
         src={getIconPath(statusMap.get(status))}
         alt=""
-        on:click={runFunc}
+        on:click={runFunc ? runFunc : editFunc}
       />
     {/if}
     <h3 class="title" {title}>{title}</h3>

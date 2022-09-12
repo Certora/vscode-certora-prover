@@ -1,8 +1,9 @@
 import * as vscode from 'vscode'
+import { FileFormat } from './types'
 export class SmartContractsFilesWatcher {
   files: vscode.Uri[]
-  filesSol: { value: string; label: string; path: string }[]
-  filesSpec: { value: string; label: string; path: string }[]
+  filesSol: FileFormat[]
+  filesSpec: FileFormat[]
   fileSystemWatcher: vscode.FileSystemWatcher
   disposables: vscode.Disposable[]
   webview: vscode.Webview | undefined
@@ -71,7 +72,7 @@ export class SmartContractsFilesWatcher {
   }
 
   private getFileFormat(fileUri: vscode.Uri) {
-    let path = vscode.workspace.asRelativePath(fileUri, true)
+    let path = vscode.workspace.asRelativePath(fileUri)
     const fileArr = path.split('/')
     let label = fileArr[fileArr.length - 1]
     // remove labale from path (file.sol)
@@ -86,7 +87,7 @@ export class SmartContractsFilesWatcher {
     }
     label = label.replace('.spec', '').replace('.sol', '')
     return {
-      value: fileUri.fsPath,
+      value: vscode.workspace.asRelativePath(fileUri),
       label,
       path,
       type,
@@ -104,25 +105,6 @@ export class SmartContractsFilesWatcher {
       })
     }
   }
-
-  // private alphaSort(
-  //   l1: { value: string; label: string; path: string },
-  //   l2: { value: string; label: string; path: string },
-  // ): number {
-  //   if (l1.label > l2.label) {
-  //     return 1
-  //   }
-  //   if (l2.label > l1.label) {
-  //     return -1
-  //   }
-  //   if (l1.path > l2.path) {
-  //     return 1
-  //   }
-  //   if (l2.path > l1.path) {
-  //     return -1
-  //   }
-  //   return 0
-  // }
 
   public dispose(): void {
     this.disposables.forEach(d => d.dispose())

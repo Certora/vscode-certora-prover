@@ -334,6 +334,7 @@
         status === STATUS.unableToRun
           ? runFunc
           : null}
+        {editFunc}
       >
         {#each verificationResults as vr, index (index)}
           {#if vr.name === runName}

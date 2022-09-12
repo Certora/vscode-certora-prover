@@ -54,9 +54,16 @@ export type SolcArg = {
   value: string
 }
 
+export type FileFormat = {
+  value: string
+  label: string
+  path: string
+  type?: string
+}
+
 // solidity part of the new settings view
 export type SolidityObj = {
-  mainFile: { value: string; label: string; path: string }
+  mainFile: FileFormat
   mainContract: string
   linking: Link[]
   specifiMethod: string
@@ -73,7 +80,7 @@ export type Property = {
 
 // spec part of the new settings view
 export type SpecObj = {
-  specFile: { value: string; label: string; path: string }
+  specFile: FileFormat
   rules: string
   duration: string
   inherit: string
@@ -119,8 +126,8 @@ export type EventsFromExtension =
   | {
       type: EventTypesFromExtension.SmartContractsFilesUpdated
       payload: {
-        sol: { value: string; label: string; path: string }[]
-        spec: { value: string; label: string; path: string }[]
+        sol: FileFormat[]
+        spec: FileFormat[]
       }
     }
   | {
@@ -135,6 +142,6 @@ export type EventsFromExtension =
       type: EventTypesFromExtension.notifyWebviewAboutUpdates
       payload: {
         method: string
-        file: { value: string; label: string; path: string }
+        file: FileFormat
       }
     }
