@@ -16,7 +16,6 @@ function sortByAbc(
   const sorted = sortedfiles.sort((f1, f2) => {
     return alphaSort(f1, f2)
   })
-  console.log(sorted)
   return sorted
 }
 function alphaSort(l1, l2): number {

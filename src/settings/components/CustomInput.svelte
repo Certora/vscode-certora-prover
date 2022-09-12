@@ -79,7 +79,6 @@
       $checkMyInputs = inputs.some(el => {
         if (el.classList.contains('field-danger')) return true
       })
-      console.log($checkMyInputs, 'checkMyInputs')
     })
   }
 </script>

@@ -60,10 +60,6 @@ export class SmartContractsFilesWatcher {
   private notifyWebviewAboutUpdates(fileUri: vscode.Uri, method: string) {
     if (this.webview) {
       const file = this.getFileFormat(fileUri)
-      console.log('minor-files-change', {
-        method,
-        file,
-      })
       this.webview.postMessage({
         type: 'minor-files-change',
         payload: {

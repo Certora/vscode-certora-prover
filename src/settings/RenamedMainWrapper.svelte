@@ -1,7 +1,7 @@
 <script>
   import RunSideNav from './RunSideNav.svelte'
   import SpecSettingsTab from './SpecSettingsTab.svelte'
-  import Test from './Test.svelte'
+  import Test from './SolSettingsTab.svelte'
   import VerificationMessageTab from './VerificationMessageTab.svelte'
   import {
     checkMyInputs,
