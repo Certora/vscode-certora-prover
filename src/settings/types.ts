@@ -4,10 +4,11 @@ export type AdditionalContract = {
 }
 
 export type Link = {
-  id: string
+  id?: string
+  variable: string
   contractName: string
-  fieldName: string
-  associatedContractName: string
+  fieldName?: string
+  associatedContractName?: string
 }
 
 export type AdditionalSetting = {
@@ -22,6 +23,7 @@ export type Flag = {
 }
 
 export type Form = {
+  name: string
   mainSolidityFile: string
   mainContractName: string
   specFile: string
@@ -37,10 +39,67 @@ export type Form = {
   additionalSettings: AdditionalSetting[]
 }
 
+export type Compiler = {
+  exe: string
+  ver: string
+}
+
+export type SolidityPackageDir = {
+  packageName: string
+  path: string
+}
+
+export type SolcArg = {
+  key: string
+  value: string
+}
+
+// solidity part of the new settings view
+export type SolidityObj = {
+  mainFile: string
+  mainContract: string
+  linking: Link[]
+  specifiMethod: string
+  compiler: Compiler
+  solidityArgs: SolcArg[]
+  solidityPackageDefaultPath: string
+  solidityPackageDir: SolidityPackageDir[]
+}
+
+export type Property = {
+  name: string
+  value: string
+}
+
+// spec part of the new settings view
+export type SpecObj = {
+  specFile: string
+  rules: string
+  duration: string
+  inherit: string
+  optimisticLoop: boolean
+  loopUnroll: string
+  properties: Property[]
+  runOnStg: boolean
+  branchName: string
+  localTypeChecking: boolean
+  shortOutput: boolean
+  multiAssert: boolean
+}
+// todo: change to multiple solidity / spec
+export type NewForm = {
+  solidyObj: SolidityObj
+  specObj: SpecObj
+  verificatoinMessage: string
+  solidityAdditionalContracts?: SolidityObj[] // multiple contracts
+  checkMyInputs: boolean
+}
+
 export enum EventTypesFromExtension {
   SmartContractsFilesUpdated = 'smart-contracts-files-updated',
   EditConfFile = 'edit-conf-file',
-  notifyWebviewAboutUpdates = 'minor-files-change',
+  FileChosen = 'file-chosen',
+  MinorFilesChange = 'minor-files-change',
 }
 
 export type ConfFile = {
@@ -52,24 +111,27 @@ export type ConfFile = {
   staging?: string
   cache?: string
   msg?: string
+  solc_map?: JSON
+  packages?: string[]
 } & Record<string, boolean | string>
 
 export type EventsFromExtension =
   | {
       type: EventTypesFromExtension.SmartContractsFilesUpdated
-      payload: {
-        sol: { value: string; label: string; path: string }[]
-        spec: { value: string; label: string; path: string }[]
-      }
+      payload: { sol: string[]; spec: string[] }
     }
   | {
       type: EventTypesFromExtension.EditConfFile
-      payload: ConfFile
+      payload: [ConfFile, string]
     }
   | {
-      type: EventTypesFromExtension.notifyWebviewAboutUpdates
+      type: EventTypesFromExtension.FileChosen
+      payload: [string, number]
+    }
+  | {
+      type: EventTypesFromExtension.MinorFilesChange
       payload: {
         method: string
-        file: any
+        file: { value: string; label: string; path: string; type: string }
       }
     }

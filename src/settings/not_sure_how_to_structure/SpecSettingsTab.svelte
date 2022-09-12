@@ -244,6 +244,7 @@
               <div class="dark_input input_x3">
                 <h3>Loop Unroll</h3>
                 <CustomInput
+                  disabledState={!$specObj.optimisticLoop}
                   placeholder="0"
                   bind:bindValue={$specObj.loopUnroll}
                   infoObj={infoObjArr.loop_iter}

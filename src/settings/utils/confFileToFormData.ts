@@ -9,12 +9,12 @@ const emptyForm: Form = {
   useAdditionalContracts: false,
   additionalContracts: [],
   link: [
-    {
-      id: nanoid(),
-      contractName: '',
-      fieldName: '',
-      associatedContractName: '',
-    },
+    // {
+    //   id: nanoid(),
+    //   contractName: '',
+    //   fieldName: '',
+    //   associatedContractName: '',
+    // },
   ],
   extendedSettings: [{ id: nanoid(), flag: '' }],
   useStaging: true,
@@ -28,6 +28,7 @@ const emptyForm: Form = {
       value: '',
     },
   ],
+  name: '',
 }
 
 const stableFields = [
@@ -104,19 +105,18 @@ export function confFileToFormData(confFile: ConfFile): Form {
     Array.isArray(confFile.link) &&
     confFile.link.length > 0
   ) {
-    form.link = confFile.link.map((linkItem: string) => {
-      const [contractName, fieldNameAndAssociatedContractName] =
-        linkItem.split(':')
-      const [fieldName, associatedContractName] =
-        fieldNameAndAssociatedContractName.split('=')
-
-      return {
-        id: nanoid(),
-        contractName,
-        fieldName,
-        associatedContractName,
-      }
-    })
+    // form.link = confFile.link.map((linkItem: string) => {
+    //   const [contractName, fieldNameAndAssociatedContractName] =
+    //     linkItem.split(':')
+    //   const [fieldName, associatedContractName] =
+    //     fieldNameAndAssociatedContractName.split('=')
+    //   return {
+    //     id: nanoid(),
+    //     contractName,
+    //     fieldName,
+    //     associatedContractName,
+    //   }
+    // })
   }
 
   if (Array.isArray(confFile.settings) && confFile.settings.length > 0) {
