@@ -418,7 +418,7 @@
     left: 0;
     height: 18px;
     width: 18px;
-    background-color: var(--vscode-dropdown-background);
+    background-color: var(--vscode-input-background);
     border-radius: 4px;
   }
 

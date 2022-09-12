@@ -450,13 +450,13 @@
     border: 1px solid var(--vscode-menu-separatorBackground);
   }
   :global(.vscode-high-contrast .simple_txt_input, .vscode-high-contrast
-      .nav_settings_child) {
+      .checkmark, .vscode-high-contrast .nav_settings_child) {
     outline: 1px solid var(--vscode-inputValidation-infoBorder);
     outline-offset: -1px;
   }
 
-  :global(.vscode-high-contrast
-      .simple_txt_input:hover, .vscode-high-contrast) {
+  :global(.vscode-high-contrast .simple_txt_input:hover, .vscode-high-contrast
+      .checkmark:hover) {
     outline-color: var(--vscode-list-focusOutline) !important;
     outline-style: dashed !important;
   }
@@ -492,7 +492,8 @@
   :global(.vscode-high-contrast .btn_add:active) {
     border-style: solid !important;
   }
-  :global(.vscode-high-contrast .simple_txt_input:focus) {
+  :global(.vscode-high-contrast .simple_txt_input:focus, .vscode-high-contrast
+      .checkmark:focus) {
     outline-color: var(--vscode-list-focusOutline) !important;
   }
   :global(.vscode-high-contrast .selectContainer.focused) {
@@ -508,6 +509,12 @@
   :global([data-vscode-theme-name='Tomorrow Night Blue']
       .simple_txt_input, [data-vscode-theme-name='Abyss']
       .simple_txt_input, [data-vscode-theme-name='Red'] .simple_txt_input) {
+    outline: 1px solid var(--vscode-inputValidation-infoBorder);
+    outline-offset: -1px;
+  }
+  :global([data-vscode-theme-name='Tomorrow Night Blue']
+      .checkmark, [data-vscode-theme-name='Abyss']
+      .checkmark, [data-vscode-theme-name='Red'] .checkmark) {
     outline: 1px solid var(--vscode-inputValidation-infoBorder);
     outline-offset: -1px;
   }
