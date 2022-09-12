@@ -4,7 +4,7 @@
   import CollapseCard from './slots_and_utility/CollapseCard.svelte'
   import CustomInput from './slots_and_utility/CustomInput.svelte'
   import Icon from './slots_and_utility/Icon.svelte'
-  import { openBrowser } from '../utils/openBrowser'
+  import { openBrowser } from './utils/openBrowser'
 
   import CustomItem from './slots_and_utility/CustomItem.svelte'
   import {
@@ -14,7 +14,7 @@
     specFilesArr,
   } from './stores/store.js'
   import CheckBoxInfo from './slots_and_utility/CheckBoxInfo.svelte'
-  import { manageFiles } from '../utils/refreshFiles'
+  import { manageFiles } from './utils/refreshFiles'
 
   // this items arrary contains all the solidity files and should update on when updateItems is fired
   // some fake stuff

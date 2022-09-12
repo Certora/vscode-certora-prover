@@ -6,7 +6,7 @@
   import CustomItem from './slots_and_utility/CustomItem.svelte'
   import CustomInput from './slots_and_utility/CustomInput.svelte'
   import { solAdditionalContracts, solFilesArr } from './stores/store.js'
-  import { refreshFiles } from '../utils/refreshFiles'
+  import { refreshFiles } from './utils/refreshFiles'
 
   //   slots
   export let index

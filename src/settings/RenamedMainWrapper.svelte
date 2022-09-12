@@ -11,7 +11,7 @@
     solAdditionalContracts,
     isReset,
   } from './stores/store.js'
-  import { log, Sources } from '../utils/log'
+  import { log, Sources } from './utils/log'
 
   $: $solidityObj ||
     $specObj ||

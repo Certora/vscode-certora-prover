@@ -6,8 +6,8 @@
   import CustomItem from './slots_and_utility/CustomItem.svelte'
   import CustomInput from './slots_and_utility/CustomInput.svelte'
   import SolidityFiles from './SolidityFiles.svelte'
-  import { openBrowser } from '../utils/openBrowser'
-  import { manageFiles } from '../utils/refreshFiles'
+  import { openBrowser } from './utils/openBrowser'
+  import { manageFiles } from './utils/refreshFiles'
   import {
     solFilesArr,
     navState,

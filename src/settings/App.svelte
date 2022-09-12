@@ -5,7 +5,7 @@
   import { confFileToFormData } from './utils/confFileToFormData'
   import type { NewForm } from './types'
   import { EventTypesFromExtension, EventsFromExtension } from './types'
-  import RenamedMainWrapper from './not_sure_how_to_structure/RenamedMainWrapper.svelte'
+  import RenamedMainWrapper from './RenamedMainWrapper.svelte'
 
   import {
     solFilesArr,
@@ -15,7 +15,7 @@
     verification_message,
     solAdditionalContracts,
     RunName,
-  } from './not_sure_how_to_structure/stores/store.js'
+  } from './stores/store.js'
   import { refreshFiles } from './utils/refreshFiles'
 
   function fillFields(newForm: NewForm) {
