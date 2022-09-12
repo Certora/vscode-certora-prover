@@ -8,6 +8,7 @@ import {
 import { log, Sources } from './utils/log'
 import {
   CommandFromSettingsWebview,
+  ConfFile,
   ConfNameMap,
   EventFromSettingsWebview,
   InputFormData,
@@ -19,7 +20,7 @@ export class SettingsPanel {
   private readonly _panel: vscode.WebviewPanel
   private _disposables: vscode.Disposable[] = []
   private watcher: SmartContractsFilesWatcher
-  private editConfFile?: Record<string, unknown>
+  private editConfFile?: ConfFile
   private static allPanels: SettingsPanel[] = []
   private curConfFileDisplayName: string
   private static resultsWebviewProvider: ResultsWebviewProvider
@@ -29,7 +30,7 @@ export class SettingsPanel {
     extensionUri: vscode.Uri,
     confFileDisplayName: string,
     confFileName: string,
-    editConfFile?: Record<string, unknown>,
+    editConfFile?: ConfFile,
   ) {
     this.curConfFileDisplayName = confFileDisplayName
 
@@ -78,6 +79,22 @@ export class SettingsPanel {
               info: e.payload,
             })
             if (!e.payload.checkMyInputs) {
+              // deuplicate fix
+              if (this.editConfFile) {
+                if (
+                  this.editConfFile?.files &&
+                  this.editConfFile?.files?.length > 0 &&
+                  this.editConfFile?.verify &&
+                  this.editConfFile?.verify?.length > 0 &&
+                  (this.editConfFile?.solc || this.editConfFile?.solc_map)
+                ) {
+                  SettingsPanel.resultsWebviewProvider.postMessage({
+                    type: 'allow-run',
+                    payload: confFileName,
+                  })
+                  break
+                }
+              }
               const form: InputFormData = processForm(e.payload, confFileName)
               createAndOpenConfFile(form)
               if (
@@ -150,7 +167,7 @@ export class SettingsPanel {
   private static _openNewPanel(
     extensionUri: vscode.Uri,
     confFileName: ConfNameMap,
-    editConfFile?: Record<string, unknown>,
+    editConfFile?: ConfFile,
   ) {
     console.log('create new panel!!!!!')
     const panel = vscode.window.createWebviewPanel(
@@ -220,7 +237,7 @@ export class SettingsPanel {
   public static render(
     extensionUri: vscode.Uri,
     confName: ConfNameMap,
-    editConfFile?: Record<string, unknown>,
+    editConfFile?: ConfFile,
   ): void {
     let isOpened = false
     if (editConfFile) {

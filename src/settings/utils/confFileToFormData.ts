@@ -8,7 +8,7 @@ import type {
 
 const newForm: NewForm = {
   solidyObj: {
-    mainFile: '',
+    mainFile: { value: '', label: '', path: '' },
     mainContract: '',
     linking: [],
     specifiMethod: '',
@@ -21,7 +21,7 @@ const newForm: NewForm = {
     solidityPackageDir: [],
   },
   specObj: {
-    specFile: '',
+    specFile: { value: '', label: '', path: '' },
     rules: '',
     duration: '',
     inherit: '',
@@ -206,16 +206,28 @@ function processSpecAttributes(confFile: ConfFile, specObj: SpecObj) {
   }
 }
 
+function processMainFile(
+  fullPath: string,
+  fileObj: { value: string; label: string; path: string },
+) {
+  fileObj.value = fullPath
+  fileObj.label = fullPath.split('/').reverse()[0]
+  fileObj.path = fullPath.replace(fileObj.label, '')
+}
+
 export function confFileToFormData(confFile: ConfFile): NewForm {
   const form = newForm as NewForm
 
   if (Array.isArray(confFile.files) && confFile.files.length > 0) {
-    form.solidyObj.mainFile = confFile.files[0] as string
+    const mainFile = form.solidyObj.mainFile
 
-    if (form.solidyObj.mainFile.includes(':')) {
-      form.solidyObj.mainFile = form.solidyObj.mainFile.split(':')[0]
+    mainFile.value = confFile.files[0] as string
+
+    if (mainFile.value.includes(':')) {
+      mainFile.value = mainFile.value.split(':')[0]
       form.solidyObj.mainContract = confFile.files[0].split(':')[1]
     }
+    processMainFile(mainFile.value, mainFile)
   }
 
   if (Array.isArray(confFile.verify) && confFile.verify.length === 1) {
@@ -226,7 +238,7 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
       form.solidyObj.mainContract = mainContractName
     }
     if (specFile) {
-      form.specObj.specFile = specFile
+      processMainFile(specFile, form.specObj.specFile)
     }
   }
 
@@ -256,7 +268,7 @@ function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
     if (solArr.length === 2 && index !== 0) {
       // create contract
       const tempForm: SolidityObj = {
-        mainFile: '',
+        mainFile: { value: '', label: '', path: '' },
         mainContract: '',
         linking: [],
         specifiMethod: '',
@@ -268,7 +280,10 @@ function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
         solidityPackageDefaultPath: '',
         solidityPackageDir: [],
       }
-      tempForm.mainFile = solArr[0] || ''
+      tempForm.mainFile.value = solArr[0] || ''
+      if (tempForm.mainFile.value) {
+        processMainFile(tempForm.mainFile.value, tempForm.mainFile)
+      }
       tempForm.mainContract = solArr[1] || ''
 
       // link
