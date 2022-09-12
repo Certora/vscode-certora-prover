@@ -6,8 +6,8 @@
     numberValidator,
     filePathValidator,
     compilerValidator,
-  } from './validations/validators.js'
-  import { createFieldValidator } from './validations/validation.js'
+  } from '../validations/validators.js'
+  import { createFieldValidator } from '../validations/validation.js'
   // const [ validity, validate ] = createFieldValidator(requiredValidator(), emailValidator())
 
   import { checkMyInputs } from '../stores/store'

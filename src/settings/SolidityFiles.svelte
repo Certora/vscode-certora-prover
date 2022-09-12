@@ -1,10 +1,10 @@
 <script>
   import Select from 'svelte-select'
-  import ClearIcon from './slots_and_utility/ClearIcon.svelte'
-  import CollapseCard from './slots_and_utility/CollapseCard.svelte'
-  import Icon from './slots_and_utility/Icon.svelte'
-  import CustomItem from './slots_and_utility/CustomItem.svelte'
-  import CustomInput from './slots_and_utility/CustomInput.svelte'
+  import ClearIcon from './components/ClearIcon.svelte'
+  import CollapseCard from './components/CollapseCard.svelte'
+  import Icon from './components/Icon.svelte'
+  import CustomItem from './components/CustomItem.svelte'
+  import CustomInput from './components/CustomInput.svelte'
   import { solAdditionalContracts, solFilesArr } from './stores/store.js'
   import { refreshFiles } from './utils/refreshFiles'
 

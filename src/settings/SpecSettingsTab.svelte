@@ -1,19 +1,19 @@
 <script>
   import Select from 'svelte-select'
-  import ClearIcon from './slots_and_utility/ClearIcon.svelte'
-  import CollapseCard from './slots_and_utility/CollapseCard.svelte'
-  import CustomInput from './slots_and_utility/CustomInput.svelte'
-  import Icon from './slots_and_utility/Icon.svelte'
+  import ClearIcon from './components/ClearIcon.svelte'
+  import CollapseCard from './components/CollapseCard.svelte'
+  import CustomInput from './components/CustomInput.svelte'
+  import Icon from './components/Icon.svelte'
   import { openBrowser } from './utils/openBrowser'
 
-  import CustomItem from './slots_and_utility/CustomItem.svelte'
+  import CustomItem from './components/CustomItem.svelte'
   import {
     navState,
     specObj,
     solidityObj,
     specFilesArr,
   } from './stores/store.js'
-  import CheckBoxInfo from './slots_and_utility/CheckBoxInfo.svelte'
+  import CheckBoxInfo from './components/CheckBoxInfo.svelte'
   import { manageFiles } from './utils/refreshFiles'
 
   // this items arrary contains all the solidity files and should update on when updateItems is fired

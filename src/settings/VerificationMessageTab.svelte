@@ -1,5 +1,5 @@
 <script>
-  import CustomInput from './slots_and_utility/CustomInput.svelte'
+  import CustomInput from './components/CustomInput.svelte'
   import { verification_message } from './stores/store.js'
 
   let infoObjArr = {
