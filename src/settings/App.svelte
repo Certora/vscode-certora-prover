@@ -15,14 +15,11 @@
     verification_message,
     solAdditionalContracts,
     RunName,
+    isReset,
   } from './not_sure_how_to_structure/stores/store.js'
   import { refreshFiles } from './utils/refreshFiles'
 
-  // $: $solidityObj, console.log($solidityObj)
-
-  let solidityFiles: string[] = []
   let solidityFilesNew
-  let specFiles: string[] = []
   let specFilesNew
 
   const listener = (e: MessageEvent<EventsFromExtension>) => {
@@ -42,11 +39,6 @@
           },
           ...e.data.payload.sol,
         ]
-        // solidityFilesNew = solidityFiles.map(str => {
-        //   const tempLabel = str.split('/').reverse()[0]
-        //   const tempPath = str.replace(tempLabel, '')
-        //   return { value: str, label: tempLabel, path: tempPath }
-        // })
         specFilesNew = [
           {
             value: 'Browse...',
@@ -55,17 +47,6 @@
           },
           ...e.data.payload.spec,
         ]
-        // specFilesNew = specFiles.map(str => {
-        //   const tempLabel = str.split('/').reverse()[0]
-        //   const tempPath = str.replace(tempLabel, '')
-        //   return { value: str, label: tempLabel, path: tempPath }
-        // })
-        // specFilesNew.unshift({
-        //   value: 'Browse...',
-        //   label: 'Browse...',
-        //   path: 'Browse',
-        // })
-        // very bad temp timeout
         setTimeout(() => {
           solFilesArr.set(solidityFilesNew)
           specFilesArr.set(specFilesNew)
@@ -96,14 +77,24 @@
         const index = e.data.payload[1]
         if (fileName.endsWith('.sol')) {
           if (index === -1) {
-            $solidityObj.mainFile = fileName
+            const label = fileName.split('/').reverse()[0]
+            $solidityObj.mainFile = {
+              value: fileName,
+              label: label,
+              path: fileName.replace(label, ''),
+            }
             $solidityObj.mainContract = contractName
           } else if ($solAdditionalContracts.length > index) {
             $solAdditionalContracts[index].mainFile = fileName
             $solAdditionalContracts[index].mainContract = contractName
           }
         } else if (fileName.endsWith('.spec')) {
-          $specObj.specFile = fileName
+          const label = fileName.split('/').reverse()[0]
+          $specObj.specFile = {
+            value: fileName,
+            label: label,
+            path: fileName.replace(label, ''),
+          }
         }
         break
       case EventTypesFromExtension.MinorFilesChange:
@@ -112,14 +103,6 @@
           source: Sources.SettingsWebview,
           info: e.data.payload,
         })
-        // const method = e.data.payload.method
-        // const file = e.data.payload.file
-        // if (file.label.endsWith('sol')){
-        //   if (method === 'push') {
-        //     $solFilesArr.push(file)
-        //     $solFilesArr = $solFilesArr
-        //   }
-        // }
         break
       default:
         break

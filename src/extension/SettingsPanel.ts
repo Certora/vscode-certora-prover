@@ -95,6 +95,8 @@ export class SettingsPanel {
                   type: 'block-run',
                   payload: confFileName,
                 })
+                console.log(editConfFile, 'edit conf after run is blocked')
+                console.log(form, 'what happened to form???')
               }
             } else {
               SettingsPanel.resultsWebviewProvider.postMessage({

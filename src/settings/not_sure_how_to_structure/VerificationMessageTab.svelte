@@ -1,12 +1,6 @@
 <script>
   import CustomInput from './slots_and_utility/CustomInput.svelte'
-  import {
-    verification_message,
-    solidityObj,
-    specObj,
-    solAdditionalContracts,
-    checkMyInputs,
-  } from './stores/store.js'
+  import { verification_message } from './stores/store.js'
 
   let infoObjArr = {
     msg: {

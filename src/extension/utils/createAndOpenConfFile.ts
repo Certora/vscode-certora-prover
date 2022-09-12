@@ -280,9 +280,9 @@ export function processForm(
     compilerDirectory += '/'
   }
   const mainSolFile =
-    newForm.solidyObj.mainFile.path + newForm.solidyObj.mainFile.label
+    newForm.solidyObj.mainFile?.path + newForm.solidyObj.mainFile?.label || ''
   const mainSpecFile =
-    newForm.specObj.specFile.path + newForm.specObj.specFile.label
+    newForm.specObj.specFile?.path + newForm.specObj.specFile?.label || ''
   const form: InputFormData = {
     name: confFileName,
     mainSolidityFile: mainSolFile,

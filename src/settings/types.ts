@@ -56,7 +56,7 @@ export type SolcArg = {
 
 // solidity part of the new settings view
 export type SolidityObj = {
-  mainFile: string
+  mainFile: { value: string; label: string; path: string }
   mainContract: string
   linking: Link[]
   specifiMethod: string
@@ -73,7 +73,7 @@ export type Property = {
 
 // spec part of the new settings view
 export type SpecObj = {
-  specFile: string
+  specFile: { value: string; label: string; path: string }
   rules: string
   duration: string
   inherit: string
