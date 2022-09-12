@@ -6,7 +6,7 @@
   import type { NewForm } from './types'
   import { EventTypesFromExtension, EventsFromExtension } from './types'
   import RenamedMainWrapper from './not_sure_how_to_structure/RenamedMainWrapper.svelte'
-  // testing files with store
+
   import {
     solFilesArr,
     specFilesArr,
@@ -15,105 +15,94 @@
     verification_message,
     solAdditionalContracts,
     RunName,
-    isReset,
   } from './not_sure_how_to_structure/stores/store.js'
   import { refreshFiles } from './utils/refreshFiles'
-
-  let solidityFilesNew
-  let specFilesNew
-
-  const listener = (e: MessageEvent<EventsFromExtension>) => {
-    switch (e.data.type) {
-      case EventTypesFromExtension.SmartContractsFilesUpdated:
-        log({
-          action: 'Received "smart-contracts-files-updated" command',
-          source: Sources.SettingsWebview,
-          info: e.data.payload,
-        })
-        // todo: files as filename, pathToFile
-        solidityFilesNew = [
-          {
-            value: 'Browse...',
-            label: 'Browse...',
-            path: 'Browse',
-          },
-          ...e.data.payload.sol,
-        ]
-        specFilesNew = [
-          {
-            value: 'Browse...',
-            label: 'Browse...',
-            path: 'Browse',
-          },
-          ...e.data.payload.spec,
-        ]
-        setTimeout(() => {
-          solFilesArr.set(solidityFilesNew)
-          specFilesArr.set(specFilesNew)
-        })
-        break
-      case EventTypesFromExtension.EditConfFile:
-        log({
-          action: 'Received "edit-conf-file" command',
-          source: Sources.SettingsWebview,
-          info: e.data.payload,
-        })
-        $RunName = e.data.payload[1]
-        let newForm: NewForm = confFileToFormData(e.data.payload[0]) // change the conf file info form data for the settings form
-        fillFields(newForm)
-        break
-      case EventTypesFromExtension.FileChosen:
-        log({
-          action: 'Received "file-chosen" command',
-          source: Sources.SettingsWebview,
-          info: e.data.payload,
-        })
-        const fileName = e.data.payload[0]
-        const contractName = fileName
-          .toString()
-          .split('/')
-          .reverse()[0]
-          .replace('.sol', '')
-        const index = e.data.payload[1]
-        if (fileName.endsWith('.sol')) {
-          if (index === -1) {
-            const label = fileName.split('/').reverse()[0]
-            $solidityObj.mainFile = {
-              value: fileName,
-              label: label,
-              path: fileName.replace(label, ''),
-            }
-            $solidityObj.mainContract = contractName
-          } else if ($solAdditionalContracts.length > index) {
-            $solAdditionalContracts[index].mainFile = fileName
-            $solAdditionalContracts[index].mainContract = contractName
-          }
-        } else if (fileName.endsWith('.spec')) {
-          const label = fileName.split('/').reverse()[0]
-          $specObj.specFile = {
-            value: fileName,
-            label: label,
-            path: fileName.replace(label, ''),
-          }
-        }
-        break
-      case EventTypesFromExtension.MinorFilesChange:
-        log({
-          action: 'Received "minor-files-change" command',
-          source: Sources.SettingsWebview,
-          info: e.data.payload,
-        })
-        break
-      default:
-        break
-    }
-  }
 
   function fillFields(newForm: NewForm) {
     $solidityObj = newForm.solidyObj
     $specObj = newForm.specObj
     $verification_message = newForm.verificatoinMessage
     $solAdditionalContracts = newForm.solidityAdditionalContracts || []
+  }
+
+  const listener = (e: MessageEvent<EventsFromExtension>) => {
+    if (e.data.type === EventTypesFromExtension.SmartContractsFilesUpdated) {
+      log({
+        action: 'Received "smart-contracts-files-updated" command',
+        source: Sources.SettingsWebview,
+        info: e.data.payload,
+      })
+      $solFilesArr = e.data.payload.sol
+      $specFilesArr = e.data.payload.spec
+    }
+    if (e.data.type === EventTypesFromExtension.notifyWebviewAboutUpdates) {
+      log({
+        action: 'Received "notifyWebviewAboutUpdates" command',
+        source: Sources.SettingsWebview,
+        info: e.data.payload,
+      })
+
+      if (e.data.payload.method === 'push') {
+        if (e.data.payload.file.label.endsWith('.sol')) {
+          $solFilesArr = [...$solFilesArr, e.data.payload.file]
+          return
+        }
+        $specFilesArr = [...$specFilesArr, e.data.payload.file]
+      }
+      if (e.data.payload.method === 'filter') {
+        let file = e.data.payload.file
+        if (e.data.payload.file.label.endsWith('.sol')) {
+          $solFilesArr = $solFilesArr.filter(f => f.value !== file.value)
+          return
+        }
+        $specFilesArr = $specFilesArr.filter(f => f.value !== file.value)
+      }
+    }
+    if (e.data.type === EventTypesFromExtension.EditConfFile) {
+      log({
+        action: 'Received "edit-conf-file" command',
+        source: Sources.SettingsWebview,
+        info: e.data.payload,
+      })
+      $RunName = e.data.payload[1]
+      let newForm: NewForm = confFileToFormData(e.data.payload[0]) // change the conf file info form data for the settings form
+      fillFields(newForm)
+    }
+    if (e.data.type === EventTypesFromExtension.FileChosen) {
+      log({
+        action: 'Received "file-chosen" command',
+        source: Sources.SettingsWebview,
+        info: e.data.payload,
+      })
+      const fileName = e.data.payload[0]
+      const contractName = fileName
+        .toString()
+        .split('/')
+        .reverse()[0]
+        .replace('.sol', '')
+      const index = e.data.payload[1]
+      if (fileName.endsWith('.sol')) {
+        if (index === -1) {
+          const label = fileName.split('/').reverse()[0]
+          $solidityObj.mainFile = {
+            value: fileName,
+            label: label,
+            path: fileName.replace(label, ''),
+          }
+          $solidityObj.mainContract = contractName
+        } else if ($solAdditionalContracts.length > index) {
+          $solAdditionalContracts[index].mainFile = fileName
+          $solAdditionalContracts[index].mainContract = contractName
+        }
+      } else if (fileName.endsWith('.spec')) {
+        const label = fileName.split('/').reverse()[0]
+        $specObj.specFile = {
+          value: fileName,
+          label: label,
+          path: fileName.replace(label, ''),
+        }
+      }
+    }
   }
 
   onMount(() => {
@@ -138,9 +127,6 @@
   :global(body) {
     padding: 44px 24px;
   }
-  /* :global(body) {
-    padding: 0 16px;
-  } */
 
   :global(:root) {
     --space-xs: 4px;
@@ -151,74 +137,14 @@
     --space-xxl: 30px;
   }
 
-  /* :global(body.vscode-light) {
-    --dropdown-text-color: #000;
-  } */
-
   :global(body.vscode-dark) {
     --dropdown-text-color: var(--dropdown-foreground);
   }
 
-  /* .settings {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-xl);
-  } */
-
-  /* .section-title {
-    margin-top: 0;
-    margin-bottom: calc(
-      var(--space-lg) - var(--space-xl)
-    ); because we have `gap: var(--space-xl);` in .settings */
-
-  /* font-size: 26px;
-    font-weight: 600;
-    line-height: 31px;
-  } */
-
-  /* .staging {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-sm);
-  } */
-
-  /* .save-button {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    padding: 30px 24px;
-    border-top: 1px solid var(--panel-view-border);
-    background-color: var(--panel-view-background);
-  } */
-
-  /* .vscode-button {
-    padding: 6px 11px;
-    border: none;
-    background-color: var(--vscode-button-background);
-    color: var(--button-primary-foreground);
-    font-family: var(--font-family);
-    font-size: var(--type-ramp-base-font-size);
-  } */
-
-  /* .vscode-button:disabled {
-    background-color: var(--vscode-button-background);
-    color: var(--button-primary-foreground);
-    cursor: default;
-    opacity: 0.5;
-  } */
-
-  /* button:hover {
-    background-color: var(--vscode-button-hoverBackground);
-    cursor: pointer;
-  } */
-
-  /* stylelint-disable */
-
   /* really bad start temporary selector */
   :global(*),
   :global(a) {
-    color: var(--vscode-foreground);
+    color: var(--button-primary-foreground) !important;
   }
 
   /* butoon/icons hover */

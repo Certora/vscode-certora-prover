@@ -31,14 +31,39 @@
     }
     itemClasses = classes.join(' ')
   }
+  let stringShrink = function () {
+    let splittedArr = item.path.split('/')
+    splittedArr = splittedArr.map(str => {
+      if (str.length < 15) return str
+      return `${
+        str.charAt(0) + str.charAt(1) + str.charAt(2) + str.charAt(3)
+      }...${
+        str.charAt(str.length - 4) +
+        str.charAt(str.length - 3) +
+        str.charAt(str.length - 2) +
+        str.charAt(str.length - 1)
+      }`
+    })
+    // debugger
+    if (splittedArr[splittedArr.length - 2]) {
+      return `.../${splittedArr[splittedArr.length - 2]}/${
+        splittedArr[splittedArr.length - 1]
+      }`
+    }
+    return `.../${splittedArr[splittedArr.length - 1]}`
+  }
 </script>
 
-<div class="item {itemClasses}">
+<div class="item {itemClasses}" class:sticky={!item.value}>
   <span>
     {@html getOptionLabel(item, filterText)}
   </span>
   <span>
-    {item.path}
+    {#if item.value !== 'Browse...'}
+      {stringShrink()}
+    {:else}
+      {item.path}
+    {/if}
   </span>
 </div>
 
@@ -46,7 +71,7 @@
   /* stylelint-disable */
 
   .item {
-    cursor: default;
+    cursor: pointer;
     height: 18px;
     line-height: 18px;
     /* height: var(--height, 18px);
@@ -96,5 +121,15 @@
   .item.hover:not(.active) {
     background: var(--itemHoverBG, #e7f2ff);
     color: var(--itemHoverColor, inherit);
+  }
+
+  .sticky {
+  }
+
+  :global(.listItem:first-of-type) {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--badge-background);
   }
 </style>

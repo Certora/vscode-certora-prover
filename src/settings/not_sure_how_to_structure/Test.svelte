@@ -5,17 +5,16 @@
   import Icon from './slots_and_utility/Icon.svelte'
   import CustomItem from './slots_and_utility/CustomItem.svelte'
   import CustomInput from './slots_and_utility/CustomInput.svelte'
-  import { refreshFiles } from '../utils/refreshFiles'
+  import SolidityFiles from './SolidityFiles.svelte'
   import { openBrowser } from '../utils/openBrowser'
-
   import {
+    solFilesArr,
     navState,
     solidityObj,
     solAdditionalContracts,
-    solFilesArr,
   } from './stores/store.js'
-  import SolidityFiles from './SolidityFiles.svelte'
-  // emailValidator ,spaceAndDashValidator, numberValidator, compilerValidator, filePathVlidator
+
+  // validator comes from validators.js
   let infoObjArr = {
     mainFile: {
       infoText: 'pick main solidity file',
@@ -70,6 +69,8 @@
     },
   }
 
+  // handle browse files
+
   function handleSelectSol(event) {
     if (event.detail.value === 'Browse...') {
       loadFilesFolder('sol')
@@ -84,7 +85,7 @@
         .replace('.sol', '')
     }
   }
-
+  // clears the store.js solidityObj.mainFile/ solAdditionalContracts
   function handleClear(e, index = -1) {
     // e is passes on by default here
     if (index > -1) {
@@ -93,7 +94,6 @@
     }
     $solidityObj.mainFile = ''
   }
-
   // push new linking/directory
   function pushNewObj(arr, obj) {
     arr.push(obj)
@@ -104,12 +104,10 @@
     arr.splice(index, 1)
     $solidityObj = $solidityObj
   }
-
   // add files from folder
   function loadFilesFolder(fileType, index) {
     openBrowser(fileType, index)
   }
-
   // add new empty solidity file push new obj to array
   function addNewFile() {
     $solAdditionalContracts = [
@@ -122,7 +120,7 @@
       },
     ]
   }
-
+  // main solidity card open/close
   let isSolidityListOpen = false
   // icon props expect an object
   let solidityIconsObj = {
@@ -134,6 +132,106 @@
     fileType: 'sol',
     ifoText: infoObjArr.mainFile.infoText,
     infoLink: infoObjArr.mainFile.infoLink,
+  }
+  // maxFiles to display in input (limit the amount of files we display in the input drop),
+  // filtered files new array made from $solFilesArr
+  // filterCountObj keep count/track <5/1000 file showing>
+  let filteredFiles,
+    filter = '',
+    maxFiles = 15
+  let filterCountObj = {
+    allFiles: $solFilesArr.length,
+    filesShowing: maxFiles,
+  }
+  // subscribe to solidity files array and input filter
+  $: filter || $solFilesArr, manageFiles(filter)
+  // all the file action happens here
+  function manageFiles(filter) {
+    // on app load filter changes to '' and reset is called
+    // and when it actually is an ''
+    if (filter === '') {
+      resetFiles()
+      return
+    }
+    // filter all the files
+    let newFilteredFiles = $solFilesArr.filter(file => {
+      return file.label.toLowerCase().includes(filter.toLowerCase())
+    })
+    // if no matches found return an empty array to display a message
+    if (!newFilteredFiles.length) return (filteredFiles = [])
+    // if the amount of the filtered files is bigger than display limit slice and dice the array
+    if (newFilteredFiles.length > filterCountObj.filesShowing) {
+      let sortedFiles = sortByAbc(
+        newFilteredFiles.slice(0, filterCountObj.filesShowing),
+      )
+      filteredFiles = [
+        {
+          value: 'Browse...',
+          label: 'Browse...',
+          path: `Showing ${filterCountObj.filesShowing}/${newFilteredFiles.length} files`,
+        },
+        ...sortedFiles,
+      ]
+      return
+    }
+    // amount of the filtered files is smaller or same as limit
+    let sortedFiles = sortByAbc(newFilteredFiles)
+    filteredFiles = [
+      {
+        value: 'Browse...',
+        label: 'Browse...',
+        path: `Showing ${newFilteredFiles.length}/${newFilteredFiles.length} files`,
+      },
+      ...sortedFiles,
+    ]
+    return
+  }
+
+  // resets the input files array and the count object
+  function resetFiles() {
+    filterCountObj = {
+      allFiles: $solFilesArr.length,
+      filesShowing: maxFiles,
+    }
+    let slicedArr = $solFilesArr.slice(0, filterCountObj.filesShowing)
+    let sortedFiles = sortByAbc(slicedArr)
+    filteredFiles = [
+      {
+        value: 'Browse...',
+        label: 'Browse...',
+        path: `Showing ${slicedArr.length}/${filterCountObj.allFiles} files`,
+      },
+      ...sortedFiles,
+    ]
+  }
+
+  // updateItems needs redesign
+  function updateItems() {
+    // do nothing
+  }
+
+  // sort function
+  function sortByAbc(sortedfiles) {
+    let sorted = sortedfiles.sort((f1, f2) => {
+      return alphaSort(f1, f2)
+    })
+    console.log(sorted)
+    return sorted
+  }
+  function alphaSort(l1, l2) {
+    if (l1.label.toLowerCase() > l2.label.toLowerCase()) {
+      return 1
+    }
+    if (l2.label.toLowerCase() > l1.label.toLowerCase()) {
+      return -1
+    }
+    if (l1.path.toLowerCase() > l2.path.toLowerCase()) {
+      return 1
+    }
+    if (l2.path.toLowerCase() > l1.path.toLowerCase()) {
+      return -1
+    }
+    return 0
   }
 </script>
 
@@ -157,24 +255,23 @@
           <div slot="body" class="p-12 pt-0">
             <div class="input_wrapper">
               <div class="dark_input">
-                <h3>Main solidity file<span>*</span></h3>
-
-                <button
-                  style="background: transparent; padding:0; border:none;"
-                >
-                  <Select
-                    listOpen={isSolidityListOpen}
-                    iconProps={solidityIconsObj}
-                    items={$solFilesArr}
-                    Item={CustomItem}
-                    {Icon}
-                    {ClearIcon}
-                    on:select={handleSelectSol}
-                    on:clear={e => handleClear(e)}
-                    placeholder="Search..."
-                    bind:value={$solidityObj.mainFile}
-                  />
-                </button>
+                <h3>Source<span>*</span></h3>
+                <Select
+                  itemFilter={(label, filterText, option) => {
+                    return option
+                  }}
+                  bind:filterText={filter}
+                  items={filteredFiles}
+                  listOpen={isSolidityListOpen}
+                  iconProps={solidityIconsObj}
+                  Item={CustomItem}
+                  {Icon}
+                  {ClearIcon}
+                  on:select={handleSelectSol}
+                  on:clear={e => handleClear(e)}
+                  placeholder="Type to filter..."
+                  bind:value={$solidityObj.mainFile}
+                />
               </div>
               <div class="dark_input">
                 <h3>Main contract name<span>*</span></h3>
@@ -381,7 +478,15 @@
         </CollapseCard>
       </div>
       {#each $solAdditionalContracts as file, index}
-        <SolidityFiles {index} {handleClear} {loadFilesFolder} {infoObjArr} />
+        <!-- needs new changes -->
+        <SolidityFiles
+          {index}
+          solFiles={$solFilesArr}
+          {updateItems}
+          {handleClear}
+          {loadFilesFolder}
+          {infoObjArr}
+        />
       {/each}
       <button class="btn_add" on:click={addNewFile}
         ><i class="codicon codicon-add" /> Add another contract</button
@@ -393,5 +498,6 @@
 <style>
   :global(.listContainer) {
     width: max-content !important;
+    max-width: calc(100vw - 73px) !important;
   }
 </style>

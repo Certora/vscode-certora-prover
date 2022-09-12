@@ -99,7 +99,7 @@ export enum EventTypesFromExtension {
   SmartContractsFilesUpdated = 'smart-contracts-files-updated',
   EditConfFile = 'edit-conf-file',
   FileChosen = 'file-chosen',
-  MinorFilesChange = 'minor-files-change',
+  notifyWebviewAboutUpdates = 'minor-files-change',
 }
 
 export type ConfFile = {
@@ -118,7 +118,10 @@ export type ConfFile = {
 export type EventsFromExtension =
   | {
       type: EventTypesFromExtension.SmartContractsFilesUpdated
-      payload: { sol: string[]; spec: string[] }
+      payload: {
+        sol: { value: string; label: string; path: string }[]
+        spec: { value: string; label: string; path: string }[]
+      }
     }
   | {
       type: EventTypesFromExtension.EditConfFile
@@ -129,9 +132,9 @@ export type EventsFromExtension =
       payload: [string, number]
     }
   | {
-      type: EventTypesFromExtension.MinorFilesChange
+      type: EventTypesFromExtension.notifyWebviewAboutUpdates
       payload: {
         method: string
-        file: { vaule: string; label: string; path: string }
+        file: { value: string; label: string; path: string }
       }
     }
