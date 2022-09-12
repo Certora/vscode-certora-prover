@@ -14,7 +14,7 @@
     specFilesArr,
   } from './stores/store.js'
   import CheckBoxInfo from './slots_and_utility/CheckBoxInfo.svelte'
-  import { refreshFiles } from '../utils/refreshFiles'
+  import { manageFiles } from '../utils/refreshFiles'
 
   // this items arrary contains all the solidity files and should update on when updateItems is fired
   // some fake stuff
@@ -115,16 +115,27 @@
     },
   }
   // on click on the input get al the files (sol or spec) based on what os passded to the function
-  function updateItems(fileType) {
-    // not really expecting anything but sol here
-    // might bove elsewhere later and make it more reusable
-    if (fileType !== 'spec') return
-    // this is actually pushing some fake value in (for testing only) just replace with an array of the new values from the file system like you see in the specFiles
-    specFiles = [
-      ...specFiles,
-      { value: 'Browse...', label: 'Browse...', path: 'src/somefolder' },
-    ]
+  // function updateItems(fileType) {
+  //   // not really expecting anything but sol here
+  //   // might bove elsewhere later and make it more reusable
+  //   if (fileType !== 'spec') return
+  //   // this is actually pushing some fake value in (for testing only) just replace with an array of the new values from the file system like you see in the specFiles
+  //   specFiles = [
+  //     ...specFiles,
+  //     { value: 'Browse...', label: 'Browse...', path: 'src/somefolder' },
+  //   ]
+  // }
+
+  let filteredFiles,
+    filter = '',
+    maxFiles = 15
+  let filterCountObj = {
+    allFiles: $specFilesArr.length,
+    filesShowing: maxFiles,
   }
+
+  $: filter || $specFilesArr,
+    (filteredFiles = manageFiles(filter, filterCountObj, $specFilesArr))
 
   function handleSelectSpec(event, fileType, index) {
     if (event.detail.value === 'Browse...') {
@@ -143,7 +154,7 @@
   }
 
   $: solDisabledState = !(
-    $solidityObj.mainFile !== '' &&
+    $solidityObj.mainFile.value !== '' &&
     $solidityObj.mainContract !== '' &&
     $solidityObj.compiler.ver !== ''
   )
@@ -196,23 +207,22 @@
             <div class="input_wrapper">
               <div class="dark_input">
                 <h3>Certora specification file<span>*</span></h3>
-                <button
-                  on:click={() => refreshFiles()}
-                  style="background: transparent; padding:0; border:none; margin-top:auto;"
-                >
-                  <Select
-                    listOpen={isSpecListOpen}
-                    iconProps={specIconsObj}
-                    items={$specFilesArr}
-                    Item={CustomItem}
-                    {Icon}
-                    {ClearIcon}
-                    on:select={e => handleSelectSpec(e, 'spec')}
-                    on:clear={e => handleClear(e)}
-                    placeholder="Search..."
-                    bind:value={$specObj.specFile}
-                  />
-                </button>
+                <Select
+                  itemFilter={(label, filterText, option) => {
+                    return option
+                  }}
+                  bind:filterText={filter}
+                  listOpen={isSpecListOpen}
+                  iconProps={specIconsObj}
+                  items={filteredFiles}
+                  Item={CustomItem}
+                  {Icon}
+                  {ClearIcon}
+                  on:select={e => handleSelectSpec(e, 'spec')}
+                  on:clear={e => handleClear(e)}
+                  placeholder="Search..."
+                  bind:value={$specObj.specFile}
+                />
               </div>
               <div class="dark_input">
                 <h3>Rules</h3>
@@ -384,12 +394,6 @@
     font-size: 13px;
   }
 
-  /* .alternate_input h3 {
-    white-space: nowrap;
-    width: max-content;
-    font-size: 13px;
-    margin: auto 8px auto 0;
-  } */
   :global(.alternate_input div) {
     flex-grow: 1;
   }

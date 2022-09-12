@@ -7,6 +7,7 @@
   import CustomInput from './slots_and_utility/CustomInput.svelte'
   import SolidityFiles from './SolidityFiles.svelte'
   import { openBrowser } from '../utils/openBrowser'
+  import { manageFiles } from '../utils/refreshFiles'
   import {
     solFilesArr,
     navState,
@@ -144,94 +145,12 @@
     filesShowing: maxFiles,
   }
   // subscribe to solidity files array and input filter
-  $: filter || $solFilesArr, manageFiles(filter)
-  // all the file action happens here
-  function manageFiles(filter) {
-    // on app load filter changes to '' and reset is called
-    // and when it actually is an ''
-    if (filter === '') {
-      resetFiles()
-      return
-    }
-    // filter all the files
-    let newFilteredFiles = $solFilesArr.filter(file => {
-      return file.label.toLowerCase().includes(filter.toLowerCase())
-    })
-    // if no matches found return an empty array to display a message
-    if (!newFilteredFiles.length) return (filteredFiles = [])
-    // if the amount of the filtered files is bigger than display limit slice and dice the array
-    if (newFilteredFiles.length > filterCountObj.filesShowing) {
-      let sortedFiles = sortByAbc(
-        newFilteredFiles.slice(0, filterCountObj.filesShowing),
-      )
-      filteredFiles = [
-        {
-          value: 'Browse...',
-          label: 'Browse...',
-          path: `Showing ${filterCountObj.filesShowing}/${newFilteredFiles.length} files`,
-        },
-        ...sortedFiles,
-      ]
-      return
-    }
-    // amount of the filtered files is smaller or same as limit
-    let sortedFiles = sortByAbc(newFilteredFiles)
-    filteredFiles = [
-      {
-        value: 'Browse...',
-        label: 'Browse...',
-        path: `Showing ${newFilteredFiles.length}/${newFilteredFiles.length} files`,
-      },
-      ...sortedFiles,
-    ]
-    return
-  }
-
-  // resets the input files array and the count object
-  function resetFiles() {
-    filterCountObj = {
-      allFiles: $solFilesArr.length,
-      filesShowing: maxFiles,
-    }
-    let slicedArr = $solFilesArr.slice(0, filterCountObj.filesShowing)
-    let sortedFiles = sortByAbc(slicedArr)
-    filteredFiles = [
-      {
-        value: 'Browse...',
-        label: 'Browse...',
-        path: `Showing ${slicedArr.length}/${filterCountObj.allFiles} files`,
-      },
-      ...sortedFiles,
-    ]
-  }
+  $: filter || $solFilesArr,
+    (filteredFiles = manageFiles(filter, filterCountObj, $solFilesArr))
 
   // updateItems needs redesign
   function updateItems() {
     // do nothing
-  }
-
-  // sort function
-  function sortByAbc(sortedfiles) {
-    let sorted = sortedfiles.sort((f1, f2) => {
-      return alphaSort(f1, f2)
-    })
-    console.log(sorted)
-    return sorted
-  }
-  function alphaSort(l1, l2) {
-    if (l1.label.toLowerCase() > l2.label.toLowerCase()) {
-      return 1
-    }
-    if (l2.label.toLowerCase() > l1.label.toLowerCase()) {
-      return -1
-    }
-    if (l1.path.toLowerCase() > l2.path.toLowerCase()) {
-      return 1
-    }
-    if (l2.path.toLowerCase() > l1.path.toLowerCase()) {
-      return -1
-    }
-    return 0
   }
 </script>
 
