@@ -14,6 +14,9 @@
   export let placeholder = 'placeholder'
   export let bindValue
 
+  export let disabledState = false
+  // export const inputName =''
+
   export let infoObj = {
     infoText: 'some text...',
     infoLink: 'https://google.com',
@@ -84,6 +87,8 @@
 </script>
 
 <div class="main_wrapper">
+  <!-- no info icon on disabled -->
+  <!-- disabled = {disabledState} -->
   <input
     class="simple_txt_input monaco-inputbox idle"
     type="text"
@@ -160,7 +165,7 @@
     gap: 4px;
   }
   i {
-    color: var(--dropdown-text-color);
+    color: var(--vscode-input-foreground);
   }
 
   .showtxt {
@@ -191,12 +196,15 @@
   .simple_txt_input {
     box-sizing: border-box;
     border: none;
-    color: var(--vscode-foreground);
+    color: var(--vscode-input-foreground);
     padding: 6px 4px;
     height: 30px;
     width: -webkit-fill-available;
-    background: var(--vscode-dropdown-background);
+    background: var(--vscode-input-background);
     font-size: var(--inputFontSize, 14px);
+  }
+  .simple_txt_input::placeholder {
+    color: var(--vscode-input-placeholderForeground);
   }
   .simple_txt_input:hover,
   .simple_txt_input:focus,

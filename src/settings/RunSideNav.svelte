@@ -72,6 +72,7 @@
     margin: 0;
     font-size: 13px;
     margin-right: 6px;
+    align-self: center;
   }
   i {
     display: flex;
@@ -107,7 +108,9 @@
     cursor: not-allowed;
   }
   .active.nav_settings_child {
-    background: var(--vscode-list-activeSelectionBackground);
+    background: var(--vscode-button-background);
+    /* background: var(--vscode-list-activeSelectionBackground); */
+    color: var(--vscode-button-foreground);
   }
   .nav_settings_child i:nth-child(3) {
     margin: auto 0 auto auto;
@@ -115,7 +118,9 @@
   .nav_settings_child i:nth-child(1) {
     margin: auto 6px auto 0;
   }
-
+  button {
+    color: var(--vscode-primary-foreground);
+  }
   button:disabled {
     filter: brightness(60%);
     /* color:var(--vscode-disabledForeground); */

@@ -67,6 +67,8 @@
   .main_wrapper {
     display: flex;
     box-sizing: border-box;
+    height: 100vh;
+    overflow: hidden;
     /* width: 100%; */
     /* overflow: hidden; */
   }
@@ -80,6 +82,11 @@
     box-sizing: border-box;
     width: 70%;
     padding: 16px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+  }
+  .right_wrapper::-webkit-scrollbar {
+    display: none;
   }
   @media (max-width: 820px) {
     .media {

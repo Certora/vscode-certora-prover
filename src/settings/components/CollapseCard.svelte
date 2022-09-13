@@ -47,11 +47,11 @@
     cursor: pointer;
     user-select: none;
     display: flex;
-    color: var(--button-secondary-foreground);
+    /* color: var(--button-secondary-foreground); */
   }
 
   .card-body {
-    color: var(--button-primary-foreground);
+    /* color: var(--button-primary-foreground); */
   }
   .cursor_disabled,
   .cursor_disabled > .card-header {

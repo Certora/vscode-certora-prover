@@ -47,7 +47,8 @@
 
 <style>
   .codicon {
-    color: var(--dropdown-text-color);
+    /* color: var(--dropdown-text-color); */
+    color: var(--vscode-input-foreground);
   }
   .icon_wrapper {
     order: 3;
@@ -87,7 +88,7 @@
     text-align: left;
     padding: 8px;
     z-index: 3;
-    color: var(--dropdown-text-color);
+    /* color: var(--dropdown-text-color); */
   }
   .showtxt a {
     margin-top: 8px;

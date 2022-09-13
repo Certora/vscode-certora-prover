@@ -35,7 +35,7 @@
       $solFilesArr = e.data.payload.sol
       $specFilesArr = e.data.payload.spec
     }
-    if (e.data.type === EventTypesFromExtension.notifyWebviewAboutUpdates) {
+    if (e.data.type === EventTypesFromExtension.MinorFilesChange) {
       log({
         action: 'Received "notifyWebviewAboutUpdates" command',
         source: Sources.SettingsWebview,
@@ -142,10 +142,10 @@
   }
 
   /* really bad start temporary selector */
-  :global(*),
+  /* :global(*),
   :global(a) {
     color: var(--button-primary-foreground) !important;
-  }
+  } */
 
   /* butoon/icons hover */
   :global(.codicon-trash) {
@@ -182,17 +182,26 @@
   /* bg helpers */
   :global(.bg_dark) {
     background: var(--vscode-menu-background);
+    color: var(--vscode-editor-foreground);
   }
   :global(.bg_light) {
-    background: var(--vscode-menu-separatorBackground);
+    background: var(--badge-background);
+    color: var(--vscode-button-foreground);
   }
+  :global(.showtxt) {
+    color: var(--vscode-editor-foreground);
+  }
+  /* :global(.selectContainer input::placeholder) {
+    color: var(--vscode-input-placeholderForeground)!important;
+  } */
   :global(.mt-8px) {
     margin-top: 8px;
   }
 
   :global(.btn_add) {
-    background: var(--vscode-editor-background);
+    background: var(--vscode-button-secondaryBackground);
     border: 1px solid var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
     display: flex;
     margin-top: 8px;
     transition: all 0.3s ease-in-out;
@@ -205,8 +214,7 @@
     margin: auto 4px auto 0;
   }
   :global(.btn_add:hover) {
-    /* background: var(--vscode-button-secondaryHoverBackground); */
-    background: var(--vscode-menu-background);
+    background: var(--vscode-button-secondaryHoverBackground);
   }
   :global(.input_wrapper) {
     display: flex;
@@ -308,7 +316,7 @@
   :global(.dark_input) {
     /* https://www.npmjs.com/package/svelte-select */
     /* https://github.com/rob-balfre/svelte-select/blob/master/docs/theming_variables.md */
-    --background: var(--vscode-dropdown-background);
+    --background: var(--vscode-input-background);
     --borderRadius: 0;
     --borderFocusColor: var(--vscode-inputValidation-infoBorder);
     --borderHoverColor: var(--vscode-inputValidation-infoBorder);
@@ -316,9 +324,9 @@
 
     --selectedItemPadding: 0 10px 0 8px;
     /* from dev tools */
-    --inputColor: var(--vscode-foreground);
-    --placeholderColor: var(--vscode-foreground);
-    --placeholderOpacity: 0.4;
+    --inputColor: var(--vscode-input-foreground);
+    --placeholderColor: var(--vscode-input-placeholderForeground);
+    --placeholderOpacity: 1;
     --height: 30px;
     --inputPadding: 8px 4px;
     --inputFontSize: 13px;
@@ -327,27 +335,46 @@
     --internalPadding: 0;
     --inputLetterSpacing: inherit;
     /* drop down open */
-    --listBackground: var(--vscode-editor-background);
-    --listBorder: 1px solid var(--vscode-button-secondaryBackground);
-    --itemHoverBG: var(--vscode-editorSuggestWidget-selectedBackground);
-    --itemHoverColor: var(--vscode-editorSuggestWidget-highlightForeground);
+    --listBackground: var(--vscode-editorSuggestWidget-background);
+    /* --listBorder: 1px solid var(--vscode-list-focusOutline); */
+    /* --listBorder: 1px solid var(--vscode-button-secondaryBackground); */
+
+    /* --vscode-editorSuggestWidget-background: #252526;
+    --vscode-editorSuggestWidget-border: #454545;
+    --vscode-editorSuggestWidget-foreground: #d4d4d4;
+    --vscode-editorSuggestWidget-selectedForeground: #ffffff;
+    --vscode-editorSuggestWidget-selectedIconForeground: #ffffff;
+    --vscode-editorSuggestWidget-selectedBackground: #094771;
+    --vscode-editorSuggestWidget-highlightForeground: #18a3ff;
+    --vscode-editorSuggestWidget-focusHighlightForeground: #18a3ff; */
+
+    --itemHoverBG: var(--vscode-editorSuggestWidget-border);
+    --itemHoverColor: var(--vscode-editorSuggestWidget-foreground);
+    --itemColor: var(--vscode-editorSuggestWidget-foreground);
     --listShadow: 0;
     --listBorderRadius: 0;
     --itemFirstBorderRadius: 0;
     --itemPadding: 0 2px 0 16px;
 
     --selectedItemPadding: 0;
-
+    --listLeft: -2px;
     /* slected active */
     --itemIsActiveBG: var(--vscode-editorSuggestWidget-selectedBackground);
-    --itemISActiveColor: var(--vscode-editorSuggestWidget-highlightForeground);
+    --itemISActiveColor: var(--vscode-editorSuggestWidget-selectedForeground);
     /* close icon */
     --clearSelectRight: 52px;
     --clearSelectTop: 0;
     --clearSelectBottom: 0;
     --clearSelectWidth: 20px;
+    --clearSelectFocusColor: var(--vscode-input-foreground);
+    --inputColor: var(--vscode-input-foreground);
   }
-
+  :global(.listContainer) {
+    left: -2px !important;
+    /* outline: 1px solid var(--vscode-list-focusOutline); */
+    outline: 1px solid var(--vscode-editorSuggestWidget-border);
+    /* outline-offset: -1px; */
+  }
   :global(.dark_input .item) {
     position: relative;
     padding-left: 22px;
@@ -360,7 +387,6 @@
     left: 2px;
   }
   :global(.dark_input .clearSelect) {
-    background: var(--vscode-dropdown-background);
     display: flex !important;
   }
 
@@ -412,5 +438,116 @@
     :global(.input_wrapper > .codicon-trash) {
       width: min-content;
     }
+  }
+
+  :global(a) {
+    color: var(--link-foreground);
+  }
+
+  /* colors light/dark */
+
+  /* light */
+  /* :global(.vscode-light .bg_light .bg_dark  input){
+    outline: 1px solid transparent !important;;
+  } */
+  :global(.vscode-light
+      .bg_dark
+      .bg_light
+      .simple_txt_input, .vscode-high-contrast-light
+      .bg_dark
+      .bg_light
+      .simple_txt_input, .vscode-high-contrast-light
+      .selectContainer, .vscode-light .selectContainer) {
+    outline: 1px solid var(--vscode-inputValidation-infoBorder);
+    outline-offset: -1px;
+  }
+  :global(.vscode-light .bg_dark, .vscode-high-contrast-light .bg_dark) {
+    background: var(--badge-background);
+    color: var(--vscode-button-foreground);
+  }
+  :global(.vscode-light .bg_light, .vscode-high-contrast-light .bg_light) {
+    background: var(--vscode-menu-background);
+    color: var(--vscode-editor-foreground);
+  }
+  :global(.vscode-high-contrast-light .dark_input) {
+    --itemHoverColor: white !important;
+  }
+  :global(.vscode-high-contrast-light) {
+    --vscode-button-secondaryHoverBackground: white !important;
+  }
+
+  /* high contrast */
+  :global(.vscode-high-contrast .bg_dark, .vscode-high-contrast
+      .bg_light, .vscode-high-contrast .nav_settings .nav_settings_child) {
+    border: 1px solid var(--vscode-menu-separatorBackground);
+  }
+  :global(.vscode-high-contrast .simple_txt_input, .vscode-high-contrast
+      .checkmark, .vscode-high-contrast .nav_settings_child) {
+    outline: 1px solid var(--vscode-inputValidation-infoBorder);
+    outline-offset: -1px;
+  }
+
+  :global(.vscode-high-contrast .simple_txt_input:hover, .vscode-high-contrast
+      .checkmark:hover) {
+    outline-color: var(--vscode-list-focusOutline) !important;
+    outline-style: dashed !important;
+  }
+  :global(.vscode-high-contrast .selectContainer) {
+    border: 1px solid var(--vscode-inputValidation-infoBorder) !important;
+    /* outline-offset: -1px; */
+  }
+  :global(.vscode-high-contrast .selectContainer:hover) {
+    border-color: var(--vscode-list-focusOutline) !important;
+    border-style: dashed !important;
+  }
+
+  :global(.vscode-high-contrast
+      button:not(.btn_add):hover, .vscode-high-contrast
+      div:not(.header)
+      > .codicon:hover, .vscode-high-contrast .codicon-trash:hover) {
+    border-radius: 4px;
+    outline: 1px dashed var(--vscode-list-focusOutline) !important;
+    outline-offset: -1px;
+  }
+  :global(.vscode-high-contrast
+      button:not(.btn_add):active, .vscode-high-contrast
+      .nav_settings_child.active, .vscode-high-contrast
+      div:not(.header)
+      > .codicon:active, .vscode-high-contrast .codicon-trash:active) {
+    outline-style: solid !important;
+    outline-color: var(--vscode-list-focusOutline);
+  }
+  :global(.vscode-high-contrast .btn_add:hover) {
+    border: 1px dashed var(--vscode-list-focusOutline) !important;
+    border-offset: -1px;
+  }
+  :global(.vscode-high-contrast .btn_add:active) {
+    border-style: solid !important;
+  }
+  :global(.vscode-high-contrast .simple_txt_input:focus, .vscode-high-contrast
+      .checkmark:focus) {
+    outline-color: var(--vscode-list-focusOutline) !important;
+  }
+  :global(.vscode-high-contrast .selectContainer.focused) {
+    border-color: var(--vscode-list-focusOutline) !important;
+  }
+
+  /* dark themes input fix */
+  :global([data-vscode-theme-name='Tomorrow Night Blue']
+      .selectContainer, [data-vscode-theme-name='Abyss']
+      .selectContainer, [data-vscode-theme-name='Red'] .selectContainer) {
+    border: 1px solid var(--vscode-inputValidation-infoBorder) !important;
+  }
+  :global([data-vscode-theme-name='Tomorrow Night Blue']
+      .simple_txt_input, [data-vscode-theme-name='Abyss']
+      .simple_txt_input, [data-vscode-theme-name='Red'] .simple_txt_input) {
+    outline: 1px solid var(--vscode-inputValidation-infoBorder);
+    outline-offset: -1px;
+  }
+  :global([data-vscode-theme-name='Tomorrow Night Blue']
+      .checkmark, [data-vscode-theme-name='Abyss']
+      .checkmark, [data-vscode-theme-name='Red'] .checkmark) {
+    outline: 1px solid var(--vscode-inputValidation-infoBorder);
+    outline-offset: -1px;
   }
 </style>
