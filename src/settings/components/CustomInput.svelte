@@ -1,5 +1,4 @@
 <script>
-  // import { emailValidator, requiredValidator } from './validations/validators.js'
   import {
     emailValidator,
     spaceAndDashValidator,
@@ -8,14 +7,10 @@
     compilerValidator,
   } from '../validations/validators.js'
   import { createFieldValidator } from '../validations/validation.js'
-  // const [ validity, validate ] = createFieldValidator(requiredValidator(), emailValidator())
 
   import { checkMyInputs } from '../stores/store'
   export let placeholder = 'placeholder'
   export let bindValue
-
-  export let disabledState = false
-  // export const inputName =''
 
   export let infoObj = {
     infoText: 'some text...',

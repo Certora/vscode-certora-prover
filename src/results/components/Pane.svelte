@@ -1,30 +1,19 @@
 <script lang="ts">
   import Toolbar from './Toolbar.svelte'
-  import type { Action, Status } from '../types'
+  import { Action, Status } from '../types'
   import { getIconPath } from '../utils/getIconPath'
-  import { stat } from 'fs'
 
   export let title: string
   export let actions: Action[] = []
   export let initialExpandedState: boolean = false
   export let showExpendIcon: boolean = true
-  export let status: string = ''
+  export let status: Status | string = ''
   export let inactiveSelected: boolean = false
   export let runFunc: () => void = null
-  export let editFunc = null
 
   let isExpanded = initialExpandedState
 
-  const STATUS: Status = {
-    finishSetup: 'Finish setup',
-    ready: 'Ready',
-    running: 'Running',
-    pending: 'Pending',
-    success: 'Ready success',
-    unableToRun: 'Unable to run',
-  }
-
-  const STATUS_ICONS: Status = {
+  const STATUS_ICONS = {
     finishSetup: 'finish-setup.svg',
     ready: 'ready-to-run.svg',
     running: 'running-rule-status.svg',
@@ -35,12 +24,12 @@
 
   // maps status to icon
   const statusMap: Map<string, string> = new Map([
-    [STATUS.finishSetup, STATUS_ICONS.finishSetup],
-    [STATUS.running, STATUS_ICONS.running],
-    [STATUS.ready, STATUS_ICONS.ready],
-    [STATUS.pending, STATUS_ICONS.pending],
-    [STATUS.success, STATUS_ICONS.success],
-    [STATUS.unableToRun, STATUS_ICONS.unableToRun],
+    [Status.finishSetup, STATUS_ICONS.finishSetup],
+    [Status.running, STATUS_ICONS.running],
+    [Status.ready, STATUS_ICONS.ready],
+    [Status.pending, STATUS_ICONS.pending],
+    [Status.success, STATUS_ICONS.success],
+    [Status.unableToRun, STATUS_ICONS.unableToRun],
   ])
 
   /**
@@ -98,7 +87,7 @@
         height="16"
         src={getIconPath(statusMap.get(status))}
         alt=""
-        on:click={runFunc ? runFunc : editFunc}
+        on:click|stopPropagation={() => runFunc()}
       />
     {/if}
     <h3 class="title" {title}>{title}</h3>
@@ -106,7 +95,7 @@
       <Toolbar {actions} />
     </div>
     <div class="status">
-      {status === STATUS.success ? STATUS.ready : status}
+      {status === Status.success ? Status.ready : status}
     </div>
   </div>
   {#if isExpanded}

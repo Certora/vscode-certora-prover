@@ -197,17 +197,17 @@ export type ConfNameMap = {
   fileName: string
 }
 
+export enum Status {
+  finishSetup = 'Finish setup',
+  ready = 'Ready',
+  running = 'Running',
+  pending = 'Pending',
+  success = 'Ready success',
+  unableToRun = 'Unable to run',
+}
+
 export type Run = {
   id: number
   name: string
-  status: string
-}
-
-export type Status = {
-  finishSetup: string
-  ready: string
-  running: string
-  pending: string
-  success: string
-  unableToRun: string
+  status: Status
 }

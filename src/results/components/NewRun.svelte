@@ -44,18 +44,9 @@
 
   export let inactiveSelected: string = ''
 
-  export let setStatus: (name: string, status: string) => void
+  export let setStatus: (name: string, status: Status) => void
 
-  const STATUS: Status = {
-    finishSetup: 'Finish setup',
-    ready: 'Ready',
-    running: 'Running',
-    pending: 'Pending',
-    success: 'Ready success',
-    unableToRun: 'Unable to run',
-  }
-
-  export let status = STATUS.finishSetup
+  export let status: Status = Status.finishSetup
 
   let beforeRename = ''
   let activateRunRename = false
@@ -74,7 +65,7 @@
         if (e.data.payload === runName) {
           // change status to 'unableToRun' only if run wasn't stoped manually / intentionly
           if (!stop) {
-            statusChange(STATUS.unableToRun)
+            statusChange(Status.unableToRun)
             stop = false
           }
         }
@@ -179,11 +170,11 @@
   /**
    * returns the status for a run that was just ran
    */
-  function getRunStatus(): string {
+  function getRunStatus(): Status {
     if (isPending) {
-      statusChange(STATUS.pending)
+      statusChange(Status.pending)
     } else if (nowRunning) {
-      statusChange(STATUS.running)
+      statusChange(Status.running)
     }
     return status
   }
@@ -231,7 +222,7 @@
    * change run status
    * @param newStatus status to change to
    */
-  function statusChange(newStatus: string): void {
+  function statusChange(newStatus: Status): void {
     status = newStatus
     setStatus(runName, newStatus)
   }
@@ -240,7 +231,7 @@
    * stops a pending run
    */
   function pendingRunStop(): void {
-    statusChange(STATUS.ready)
+    statusChange(Status.ready)
     pendingStopFunc()
     isPending = false
   }
@@ -249,7 +240,7 @@
    * stops a running run
    */
   function runningStop(): void {
-    statusChange(STATUS.ready)
+    statusChange(Status.ready)
     runningStopFunc()
     stop = true
   }
@@ -287,7 +278,7 @@
       return vr.name === runName
     })
     if (result !== undefined) {
-      statusChange(STATUS.success)
+      statusChange(Status.success)
     }
     return result !== undefined
   }
@@ -321,20 +312,19 @@
       />
     </div>
   {:else if !nowRunning}
-    <div class="results">
+    <div class="results" on:click={editFunc}>
       <Pane
         title={namesMap.get(runName)}
         initialExpandedState={expandedState}
         actions={createActions()}
         showExpendIcon={expandedState}
-        status={hasResults() ? STATUS.success : status}
+        status={hasResults() ? Status.success : status}
         inactiveSelected={runName === inactiveSelected}
-        runFunc={status === STATUS.ready ||
-        status === STATUS.success ||
-        status === STATUS.unableToRun
+        runFunc={status === Status.ready ||
+        status === Status.success ||
+        status === Status.unableToRun
           ? runFunc
           : null}
-        {editFunc}
       >
         {#each verificationResults as vr, index (index)}
           {#if vr.name === runName}

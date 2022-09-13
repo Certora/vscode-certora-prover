@@ -15,7 +15,7 @@
   } from './extension-actions'
   import { smartMergeVerificationResult } from './utils/mergeResults'
   import { log, Sources } from './utils/log'
-  import type {
+  import {
     Assert,
     Output,
     Job,
@@ -45,15 +45,6 @@
   $: hasRunningScripts = runningScripts.length > 0
   $: hasResults = verificationResults.length > 0
   $: hasRuns = runsCounter > 0
-
-  const STATUS: Status = {
-    finishSetup: 'Finish setup',
-    ready: 'Ready',
-    running: 'Running',
-    pending: 'Pending',
-    success: 'Ready success',
-    unableToRun: 'Unable to run',
-  }
 
   function newFetchOutput(e: CustomEvent<Assert | Rule>, vr: Verification) {
     let clickedRuleOrAssert = e.detail
@@ -152,7 +143,7 @@
           info: e.data.payload,
         })
         // status is changed to 'ready' when job is allowed to run
-        runs = setStatus(e.data.payload, STATUS.ready)
+        runs = setStatus(e.data.payload, Status.ready)
         break
       }
       case EventTypesFromExtension.BlockRun: {
@@ -162,7 +153,7 @@
           info: e.data.payload,
         })
         // status is changed to 'finish setup' when job isn't allowed to run
-        runs = setStatus(e.data.payload, STATUS.finishSetup)
+        runs = setStatus(e.data.payload, Status.finishSetup)
         break
       }
       case EventTypesFromExtension.ClearAllJobs: {
@@ -182,7 +173,7 @@
           action: 'Received "create-new-job" command',
           source: Sources.ResultsWebview,
         })
-        createRun({ id: runs.length, name: '', status: STATUS.finishSetup })
+        createRun({ id: runs.length, name: '', status: Status.finishSetup })
         break
       }
       case EventTypesFromExtension.FocusChanged: {
@@ -205,7 +196,7 @@
    * @param value status
    * @returns new list of runs after change
    */
-  function setStatus(runName: string, value: string): Run[] {
+  function setStatus(runName: string, value: Status): Run[] {
     runs.forEach(run => {
       if (run.name === runName) {
         run.status = value
@@ -225,8 +216,8 @@
 
     // the status of the new run cannot be 'success' (havn't run yet => no results)
     let newStatus = toDuplicate.status
-    if (newStatus === STATUS.success) {
-      newStatus = STATUS.ready
+    if (newStatus === Status.success) {
+      newStatus = Status.ready
     }
 
     const duplicated: Run = {
@@ -259,7 +250,7 @@
     if (run) {
       runs.push(run)
     } else {
-      runs.push({ id: runs.length, name: '', status: STATUS.finishSetup })
+      runs.push({ id: runs.length, name: '', status: Status.finishSetup })
     }
     runsCounter++
   }
@@ -394,10 +385,10 @@
     runs.forEach((singleRun, index) => {
       // runs with these statuses should not run automatically
       if (
-        singleRun.status === STATUS.finishSetup ||
-        singleRun.status === STATUS.pending ||
-        singleRun.status === STATUS.running ||
-        singleRun.status === STATUS.unableToRun
+        singleRun.status === Status.finishSetup ||
+        singleRun.status === Status.pending ||
+        singleRun.status === Status.running ||
+        singleRun.status === Status.unableToRun
       ) {
         return
       }
