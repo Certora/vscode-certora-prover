@@ -176,7 +176,7 @@
     bind:disabledState={solDisabledState}
   >
     <div slot="header" class="header header_contracts">
-      <i class="codicon codicon-file" />
+      <i class="codicon codicon-symbol-method" />
       <h3>Certora spec</h3>
       <!-- <i class="codicon codicon-settings" /> -->
     </div>

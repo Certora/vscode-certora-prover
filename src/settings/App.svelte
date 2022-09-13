@@ -66,45 +66,8 @@
     padding: 0 16px;
   } */
 
-  :global(:root) {
-    --space-xs: 4px;
-    --space-sm: 9px;
-    --space-md: 14px;
-    --space-lg: 18px;
-    --space-xl: 26px;
-    --space-xxl: 30px;
-  }
-
-  /* :global(body.vscode-light) {
-    --dropdown-text-color: #000;
-  } */
-
   :global(body.vscode-dark) {
     --dropdown-text-color: var(--dropdown-foreground);
-  }
-
-  .settings {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-xl);
-  }
-
-  .section-title {
-    margin-top: 0;
-    margin-bottom: calc(
-      var(--space-lg) - var(--space-xl)
-    ); /* because we have `gap: var(--space-xl);` in .settings */
-
-    font-size: 26px;
-    font-weight: 600;
-    line-height: 31px;
-  }
-
-  .staging {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-sm);
   }
 
   /* stylelint-disable */
@@ -150,11 +113,15 @@
   /* bg helpers */
   :global(.bg_dark) {
     background: var(--vscode-menu-background);
+    /* background: var(--vscode-tab-inactiveBackground); */
     color: var(--vscode-editor-foreground);
+    fill: var(--vscode-editor-foreground);
   }
   :global(.bg_light) {
     background: var(--badge-background);
+    /* background: var(--vscode-menu-separatorBackground); */
     color: var(--vscode-button-foreground);
+    fill: var(--vscode-button-foreground);
   }
   :global(.showtxt) {
     color: var(--vscode-editor-foreground);
@@ -172,7 +139,7 @@
     color: var(--vscode-button-secondaryForeground);
     display: flex;
     margin-top: 8px;
-    transition: all 0.3s ease-in-out;
+    /* transition: all 0.3s ease-in-out; */
     font-size: 12px;
     padding: 2px 4px;
   }
@@ -249,9 +216,13 @@
     font-size: 12px;
     font-weight: 500;
   }
-  :global(.header_contracts .codicon-file) {
+  :global(.header_contracts i:first-of-type) {
     height: min-content;
+    max-height: 16px;
     margin: auto 3px auto 0;
+  }
+  :global(.header_contracts i:first-of-type path) {
+    fill: inherit;
   }
   :global(.header_contracts .codicon-settings) {
     height: min-content;
@@ -259,7 +230,7 @@
   }
 
   :global(.header_contract) {
-    transition: all 0.2s ease;
+    /* transition: all 0.2s ease; */
     display: flex;
     width: 100%;
   }
@@ -296,7 +267,7 @@
     --placeholderColor: var(--vscode-input-placeholderForeground);
     --placeholderOpacity: 1;
     --height: 30px;
-    --inputPadding: 8px 4px;
+    --inputPadding: 6px 52px 6px 4px;
     --inputFontSize: 13px;
     --inputLetterSpacing: initial;
     --padding: 6px 4px;
@@ -339,10 +310,15 @@
   }
   :global(.listContainer) {
     left: -2px !important;
-    /* outline: 1px solid var(--vscode-list-focusOutline); */
     outline: 1px solid var(--vscode-editorSuggestWidget-border);
-    /* outline-offset: -1px; */
   }
+  :global(.selectContainer) {
+    gap: 24px;
+  }
+  :global(.selectContainer > input) {
+    box-sizing: border-box;
+  }
+
   :global(.dark_input .item) {
     position: relative;
     padding-left: 22px;
@@ -432,10 +408,12 @@
   :global(.vscode-light .bg_dark, .vscode-high-contrast-light .bg_dark) {
     background: var(--badge-background);
     color: var(--vscode-button-foreground);
+    fill: var(--vscode-button-foreground);
   }
   :global(.vscode-light .bg_light, .vscode-high-contrast-light .bg_light) {
     background: var(--vscode-menu-background);
     color: var(--vscode-editor-foreground);
+    fill: var(--vscode-editor-foreground);
   }
   :global(.vscode-high-contrast-light .dark_input) {
     --itemHoverColor: white !important;
@@ -446,7 +424,9 @@
 
   /* high contrast */
   :global(.vscode-high-contrast .bg_dark, .vscode-high-contrast
-      .bg_light, .vscode-high-contrast .nav_settings .nav_settings_child) {
+      .bg_light, .vscode-high-contrast
+      .nav_settings
+      .nav_settings_child, .vscode-high-contrast .btn_add) {
     border: 1px solid var(--vscode-menu-separatorBackground);
   }
   :global(.vscode-high-contrast .simple_txt_input, .vscode-high-contrast

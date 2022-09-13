@@ -197,7 +197,7 @@
     box-sizing: border-box;
     border: none;
     color: var(--vscode-input-foreground);
-    padding: 6px 4px;
+    padding: 6px 53px 6px 4px;
     height: 30px;
     width: -webkit-fill-available;
     background: var(--vscode-input-background);
