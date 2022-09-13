@@ -220,7 +220,7 @@
                   {ClearIcon}
                   on:select={e => handleSelectSpec(e, 'spec')}
                   on:clear={e => handleClear(e)}
-                  placeholder="Search..."
+                  placeholder="Type to filter..."
                   bind:value={$specObj.specFile}
                 />
               </div>

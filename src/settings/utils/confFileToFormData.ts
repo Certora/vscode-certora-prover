@@ -153,7 +153,6 @@ function processSolidityAttributes(
   } else {
     solidityObj.solidityArgs.push({ key: '', value: '' })
   }
-
   if (confFile.method) {
     solidityObj.specifiMethod = confFile.method.toString()
   }

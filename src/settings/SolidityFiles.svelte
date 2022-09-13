@@ -6,7 +6,7 @@
   import CustomItem from './components/CustomItem.svelte'
   import CustomInput from './components/CustomInput.svelte'
   import { solAdditionalContracts, solFilesArr } from './stores/store.js'
-  import { refreshFiles } from './utils/refreshFiles'
+  import { manageFiles } from './utils/refreshFiles'
 
   //   slots
   export let index
@@ -24,8 +24,19 @@
     infoLink: infoObjArr.mainFile.infoText,
   }
 
-  // $: $solAdditionalContracts, save()
-
+  // maxFiles to display in input (limit the amount of files we display in the input drop),
+  // filtered files new array made from $solFilesArr
+  // filterCountObj keep count/track <5/1000 file showing>
+  let filteredFiles,
+    filter = '',
+    maxFiles = 15
+  let filterCountObj = {
+    allFiles: $solFilesArr.length,
+    filesShowing: maxFiles,
+  }
+  // subscribe to solidity files array and input filter
+  $: filter || $solFilesArr,
+    (filteredFiles = manageFiles(filter, filterCountObj, $solFilesArr))
   // push new linking/directory
   function pushNewObj(arr, obj) {
     arr.push(obj)
@@ -82,23 +93,22 @@
       <div class="input_wrapper">
         <div class="dark_input">
           <h3>Source<span>*</span></h3>
-          <button
-            on:click={() => refreshFiles()}
-            style="background: transparent; padding:0; border:none; margin-top:auto;"
-          >
-            <Select
-              listOpen={isSolidityListOpen}
-              iconProps={solidityIconsObj}
-              items={$solFilesArr}
-              Item={CustomItem}
-              {Icon}
-              {ClearIcon}
-              on:select={e => handleSelectSol(e, index)}
-              on:clear={e => handleClear(e, index)}
-              placeholder="Search..."
-              bind:value={$solAdditionalContracts[index].mainFile}
-            />
-          </button>
+          <Select
+            itemFilter={(label, filterText, option) => {
+              return option
+            }}
+            bind:filterText={filter}
+            listOpen={isSolidityListOpen}
+            iconProps={solidityIconsObj}
+            items={filteredFiles}
+            Item={CustomItem}
+            {Icon}
+            {ClearIcon}
+            on:select={e => handleSelectSol(e, index)}
+            on:clear={e => handleClear(e, index)}
+            placeholder="Type to filter..."
+            bind:value={$solAdditionalContracts[index].mainFile}
+          />
         </div>
         <div class="dark_input">
           <h3>Main contract name</h3>
