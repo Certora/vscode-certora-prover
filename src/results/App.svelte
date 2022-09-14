@@ -314,14 +314,10 @@
    * @param newName new name for the run and conf
    */
   function renameRun(oldName: string, newName: string): void {
-    console.log('rename: ', oldName, newName)
     // rename existing run
     if (oldName !== '') {
-      console.log('name is not empty string')
-      console.log(verificationResults, 'results overall')
       // the renamed run should have the same verification results, if they exist
       let oldResult = verificationResults.find(vr => vr.name === oldName)
-      console.log(oldResult, 'old result')
       if (oldResult !== undefined) {
         let newResult: Verification = {
           name: newName,
@@ -329,12 +325,10 @@
           spec: oldResult.spec,
           jobs: oldResult.jobs,
         }
-        console.log(newResult, 'new result')
         verificationResults = verificationResults.filter(vr => {
           return vr.name !== oldName
         })
         verificationResults.push(newResult)
-        console.log(verificationResults, 'results overall 2')
       }
 
       const oldConfNameMap: ConfNameMap = {
@@ -371,7 +365,6 @@
       verificationResults = verificationResults.filter(vr => {
         return vr.name !== curRun.fileName
       })
-      console.log(verificationResults, 'results overall 3')
       runScript(curRun)
     }
   }
