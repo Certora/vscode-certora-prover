@@ -79,22 +79,6 @@ export class SettingsPanel {
               info: e.payload,
             })
             if (!e.payload.checkMyInputs) {
-              // deuplicate fix
-              if (this.editConfFile) {
-                if (
-                  this.editConfFile?.files &&
-                  this.editConfFile?.files?.length > 0 &&
-                  this.editConfFile?.verify &&
-                  this.editConfFile?.verify?.length > 0 &&
-                  (this.editConfFile?.solc || this.editConfFile?.solc_map)
-                ) {
-                  SettingsPanel.resultsWebviewProvider.postMessage({
-                    type: 'allow-run',
-                    payload: confFileName,
-                  })
-                  break
-                }
-              }
               const form: InputFormData = processForm(e.payload, confFileName)
               createAndOpenConfFile(form)
               if (
@@ -108,6 +92,22 @@ export class SettingsPanel {
                   payload: confFileName,
                 })
               } else {
+                // deuplicate fix
+                if (this.editConfFile) {
+                  if (
+                    this.editConfFile?.files &&
+                    this.editConfFile?.files?.length > 0 &&
+                    this.editConfFile?.verify &&
+                    this.editConfFile?.verify?.length > 0 &&
+                    (this.editConfFile?.solc || this.editConfFile?.solc_map)
+                  ) {
+                    SettingsPanel.resultsWebviewProvider.postMessage({
+                      type: 'allow-run',
+                      payload: confFileName,
+                    })
+                    break
+                  }
+                }
                 SettingsPanel.resultsWebviewProvider.postMessage({
                   type: 'block-run',
                   payload: confFileName,

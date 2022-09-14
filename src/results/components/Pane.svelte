@@ -13,7 +13,7 @@
 
   let isExpanded = initialExpandedState
 
-  const STATUS_ICONS = {
+  const statusIcons = {
     finishSetup: 'finish-setup.svg',
     ready: 'ready-to-run.svg',
     running: 'running-rule-status.svg',
@@ -24,12 +24,12 @@
 
   // maps status to icon
   const statusMap: Map<string, string> = new Map([
-    [Status.finishSetup, STATUS_ICONS.finishSetup],
-    [Status.running, STATUS_ICONS.running],
-    [Status.ready, STATUS_ICONS.ready],
-    [Status.pending, STATUS_ICONS.pending],
-    [Status.success, STATUS_ICONS.success],
-    [Status.unableToRun, STATUS_ICONS.unableToRun],
+    [Status.finishSetup, statusIcons.finishSetup],
+    [Status.running, statusIcons.running],
+    [Status.ready, statusIcons.ready],
+    [Status.pending, statusIcons.pending],
+    [Status.success, statusIcons.success],
+    [Status.unableToRun, statusIcons.unableToRun],
   ])
 
   /**
@@ -37,7 +37,7 @@
    */
   function getPaneClassName(): string {
     let className = 'pane-header'
-    if (isExpanded) {
+    if (isExpanded || status !== (Status.pending || Status.running)) {
       className += ' pointer-cursor'
     }
     if (inactiveSelected) {

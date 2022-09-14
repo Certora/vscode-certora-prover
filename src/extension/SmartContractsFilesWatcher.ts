@@ -34,9 +34,12 @@ export class SmartContractsFilesWatcher {
   public async init(webview: vscode.Webview | undefined): Promise<void> {
     this.webview = webview
     this.files = await vscode.workspace.findFiles(
-      '**/*.{sol,spec}',
+      '**/*.{spec,sol}',
       '{.certora_config,.git,emv-*,**/emv-*,**/*.certora_config}/**',
     )
+
+    this.filesSol = []
+    this.filesSpec = []
 
     this.files.forEach(file => {
       const fileObj = this.getFileFormat(file)
@@ -47,6 +50,7 @@ export class SmartContractsFilesWatcher {
         this.filesSpec.push(fileObj)
       }
     })
+    console.log(this.filesSpec, 'files spec')
     this.sendFilesToWebview()
   }
 

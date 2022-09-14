@@ -295,9 +295,6 @@
    * @param index if 0 - run, else: add to pending queue
    */
   function run(run: Run, index = 0): void {
-    verificationResults = verificationResults.filter(vr => {
-      return vr.name !== run.name
-    })
     const confNameMap: ConfNameMap = {
       fileName: run.name,
       displayName: namesMap.get(run.name),
@@ -367,6 +364,9 @@
     if (pendingQueue.length > 0) {
       let curRun = pendingQueue.shift()
       pendingQueueCounter--
+      verificationResults.filter(vr => {
+        return vr.name !== curRun.fileName
+      })
       runScript(curRun)
     }
   }
@@ -411,6 +411,9 @@
   function pendingStopFunc(run: Run): void {
     pendingQueue = pendingQueue.filter(rq => {
       return rq.fileName !== run.name
+    })
+    verificationResults = verificationResults.filter(vr => {
+      return vr.name !== run.name
     })
     pendingQueueCounter--
   }
@@ -483,6 +486,9 @@
                 pendingStopFunc(runs[index])
               }}
               runningStopFunc={() => {
+                verificationResults = verificationResults.filter(vr => {
+                  return vr.name !== runs[index].name
+                })
                 stopScript(runs[index].id)
                 runNext()
               }}
