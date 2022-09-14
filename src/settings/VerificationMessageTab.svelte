@@ -15,7 +15,7 @@
 
 <div class="card_parent_wrapper bg_dark border-rd">
   <div class="header header_contracts">
-    <i class="codicon codicon-file" />
+    <i class="codicon codicon-comment" />
     <h3>Verification message</h3>
   </div>
   <div>
