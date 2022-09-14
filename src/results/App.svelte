@@ -18,7 +18,6 @@
   import {
     Assert,
     Output,
-    Job,
     EventsFromExtension,
     Rule,
     Verification,
@@ -41,10 +40,6 @@
   let namesMap: Map<string, string> = new Map()
   let runsCounter = 0
   let focusedRun: string = ''
-
-  $: hasRunningScripts = runningScripts.length > 0
-  $: hasResults = verificationResults.length > 0
-  $: hasRuns = runsCounter > 0
 
   function newFetchOutput(e: CustomEvent<Assert | Rule>, vr: Verification) {
     let clickedRuleOrAssert = e.detail
@@ -164,7 +159,7 @@
             currentVerificationResults: verificationResults,
           },
         })
-        if (hasResults) verificationResults = []
+        if (verificationResults.length > 0) verificationResults = []
         clearOutput()
         break
       }
@@ -248,11 +243,14 @@
    */
   function createRun(run?: Run): void {
     if (run) {
-      runs.push(run)
+      runsCounter = runs.push(run)
     } else {
-      runs.push({ id: runs.length, name: '', status: Status.finishSetup })
+      runsCounter = runs.push({
+        id: runs.length,
+        name: '',
+        status: Status.finishSetup,
+      })
     }
-    runsCounter++
   }
 
   function editRun(run: Run): void {
@@ -305,7 +303,7 @@
     pendingQueueCounter++
 
     //if there are no running scripts => runNext
-    if (!hasRunningScripts && index === 0) {
+    if (runningScripts.length === 0 && index === 0) {
       runNext()
     }
   }
@@ -316,10 +314,14 @@
    * @param newName new name for the run and conf
    */
   function renameRun(oldName: string, newName: string): void {
+    console.log('rename: ', oldName, newName)
     // rename existing run
     if (oldName !== '') {
+      console.log('name is not empty string')
+      console.log(verificationResults, 'results overall')
       // the renamed run should have the same verification results, if they exist
       let oldResult = verificationResults.find(vr => vr.name === oldName)
+      console.log(oldResult, 'old result')
       if (oldResult !== undefined) {
         let newResult: Verification = {
           name: newName,
@@ -327,10 +329,12 @@
           spec: oldResult.spec,
           jobs: oldResult.jobs,
         }
+        console.log(newResult, 'new result')
         verificationResults = verificationResults.filter(vr => {
           return vr.name !== oldName
         })
         verificationResults.push(newResult)
+        console.log(verificationResults, 'results overall 2')
       }
 
       const oldConfNameMap: ConfNameMap = {
@@ -364,9 +368,10 @@
     if (pendingQueue.length > 0) {
       let curRun = pendingQueue.shift()
       pendingQueueCounter--
-      verificationResults.filter(vr => {
+      verificationResults = verificationResults.filter(vr => {
         return vr.name !== curRun.fileName
       })
+      console.log(verificationResults, 'results overall 3')
       runScript(curRun)
     }
   }
@@ -427,7 +432,7 @@
   })
 </script>
 
-{#if !hasRuns}
+{#if runsCounter === 0}
   <div class="zero-state">
     <div class="command">
       <div class="command-description">
