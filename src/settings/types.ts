@@ -63,7 +63,7 @@ export type FileFormat = {
 
 // solidity part of the new settings view
 export type SolidityObj = {
-  mainFile: string
+  mainFile: any
   mainContract: string
   linking: Link[]
   specifiMethod: string
@@ -80,7 +80,7 @@ export type Property = {
 
 // spec part of the new settings view
 export type SpecObj = {
-  specFile: string
+  specFile: any
   rules: string
   duration: string
   inherit: string

@@ -83,7 +83,6 @@
       const index = e.data.payload[1]
       if (fileName.endsWith('.sol')) {
         if (index === -1) {
-          const label = fileName.split('/').reverse()[0]
           $solidityObj.mainFile = fileName
           $solidityObj.mainContract = contractName
         } else if ($solAdditionalContracts.length > index) {
@@ -91,7 +90,6 @@
           $solAdditionalContracts[index].mainContract = contractName
         }
       } else if (fileName.endsWith('.spec')) {
-        const label = fileName.split('/').reverse()[0]
         $specObj.specFile = fileName
       }
     }

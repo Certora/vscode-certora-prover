@@ -9,7 +9,7 @@ import type {
 
 const newForm: NewForm = {
   solidyObj: {
-    mainFile: { value: '', label: '', path: '' },
+    mainFile: '',
     mainContract: '',
     linking: [],
     specifiMethod: '',
@@ -22,7 +22,7 @@ const newForm: NewForm = {
     solidityPackageDir: [],
   },
   specObj: {
-    specFile: { value: '', label: '', path: '' },
+    specFile: '',
     rules: '',
     duration: '',
     inherit: '',
@@ -216,15 +216,13 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
   const form = newForm as NewForm
 
   if (Array.isArray(confFile.files) && confFile.files.length > 0) {
-    const mainFile = form.solidyObj.mainFile
+    form.solidyObj.mainFile = confFile.files[0] as string
 
-    mainFile.value = confFile.files[0] as string
-
-    if (mainFile.value.includes(':')) {
-      mainFile.value = mainFile.value.split(':')[0]
+    if (form.solidyObj.mainFile.includes(':')) {
+      form.solidyObj.mainFile = form.solidyObj.mainFile.split(':')[0]
       form.solidyObj.mainContract = confFile.files[0].split(':')[1]
     }
-    processMainFile(mainFile.value, mainFile)
+    // processMainFile(mainFile.value, mainFile)
   }
 
   if (Array.isArray(confFile.verify) && confFile.verify.length === 1) {
@@ -235,7 +233,8 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
       form.solidyObj.mainContract = mainContractName
     }
     if (specFile) {
-      processMainFile(specFile, form.specObj.specFile)
+      form.specObj.specFile = specFile
+      // processMainFile(specFile, form.specObj.specFile)
     }
   }
 

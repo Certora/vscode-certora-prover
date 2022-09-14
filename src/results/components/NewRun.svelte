@@ -312,7 +312,7 @@
       />
     </div>
   {:else if !nowRunning}
-    <div class="results" on:click={editFunc}>
+    <div class="results" on:click={expandedState ? null : editFunc}>
       <Pane
         title={namesMap.get(runName)}
         initialExpandedState={expandedState}

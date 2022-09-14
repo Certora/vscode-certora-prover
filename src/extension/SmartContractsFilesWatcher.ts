@@ -76,7 +76,7 @@ export class SmartContractsFilesWatcher {
   }
 
   private getFileFormat(fileUri: vscode.Uri) {
-    let path = vscode.workspace.asRelativePath(fileUri)
+    let path = vscode.workspace.asRelativePath(fileUri, true)
     const fileArr = path.split('/')
     let label = fileArr[fileArr.length - 1]
     // remove labale from path (file.sol)
