@@ -44,9 +44,11 @@ export class SettingsPanel {
     this.watcher = new SmartContractsFilesWatcher()
     this.watcher.init(this._panel.webview)
     if (editConfFile) {
+      const name =
+        confFileDisplayName !== '' ? confFileDisplayName : confFileName
       this._panel.webview.postMessage({
         type: 'edit-conf-file',
-        payload: [editConfFile, confFileName],
+        payload: [editConfFile, name],
       })
       this.editConfFile = editConfFile
     }

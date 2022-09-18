@@ -81,8 +81,9 @@
     >
       <i class="codicon codicon-file" />
       <h3 style="line-height: 18px; margin-right:auto;">
-        {$solAdditionalContracts[index].mainContract ||
-          `additional Contract ${index + 1}`}
+        Additional Contract {$solAdditionalContracts[index].mainContract
+          ? `${$solAdditionalContracts[index].mainContract}`
+          : `${index + 1}`}
       </h3>
       <i
         class="codicon codicon-trash"

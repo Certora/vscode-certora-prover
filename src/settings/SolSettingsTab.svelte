@@ -182,7 +182,7 @@
         <CollapseCard chevron="padding-right:12px;">
           <div slot="header" class="p-12 header header_contract">
             <i class="codicon codicon-file" />
-            <h3>Main contract</h3>
+            <h3>Main contract {$solidityObj.mainContract}</h3>
           </div>
           <div slot="body" class="p-12 pt-0">
             <div class="input_wrapper">
@@ -291,7 +291,7 @@
                             key: '',
                             value: '',
                           })}
-                          ><i class="codicon codicon-add" /> Add Directory</button
+                          ><i class="codicon codicon-add" /> Add Argument</button
                         >
                         <div
                           class="dark_input border_light mt-8px"
