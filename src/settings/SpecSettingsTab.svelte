@@ -233,40 +233,29 @@
                 />
               </div>
             </div>
-            <div class="input_wrapper mt-24px">
-              <div class="dark_input input_x3">
-                <h3>Duration</h3>
-                <CustomInput
-                  placeholder="default: 600"
-                  bind:bindValue={$specObj.duration}
-                  infoObj={infoObjArr.duration}
-                />
-              </div>
-
-              <div
-                class="dark_input check_box_wrapper input_x3"
-                style="margin: auto 16px 8px auto;"
-              >
-                <label class="checkbox_container" style="margin: 0;">
-                  Optomistic loop
-                  <input
-                    type="checkbox"
-                    bind:checked={$specObj.optimisticLoop}
-                  />
+            <h3 class="header_single mt-8px">Staging</h3>
+            <div class="input_wrapper input_single mt-8px">
+              <div class="dark_input check_box_wrapper">
+                <label class="checkbox_container"
+                  >Run on the Staging Environment
+                  <input type="checkbox" bind:checked={$specObj.runOnStg} />
                   <span class="checkmark" />
                 </label>
-                <CheckBoxInfo infoObj={infoObjArr.optimistic_loop} />
-              </div>
-              <div class="dark_input input_x3">
-                <h3>Loop Unroll</h3>
-                <CustomInput
-                  disabledState={!$specObj.optimisticLoop}
-                  placeholder="default: 1"
-                  bind:bindValue={$specObj.loopUnroll}
-                  infoObj={infoObjArr.loop_iter}
-                />
+                <CheckBoxInfo infoObj={infoObjArr.stg} />
               </div>
             </div>
+            {#if $specObj.runOnStg}
+              <div class="input_wrapper input_single">
+                <div class="dark_input">
+                  <h3>Branch Name</h3>
+                  <CustomInput
+                    placeholder="default: master"
+                    bind:bindValue={$specObj.branchName}
+                    infoObj={infoObjArr.stg}
+                  />
+                </div>
+              </div>
+            {/if}
             <div class="border-rd bg_dark mt-8px">
               <CollapseCard open={false} chevron="padding-right:8px;">
                 <div slot="header" class="p-8 header header_contract">
@@ -305,27 +294,37 @@
                       value: '',
                     })}><i class="codicon codicon-add" /> Add Flag</button
                   >
-                  <h3 class="header_single mt-8px">Staging</h3>
-                  <div class="input_wrapper input_single mt-8px">
-                    <div class="dark_input check_box_wrapper">
-                      <label class="checkbox_container"
-                        >Run on the Staging Environment
+                  <div class="input_wrapper mt-24px">
+                    <div class="dark_input input_x3">
+                      <h3>Duration</h3>
+                      <CustomInput
+                        placeholder="default: 600"
+                        bind:bindValue={$specObj.duration}
+                        infoObj={infoObjArr.duration}
+                      />
+                    </div>
+
+                    <div
+                      class="dark_input check_box_wrapper input_x3"
+                      style="margin: auto 16px 8px auto;"
+                    >
+                      <label class="checkbox_container" style="margin: 0;">
+                        Optomistic loop
                         <input
                           type="checkbox"
-                          bind:checked={$specObj.runOnStg}
+                          bind:checked={$specObj.optimisticLoop}
                         />
                         <span class="checkmark" />
                       </label>
-                      <CheckBoxInfo infoObj={infoObjArr.stg} />
+                      <CheckBoxInfo infoObj={infoObjArr.optimistic_loop} />
                     </div>
-                  </div>
-                  <div class="input_wrapper input_single">
-                    <div class="dark_input">
-                      <h3>Branch Name</h3>
+                    <div class="dark_input input_x3">
+                      <h3>Loop Unroll</h3>
                       <CustomInput
-                        placeholder="default: master"
-                        bind:bindValue={$specObj.branchName}
-                        infoObj={infoObjArr.stg}
+                        disabledState={!$specObj.optimisticLoop}
+                        placeholder="default: 1"
+                        bind:bindValue={$specObj.loopUnroll}
+                        infoObj={infoObjArr.loop_iter}
                       />
                     </div>
                   </div>
