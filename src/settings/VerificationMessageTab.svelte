@@ -4,8 +4,7 @@
 
   let infoObjArr = {
     msg: {
-      infoText:
-        'Adds a message description to your run, similar to a commit message. ',
+      infoText: 'Adds a message description to your run. ',
       infoLink:
         'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#msg',
       validator: 'spaceAndDash',

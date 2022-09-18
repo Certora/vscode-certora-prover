@@ -206,7 +206,7 @@
           <div slot="body" class="p-12 pt-0">
             <div class="input_wrapper">
               <div class="dark_input">
-                <h3>Certora specification file<span>*</span></h3>
+                <h3>Certora Specification File<span>*</span></h3>
                 <Select
                   itemFilter={(label, filterText, option) => {
                     return option
@@ -269,14 +269,14 @@
                     <div class="input_wrapper mt-8px">
                       <div class="dark_input">
                         <CustomInput
-                          placeholder="flag"
+                          placeholder="flag name"
                           bind:bindValue={obj.name}
                           infoObj={infoObjArr.flag}
                         />
                       </div>
                       <div class="dark_input">
                         <CustomInput
-                          placeholder="value (optional)"
+                          placeholder="value"
                           bind:bindValue={obj.value}
                           infoObj={infoObjArr.flag}
                         />

@@ -23,7 +23,7 @@
         'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html',
     },
     contractName: {
-      infoText: 'pick main contract',
+      infoText: 'type main contract name',
       infoLink:
         'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html',
       validator: 'alphaNum',
@@ -42,8 +42,7 @@
       validator: 'filePathValidator',
     },
     solc_args: {
-      infoText:
-        'Gets a list of arguments to pass to the Solidity compiler. The arguments will be passed as is, without any formatting, in the same order.',
+      infoText: 'Gets an argument to pass to the Solidity compiler.',
       infoLink:
         'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#solc-args',
       validator: 'alphaNum',
@@ -63,7 +62,7 @@
     },
     method: {
       infoText:
-        'Parametric rules will only verify the method with the given signature, instead of all public and external methods of the contract. Note that you will need to wrap the method’s signature with quotes, as the shell doesn’t interpret parenthesis correctly otherwise.',
+        'Parametric rules will only verify the method with the given signature, instead of all public and external methods of the contract.',
       infoLink:
         'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#method',
       validator: 'alphaNum',
@@ -187,7 +186,7 @@
           <div slot="body" class="p-12 pt-0">
             <div class="input_wrapper">
               <div class="dark_input">
-                <h3>Source<span>*</span></h3>
+                <h3>Main Solidity File<span>*</span></h3>
                 <Select
                   itemFilter={(label, filterText, option) => {
                     return option
@@ -206,7 +205,7 @@
                 />
               </div>
               <div class="dark_input">
-                <h3>Main contract name<span>*</span></h3>
+                <h3>Main Contract Name<span>*</span></h3>
                 <CustomInput
                   infoObj={infoObjArr.contractName}
                   placeholder="Contract"
@@ -226,7 +225,7 @@
                 <div slot="body" class="most_inner_card">
                   <div class="input_wrapper">
                     <div class="dark_input">
-                      <h3>Soldity compiler to use<span>*</span></h3>
+                      <h3>Solidity compiler to use<span>*</span></h3>
                       <!-- no placeholder, this filed should have the default compiler selected by default -->
                       <CustomInput
                         infoObj={infoObjArr.solCompiler}
@@ -257,14 +256,14 @@
                           line-height: 14px;
                           font-weight: 500;"
                           >
-                            Solidity Arguments
+                            Solidity Compiler Arguments
                           </h3>
                           {#each $solidityObj.solidityArgs as obj, index}
                             <div class="input_wrapper mt-8px">
                               <div class="dark_input">
                                 <CustomInput
                                   infoObj={infoObjArr.solc_args}
-                                  placeholder="flag"
+                                  placeholder="example: optimize-runs"
                                   bind:bindValue={obj.key}
                                 />
                               </div>
@@ -302,7 +301,7 @@
                           line-height: 14px;
                           font-weight: 500;"
                           >
-                            Solidity package directories
+                            Solidity Package Directories
                           </h3>
                           {#each $solidityObj.solidityPackageDir as obj, index}
                             <div class="input_wrapper mt-8px">
