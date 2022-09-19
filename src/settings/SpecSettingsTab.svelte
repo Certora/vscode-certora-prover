@@ -334,6 +334,17 @@
                     </div>
                   </div>
                   <div class="input_wrapper check_between ">
+                    <div class="dark_input alternate_input check_box_wrapper">
+                      <label class="checkbox_container"
+                        >Multi assert
+                        <input
+                          type="checkbox"
+                          bind:checked={$specObj.multiAssert}
+                        />
+                        <span class="checkmark" />
+                      </label>
+                      <CheckBoxInfo infoObj={infoObjArr.multi_assert_check} />
+                    </div>
                     <div class="dark_input alternate_input  check_box_wrapper">
                       <label class="checkbox_container"
                         >Local type checking
@@ -355,17 +366,6 @@
                         <span class="checkmark" />
                       </label>
                       <CheckBoxInfo infoObj={infoObjArr.short_output} />
-                    </div>
-                    <div class="dark_input alternate_input check_box_wrapper">
-                      <label class="checkbox_container"
-                        >Multi assert
-                        <input
-                          type="checkbox"
-                          bind:checked={$specObj.multiAssert}
-                        />
-                        <span class="checkmark" />
-                      </label>
-                      <CheckBoxInfo infoObj={infoObjArr.multi_assert_check} />
                     </div>
                   </div>
                 </div>
