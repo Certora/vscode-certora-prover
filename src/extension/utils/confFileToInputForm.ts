@@ -122,7 +122,7 @@ export function confFileToFormData(
 
   if (confFile.staging) {
     form.useStaging = true
-    form.branch = confFile.staging as string
+    form.branch = (confFile.staging as string) || 'master'
   }
 
   if (confFile.cache) {

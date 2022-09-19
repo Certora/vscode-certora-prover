@@ -105,7 +105,7 @@ export const specObj = writable({
   branchName: 'master',
   localTypeChecking: true,
   shortOutput: true,
-  multiAssert: true,
+  multiAssert: false,
 })
 
 // const specProperties = {

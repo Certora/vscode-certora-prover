@@ -60,13 +60,6 @@
         'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#link',
       validator: 'alphaNum',
     },
-    method: {
-      infoText:
-        'Parametric rules will only verify the method with the given signature, instead of all public and external methods of the contract.',
-      infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#method',
-      validator: 'alphaNum',
-    },
   }
 
   // handle browse files
@@ -382,26 +375,6 @@
                       contractName: '',
                     })}><i class="codicon codicon-add" /> Add Link</button
                   >
-                </div>
-              </CollapseCard>
-            </div>
-            <div class="border-rd bg_dark mt-8px">
-              <CollapseCard open={false} chevron="padding-right:8px;">
-                <div slot="header" class="p-8 header header_contract">
-                  <i class="codicon codicon-gear" />
-                  <h3>Specific method</h3>
-                </div>
-                <div slot="body" class="most_inner_card">
-                  <div class="input_wrapper input_single">
-                    <div class="dark_input">
-                      <h3>Function name</h3>
-                      <CustomInput
-                        infoObj={infoObjArr.method}
-                        placeholder="method_name()"
-                        bind:bindValue={$solidityObj.specifiMethod}
-                      />
-                    </div>
-                  </div>
                 </div>
               </CollapseCard>
             </div>

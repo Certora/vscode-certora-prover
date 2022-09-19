@@ -33,7 +33,6 @@ export function activate(context: vscode.ExtensionContext): void {
     }
     const solc: string =
       vscode.workspace.getConfiguration().get('SolcExecutable') || ''
-
     const solcArgs: string = JSON.stringify(
       vscode.workspace.getConfiguration().get('SolidityArguments'),
     )
@@ -42,44 +41,34 @@ export function activate(context: vscode.ExtensionContext): void {
       vscode.workspace
         .getConfiguration()
         .get('Solidity.DefaultDirectoryForPackagesDependencies') || ''
-
     const solidityPackageDirectories: string = JSON.stringify(
       vscode.workspace.getConfiguration().get('SolidityPackageDirectories'),
     )
-
     const optimisticLoop: boolean | undefined = vscode.workspace
       .getConfiguration()
       .get('OptimisticLoop')
-
     const loopUnroll: number =
       vscode.workspace.getConfiguration().get('LoopUnroll') || 1
-
     const duration: number =
       vscode.workspace.getConfiguration().get('Duration') || 600
-
-    const additionalSettings: string =
+    const additionalFlags: string =
       JSON.stringify(
-        vscode.workspace.getConfiguration().get('AdditionalSetting'),
+        vscode.workspace.getConfiguration().get('AdditionalFlags'),
       ) || ''
-
     const typeCheck: boolean | undefined = vscode.workspace
       .getConfiguration()
       .get('LocalTypeChecking')
-
     const staging: boolean =
       vscode.workspace.getConfiguration().get('Staging') || false
-
     let branch = ''
-
     if (staging) {
       branch = vscode.workspace.getConfiguration().get('Branch') || 'master'
     }
-
     const confFileDefault: ConfFile = {
       solc: solcPath + solc,
       staging: branch,
+      short_output: true,
     }
-
     if (solcArgs !== '{}') {
       confFileDefault.solc_args = ''
       const tempArgs = JSON.parse(solcArgs)
@@ -111,18 +100,16 @@ export function activate(context: vscode.ExtensionContext): void {
     if (duration) {
       confFileDefault.smt_timeout = duration
     }
-    if (additionalSettings !== '{}') {
-      Object.entries(JSON.parse(additionalSettings)).forEach(([key, value]) => {
+    if (additionalFlags !== '{}') {
+      Object.entries(JSON.parse(additionalFlags)).forEach(([key, value]) => {
         confFileDefault[key.toString()] = value as string
       })
     }
-
     if (!typeCheck) {
       confFileDefault.disableLocalTypeChecking = true
     } else if (typeCheck === true) {
       confFileDefault.disableLocalTypeChecking = false
     }
-
     return confFileDefault
   }
 

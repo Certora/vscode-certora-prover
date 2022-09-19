@@ -72,9 +72,9 @@
     },
     optimistic_loop: {
       infoText:
-        'The Certora Prover unrolls loops - if the loop should be executed three times, it will copy the code inside the loop three times. After we finish the loop’s iterations, we add an assertion to verify we have actually finished running the loop',
+        'Prover ignores any examples that would cause the loop to execute too many times.',
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#optimistic-loop',
+        'https://docs.certora.com/en/latest/docs/ref-manual/approx/loops.html?highlight=optimistic#loop-unrolling',
     },
     loop_iter: {
       infoText:

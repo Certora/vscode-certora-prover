@@ -292,7 +292,7 @@ export function processForm(
     link: [],
     extendedSettings: [],
     useStaging: newForm.specObj.runOnStg,
-    branch: newForm.specObj.branchName,
+    branch: newForm.specObj.branchName || 'master',
     cacheName: '',
     message: '',
     additionalSettings: [],
@@ -334,7 +334,7 @@ export function processForm(
 
   if (newForm.specObj.runOnStg) {
     form.useStaging = true
-    form.branch = newForm.specObj.branchName
+    form.branch = newForm.specObj.branchName || 'master'
   }
 
   addAdditionalSetting(

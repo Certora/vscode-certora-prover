@@ -30,7 +30,7 @@ const newForm: NewForm = {
     loopUnroll: '',
     properties: [],
     runOnStg: false,
-    branchName: '',
+    branchName: 'master',
     localTypeChecking: false,
     shortOutput: false,
     multiAssert: false,
@@ -194,7 +194,7 @@ function processSpecAttributes(confFile: ConfFile, specObj: SpecObj) {
 
   if (confFile.staging) {
     specObj.runOnStg = true
-    specObj.branchName = confFile.staging as string
+    specObj.branchName = (confFile.staging as string) || 'master'
   }
 
   const additionalSettings = getAdditionalSettings(confFile)
