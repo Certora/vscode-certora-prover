@@ -116,14 +116,15 @@
         }}
       />
     {/if}
-    <i
-      class="codicon codicon-info"
-      on:mouseenter={() => (showInfo = true)}
-      on:mouseleave={checkMouseLeave}
-      style={mouse_is_on_input ? '' : 'display:none;'}
-    />
+    {#if infoObj.infoLink !== ''}
+      <i
+        class="codicon codicon-info"
+        on:mouseenter={() => (showInfo = true)}
+        on:mouseleave={checkMouseLeave}
+        style={mouse_is_on_input ? '' : 'display:none;'}
+      />
+    {/if}
   </div>
-
   <div
     class="showtxt"
     class:hovering={showInfo}

@@ -90,6 +90,11 @@
         'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html',
       validator: 'alphaNum',
     },
+    value: {
+      infoText: '',
+      infoLink: '',
+      validator: 'alphaNum',
+    },
     stg: {
       infoText: 'run on staging environment',
       infoLink:
@@ -278,7 +283,7 @@
                         <CustomInput
                           placeholder="value"
                           bind:bindValue={obj.value}
-                          infoObj={infoObjArr.flag}
+                          infoObj={infoObjArr.value}
                         />
                       </div>
                       <i
