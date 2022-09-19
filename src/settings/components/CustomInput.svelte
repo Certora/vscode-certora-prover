@@ -133,7 +133,7 @@
     }}
   >
     <p>
-      {infoObj.infoText}
+      {@html infoObj.infoText}
     </p>
     <a href={infoObj.infoLink}>link to documentation</a>
   </div>
@@ -212,5 +212,9 @@
   .field-danger:focus,
   .field-danger:hover {
     outline-color: var(--vscode-editorError-foreground);
+  }
+
+  .code {
+    font-family: monospace;
   }
 </style>

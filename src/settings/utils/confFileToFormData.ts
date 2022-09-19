@@ -1,6 +1,5 @@
 import type {
   ConfFile,
-  FileFormat,
   NewForm,
   SolidityObj,
   SolidityPackageDir,
@@ -204,12 +203,6 @@ function processSpecAttributes(confFile: ConfFile, specObj: SpecObj) {
       value: additionalSettings[key].toString(),
     }))
   }
-}
-
-function processMainFile(fullPath: string, fileObj: FileFormat) {
-  fileObj.value = fullPath
-  fileObj.label = fullPath.split('/').reverse()[0]
-  fileObj.path = fullPath.replace(fileObj.label, '')
 }
 
 export function confFileToFormData(confFile: ConfFile): NewForm {

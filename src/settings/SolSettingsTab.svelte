@@ -54,8 +54,14 @@
         'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#packages',
       validator: 'filePathValidator',
     },
-    link: {
-      infoText: 'Links a slot in a contract with another contract.',
+    linkVar: {
+      infoText: `Links a slot in a contract with another contract.<p class='code'> --link CurrentContract : <b>Variable</b> = OtherContract</p>`,
+      infoLink:
+        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#link',
+      validator: 'alphaNum',
+    },
+    linkContract: {
+      infoText: `Links a slot in a contract with another contract.<p class='code'> --link CurrentContract : Variable = <b>OtherContract</b></p>`,
       infoLink:
         'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#link',
       validator: 'alphaNum',
@@ -349,15 +355,15 @@
                     <div class="input_wrapper mt-8px">
                       <div class="dark_input">
                         <CustomInput
-                          infoObj={infoObjArr.link}
+                          infoObj={infoObjArr.linkVar}
                           placeholder="Variable"
                           bind:bindValue={$solidityObj.linking[index].variable}
                         />
                       </div>
                       <div class="dark_input">
                         <CustomInput
-                          infoObj={infoObjArr.link}
-                          placeholder="Contract name"
+                          infoObj={infoObjArr.linkContract}
+                          placeholder="Other Contract"
                           bind:bindValue={$solidityObj.linking[index]
                             .contractName}
                         />

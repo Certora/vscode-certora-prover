@@ -93,7 +93,7 @@
     <div slot="body" class="p-12 pt-0">
       <div class="input_wrapper">
         <div class="dark_input">
-          <h3>Source<span>*</span></h3>
+          <h3>Main Solidity File<span>*</span></h3>
           <Select
             itemFilter={(label, filterText, option) => {
               return option
@@ -112,7 +112,7 @@
           />
         </div>
         <div class="dark_input">
-          <h3>Main contract name</h3>
+          <h3>Main Contract Name</h3>
           <CustomInput
             infoObj={infoObjArr.contractName}
             placeholder="Contract"
@@ -165,15 +165,15 @@
               <div class="input_wrapper mt-8px">
                 <div class="dark_input">
                   <CustomInput
-                    infoObj={infoObjArr.link}
+                    infoObj={infoObjArr.linkVar}
                     placeholder="Variable"
                     bind:bindValue={obj.variable}
                   />
                 </div>
                 <div class="dark_input">
                   <CustomInput
-                    infoObj={infoObjArr.link}
-                    placeholder="Contract name"
+                    infoObj={infoObjArr.linkContract}
+                    placeholder="Other Contract"
                     bind:bindValue={obj.contractName}
                   />
                 </div>
