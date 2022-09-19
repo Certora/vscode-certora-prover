@@ -55,13 +55,13 @@
       validator: 'filePathValidator',
     },
     linkVar: {
-      infoText: `Links a slot in a contract with another contract.<p class='code'> --link CurrentContract : <b>Variable</b> = OtherContract</p>`,
+      infoText: `Links a slot in a contract with another contract.<p style='font-family:monospace'> --link CurrentContract : <ins><b>Variable</b></ins> = OtherContract</p>`,
       infoLink:
         'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#link',
       validator: 'alphaNum',
     },
     linkContract: {
-      infoText: `Links a slot in a contract with another contract.<p class='code'> --link CurrentContract : Variable = <b>OtherContract</b></p>`,
+      infoText: `Links a slot in a contract with another contract.<p style='font-family:monospace'> --link CurrentContract : Variable = <ins><b>OtherContract</b></ins></p>`,
       infoLink:
         'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#link',
       validator: 'alphaNum',

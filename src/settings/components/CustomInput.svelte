@@ -213,8 +213,4 @@
   .field-danger:hover {
     outline-color: var(--vscode-editorError-foreground);
   }
-
-  .code {
-    font-family: monospace;
-  }
 </style>
