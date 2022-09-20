@@ -14,7 +14,7 @@
     solidityObj,
     solAdditionalContracts,
   } from './stores/store.js'
-  import CustomList from './slots_and_utility/CustomList.svelte'
+  import CustomList from './components/CustomList.svelte'
 
   // validator comes from validators.js
   let infoObjArr = {
