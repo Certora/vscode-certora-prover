@@ -94,6 +94,7 @@ type TreeViewPath = {
 }
 
 export type Output = {
+  runName?: string
   treeViewPath: TreeViewPath
   graph_link: string
   jumpToDefinition: JumpToDefinition[]

@@ -29,6 +29,7 @@
   import NewRun from './components/NewRun.svelte'
 
   let output: Output
+  let outputRunName: string
   let selectedCalltraceFunction: CallTraceFunction
 
   let verificationResults: Verification[] = []
@@ -55,6 +56,7 @@
       )}&output=${clickedRuleOrAssert.output}`
 
       getOutput(outputUrl)
+      outputRunName = vr.name
     } else {
       console.log(
         'Error occurred while fetching the output - job id is  undefined',
@@ -122,12 +124,13 @@
       }
       case EventTypesFromExtension.SetOutput: {
         log({
-          action: 'Received "set-output" command',
+          action: 'Received "getOutput" command',
           source: Sources.ResultsWebview,
           info: e.data.payload,
         })
         if (e.data.payload) {
           output = e.data.payload
+          output.runName = outputRunName
         }
         break
       }
@@ -281,6 +284,10 @@
       return run !== runToDelete
     })
     namesMap.delete(name)
+
+    if (output.runName === name) {
+      clearOutput()
+    }
 
     //delete conf file
     deleteConf(confNameMap)
