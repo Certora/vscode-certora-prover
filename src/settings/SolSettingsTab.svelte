@@ -14,6 +14,7 @@
     solidityObj,
     solAdditionalContracts,
   } from './stores/store.js'
+  import CustomList from './slots_and_utility/CustomList.svelte'
 
   // validator comes from validators.js
   let infoObjArr = {
@@ -201,6 +202,7 @@
                   on:clear={e => handleClear(e)}
                   placeholder="Type to filter..."
                   bind:value={$solidityObj.mainFile}
+                  List={CustomList}
                 />
               </div>
               <div class="dark_input">
@@ -404,10 +406,3 @@
     </div>
   </CollapseCard>
 </div>
-
-<style>
-  :global(.listContainer) {
-    width: max-content !important;
-    max-width: calc(100vw - 73px) !important;
-  }
-</style>

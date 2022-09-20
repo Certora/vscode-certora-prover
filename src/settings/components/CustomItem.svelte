@@ -1,4 +1,5 @@
 <script>
+  // export let itemSrcHover = 'hgjghjghjgj'
   export let isActive = false
   export let isFirst = false
   export let isHover = false
@@ -31,8 +32,8 @@
     }
     itemClasses = classes.join(' ')
   }
-  let stringShrink = function () {
-    let splittedArr = item.path.split('/')
+  let stringShrink = function (path) {
+    let splittedArr = path.split('/')
     splittedArr = splittedArr.map(str => {
       if (str.length < 15) return str
       return `${
@@ -44,8 +45,8 @@
         str.charAt(str.length - 1)
       }`
     })
-    // debugger
-    if (splittedArr[splittedArr.length - 2]) {
+
+    if (splittedArr.length > 2) {
       return `.../${splittedArr[splittedArr.length - 2]}/${
         splittedArr[splittedArr.length - 1]
       }`
@@ -55,38 +56,19 @@
 
   let showInfo = false
   let mouse_is_on_show_info = false
-  function checkMouseLeave() {
-    setTimeout(() => {
-      if (mouse_is_on_show_info) return
-      showInfo = false
-    }, 100)
-  }
 </script>
 
 <div class="item {itemClasses}" class:sticky={!item.value}>
   <span>
     {@html getOptionLabel(item, filterText)}
   </span>
-  <span on:mouseenter={() => (showInfo = true)} on:mouseleave={checkMouseLeave}>
+  <span>
     {#if item.value !== 'Browse...'}
-      {stringShrink()}
+      {stringShrink(item.path)}
     {:else}
       {item.path}
     {/if}
   </span>
-</div>
-<div
-  class="showtxt"
-  class:hovering={showInfo}
-  on:click|stopPropagation
-  on:mouseenter={() => (mouse_is_on_show_info = true)}
-  on:mouseleave={() => {
-    ;(showInfo = false), (mouse_is_on_show_info = false)
-  }}
->
-  <p>
-    {item.path}
-  </p>
 </div>
 
 <style>
@@ -111,7 +93,7 @@
     font-size: 11px;
   }
   .item span:first-child {
-    margin-right: 8px;
+    margin-right: 16px;
     margin-left: 4px;
   }
 
@@ -159,32 +141,5 @@
       .item.first.hover) {
     background: var(--button-primary-hover-background);
     color: var(--vscode-button-foreground);
-  }
-
-  .showtxt {
-    box-sizing: border-box;
-    display: none;
-    position: absolute;
-    background: var(--vscode-editorWidget-background);
-    border: 1px solid var(--vscode-editorWidget-border);
-    border-left: 0;
-    border-right: 0;
-    left: 0;
-    width: 100%;
-    flex-direction: column;
-    text-align: left;
-    padding: 8px;
-    z-index: 3;
-    overflow: hidden;
-  }
-
-  .showtxt p {
-    margin: 0;
-    font-size: 11px;
-    word-break: break-word;
-  }
-
-  .hovering {
-    display: flex;
   }
 </style>

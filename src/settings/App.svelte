@@ -360,10 +360,7 @@
     --clearSelectFocusColor: var(--vscode-input-foreground);
     --inputColor: var(--vscode-input-foreground);
   }
-  :global(.listContainer) {
-    left: -2px !important;
-    outline: 1px solid var(--vscode-editorSuggestWidget-border);
-  }
+
   :global(.selectContainer) {
     gap: 24px;
   }
@@ -549,5 +546,17 @@
       .checkmark, [data-vscode-theme-name='Red'] .checkmark) {
     outline: 1px solid var(--vscode-inputValidation-infoBorder);
     outline-offset: -1px;
+  }
+
+  :global(.listContainer.svelte-uv3qci, .listContainer.svelte-1uyqfml, .listContainer) {
+    left: -2px !important;
+    outline: 1px solid var(--vscode-editorSuggestWidget-border);
+    max-width: calc(100vw - 73px) !important;
+    width: fit-content !important;
+  }
+
+  :global(body, html) {
+    height: 100vh;
+    overflow-y: hidden;
   }
 </style>
