@@ -121,7 +121,7 @@
   }
   button {
     color: var(--vscode-primary-foreground);
-    fill: var(--vscode-primary-foreground);
+    fill: var(--vscode-primary-foreground, var(--vscode-editor-foreground));
   }
   button:disabled {
     filter: brightness(60%);
