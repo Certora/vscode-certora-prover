@@ -371,7 +371,7 @@ export function processForm(
     additionalSettings[0].name
   ) {
     additionalSettings.forEach(flag => {
-      addAdditionalSetting(flag.name, flag.value, form)
+      addAdditionalSetting(flag.name, flag.value || 'true', form)
     })
   }
   processLink(form, newForm.solidyObj, newForm.solidyObj.mainContract)

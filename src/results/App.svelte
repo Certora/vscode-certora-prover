@@ -285,7 +285,7 @@
     })
     namesMap.delete(name)
 
-    if (output.runName === name) {
+    if (output && output.runName === name) {
       clearOutput()
     }
 
@@ -308,6 +308,10 @@
     //add to pending queue
     pendingQueue.push(confNameMap)
     pendingQueueCounter++
+
+    if (output && output.runName === run.name) {
+      clearOutput()
+    }
 
     //if there are no running scripts => runNext
     if (runningScripts.length === 0 && index === 0) {
