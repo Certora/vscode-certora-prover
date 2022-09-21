@@ -19,6 +19,7 @@ export class ScriptRunner {
   private readonly resultsWebviewProvider: ResultsWebviewProvider
   private script: ChildProcessWithoutNullStreams | null = null
   private runningScripts: RunningScript[] = []
+  private logFile: Uri | undefined
 
   constructor(resultsWebviewProvider: ResultsWebviewProvider) {
     this.polling = new ScriptProgressLongPolling()
@@ -57,6 +58,7 @@ export class ScriptRunner {
     ts: number,
   ): Promise<void> {
     const logFilePath = this.getLogFilePath(pathToConfFile, ts)
+    this.logFile = logFilePath
     if (!logFilePath) {
       return
     }
@@ -111,10 +113,25 @@ export class ScriptRunner {
 
         if (progressUrl) {
           await this.polling.run(progressUrl, data => {
-            this.resultsWebviewProvider.postMessage<Job>({
-              type: 'receive-new-job-result',
-              payload: [data, confFileName],
-            })
+            data.runName = confFileName
+            if (this.logFile) {
+              workspace.fs.readFile(this.logFile).then(content => {
+                const decoder = new TextDecoder()
+                const strContent: string = decoder.decode(content)
+                const pattern =
+                  'https://prover.certora.com/output/[a-zA-Z0-9/?=]+'
+                const vrLinkRegExp = new RegExp(pattern)
+                const vrLink = vrLinkRegExp.exec(strContent)
+                if (vrLink) {
+                  data.verificationReportLink = (vrLink[0] as string) || ''
+                  console.log('link: ', data.verificationReportLink)
+                  this.resultsWebviewProvider.postMessage<Job>({
+                    type: 'receive-new-job-result',
+                    payload: data,
+                  })
+                }
+              })
+            }
           })
         }
       })

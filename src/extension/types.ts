@@ -46,6 +46,8 @@ export type Job = {
   verificationProgress: Tree
   progressUrl: string
   creationTime: string
+  runName?: string
+  verificationReportLink?: string
 }
 
 export type ProgressResponse = {

@@ -293,7 +293,7 @@ export class SettingsPanel {
       <html lang="en">
         <head>
           <meta charset="UTF-8">
-          <meta http-equiv="Content-Security-Policy" content="${csp}">
+          <meta http-equiv="Content-Security-Content-Security-Policy: sandbox allow-scripts;" content="${csp}">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <script type="module" nonce="${nonce}" src="${toolkitUri}"></script>
           <link href="${styleUri}" rel="stylesheet">

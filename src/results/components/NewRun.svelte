@@ -46,7 +46,9 @@
 
   export let setStatus: (name: string, status: Status) => void
 
-  export let status: Status = Status.finishSetup
+  export let status: Status
+
+  export let vrLinkFunc
 
   let beforeRename = ''
   let activateRunRename = false
@@ -215,6 +217,14 @@
         onClick: duplicate,
       },
     ]
+    if (hasResults()) {
+      actions.unshift({
+        title: 'go to verification report',
+        icon: 'file-symlink-file',
+        onClick: vrLinkFunc,
+      })
+    }
+    console.log('actions', actions)
     return actions
   }
 
@@ -364,7 +374,6 @@
     *:selection {
       background-color: var(--vscode-list-activeSelectionBackground);
     }
-
     text-overflow: ellipsis;
   }
 

@@ -81,14 +81,18 @@
           source: Sources.ResultsWebview,
           info: {
             currentVerificationResults: verificationResults,
-            newResult: e.data.payload[0],
-            name: e.data.payload[1],
+            newResult: e.data.payload,
+            name: e.data.payload.runName,
           },
         })
+        setVerificationReportLink(
+          e.data.payload.runName,
+          e.data.payload.verificationReportLink,
+        )
         smartMergeVerificationResult(
           verificationResults,
-          e.data.payload[0],
-          e.data.payload[1],
+          e.data.payload,
+          e.data.payload.runName,
         )
         verificationResults = verificationResults
         log({
@@ -186,6 +190,19 @@
       default:
         break
     }
+  }
+
+  /**
+   * set vrLink of the run with name [runName] to [link]
+   * @param runName name of the run to update
+   * @param link to verification report of run [runName]
+   */
+  function setVerificationReportLink(runName: string, link: string) {
+    runs.forEach(run => {
+      if (run.name === runName) {
+        run.vrLink = link
+      }
+    })
   }
 
   /**
@@ -448,68 +465,73 @@
     </div>
   </div>
 {:else}
-  <Pane
-    title="MY RUNS"
-    initialExpandedState={true}
-    actions={[
-      {
-        title: 'run all',
-        icon: 'run-all',
-        onClick: runAll,
-      },
-      {
-        title: 'create new run',
-        icon: 'diff-added',
-        onClick: createRun,
-      },
-    ]}
-  >
-    <ul class="running-scripts">
-      {#each Array(runsCounter) as _, index (index)}
-        {#key [runs[index], focusedRun, runs[index].status]}
-          <li>
-            <NewRun
-              doRename={runs[index].name === ''}
-              editFunc={() => editRun(runs[index])}
-              deleteFunc={() => deleteRun(runs[index])}
-              {namesMap}
-              {renameRun}
-              duplicateFunc={duplicateRun}
-              runFunc={() => run(runs[index])}
-              status={runs[index].status}
-              {verificationResults}
-              {newFetchOutput}
-              nowRunning={runningScripts.find(
-                rs => getFilename(rs.confFile) === runs[index].name,
-              ) !== undefined ||
-                (pendingQueue.find(rs => rs.fileName === runs[index].name) !==
-                  undefined &&
-                  pendingQueueCounter > 0)}
-              isPending={pendingQueue.find(
-                rs => rs.fileName === runs[index].name,
-              ) !== undefined && pendingQueueCounter > 0}
-              expandedState={verificationResults.find(
-                vr => vr.name === runs[index].name,
-              ) !== undefined}
-              pendingStopFunc={() => {
-                pendingStopFunc(runs[index])
-              }}
-              runningStopFunc={() => {
-                verificationResults = verificationResults.filter(vr => {
-                  return vr.name !== runs[index].name
-                })
-                stopScript(runs[index].id)
-                runNext()
-              }}
-              inactiveSelected={focusedRun}
-              {setStatus}
-              bind:runName={runs[index].name}
-            />
-          </li>
-        {/key}
-      {/each}
-    </ul>
-  </Pane>
+  <div sandbox="allow-popups">
+    <Pane
+      title="MY RUNS"
+      initialExpandedState={true}
+      actions={[
+        {
+          title: 'run all',
+          icon: 'run-all',
+          onClick: runAll,
+        },
+        {
+          title: 'create new run',
+          icon: 'diff-added',
+          onClick: createRun,
+        },
+      ]}
+    >
+      <ul class="running-scripts">
+        {#each Array(runsCounter) as _, index (index)}
+          {#key [runs[index], focusedRun, runs[index].status, verificationResults]}
+            <li>
+              <NewRun
+                doRename={runs[index].name === ''}
+                editFunc={() => editRun(runs[index])}
+                deleteFunc={() => deleteRun(runs[index])}
+                {namesMap}
+                {renameRun}
+                duplicateFunc={duplicateRun}
+                runFunc={() => run(runs[index])}
+                status={runs[index].status}
+                {verificationResults}
+                {newFetchOutput}
+                nowRunning={runningScripts.find(
+                  rs => getFilename(rs.confFile) === runs[index].name,
+                ) !== undefined ||
+                  (pendingQueue.find(rs => rs.fileName === runs[index].name) !==
+                    undefined &&
+                    pendingQueueCounter > 0)}
+                isPending={pendingQueue.find(
+                  rs => rs.fileName === runs[index].name,
+                ) !== undefined && pendingQueueCounter > 0}
+                expandedState={verificationResults.find(
+                  vr => vr.name === runs[index].name,
+                ) !== undefined}
+                pendingStopFunc={() => {
+                  pendingStopFunc(runs[index])
+                }}
+                runningStopFunc={() => {
+                  verificationResults = verificationResults.filter(vr => {
+                    return vr.name !== runs[index].name
+                  })
+                  stopScript(runs[index].id)
+                  runNext()
+                }}
+                inactiveSelected={focusedRun}
+                {setStatus}
+                vrLinkFunc={runs[index].vrLink
+                  ? window.open(runs[index].vrLink)
+                  : null}
+                bind:runName={runs[index].name}
+              />
+            </li>
+          {/key}
+        {/each}
+      </ul>
+    </Pane>
+  </div>
 {/if}
 {#if output}
   {#if output.variables && output.variables.length > 0}
