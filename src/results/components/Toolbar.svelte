@@ -12,6 +12,7 @@
         <ToolbarItem
           title={action.title}
           icon={action.icon}
+          link={action.link}
           on:click={action.onClick}
         />
       {/each}

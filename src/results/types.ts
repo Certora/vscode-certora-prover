@@ -1,4 +1,9 @@
-export type Action = { title: string; onClick: () => void; icon: string }
+export type Action = {
+  title: string
+  onClick?: () => void
+  icon: string
+  link?: string
+}
 
 export type JumpToDefinition = {
   file: string

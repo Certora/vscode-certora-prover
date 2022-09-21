@@ -1,16 +1,25 @@
 <script lang="ts">
   export let title: string
   export let icon: string
+  export let link: string = ''
 </script>
 
 <li class="action-item menu-entry" role="presentation">
-  <div
-    class="action-label codicon codicon-action codicon-{icon}"
-    role="button"
-    {title}
-    tabindex="0"
-    on:click|preventDefault|stopPropagation
-  />
+  {#if link}
+    <a
+      class="action-label codicon codicon-action codicon-{icon}"
+      {title}
+      href={link}
+    />
+  {:else}
+    <div
+      class="action-label codicon codicon-action codicon-{icon}"
+      role="button"
+      {title}
+      tabindex="0"
+      on:click|preventDefault|stopPropagation
+    />
+  {/if}
 </li>
 
 <style lang="postcss">
@@ -31,6 +40,7 @@
     padding: 2px;
     border-radius: 5px;
     text-decoration: none;
+    color: var(--code-item-value-color);
 
     &:focus {
       outline-color: rgb(255 255 255 / 0%);

@@ -38,7 +38,10 @@
    */
   function getPaneClassName(): string {
     let className = 'pane-header'
-    if (isExpanded || status !== (Status.pending || Status.running)) {
+    if (
+      isExpanded ||
+      (status !== Status.pending && status !== Status.running)
+    ) {
       className += ' pointer-cursor'
     }
     if (inactiveSelected) {
@@ -53,8 +56,11 @@
   function getIconClassName(): string {
     let className = 'icon'
     if (runFunc) {
-      className += ' pointer-cursor'
+      className += ' pointer-cursor' + ' icon-hover'
+    } else {
+      className += ' arrow-curser'
     }
+    console.log('STATUS: ', status)
     return className
   }
 
@@ -88,17 +94,10 @@
         height="16"
         src={getIconPath(statusMap.get(status))}
         alt=""
-        on:click|stopPropagation={() => runFunc()}
+        on:click|stopPropagation={runFunc}
       />
     {/if}
     <h3 class="title" {title}>{title}</h3>
-    {#if status === Status.success && link.startsWith('https://prover.certora.com/output/')}
-      <a
-        class="actions action-label codicon codicon-action codicon-file-symlink-file"
-        title="go to verification report"
-        href={link}
-      />
-    {/if}
     <div class="actions">
       <Toolbar {actions} />
     </div>
@@ -133,6 +132,14 @@
     .icon {
       margin-right: 7px;
       margin-left: 2px;
+    }
+
+    .icon-hover {
+      &:hover {
+        border-radius: 20px;
+        border: 0px solid rgb(184 184 184 / 31%);
+        background: white;
+      }
     }
 
     .no-icon {
@@ -212,30 +219,11 @@
     cursor: pointer !important;
   }
 
-  .inactive-selected {
-    background-color: var(--vscode-editor-inactiveSelectionBackground);
+  .arrow-curser {
+    cursor: default !important;
   }
 
-  .action-label {
-    display: flex;
-    width: 16px;
-    height: 16px;
-    align-items: center;
-    padding: 2px;
-    border-radius: 5px;
-    text-decoration: none;
-    color: white;
-
-    &:focus {
-      outline-color: rgb(255 255 255 / 0%);
-    }
-
-    &:active {
-      outline: 0 !important;
-    }
-
-    &:hover {
-      background-color: rgb(184 184 184 / 31%);
-    }
+  .inactive-selected {
+    background-color: var(--vscode-editor-inactiveSelectionBackground);
   }
 </style>
