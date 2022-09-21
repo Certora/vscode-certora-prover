@@ -5,7 +5,7 @@
   import CustomInput from './components/CustomInput.svelte'
   import Icon from './components/Icon.svelte'
   import { openBrowser } from './utils/openBrowser'
-
+  import CustomList from './components/CustomList.svelte'
   import CustomItem from './components/CustomItem.svelte'
   import {
     navState,
@@ -206,7 +206,7 @@
         <CollapseCard chevron="padding-right:12px;">
           <div slot="header" class="p-12 header header_contract">
             <i class="codicon codicon-file" />
-            <h3>Main SPEC FILE</h3>
+            <h3>Main Spec File</h3>
           </div>
           <div slot="body" class="p-12 pt-0">
             <div class="input_wrapper">
@@ -227,6 +227,7 @@
                   on:clear={e => handleClear(e)}
                   placeholder="Type to filter..."
                   bind:value={$specObj.specFile}
+                  List={CustomList}
                 />
               </div>
               <div class="dark_input">

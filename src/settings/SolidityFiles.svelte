@@ -7,6 +7,7 @@
   import CustomInput from './components/CustomInput.svelte'
   import { solAdditionalContracts, solFilesArr } from './stores/store.js'
   import { manageFiles } from './utils/refreshFiles'
+  import CustomList from './components/CustomList.svelte'
 
   //   slots
   export let index
@@ -109,6 +110,7 @@
             on:clear={e => handleClear(e, index)}
             placeholder="Type to filter..."
             bind:value={$solAdditionalContracts[index].mainFile}
+            List={CustomList}
           />
         </div>
         <div class="dark_input">
