@@ -48,7 +48,7 @@
 
   export let status: Status
 
-  export let vrLinkFunc
+  export let vrLink
 
   let beforeRename = ''
   let activateRunRename = false
@@ -217,14 +217,6 @@
         onClick: duplicate,
       },
     ]
-    if (hasResults()) {
-      actions.unshift({
-        title: 'go to verification report',
-        icon: 'file-symlink-file',
-        onClick: vrLinkFunc,
-      })
-    }
-    console.log('actions', actions)
     return actions
   }
 
@@ -330,6 +322,7 @@
         showExpendIcon={expandedState}
         status={hasResults() ? Status.success : status}
         inactiveSelected={runName === inactiveSelected}
+        link={vrLink}
         runFunc={status === Status.ready ||
         status === Status.success ||
         status === Status.unableToRun

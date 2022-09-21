@@ -10,6 +10,7 @@
   export let status: Status | string = ''
   export let inactiveSelected: boolean = false
   export let runFunc: () => void = null
+  export let link = ''
 
   let isExpanded = initialExpandedState
 
@@ -91,6 +92,13 @@
       />
     {/if}
     <h3 class="title" {title}>{title}</h3>
+    {#if status === Status.success && link.startsWith('https://prover.certora.com/output/')}
+      <a
+        class="actions action-label codicon codicon-action codicon-file-symlink-file"
+        title="go to verification report"
+        href={link}
+      />
+    {/if}
     <div class="actions">
       <Toolbar {actions} />
     </div>
@@ -206,5 +214,28 @@
 
   .inactive-selected {
     background-color: var(--vscode-editor-inactiveSelectionBackground);
+  }
+
+  .action-label {
+    display: flex;
+    width: 16px;
+    height: 16px;
+    align-items: center;
+    padding: 2px;
+    border-radius: 5px;
+    text-decoration: none;
+    color: white;
+
+    &:focus {
+      outline-color: rgb(255 255 255 / 0%);
+    }
+
+    &:active {
+      outline: 0 !important;
+    }
+
+    &:hover {
+      background-color: rgb(184 184 184 / 31%);
+    }
   }
 </style>

@@ -465,7 +465,7 @@
     </div>
   </div>
 {:else}
-  <div sandbox="allow-popups">
+  <div>
     <Pane
       title="MY RUNS"
       initialExpandedState={true}
@@ -521,9 +521,7 @@
                 }}
                 inactiveSelected={focusedRun}
                 {setStatus}
-                vrLinkFunc={runs[index].vrLink
-                  ? window.open(runs[index].vrLink)
-                  : null}
+                vrLink={runs[index].vrLink}
                 bind:runName={runs[index].name}
               />
             </li>
