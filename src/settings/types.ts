@@ -134,11 +134,11 @@ export type EventsFromExtension =
     }
   | {
       type: EventTypesFromExtension.EditConfFile
-      payload: [ConfFile, string]
+      payload: { confFile: ConfFile; runName: string }
     }
   | {
       type: EventTypesFromExtension.FileChosen
-      payload: [string, number]
+      payload: { file: string; index: number }
     }
   | {
       type: EventTypesFromExtension.notifyWebviewAboutUpdates

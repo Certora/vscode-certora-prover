@@ -277,7 +277,7 @@ export type EventFromResultsWebview =
     }
   | {
       command: CommandFromResultsWebview.Duplicate
-      payload: [ConfNameMap, ConfNameMap]
+      payload: { toDuplicate: ConfNameMap; duplicatedName: ConfNameMap }
     }
 
 export type EventFromSettingsWebview =
@@ -290,7 +290,7 @@ export type EventFromSettingsWebview =
     }
   | {
       command: CommandFromSettingsWebview.OpenBrowser
-      payload: [string, number]
+      payload: { fileType: string; index: number }
     }
 
 export type ConfFile = {

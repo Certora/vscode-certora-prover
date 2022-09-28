@@ -78,7 +78,7 @@ export function duplicate(
   })
   vscode.postMessage({
     command: Commands.Duplicate,
-    payload: [toDuplicate, duplicated],
+    payload: { toDuplicate: toDuplicate, duplicatedName: duplicated },
   })
 }
 

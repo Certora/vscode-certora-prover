@@ -1,3 +1,7 @@
+/* ---------------------------------------------------------------------------------------------
+ *  Settings webview actions
+ *-------------------------------------------------------------------------------------------- */
+
 import * as vscode from 'vscode'
 import { SmartContractsFilesWatcher } from './SmartContractsFilesWatcher'
 import { getNonce } from './utils/getNonce'
@@ -48,7 +52,7 @@ export class SettingsPanel {
         confFileDisplayName !== '' ? confFileDisplayName : confFileName
       this._panel.webview.postMessage({
         type: 'edit-conf-file',
-        payload: [editConfFile, name],
+        payload: { confFile: editConfFile, runName: name },
       })
       this.editConfFile = editConfFile
     }
@@ -129,7 +133,7 @@ export class SettingsPanel {
               source: Sources.Extension,
               info: e.payload,
             })
-            this.openOsPicker(e.payload[0], e.payload[1])
+            this.openOsPicker(e.payload.fileType, e.payload.index)
             break
           }
           default:
@@ -162,6 +166,8 @@ export class SettingsPanel {
   /**
    * opens a new settings panel in a new tab
    * @param extensionUri uri of the extension folder
+   * @param confFileName the name of a run, in a type that holds both conf file name
+   * and display name of the run
    * @param editConfFile conf file content
    */
   private static _openNewPanel(
@@ -206,8 +212,8 @@ export class SettingsPanel {
    * Open a new webview panel when creating or editing conf files.
    * If the panel is already opened (for editing an existing configuration file),
    * show the same panel.
-   * @param extensionUri uri of the extension folder
-   * @param editConfFile conf file content
+   * @param fileType file extension
+   * @param index if the file is an additional contract file - the index of the additional file.
    */
 
   private openOsPicker(fileType: string, index: number) {
@@ -227,12 +233,24 @@ export class SettingsPanel {
       if (fileUri && fileUri[0]) {
         this._panel.webview.postMessage({
           type: 'file-chosen',
-          payload: [fileUri[0].fsPath.replace(uri.path + '/', ''), index],
+          payload: {
+            file: fileUri[0].fsPath.replace(uri.path + '/', ''),
+            index: index,
+          },
         })
       }
     })
   }
 
+  /**
+   * renders a settings webview.
+   * if the settings webview with name [confName] already exists, skip to it
+   * if not - create and skip to it
+   * @param extensionUri extention uri
+   * @param confName the name of a run, in a type that holds both conf file name
+   * and display name of the run
+   * @param editConfFile conf file with information to fill settings view with
+   */
   public static render(
     extensionUri: vscode.Uri,
     confName: ConfNameMap,

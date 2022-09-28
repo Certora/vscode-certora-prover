@@ -7,6 +7,6 @@ export function openBrowser(fileType: string, index = -1): void {
   })
   vscode.postMessage({
     command: 'open-browser',
-    payload: [fileType, index],
+    payload: { fileType: fileType, index: index },
   })
 }

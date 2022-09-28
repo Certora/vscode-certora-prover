@@ -64,8 +64,8 @@
         source: Sources.SettingsWebview,
         info: e.data.payload,
       })
-      $RunName = e.data.payload[1]
-      let newForm: NewForm = confFileToFormData(e.data.payload[0]) // change the conf file info form data for the settings form
+      $RunName = e.data.payload.runName
+      let newForm: NewForm = confFileToFormData(e.data.payload.confFile) // change the conf file info form data for the settings form
       fillFields(newForm)
     }
     if (e.data.type === EventTypesFromExtension.FileChosen) {
@@ -74,13 +74,13 @@
         source: Sources.SettingsWebview,
         info: e.data.payload,
       })
-      const fileName = e.data.payload[0]
+      const fileName = e.data.payload.file
       const contractName = fileName
         .toString()
         .split('/')
         .reverse()[0]
         .replace('.sol', '')
-      const index = e.data.payload[1]
+      const index = e.data.payload.index
       if (fileName.endsWith('.sol')) {
         if (index === -1) {
           $solidityObj.mainFile = fileName

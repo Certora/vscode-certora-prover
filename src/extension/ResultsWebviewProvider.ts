@@ -118,7 +118,7 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
               info: e.payload,
             })
             if (typeof this.duplicate === 'function') {
-              this.duplicate(e.payload[0], e.payload[1])
+              this.duplicate(e.payload.toDuplicate, e.payload.duplicatedName)
             }
             break
           default:

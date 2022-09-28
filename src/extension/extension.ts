@@ -1,3 +1,8 @@
+/* ---------------------------------------------------------------------------------------------
+ *  This is the main file of the [extention] part. Here, there are the main tasks
+ *  of the extention.
+ *-------------------------------------------------------------------------------------------- */
+
 import * as vscode from 'vscode'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { SettingsPanel } from './SettingsPanel'
@@ -7,6 +12,12 @@ import { createAndOpenConfFile } from './utils/createAndOpenConfFile'
 import { confFileToFormData } from './utils/confFileToInputForm'
 
 export function activate(context: vscode.ExtensionContext): void {
+  /**
+   * opens the settings webview. only called once, when a new run is created
+   * @param name the name of a run to edit, in a type that holds both conf file name
+   * and display name of the run
+   * @returns null
+   */
   function showSettings(name: ConfNameMap) {
     const path = vscode.workspace.workspaceFolders?.[0]
 
@@ -113,6 +124,12 @@ export function activate(context: vscode.ExtensionContext): void {
     return confFileDefault
   }
 
+  /**
+   * open the settings webview to edit the content of a conf file
+   * @param name the name of a run to edit, in a type that holds both conf file name
+   * and display name of the run
+   * @returns Promise<void>
+   */
   async function editConf(name: ConfNameMap): Promise<void> {
     const path = vscode.workspace.workspaceFolders?.[0]
     if (!path) return
@@ -132,6 +149,14 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   }
 
+  /**
+   * duplicates a run's conf file, and opens the settings webview of the new run that was created
+   * @param toDuplicate the name of a run to duplicate, in a type that holds both conf file name
+   * and display name of the run
+   * @param duplicated the name of the new duplicated run, in a type that holds both conf file name
+   * and display name of the run
+   * @returns Promise<void>
+   */
   async function duplicate(
     toDuplicate: ConfNameMap,
     duplicated: ConfNameMap,
