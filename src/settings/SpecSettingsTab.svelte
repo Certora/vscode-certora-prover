@@ -118,6 +118,17 @@
       infoLink:
         'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#multi-assert-check',
     },
+    ruleSanity: {
+      infoText: 'This option enables sanity checking for rules.',
+      infoLink:
+        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#rule-sanity',
+    },
+    advancedSanity: {
+      infoText:
+        'If this box is checked, all the sanity checks will be performed for all invariants and rules.',
+      infoLink:
+        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#rule-sanity',
+    },
   }
   // on click on the input get al the files (sol or spec) based on what os passded to the function
   // function updateItems(fileType) {
@@ -186,14 +197,6 @@
     fileType: 'spec',
     ifoText: infoObjArr.specFile.infoText,
     infoLink: infoObjArr.specFile.infoLink,
-  }
-
-  function getSpecFileName() {
-    if ($specObj.specFile) {
-      console.log('LABEL: ', $specObj.specFile)
-      return $specObj.specFile
-    }
-    return ''
   }
 </script>
 
@@ -348,6 +351,36 @@
                   <div class="input_wrapper check_between ">
                     <div class="dark_input alternate_input check_box_wrapper">
                       <label class="checkbox_container"
+                        >Rule Sanity
+                        <input
+                          type="checkbox"
+                          bind:checked={$specObj.ruleSanity}
+                        />
+                        <span class="checkmark" />
+                      </label>
+                      <CheckBoxInfo infoObj={infoObjArr.ruleSanity} />
+                    </div>
+                    <div
+                      class="dark_input alternate_input check_box_wrapper"
+                      style="margin-right: 37%;"
+                    >
+                      <label
+                        class={'checkbox_container ' +
+                          (!$specObj.ruleSanity ? 'input_checkbox' : '')}
+                        >Advanced Sanity
+                        <input
+                          type="checkbox"
+                          disabled={!$specObj.ruleSanity}
+                          bind:checked={$specObj.advancedSanity}
+                        />
+                        <span class="checkmark" />
+                      </label>
+                      <CheckBoxInfo infoObj={infoObjArr.advancedSanity} />
+                    </div>
+                  </div>
+                  <div class="input_wrapper check_between ">
+                    <div class="dark_input alternate_input check_box_wrapper">
+                      <label class="checkbox_container"
                         >Multi assert
                         <input
                           type="checkbox"
@@ -426,6 +459,12 @@
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+  }
+
+  .input_checkbox {
+    cursor: not-allowed !important;
+    /* color: var(--input-placeholder-foreground) !important; */
+    opacity: 50%;
   }
 
   /* Hide the browser's default checkbox */

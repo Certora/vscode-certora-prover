@@ -354,6 +354,14 @@ export function processForm(
 
   addAdditionalSetting('method', newForm.solidyObj.specifiMethod, form)
 
+  if (newForm.specObj.ruleSanity) {
+    if (newForm.specObj.advancedSanity) {
+      addAdditionalSetting('rule_sanity', 'advanced', form)
+    } else {
+      addAdditionalSetting('rule_sanity', 'basic', form)
+    }
+  }
+
   addAdditionalSetting(
     'short_output',
     newForm.specObj.shortOutput.toString(),

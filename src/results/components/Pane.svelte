@@ -10,7 +10,6 @@
   export let status: Status | string = ''
   export let inactiveSelected: boolean = false
   export let runFunc: () => void = null
-  export let link = ''
 
   let isExpanded = initialExpandedState
 

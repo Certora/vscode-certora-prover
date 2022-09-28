@@ -89,6 +89,8 @@ export type SpecObj = {
   properties: Property[]
   runOnStg: boolean
   branchName: string
+  ruleSanity: boolean
+  advancedSanity: boolean
   localTypeChecking: boolean
   shortOutput: boolean
   multiAssert: boolean

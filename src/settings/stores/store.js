@@ -103,6 +103,8 @@ export const specObj = writable({
   ],
   runOnStg: false,
   branchName: 'master',
+  ruleSanity: false,
+  advancedSanity: false,
   localTypeChecking: true,
   shortOutput: true,
   multiAssert: false,

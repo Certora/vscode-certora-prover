@@ -30,6 +30,8 @@ const newForm: NewForm = {
     properties: [],
     runOnStg: false,
     branchName: 'master',
+    ruleSanity: false,
+    advancedSanity: false,
     localTypeChecking: false,
     shortOutput: false,
     multiAssert: false,
@@ -58,6 +60,7 @@ const stableFields = [
   'optimistic_loop',
   'packages_path',
   'solc_map',
+  'rule_sanity',
 ]
 
 function getAdditionalSettings(confFile: ConfFile) {
@@ -194,6 +197,16 @@ function processSpecAttributes(confFile: ConfFile, specObj: SpecObj) {
   if (confFile.staging) {
     specObj.runOnStg = true
     specObj.branchName = (confFile.staging as string) || 'master'
+  }
+
+  if (confFile.rule_sanity) {
+    if (confFile.rule_sanity === 'basic') {
+      specObj.ruleSanity = true
+    }
+    if (confFile.rule_sanity === 'advanced') {
+      specObj.ruleSanity = true
+      specObj.advancedSanity = true
+    }
   }
 
   const additionalSettings = getAdditionalSettings(confFile)
