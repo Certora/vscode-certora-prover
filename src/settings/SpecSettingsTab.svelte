@@ -187,6 +187,14 @@
     ifoText: infoObjArr.specFile.infoText,
     infoLink: infoObjArr.specFile.infoLink,
   }
+
+  function getSpecFileName() {
+    if ($specObj.specFile) {
+      console.log('LABEL: ', $specObj.specFile)
+      return $specObj.specFile
+    }
+    return ''
+  }
 </script>
 
 <div class="card_parent_wrapper bg_dark border-rd">
@@ -207,6 +215,9 @@
           <div slot="header" class="p-12 header header_contract">
             <i class="codicon codicon-file" />
             <h3>Main Spec File</h3>
+            <h3 style="margin-left: auto; margin-right: 0; margin-top: 2px">
+              {JSON.parse(JSON.stringify($specObj.specFile)).label || ''}
+            </h3>
           </div>
           <div slot="body" class="p-12 pt-0">
             <div class="input_wrapper">

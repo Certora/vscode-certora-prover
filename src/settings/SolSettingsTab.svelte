@@ -181,7 +181,10 @@
         <CollapseCard chevron="padding-right:12px;">
           <div slot="header" class="p-12 header header_contract">
             <i class="codicon codicon-file" />
-            <h3>Main contract {$solidityObj.mainContract}</h3>
+            <h3>Main contract</h3>
+            <h3 style="margin-left: auto; margin-right: 0; margin-top: 2px">
+              {$solidityObj.mainContract}
+            </h3>
           </div>
           <div slot="body" class="p-12 pt-0">
             <div class="input_wrapper">

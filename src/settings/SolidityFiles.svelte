@@ -82,10 +82,12 @@
     >
       <i class="codicon codicon-file" />
       <h3 style="line-height: 18px; margin-right:auto;">
-        Additional Contract {$solAdditionalContracts[index].mainContract
-          ? `${$solAdditionalContracts[index].mainContract}`
-          : `${index + 1}`}
+        {`additional Contract ${index + 1}`}
       </h3>
+      <h3 style="margin-left: auto; margin-right: 10px; margin-top: 3px">
+        {$solAdditionalContracts[index].mainContract}
+      </h3>
+
       <i
         class="codicon codicon-trash"
         on:click|stopPropagation={() => removeSolFile(index)}

@@ -60,7 +60,6 @@
     } else {
       className += ' arrow-curser'
     }
-    console.log('STATUS: ', status)
     return className
   }
 
