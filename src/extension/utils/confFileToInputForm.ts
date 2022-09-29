@@ -1,3 +1,7 @@
+/* ---------------------------------------------------------------------------------------------
+ *  Convert conf file to input form
+ *-------------------------------------------------------------------------------------------- */
+
 import { nanoid } from 'nanoid'
 import type { InputFormData, ConfFile } from '../types'
 
@@ -46,6 +50,12 @@ function getAdditionalSettings(confFile: ConfFile) {
   return copy
 }
 
+/**
+ * converts conf file to input form
+ * @param confFile to convert
+ * @param name of the run
+ * @returns input form
+ */
 export function confFileToFormData(
   confFile: ConfFile,
   name: string,
@@ -54,6 +64,7 @@ export function confFileToFormData(
 
   form.name = name
 
+  // convert solidity file / contract
   if (Array.isArray(confFile.files) && confFile.files.length > 0) {
     form.mainSolidityFile = confFile.files[0] as string
 

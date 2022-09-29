@@ -1,3 +1,6 @@
+/* ---------------------------------------------------------------------------------------------
+ *  Runs certoraRun command with the contant of a conf file.
+ *-------------------------------------------------------------------------------------------- */
 import { workspace, window, Uri } from 'vscode'
 import { spawn, exec, ChildProcessWithoutNullStreams } from 'child_process'
 import * as os from 'os'
@@ -82,6 +85,11 @@ export class ScriptRunner {
     }
   }
 
+  /**
+   * runs certoraRun command with the content of the [confFile]
+   * @param confFile path to conf file
+   * @returns void
+   */
   public run(confFile: string): void {
     PostProblems.resetDiagnosticCollection()
 
@@ -124,7 +132,6 @@ export class ScriptRunner {
                 const vrLink = vrLinkRegExp.exec(strContent)
                 if (vrLink) {
                   data.verificationReportLink = (vrLink[0] as string) || ''
-                  console.log('link: ', data.verificationReportLink)
                   this.resultsWebviewProvider.postMessage<Job>({
                     type: 'receive-new-job-result',
                     payload: data,
@@ -148,6 +155,7 @@ export class ScriptRunner {
         this.removeRunningScript(pid)
 
         if (code !== 0) {
+          // when there is a parse error, post it to PROBLEMS and send 'parse-error' to results
           PostProblems.postProblems(confFile)
           this.resultsWebviewProvider.postMessage({
             type: 'parse-error',

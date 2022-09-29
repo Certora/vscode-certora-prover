@@ -1,3 +1,7 @@
+/* ---------------------------------------------------------------------------------------------
+ *  Logs a webview action to the console
+ *-------------------------------------------------------------------------------------------- */
+
 // In the future we will add it to VSCode Settings and will take DEBUG value
 // from there
 const DEBUG = true

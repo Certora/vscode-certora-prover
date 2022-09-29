@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------------------------------
- *  Settings webview actions
+ *  Settings webview actions.
  *-------------------------------------------------------------------------------------------- */
 
 import * as vscode from 'vscode'
@@ -93,12 +93,13 @@ export class SettingsPanel {
                 form.solidityCompiler &&
                 form.specFile
               ) {
+                // if all mandatory fields are filled - allow running
                 SettingsPanel.resultsWebviewProvider.postMessage({
                   type: 'allow-run',
                   payload: confFileName,
                 })
               } else {
-                // deuplicate fix
+                // deuplicate fix - if all mandatory fields are filled in the conf file - allow runnig
                 if (this.editConfFile) {
                   if (
                     this.editConfFile?.files &&
@@ -339,10 +340,6 @@ export class SettingsPanel {
       if (disposable) disposable.dispose()
     }
   }
-
-  // public static setAllowRun(func: (runName: string) => void): void {
-  //   SettingsPanel.allowRun = func
-  // }
 
   public static setResultsWebviewProvider(
     resultsWebviewProvide: ResultsWebviewProvider,

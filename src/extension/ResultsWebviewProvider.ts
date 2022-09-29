@@ -1,3 +1,9 @@
+/* ---------------------------------------------------------------------------------------------
+ *  Results webview actions. When there is an action that has to do with sending
+ *  information from the Results part of the applicaiton to the extention part,
+ *  it is listened to in here, than the corresponding function is called.
+ *-------------------------------------------------------------------------------------------- */
+
 import * as vscode from 'vscode'
 import axios from 'axios'
 import { navigateToCode } from './utils/navigateToCode'

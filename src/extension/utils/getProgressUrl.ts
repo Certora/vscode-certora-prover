@@ -1,3 +1,7 @@
+/* ---------------------------------------------------------------------------------------------
+ *  Gets the progress url / creation time url, by string processsing.
+ *-------------------------------------------------------------------------------------------- */
+
 export function getProgressUrl(text: string): string | null {
   if (!text.includes('You can follow up on the status:')) return null
 

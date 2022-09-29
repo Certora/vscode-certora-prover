@@ -330,7 +330,6 @@
           showExpendIcon={expandedState}
           status={hasResults() ? Status.success : status}
           inactiveSelected={runName === inactiveSelected}
-          link={vrLink}
           runFunc={status === Status.ready ||
           status === Status.success ||
           status === Status.unableToRun

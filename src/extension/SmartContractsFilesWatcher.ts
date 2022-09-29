@@ -1,3 +1,7 @@
+/* ---------------------------------------------------------------------------------------------
+ *  Finds all the solidity / spec files in the workspace and sends them to settings
+ *-------------------------------------------------------------------------------------------- */
+
 import * as vscode from 'vscode'
 import { FileFormat } from './types'
 export class SmartContractsFilesWatcher {
@@ -50,7 +54,6 @@ export class SmartContractsFilesWatcher {
         this.filesSpec.push(fileObj)
       }
     })
-    console.log(this.filesSpec, 'files spec')
     this.sendFilesToWebview()
   }
 
@@ -62,6 +65,11 @@ export class SmartContractsFilesWatcher {
     this.notifyWebviewAboutUpdates(fileUri, 'filter')
   }
 
+  /**
+   * when a file is created / deleted from the workspace, only the change is sent to settings
+   * @param fileUri uri of the file that has changed
+   * @param method either 'push' or 'filter'
+   */
   private notifyWebviewAboutUpdates(fileUri: vscode.Uri, method: string) {
     if (this.webview) {
       const file = this.getFileFormat(fileUri)

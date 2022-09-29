@@ -1,3 +1,7 @@
+/* ---------------------------------------------------------------------------------------------
+ *  Creates a conf file from an inputFormData type.
+ *-------------------------------------------------------------------------------------------- */
+
 import { workspace, Uri, window } from 'vscode'
 import { log, Sources } from '../utils/log'
 import { InputFormData, NewForm, SolcArg, SolidityObj } from '../types'

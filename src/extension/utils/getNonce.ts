@@ -1,3 +1,7 @@
+/* ---------------------------------------------------------------------------------------------
+ *  Gets a unique identifier, consists of english letters and numbers
+ *-------------------------------------------------------------------------------------------- */
+
 export function getNonce(): string {
   let text = ''
   const possible =
