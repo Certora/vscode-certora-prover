@@ -1,4 +1,8 @@
 <script lang="ts">
+  /* ---------------------------------------------------------------------------------------------
+   *  Component that shows contract call resolutions / warnings
+   *-------------------------------------------------------------------------------------------- */
+
   import { navigateToCode } from '../extension-actions'
   import type { ContractCallResolution } from '../types'
 

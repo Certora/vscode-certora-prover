@@ -1,3 +1,7 @@
+/* ---------------------------------------------------------------------------------------------
+ *  Add a new verification result to the VerificationResults array.
+ *-------------------------------------------------------------------------------------------- */
+
 import type { Assert, Job, Rule, Tree, Verification } from '../types'
 
 export function mergeResults(results: Job[], newResult: Job): void {

@@ -1,4 +1,8 @@
 <script lang="ts">
+  /* ---------------------------------------------------------------------------------------------
+   *  Component that shows icon of a tree item
+   *-------------------------------------------------------------------------------------------- */
+
   import { getIconPath } from '../utils/getIconPath'
 
   export let path: string = ''

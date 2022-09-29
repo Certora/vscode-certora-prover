@@ -1,4 +1,8 @@
 <script lang="ts">
+  /* ---------------------------------------------------------------------------------------------
+   *  Component that shows one action button for the Toolbar component
+   *-------------------------------------------------------------------------------------------- */
+
   export let title: string
   export let icon: string
   export let link: string = ''

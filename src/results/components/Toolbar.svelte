@@ -1,4 +1,8 @@
 <script lang="ts">
+  /* ---------------------------------------------------------------------------------------------
+   *  Component that shows action buttons for the Pane component
+   *-------------------------------------------------------------------------------------------- */
+
   import ToolbarItem from './ToolbarItem.svelte'
   import type { Action } from '../types'
 

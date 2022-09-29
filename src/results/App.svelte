@@ -1,4 +1,10 @@
 <script lang="ts">
+  /* ---------------------------------------------------------------------------------------------
+   *  Main file of the Results part of the extension.
+   *  creates runs under MY RUNS pane, creates action buttons, sends actions
+   *  like edit, run etc.
+   *-------------------------------------------------------------------------------------------- */
+
   import { onMount, onDestroy } from 'svelte'
   import Pane from './components/Pane.svelte'
   import CodeItemList from './components/CodeItemList.svelte'

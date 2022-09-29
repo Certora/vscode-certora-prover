@@ -1,4 +1,8 @@
 <script lang="ts">
+  /* ---------------------------------------------------------------------------------------------
+   *  Shows all the information of a run: run name, status, action buttons etc.
+   *-------------------------------------------------------------------------------------------- */
+
   import { onDestroy, onMount } from 'svelte'
   import { getIconPath } from '../utils/getIconPath'
 

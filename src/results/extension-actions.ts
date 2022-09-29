@@ -1,3 +1,9 @@
+/* ---------------------------------------------------------------------------------------------
+ *  Results actions to send to the extention part. When there is an action that has to do with sending
+ *  information from the Results part of the applicaiton to the extention part,
+ *  it is sent in here, with the corresponding function.
+ *-------------------------------------------------------------------------------------------- */
+
 import { log, Sources } from './utils/log'
 import type { ConfNameMap, JumpToDefinition } from './types'
 

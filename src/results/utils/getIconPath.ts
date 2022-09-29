@@ -1,4 +1,7 @@
-// TODO: I couldn't find better solution than provide path to media folder from webview provider
+/* ---------------------------------------------------------------------------------------------
+ *  Gets the path to the icon from the media folder.
+ *-------------------------------------------------------------------------------------------- */
+
 const mediaPath = document
   .querySelector('meta[data-media-path]')
   .getAttribute('data-media-path')
