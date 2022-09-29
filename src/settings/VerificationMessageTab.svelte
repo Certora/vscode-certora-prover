@@ -1,4 +1,8 @@
 <script>
+  /* ---------------------------------------------------------------------------------------------
+   *  Verification message tab. Here the user types the verification message of the run.
+   *-------------------------------------------------------------------------------------------- */
+
   import CustomInput from './components/CustomInput.svelte'
   import { verification_message } from './stores/store.js'
 

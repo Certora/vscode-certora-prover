@@ -1,4 +1,8 @@
 <script lang="ts">
+  /* ---------------------------------------------------------------------------------------------
+   *  Settings view main file. It consists of all the components of the settings form.
+   *-------------------------------------------------------------------------------------------- */
+
   import { onMount, onDestroy } from 'svelte'
   // new cutting edge stuff
   import { log, Sources } from './utils/log'

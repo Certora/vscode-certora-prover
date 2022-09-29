@@ -1,7 +1,12 @@
 <script>
+  /* ---------------------------------------------------------------------------------------------
+   *  Wrapper for the settings view component. This also auto saved the changes to the fields.
+   *  The different components are side navigation, solidity settings tab, spec settings tab, validation message.
+   *-------------------------------------------------------------------------------------------- */
+
   import RunSideNav from './RunSideNav.svelte'
   import SpecSettingsTab from './SpecSettingsTab.svelte'
-  import Test from './SolSettingsTab.svelte'
+  import SolSettingsTab from './SolSettingsTab.svelte'
   import VerificationMessageTab from './VerificationMessageTab.svelte'
   import {
     checkMyInputs,
@@ -53,7 +58,7 @@
   <div class="left_wrapper media"><RunSideNav /></div>
   <div class="right_wrapper">
     <div class="top_nav"><RunSideNav /></div>
-    <Test />
+    <SolSettingsTab />
     <SpecSettingsTab />
     <VerificationMessageTab />
   </div>

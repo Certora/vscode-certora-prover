@@ -1,4 +1,8 @@
 <script>
+  /* ---------------------------------------------------------------------------------------------
+   *  Component that shows an expendable section of the settings view.
+   *-------------------------------------------------------------------------------------------- */
+
   import { createEventDispatcher } from 'svelte'
   import collapse from 'svelte-collapse'
   import { resetNav } from '../stores/store.js'

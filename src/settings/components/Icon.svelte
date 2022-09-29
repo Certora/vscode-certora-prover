@@ -1,11 +1,7 @@
 <script>
-  // expected obj
-  // let solidityIconsObj = {
-  //   selected: isSolidityListOpen,
-  //   loadFilesFolder: loadFilesFolder,
-  //   ifoText: 'some string',
-  //   infoLink: 'www.google.com'
-  // }
+  /* ---------------------------------------------------------------------------------------------
+   *  Component that shows an icon
+   *-------------------------------------------------------------------------------------------- */
 
   let showInfo = false
   let mouse_is_on_show_info = false

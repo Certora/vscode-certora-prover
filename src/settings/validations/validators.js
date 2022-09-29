@@ -1,3 +1,8 @@
+/* ---------------------------------------------------------------------------------------------
+ *  All validators functions. A validator is for checking if an input is valid,
+ *  consists of the relvant charecters.
+ *-------------------------------------------------------------------------------------------- */
+
 function emailValidator() {
   return function email(value) {
     return (
@@ -35,18 +40,6 @@ function numberValidator() {
     return !!value.match('^[0-9]*$') || 'Accepting numbers Only'
   }
 }
-//   (value && !!value.match('^[a-zA-Z ]*$')) || 'Please enter a valid email'
-// empty string rerurns error here
-
-// looks like a useless  just for msg?
-// function requiredValidator() {
-//   return function required(value) {
-//     return (
-//       (value !== undefined && value !== null && value !== '') ||
-//       'This field is required'
-//     )
-//   }
-// }
 
 export {
   emailValidator,

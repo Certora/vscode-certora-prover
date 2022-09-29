@@ -1,4 +1,8 @@
 <script>
+  /* ---------------------------------------------------------------------------------------------
+   *  Component that shows info abuot a property, and link to documentation
+   *-------------------------------------------------------------------------------------------- */
+
   export let infoObj = {
     infoText: 'some text...',
     infoLink: 'https://google.com',

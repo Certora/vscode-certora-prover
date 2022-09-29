@@ -1,5 +1,8 @@
 <script>
-  // export let itemSrcHover = 'hgjghjghjgj'
+  /* ---------------------------------------------------------------------------------------------
+   *  Component that shows a file list in the file picker
+   *-------------------------------------------------------------------------------------------- */
+
   export let isActive = false
   export let isFirst = false
   export let isHover = false

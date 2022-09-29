@@ -1,4 +1,9 @@
 <script>
+  /* ---------------------------------------------------------------------------------------------
+   *  Additional solidity settings tab. All the input components and input fields of additional
+   *  solidity contracts part.
+   *-------------------------------------------------------------------------------------------- */
+
   import Select from 'svelte-select'
   import ClearIcon from './components/ClearIcon.svelte'
   import CollapseCard from './components/CollapseCard.svelte'

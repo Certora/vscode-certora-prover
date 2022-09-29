@@ -1,4 +1,10 @@
 <script>
+  /* ---------------------------------------------------------------------------------------------
+   * Side navigation consists of solidity, spec and verification message parts.
+   * The solidity part is enabled first, then only if all the mandatory fields are filled,
+   * the spec part is enabled.
+   *-------------------------------------------------------------------------------------------- */
+
   import {
     navState,
     selectNavMenu,

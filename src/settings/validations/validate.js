@@ -1,3 +1,7 @@
+/* ---------------------------------------------------------------------------------------------
+ *  builds one validator. looks for wrong cherecters, and sends the findings.
+ *-------------------------------------------------------------------------------------------- */
+
 function buildValidator(validators) {
   return function validate(value, dirty) {
     if (!validators || validators.length === 0) {

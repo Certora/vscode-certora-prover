@@ -1,4 +1,8 @@
 <script>
+  /* ---------------------------------------------------------------------------------------------
+   *  Component that shows a file item in the file picker
+   *-------------------------------------------------------------------------------------------- */
+
   import { beforeUpdate, createEventDispatcher, onMount, tick } from 'svelte'
   import isOutOfViewport from 'svelte-select/src/utils/isOutOfViewport'
   import ItemComponent from './CustomItem.svelte'

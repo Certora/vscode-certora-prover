@@ -1,3 +1,6 @@
+/* ---------------------------------------------------------------------------------------------
+ *  Resend all the solidity / spec files from the workspace folder.
+ *-------------------------------------------------------------------------------------------- */
 import { log, Sources } from './log'
 
 export function refreshFiles(): void {

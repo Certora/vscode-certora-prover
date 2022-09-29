@@ -1,4 +1,8 @@
 <script>
+  /* ---------------------------------------------------------------------------------------------
+   *  Spec settings tab. All the input components and input fields of the spec part.
+   *-------------------------------------------------------------------------------------------- */
+
   import Select from 'svelte-select'
   import ClearIcon from './components/ClearIcon.svelte'
   import CollapseCard from './components/CollapseCard.svelte'
