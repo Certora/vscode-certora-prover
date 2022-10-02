@@ -29,7 +29,7 @@ function setAdditionalSetting(val?: string) {
   const settingsRegex = /(-(.+)(=(.+))?)(,(-(.+)(=(.+))?))*/g
   if (settingsRegex.exec(val)) {
     const squareBracketsRegex = /(\[|\])+/g
-    return val.replace(squareBracketsRegex, '').split(',')
+    return val[0].replace(squareBracketsRegex, '').split(',')
   }
   return val
 }
