@@ -120,7 +120,7 @@
         mainFile: '',
         mainContract: '',
         linking: [{ variable: '', contractName: '' }],
-        compiler: { exe: '', ver: '' },
+        compiler: $solidityObj.compiler,
       },
     ]
   }
