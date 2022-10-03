@@ -113,6 +113,12 @@ export class ScriptRunner {
         // remove all the bash color characters
         str = str.replace(re, '')
         this.log(str, confFile, ts)
+        // parse errors are shown in an error message.
+        if (str.includes('CRITICAL')) {
+          // remove irrelevant --debug suggestion
+          const shortMsg = str.split('consider running the script again')[0]
+          window.showErrorMessage(shortMsg)
+        }
         channel.appendLine(str)
 
         const progressUrl = getProgressUrl(str)
@@ -147,7 +153,8 @@ export class ScriptRunner {
         this.removeRunningScript(pid)
       })
 
-      this.script.on('error', () => {
+      this.script.on('error', err => {
+        console.log(err, 'error message')
         this.removeRunningScript(pid)
       })
 

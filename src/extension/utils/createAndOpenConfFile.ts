@@ -225,14 +225,14 @@ function processAdditionalContracts(
   solidityAdditionalContracts.forEach(solObj => {
     if (solObj.mainContract) {
       form.additionalContracts.push({
-        file: solObj.mainFile.value.toString(),
+        file: solObj.mainFile.value?.toString(),
         name: solObj.mainContract,
       })
 
       processLink(form, solObj, solObj.mainContract)
 
       if (solObj.compiler.ver) {
-        let compDir: string = solObj.compiler.exe
+        let compDir: string = solObj.compiler.exe || ''
         if (compDir !== '') {
           compDir += '/'
         }

@@ -17,6 +17,7 @@
     navState,
     solidityObj,
     solAdditionalContracts,
+    isReset,
   } from './stores/store.js'
   import CustomList from './components/CustomList.svelte'
 
@@ -81,13 +82,14 @@
       return
     }
     $solidityObj.mainFile = event.detail
-    if ($solidityObj.mainFile) {
+    if ($solidityObj.mainFile && (!$solidityObj.mainContract || !$isReset)) {
       $solidityObj.mainContract = $solidityObj.mainFile.label
         .toString()
         .split('/')
         .reverse()[0]
         .replace('.sol', '')
     }
+    $isReset = false
   }
   // clears the store.js solidityObj.mainFile/ solAdditionalContracts
   function handleClear(e, index = -1) {
