@@ -77,21 +77,6 @@ export const solidityObj = writable({
   ],
 })
 
-// const linkingObj = {
-//     variable:'some string',
-//     contractName:'some string'
-// }
-
-// const compiler = {
-//     exe:'somer string',
-//     ver:'some string'
-// }
-
-// const solidityPackageDir = {
-//     packageName:'some string',
-//     path:''
-// }
-
 export const specObj = writable({
   specFile: '',
   rules: '',
@@ -113,8 +98,3 @@ export const specObj = writable({
   multiAssert: false,
   sendOnly: true,
 })
-
-// const specProperties = {
-//     name: 'some string',
-//     value:'some string'
-// }

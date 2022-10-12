@@ -1,20 +1,19 @@
 <script>
-  import { onMount } from 'svelte'
   /* ---------------------------------------------------------------------------------------------
    *  Verification message tab. Here the user types the verification message of the run.
    *-------------------------------------------------------------------------------------------- */
 
   import CustomInput from './components/CustomInput.svelte'
-  import { verification_message, RunName } from './stores/store.js'
+  import { verification_message } from './stores/store.js'
 
-  let infoObjArr = {
-    msg: {
-      infoText: 'Adds a message description to your run. ',
-      infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#msg',
-      validator: 'spaceAndDash',
-    },
-  }
+  // let infoObjArr = {
+  //   msg: {
+  //     infoText: 'Adds a message description to your run. ',
+  //     infoLink:
+  //       'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#msg',
+  //     validator: 'spaceAndDash',
+  //   },
+  // }
 </script>
 
 <div class="card_parent_wrapper bg_dark border-rd">
