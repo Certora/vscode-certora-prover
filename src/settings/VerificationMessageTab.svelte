@@ -28,7 +28,6 @@
         <CustomInput
           placeholder="Text message"
           bind:bindValue={$verification_message}
-          infoObj={infoObjArr.msg}
         />
       </div>
     </div>
