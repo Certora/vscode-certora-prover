@@ -14,7 +14,7 @@
     specObj,
     verification_message,
     solAdditionalContracts,
-    isReset,
+    RunName,
   } from './stores/store.js'
   import { log, Sources } from './utils/log'
 

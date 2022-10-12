@@ -1,4 +1,5 @@
 <script>
+  import { onMount } from 'svelte'
   /* ---------------------------------------------------------------------------------------------
    *  Verification message tab. Here the user types the verification message of the run.
    *-------------------------------------------------------------------------------------------- */
@@ -13,10 +14,6 @@
         'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#msg',
       validator: 'spaceAndDash',
     },
-  }
-
-  if (!$verification_message) {
-    $verification_message = $RunName
   }
 </script>
 
