@@ -110,7 +110,6 @@ export const specObj = writable({
   ruleSanity: false,
   advancedSanity: false,
   localTypeChecking: true,
-  shortOutput: true,
   multiAssert: false,
   sendOnly: true,
 })

@@ -96,7 +96,6 @@ export type SpecObj = {
   ruleSanity: boolean
   advancedSanity: boolean
   localTypeChecking: boolean
-  shortOutput: boolean
   multiAssert: boolean
   sendOnly: boolean
 }

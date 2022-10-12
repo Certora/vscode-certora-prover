@@ -182,10 +182,6 @@ export class ScriptRunner {
             payload: this.getConfFileName(confFile).replace('.conf', ''),
           })
         }
-        const document = await workspace.openTextDocument(
-          this.logFile?.path || '',
-        )
-        await window.showTextDocument(document)
       })
     }
   }

@@ -37,7 +37,6 @@ const newForm: NewForm = {
     ruleSanity: false,
     advancedSanity: false,
     localTypeChecking: false,
-    shortOutput: false,
     multiAssert: false,
     sendOnly: true,
   },
@@ -60,7 +59,6 @@ const stableFields = [
   'smt_timeout',
   'loop_iter',
   'method',
-  'short_output',
   'disableLocalTypeChecking',
   'optimistic_loop',
   'packages_path',
@@ -190,10 +188,6 @@ function processSpecAttributes(confFile: ConfFile, specObj: SpecObj) {
 
   if (confFile.loop_iter) {
     specObj.loopUnroll = confFile.loop_iter.toString()
-  }
-
-  if (confFile.short_output !== undefined) {
-    specObj.shortOutput = confFile.short_output as boolean
   }
 
   if (confFile.disableLocalTypeChecking !== undefined) {

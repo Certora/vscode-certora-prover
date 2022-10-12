@@ -111,11 +111,6 @@
       infoLink:
         'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#typecheck-only',
     },
-    short_output: {
-      infoText: 'Reduces the verbosity of the tool.',
-      infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#short-output',
-    },
     multi_assert_check: {
       infoText:
         'This mode checks each assertion statement that occurs in a rule, separately.',
@@ -394,7 +389,10 @@
                       </label>
                       <CheckBoxInfo infoObj={infoObjArr.multi_assert_check} />
                     </div>
-                    <div class="dark_input alternate_input  check_box_wrapper">
+                    <div
+                      class="dark_input alternate_input  check_box_wrapper"
+                      style="margin-right: 37%;"
+                    >
                       <label class="checkbox_container"
                         >Local type checking
                         <input
@@ -405,17 +403,6 @@
                       </label>
                       <CheckBoxInfo infoObj={infoObjArr.typecheck_only} />
                     </div>
-                    <!-- <div class="dark_input alternate_input check_box_wrapper">
-                      <label class="checkbox_container"
-                        >Short output
-                        <input
-                          type="checkbox"
-                          bind:checked={$specObj.shortOutput}
-                        />
-                        <span class="checkmark" />
-                      </label>
-                      <CheckBoxInfo infoObj={infoObjArr.short_output} />
-                    </div> -->
                   </div>
                 </div>
               </CollapseCard>

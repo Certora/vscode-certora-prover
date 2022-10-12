@@ -78,7 +78,6 @@ export function activate(context: vscode.ExtensionContext): void {
     const confFileDefault: ConfFile = {
       solc: solcPath + solc,
       staging: branch,
-      short_output: true,
     }
     if (solcArgs !== '{}') {
       confFileDefault.solc_args = ''

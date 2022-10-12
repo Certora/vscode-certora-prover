@@ -372,12 +372,6 @@ export function processForm(
     }
   }
 
-  addAdditionalSetting(
-    'short_output',
-    newForm.specObj.shortOutput.toString(),
-    form,
-  )
-
   addSolcArguments('solc_args', newForm.solidyObj.solidityArgs, form)
 
   processPackages(newForm.solidyObj, form)
