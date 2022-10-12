@@ -39,6 +39,7 @@ const newForm: NewForm = {
     localTypeChecking: false,
     shortOutput: false,
     multiAssert: false,
+    sendOnly: true,
   },
   verificatoinMessage: '',
   checkMyInputs: false,
@@ -65,6 +66,7 @@ const stableFields = [
   'packages_path',
   'solc_map',
   'rule_sanity',
+  'send_only',
 ]
 
 function getAdditionalSettings(confFile: ConfFile) {
@@ -210,6 +212,9 @@ function processSpecAttributes(confFile: ConfFile, specObj: SpecObj) {
     if (confFile.rule_sanity === 'advanced') {
       specObj.ruleSanity = true
       specObj.advancedSanity = true
+    }
+    if (confFile.send_only) {
+      specObj.sendOnly = true
     }
   }
 

@@ -98,6 +98,7 @@ export type SpecObj = {
   localTypeChecking: boolean
   shortOutput: boolean
   multiAssert: boolean
+  sendOnly: boolean
 }
 // todo: change to multiple solidity / spec
 export type NewForm = {

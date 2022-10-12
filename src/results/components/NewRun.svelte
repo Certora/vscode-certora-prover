@@ -20,6 +20,7 @@
   import { log, Sources } from '../utils/log'
   import Pane from './Pane.svelte'
   import Tree from './Tree.svelte'
+  import { now } from 'svelte/internal'
 
   export let doRename: boolean = true
   export let editFunc: () => void

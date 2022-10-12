@@ -112,6 +112,7 @@ export const specObj = writable({
   localTypeChecking: true,
   shortOutput: true,
   multiAssert: false,
+  sendOnly: true,
 })
 
 // const specProperties = {

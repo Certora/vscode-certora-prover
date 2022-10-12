@@ -326,6 +326,12 @@ export function processForm(
     form,
   )
 
+  addAdditionalSetting(
+    'send_only',
+    (newForm.specObj.sendOnly as boolean).toString(),
+    form,
+  )
+
   addAdditionalSetting('smt_timeout', newForm.specObj.duration, form)
 
   addAdditionalSetting('loop_iter', newForm.specObj.loopUnroll, form)

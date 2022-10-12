@@ -218,6 +218,7 @@ export type SpecObj = {
   localTypeChecking: boolean
   shortOutput: boolean
   multiAssert: boolean
+  sendOnly: boolean
 }
 
 export type NewForm = {

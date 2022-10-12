@@ -39,8 +39,8 @@
   let selectedCalltraceFunction: CallTraceFunction
 
   let verificationResults: Verification[] = []
-  let runningScripts: { pid: number; confFile: string }[] = []
-
+  let runningScripts: { pid: number; confFile: string; uploaded: boolean }[] =
+    []
   let runs: Run[] = []
   let pendingQueue: ConfNameMap[] = []
   let pendingQueueCounter = 0
@@ -108,6 +108,21 @@
             updatedVerificationResults: verificationResults,
           },
         })
+        break
+      }
+      case EventTypesFromExtension.UploadingFiles: {
+        log({
+          action: 'Received "run-next" command',
+          source: Sources.ResultsWebview,
+          info: e.data.payload,
+        })
+        const curPid = e.data.payload
+        runningScripts.forEach(rs => {
+          if (rs.pid === curPid) {
+            rs.uploaded = true
+          }
+        })
+        runningScripts = runningScripts
         // when we recieve the results of the last run, we run the next job!
         runNext()
         break
@@ -126,15 +141,32 @@
             }
           })
         })
+
         // if there is no running script - run next
         if (e.data.payload.length === 0) {
           runNext()
         }
         break
       }
+      case EventTypesFromExtension.ScriptStopped: {
+        log({
+          action: 'Received "script-stopped" command',
+          source: Sources.ResultsWebview,
+          info: e.data.payload,
+        })
+        const pid = e.data.payload
+        const curRun = runs.find(run => run.id === pid)
+        if (curRun !== undefined) {
+          runs = setStatus(curRun.name, Status.ready)
+        }
+        runningScripts = runningScripts.filter(rs => {
+          return rs.pid !== pid
+        })
+        break
+      }
       case EventTypesFromExtension.SetOutput: {
         log({
-          action: 'Received "getOutput" command',
+          action: 'Received "get-output" command',
           source: Sources.ResultsWebview,
           info: e.data.payload,
         })
@@ -336,8 +368,12 @@
       clearOutput()
     }
 
+    const shouldRunNext = runningScripts.every(rs => {
+      return rs.uploaded === true
+    })
+
     //if there are no running scripts => runNext
-    if (runningScripts.length === 0 && index === 0) {
+    if ((runningScripts.length === 0 || shouldRunNext) && index === 0) {
       runNext()
     }
   }
@@ -448,6 +484,7 @@
       return vr.name !== run.name
     })
     pendingQueueCounter--
+    runs = setStatus(run.name, Status.ready)
   }
 
   onMount(() => {
@@ -490,7 +527,7 @@
     >
       <ul class="running-scripts">
         {#each Array(runsCounter) as _, index (index)}
-          {#key [runs[index], focusedRun, runs[index].status, verificationResults]}
+          {#key [runs[index], focusedRun, runs[index].status, verificationResults, runningScripts]}
             <li>
               <NewRun
                 doRename={runs[index].name === ''}
@@ -522,8 +559,9 @@
                   verificationResults = verificationResults.filter(vr => {
                     return vr.name !== runs[index].name
                   })
+                  runs = setStatus(runs[index].name, Status.ready)
                   stopScript(runs[index].id)
-                  runNext()
+                  // runNext()
                 }}
                 inactiveSelected={focusedRun}
                 {setStatus}

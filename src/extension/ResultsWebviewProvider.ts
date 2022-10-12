@@ -159,7 +159,7 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
       this.postMessage<Output>({ type: 'set-output', payload: data })
     } catch (e) {
       vscode.window.showErrorMessage(
-        `Certora verification service is currently unavailable. Please, try again later.`,
+        `Certora verification service is currently unavailable. Please, try again later.1`,
       )
     }
   }
@@ -175,7 +175,7 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
       })
     } catch (e) {
       vscode.window.showErrorMessage(
-        `Certora verification service is currently unavailable. Please, try again later.`,
+        `Certora verification service is currently unavailable. Please, try again later.2`,
       )
     }
   }

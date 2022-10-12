@@ -405,7 +405,7 @@
                       </label>
                       <CheckBoxInfo infoObj={infoObjArr.typecheck_only} />
                     </div>
-                    <div class="dark_input alternate_input check_box_wrapper">
+                    <!-- <div class="dark_input alternate_input check_box_wrapper">
                       <label class="checkbox_container"
                         >Short output
                         <input
@@ -415,7 +415,7 @@
                         <span class="checkmark" />
                       </label>
                       <CheckBoxInfo infoObj={infoObjArr.short_output} />
-                    </div>
+                    </div> -->
                   </div>
                 </div>
               </CollapseCard>

@@ -4,7 +4,7 @@
    *-------------------------------------------------------------------------------------------- */
 
   import CustomInput from './components/CustomInput.svelte'
-  import { verification_message } from './stores/store.js'
+  import { verification_message, RunName } from './stores/store.js'
 
   let infoObjArr = {
     msg: {
@@ -13,6 +13,10 @@
         'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#msg',
       validator: 'spaceAndDash',
     },
+  }
+
+  if (!$verification_message) {
+    $verification_message = $RunName
   }
 </script>
 

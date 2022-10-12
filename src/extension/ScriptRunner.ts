@@ -13,6 +13,7 @@ import { PostProblems } from './PostProblems'
 type RunningScript = {
   pid: number
   confFile: string
+  uploaded: boolean
 }
 
 const re = /(\033)|(\[33m)|(\[32m)|(\[31m)|(\[0m)/g
@@ -136,7 +137,11 @@ export class ScriptRunner {
                   'https://prover.certora.com/output/[a-zA-Z0-9/?=]+'
                 const vrLinkRegExp = new RegExp(pattern)
                 const vrLink = vrLinkRegExp.exec(strContent)
-                if (vrLink) {
+                if (
+                  vrLink &&
+                  this.runningScripts.find(rs => rs.pid === pid) !== undefined
+                ) {
+                  this.removeRunningScript(pid)
                   data.verificationReportLink = (vrLink[0] as string) || ''
                   this.resultsWebviewProvider.postMessage<Job>({
                     type: 'receive-new-job-result',
@@ -153,15 +158,23 @@ export class ScriptRunner {
         this.removeRunningScript(pid)
       })
 
-      this.script.on('error', err => {
-        console.log(err, 'error message')
+      this.script.on('error', async err => {
+        console.error(err)
         this.removeRunningScript(pid)
       })
 
       this.script.on('close', async code => {
-        this.removeRunningScript(pid)
-
+        this.runningScripts.forEach(rs => {
+          if (rs.pid === pid) {
+            rs.uploaded = true
+          }
+        })
+        this.resultsWebviewProvider.postMessage<number>({
+          type: 'run-next',
+          payload: pid,
+        })
         if (code !== 0) {
+          this.removeRunningScript(pid)
           // when there is a parse error, post it to PROBLEMS and send 'parse-error' to results
           PostProblems.postProblems(confFile)
           this.resultsWebviewProvider.postMessage({
@@ -169,6 +182,10 @@ export class ScriptRunner {
             payload: this.getConfFileName(confFile).replace('.conf', ''),
           })
         }
+        const document = await workspace.openTextDocument(
+          this.logFile?.path || '',
+        )
+        await window.showTextDocument(document)
       })
     }
   }
@@ -180,12 +197,18 @@ export class ScriptRunner {
         : `kill -15 ${pid}`
 
     exec(command)
+    this.removeRunningScript(pid)
+    this.resultsWebviewProvider.postMessage({
+      type: 'script-stopped',
+      payload: pid,
+    })
   }
 
   private addRunningScript(confFile: string, pid: number): void {
     this.runningScripts.push({
       confFile,
       pid,
+      uploaded: false,
     })
     this.sendRunningScriptsToWebview()
   }

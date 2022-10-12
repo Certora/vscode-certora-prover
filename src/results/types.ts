@@ -162,6 +162,8 @@ export enum EventTypesFromExtension {
   AllowRun = 'allow-run',
   BlockRun = 'block-run',
   FocusChanged = 'focus-changed',
+  UploadingFiles = 'run-next',
+  ScriptStopped = 'script-stopped',
 }
 
 export type EventsFromExtension =
@@ -171,7 +173,7 @@ export type EventsFromExtension =
     }
   | {
       type: EventTypesFromExtension.RunningScriptChanged
-      payload: { pid: number; confFile: string }[]
+      payload: { pid: number; confFile: string; uploaded: boolean }[]
     }
   | {
       type: EventTypesFromExtension.SetOutput
@@ -202,6 +204,14 @@ export type EventsFromExtension =
   | {
       type: EventTypesFromExtension.FocusChanged
       payload: string
+    }
+  | {
+      type: EventTypesFromExtension.UploadingFiles
+      payload: number
+    }
+  | {
+      type: EventTypesFromExtension.ScriptStopped
+      payload: number
     }
 
 export type ConfNameMap = {
