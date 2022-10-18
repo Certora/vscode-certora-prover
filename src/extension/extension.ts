@@ -171,6 +171,7 @@ export function activate(context: vscode.ExtensionContext): void {
       const confFileContent: ConfFile = JSON.parse(
         decoder.decode(await vscode.workspace.fs.readFile(confFileUri)),
       )
+      confFileContent.msg = ''
 
       try {
         const newConfFilePath = getConfFilePath(duplicated.fileName)
