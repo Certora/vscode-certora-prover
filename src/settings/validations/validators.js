@@ -19,6 +19,15 @@ function spaceAndDashValidator() {
     )
   }
 }
+function messageAndNameValidator() {
+  const regex = /^[-_, a-zA-Z0-9()]*$/g
+  return function email(value) {
+    return (
+      !!value.match(regex) ||
+      'Accepting only alphanumeric characters (including underscore, space, dash, comma, parentheses)*'
+    )
+  }
+}
 function compilerValidator() {
   return function email(value) {
     return (
@@ -47,5 +56,6 @@ export {
   numberValidator,
   compilerValidator,
   filePathValidator,
+  messageAndNameValidator,
 }
 // export { emailValidator, requiredValidator }

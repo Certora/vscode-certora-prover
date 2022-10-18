@@ -9,6 +9,7 @@
     numberValidator,
     filePathValidator,
     compilerValidator,
+    messageAndNameValidator,
   } from '../validations/validators.js'
   import { createFieldValidator } from '../validations/validation.js'
 
@@ -44,6 +45,11 @@
 
     if (infoObj.validator === 'compilerValidator') {
       validator = compilerValidator()
+      return
+    }
+
+    if (infoObj.validator === 'messageAndNameValidator') {
+      validator = messageAndNameValidator()
       return
     }
     validator = compilerValidator()
