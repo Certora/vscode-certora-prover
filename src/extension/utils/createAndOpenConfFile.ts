@@ -298,7 +298,7 @@ export function processForm(
     useStaging: newForm.specObj.runOnStg,
     branch: newForm.specObj.branchName || 'master',
     cacheName: '',
-    message: '',
+    message: confFileName,
     additionalSettings: [],
     solc_map: [],
   }
