@@ -24,6 +24,7 @@ export class ScriptRunner {
   private script: ChildProcessWithoutNullStreams | null = null
   private runningScripts: RunningScript[] = []
   private logFile: Uri | undefined
+  private logFiles: Uri[] = []
 
   constructor(resultsWebviewProvider: ResultsWebviewProvider) {
     this.polling = new ScriptProgressLongPolling()
@@ -62,7 +63,9 @@ export class ScriptRunner {
     ts: number,
   ): Promise<void> {
     const logFilePath = this.getLogFilePath(pathToConfFile, ts)
-    this.logFile = logFilePath
+    if (logFilePath) {
+      this.logFiles.push(logFilePath)
+    }
     if (!logFilePath) {
       return
     }
@@ -129,8 +132,13 @@ export class ScriptRunner {
         if (progressUrl) {
           await this.polling.run(progressUrl, data => {
             data.runName = confFileName
-            if (this.logFile) {
-              workspace.fs.readFile(this.logFile).then(content => {
+            const curLogFile = this.logFiles.find(
+              lf =>
+                lf.path.split('/').reverse()[0].split('.conf')[0] ===
+                data.runName,
+            )
+            if (curLogFile !== undefined) {
+              workspace.fs.readFile(curLogFile).then(content => {
                 const decoder = new TextDecoder()
                 const strContent: string = decoder.decode(content)
                 const pattern =
