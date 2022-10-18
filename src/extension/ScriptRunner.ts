@@ -218,8 +218,14 @@ export class ScriptRunner {
   }
 
   private removeRunningScript(pid: number): void {
+    const confFile = this.runningScripts.find(rs => rs.pid === pid)
     this.runningScripts = this.runningScripts.filter(
       script => script.pid !== pid,
+    )
+    this.logFiles = this.logFiles.filter(
+      lf =>
+        lf.path.split('/').reverse()[0].split('.conf')[0] !==
+        confFile?.confFile,
     )
     this.sendRunningScriptsToWebview()
   }
