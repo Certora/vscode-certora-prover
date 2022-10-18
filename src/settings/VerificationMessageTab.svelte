@@ -11,7 +11,7 @@
       infoText: 'Adds a message description to your run. ',
       infoLink:
         'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#msg',
-      validator: 'messageAndNameValidator',
+      validator: 'spaceAndDash',
     },
   }
 </script>

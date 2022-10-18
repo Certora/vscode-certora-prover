@@ -26,7 +26,9 @@
   function fillFields(newForm: NewForm) {
     $solidityObj = newForm.solidyObj
     $specObj = newForm.specObj
-    $verification_message = newForm.verificatoinMessage || $RunName
+    $verification_message =
+      newForm.verificatoinMessage ||
+      $RunName.replaceAll('(', '').replaceAll(')', '')
     $solAdditionalContracts = newForm.solidityAdditionalContracts || []
   }
 
