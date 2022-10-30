@@ -29,6 +29,7 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
     | ((toDuplicate: ConfNameMap, duplicated: ConfNameMap) => void) = null
 
   public runScript: null | ((name: ConfNameMap) => void) = null
+  public removeScript: null | ((name: string) => void) = null
   constructor(private readonly _extensionUri: vscode.Uri) {
     this._extensionUri = _extensionUri
   }
@@ -125,6 +126,16 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
             })
             if (typeof this.duplicate === 'function') {
               this.duplicate(e.payload.toDuplicate, e.payload.duplicatedName)
+            }
+            break
+          case CommandFromResultsWebview.RemoveScript:
+            log({
+              action: 'Received "remove-script" command',
+              source: Sources.Extension,
+              info: e.payload,
+            })
+            if (typeof this.removeScript === 'function') {
+              this.removeScript(e.payload)
             }
             break
           default:

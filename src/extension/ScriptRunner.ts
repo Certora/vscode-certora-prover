@@ -9,6 +9,7 @@ import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { getProgressUrl } from './utils/getProgressUrl'
 import type { Job } from './types'
 import { PostProblems } from './PostProblems'
+import { Console } from 'console'
 
 type RunningScript = {
   pid: number
@@ -121,7 +122,24 @@ export class ScriptRunner {
         if (str.includes('CRITICAL')) {
           // remove irrelevant --debug suggestion
           const shortMsg = str.split('consider running the script again')[0]
-          window.showErrorMessage(shortMsg)
+          // window.showErrorMessage(shortMsg).then(action => {
+          //   if (action === 'Show The Script Output') {
+          //     channel.show()
+          //   }
+          // })
+          const action = await window.showErrorMessage(
+            shortMsg,
+            'Open Execution Log File',
+          )
+          if (action === 'Open Execution Log File') {
+            const logFilePath = Uri.joinPath(
+              path.uri,
+              'certora-logs',
+              `${this.getConfFileName(confFile)}-${ts}.log`,
+            )
+            const document = await workspace.openTextDocument(logFilePath)
+            await window.showTextDocument(document)
+          }
         }
         channel.appendLine(str)
 
@@ -149,7 +167,7 @@ export class ScriptRunner {
                   vrLink &&
                   this.runningScripts.find(rs => rs.pid === pid) !== undefined
                 ) {
-                  this.removeRunningScript(pid)
+                  // this.removeRunningScript(pid)
                   data.verificationReportLink = (vrLink[0] as string) || ''
                   this.resultsWebviewProvider.postMessage<Job>({
                     type: 'receive-new-job-result',
@@ -162,8 +180,8 @@ export class ScriptRunner {
         }
       })
 
-      this.script.stderr.on('data', () => {
-        this.removeRunningScript(pid)
+      this.script.stderr.on('data', async data => {
+        // this.removeRunningScript(pid)
       })
 
       this.script.on('error', async err => {
@@ -227,6 +245,17 @@ export class ScriptRunner {
         lf.path.split('/').reverse()[0].split('.conf')[0] !==
         confFile?.confFile,
     )
+    this.sendRunningScriptsToWebview()
+  }
+
+  public removeRunningScriptByName(name: string): void {
+    this.runningScripts = this.runningScripts.filter(script => {
+      return script.confFile.replace('.conf', '').replace('conf/', '') !== name
+    })
+
+    this.logFiles = this.logFiles.filter(lf => {
+      return lf.path.split('/').reverse()[0].split('.conf')[0] !== name
+    })
     this.sendRunningScriptsToWebview()
   }
 

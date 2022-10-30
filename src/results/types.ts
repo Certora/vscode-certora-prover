@@ -226,6 +226,7 @@ export enum Status {
   pending = 'Pending',
   success = 'Ready success',
   unableToRun = 'Unable to run',
+  incompleteResults = 'Incomplete results',
 }
 
 export type Run = {

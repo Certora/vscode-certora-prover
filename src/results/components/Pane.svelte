@@ -6,6 +6,7 @@
   import Toolbar from './Toolbar.svelte'
   import { Action, Status } from '../types'
   import { getIconPath } from '../utils/getIconPath'
+  import { onMount } from 'svelte'
 
   export let title: string
   export let actions: Action[] = []
@@ -34,6 +35,7 @@
     [Status.pending, statusIcons.pending],
     [Status.success, statusIcons.success],
     [Status.unableToRun, statusIcons.unableToRun],
+    [Status.incompleteResults, statusIcons.running],
   ])
 
   /**
@@ -69,6 +71,10 @@
   function toggleExpand() {
     isExpanded = !isExpanded
   }
+
+  onMount(() => {
+    console.log('Mounting pane object', title)
+  })
 </script>
 
 <div class="pane" class:expanded={isExpanded} id={title}>

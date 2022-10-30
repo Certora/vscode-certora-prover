@@ -16,6 +16,19 @@ enum Commands {
   EditConfFile = 'edit-confFile',
   DeleteConf = 'delete-confFile',
   Duplicate = 'duplicate',
+  RemoveScript = 'remove-script',
+}
+
+export function removeScript(name: string): void {
+  log({
+    action: 'Send "remove-script" command',
+    source: Sources.ResultsWebview,
+    info: name,
+  })
+  vscode.postMessage({
+    command: Commands.RemoveScript,
+    payload: name,
+  })
 }
 
 export function stopScript(pid: number): void {

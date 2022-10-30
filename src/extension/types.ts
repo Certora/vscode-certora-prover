@@ -238,6 +238,7 @@ export enum CommandFromResultsWebview {
   EditConfFile = 'edit-confFile',
   DeleteConfFile = 'delete-confFile',
   Duplicate = 'duplicate',
+  RemoveScript = 'remove-script',
 }
 
 export enum CommandFromSettingsWebview {
@@ -282,6 +283,10 @@ export type EventFromResultsWebview =
   | {
       command: CommandFromResultsWebview.Duplicate
       payload: { toDuplicate: ConfNameMap; duplicatedName: ConfNameMap }
+    }
+  | {
+      command: CommandFromResultsWebview.RemoveScript
+      payload: string
     }
 
 export type EventFromSettingsWebview =

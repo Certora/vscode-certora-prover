@@ -20,7 +20,6 @@
   import { log, Sources } from '../utils/log'
   import Pane from './Pane.svelte'
   import Tree from './Tree.svelte'
-  import { now } from 'svelte/internal'
 
   export let doRename: boolean = true
   export let editFunc: () => void
@@ -82,6 +81,7 @@
   }
 
   onMount(() => {
+    console.log('Mounting newRun object')
     window.addEventListener('message', listener)
   })
 
@@ -222,6 +222,7 @@
         onClick: duplicate,
       },
     ]
+    console.log('creating actions')
     if (hasResults()) {
       actions.unshift({
         title: 'go to verification report',
@@ -291,10 +292,32 @@
     const result = verificationResults.find(vr => {
       return vr.name === runName
     })
-    if (result !== undefined) {
+    if (
+      result !== undefined &&
+      hasCompleteResults() &&
+      status !== Status.success
+    ) {
+      console.log('settings status to success')
       statusChange(Status.success)
+      console.log('status after change:', status)
+    } else if (
+      result !== undefined &&
+      status !== Status.incompleteResults &&
+      status !== Status.success
+    ) {
+      console.log('setting status to incomplete results')
+      statusChange(Status.incompleteResults)
+      console.log('status after change:', status)
     }
+    console.log('returning whether there are results')
     return result !== undefined
+  }
+
+  function hasCompleteResults(): boolean {
+    const result = verificationResults.find(vr => {
+      return vr.name === runName
+    })
+    return result.jobs.find(job => job.jobStatus === 'SUCCEEDED') !== undefined
   }
 
   // was copied from App.svelte
@@ -318,6 +341,8 @@
         alt=""
       />
       <input
+        type="text"
+        maxlength="35"
         class="input"
         value={namesMap.get(runName) || ''}
         placeholder="Enter run name"
@@ -327,35 +352,34 @@
     </div>
   {:else if !nowRunning}
     <div class="results" on:click={expandedState ? null : editFunc}>
-      {#key status}
-        <Pane
-          title={namesMap.get(runName)}
-          initialExpandedState={expandedState}
-          actions={createActions()}
-          showExpendIcon={expandedState}
-          status={hasResults() ? Status.success : status}
-          inactiveSelected={runName === inactiveSelected}
-          runFunc={status === Status.ready ||
-          status === Status.success ||
-          status === Status.unableToRun
-            ? runFunc
-            : null}
-        >
-          {#each verificationResults as vr, index (index)}
-            {#if vr.name === runName}
-              <li class="tree">
-                <Tree
-                  data={{
-                    type: TreeType.Rules,
-                    tree: retrieveRules(vr.jobs),
-                  }}
-                  on:fetchOutput={e => newFetchOutput(e, vr)}
-                />
-              </li>
-            {/if}
-          {/each}
-        </Pane>
-      {/key}
+      <Pane
+        title={namesMap.get(runName)}
+        initialExpandedState={expandedState}
+        actions={createActions()}
+        showExpendIcon={expandedState}
+        {status}
+        inactiveSelected={runName === inactiveSelected}
+        runFunc={status === Status.ready ||
+        status === Status.success ||
+        status === Status.unableToRun ||
+        status === Status.incompleteResults
+          ? runFunc
+          : null}
+      >
+        {#each verificationResults as vr, index (index)}
+          {#if vr.name === runName}
+            <li class="tree">
+              <Tree
+                data={{
+                  type: TreeType.Rules,
+                  tree: retrieveRules(vr.jobs),
+                }}
+                on:fetchOutput={e => newFetchOutput(e, vr)}
+              />
+            </li>
+          {/if}
+        {/each}
+      </Pane>
     </div>
   {:else}
     <div class="running">

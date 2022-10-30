@@ -97,6 +97,7 @@
   <input
     class="simple_txt_input monaco-inputbox idle"
     type="text"
+    maxlength="255"
     bind:value={bindValue}
     {placeholder}
     on:mouseenter={() => (mouse_is_on_input = true)}

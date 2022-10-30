@@ -99,7 +99,8 @@ function processCompiler(solc: string, solidityObj: SolidityObj) {
  */
 function processPackages(packages: string[], solidityObj: SolidityObj) {
   packages.forEach(packageStr => {
-    const packageArray = packageStr.split('=')
+    const re = /"/gi
+    const packageArray = packageStr.replace(re, '').split(/[:|=]/)
     const tempPackage: SolidityPackageDir = {
       packageName: packageArray[0],
       path: packageArray[1],

@@ -101,7 +101,7 @@
     <div slot="body" class="p-12 pt-0">
       <div class="input_wrapper">
         <div class="dark_input">
-          <h3>Main Solidity File<span>*</span></h3>
+          <h3>Solidity File<span>*</span></h3>
           <Select
             itemFilter={(label, filterText, option) => {
               return option
@@ -121,7 +121,7 @@
           />
         </div>
         <div class="dark_input">
-          <h3>Main Contract Name</h3>
+          <h3>Contract Name</h3>
           <CustomInput
             infoObj={infoObjArr.contractName}
             placeholder="Contract"

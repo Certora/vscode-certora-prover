@@ -100,6 +100,9 @@ export function activate(context: vscode.ExtensionContext): void {
     }
     if (solidityPackageDirectories !== '{}') {
       confFileDefault.packages = solidityPackageDirectories
+        .replace('{', '')
+        .replace('}', '')
+        .split(',')
     }
     if (optimisticLoop) {
       confFileDefault.optimistic_loop = true
@@ -215,17 +218,23 @@ export function activate(context: vscode.ExtensionContext): void {
       vscode.workspace.fs.delete(confFileUri)
     }
     SettingsPanel.removePanel(name.displayName)
+    scriptRunner.removeRunningScriptByName(name.fileName)
   }
 
   const resultsWebviewProvider = new ResultsWebviewProvider(
     context.extensionUri,
   )
 
+  function removeRunningScriptByName(name: string) {
+    scriptRunner.removeRunningScriptByName(name)
+  }
+
   resultsWebviewProvider.editConfFile = editConf
   resultsWebviewProvider.openSettings = showSettings
   resultsWebviewProvider.deleteConf = deleteConfFile
   resultsWebviewProvider.duplicate = duplicate
   resultsWebviewProvider.runScript = runScript
+  resultsWebviewProvider.removeScript = removeRunningScriptByName
 
   const scriptRunner = new ScriptRunner(resultsWebviewProvider)
 

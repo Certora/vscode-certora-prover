@@ -18,6 +18,7 @@
     editConfFile,
     deleteConf,
     duplicate,
+    removeScript,
   } from './extension-actions'
   import { smartMergeVerificationResult } from './utils/mergeResults'
   import { log, Sources } from './utils/log'
@@ -101,6 +102,15 @@
           e.data.payload.runName,
         )
         verificationResults = verificationResults
+        if (e.data.payload.jobStatus === 'SUCCEEDED') {
+          console.log('success status detected')
+          if (e.data.payload.runName) {
+            console.log('remove the script from running scripts')
+            removeScript(e.data.payload.runName)
+          }
+          console.log('change status to success from receving results')
+          runs = setStatus(e.data.payload.runName, Status.success)
+        }
         log({
           action: 'After Smart merge current results with new result',
           source: Sources.ResultsWebview,
@@ -540,12 +550,15 @@
                 status={runs[index].status}
                 {verificationResults}
                 {newFetchOutput}
-                nowRunning={runningScripts.find(
+                nowRunning={(runningScripts.find(
                   rs => getFilename(rs.confFile) === runs[index].name,
                 ) !== undefined ||
                   (pendingQueue.find(rs => rs.fileName === runs[index].name) !==
                     undefined &&
-                    pendingQueueCounter > 0)}
+                    pendingQueueCounter > 0)) &&
+                  verificationResults.find(
+                    vr => runs[index].name === vr.name,
+                  ) === undefined}
                 isPending={pendingQueue.find(
                   rs => rs.fileName === runs[index].name,
                 ) !== undefined && pendingQueueCounter > 0}
