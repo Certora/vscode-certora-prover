@@ -179,7 +179,7 @@
   >
     <div slot="header" class="header header_contracts">
       <i class="codicon codicon-symbol-method" />
-      <h3>Certora spec</h3>
+      <h3>Certora Spec</h3>
       <!-- <i class="codicon codicon-settings" /> -->
     </div>
     <div slot="body" class="p-16 pt-0">
@@ -250,10 +250,10 @@
               <CollapseCard open={false} chevron="padding-right:8px;">
                 <div slot="header" class="p-8 header header_contract">
                   <i class="codicon codicon-gear" />
-                  <h3>Additional prover settings</h3>
+                  <h3>Additional Prover Settings</h3>
                 </div>
                 <div slot="body" class="most_inner_card">
-                  <h3 class="header_single">Additional flags</h3>
+                  <h3 class="header_single">Additional Flags</h3>
 
                   {#each $specObj.properties as obj, index}
                     <div class="input_wrapper mt-8px">
@@ -299,7 +299,7 @@
                       style="margin: auto 16px 8px auto;"
                     >
                       <label class="checkbox_container" style="margin: 0;">
-                        Optomistic loop
+                        Optomistic Loop
                         <input
                           type="checkbox"
                           bind:checked={$specObj.optimisticLoop}
@@ -351,7 +351,7 @@
                   <div class="input_wrapper check_between ">
                     <div class="dark_input alternate_input check_box_wrapper">
                       <label class="checkbox_container"
-                        >Multi assert
+                        >Multi Assert
                         <input
                           type="checkbox"
                           bind:checked={$specObj.multiAssert}
@@ -365,7 +365,7 @@
                       style="margin-right: 37%;"
                     >
                       <label class="checkbox_container"
-                        >Local type checking
+                        >Local Type Checking
                         <input
                           type="checkbox"
                           bind:checked={$specObj.localTypeChecking}

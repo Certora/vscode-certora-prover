@@ -517,7 +517,7 @@
 {:else}
   <div>
     <Pane
-      title="MY RUNS"
+      title="JOB LIST"
       initialExpandedState={true}
       actions={[
         {
