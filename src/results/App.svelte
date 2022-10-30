@@ -103,12 +103,9 @@
         )
         verificationResults = verificationResults
         if (e.data.payload.jobStatus === 'SUCCEEDED') {
-          console.log('success status detected')
           if (e.data.payload.runName) {
-            console.log('remove the script from running scripts')
             removeScript(e.data.payload.runName)
           }
-          console.log('change status to success from receving results')
           runs = setStatus(e.data.payload.runName, Status.success)
         }
         log({

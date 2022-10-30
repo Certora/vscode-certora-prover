@@ -81,7 +81,6 @@
   }
 
   onMount(() => {
-    console.log('Mounting newRun object')
     window.addEventListener('message', listener)
   })
 
@@ -222,7 +221,6 @@
         onClick: duplicate,
       },
     ]
-    console.log('creating actions')
     if (hasResults()) {
       actions.unshift({
         title: 'go to verification report',
@@ -297,19 +295,14 @@
       hasCompleteResults() &&
       status !== Status.success
     ) {
-      console.log('settings status to success')
       statusChange(Status.success)
-      console.log('status after change:', status)
     } else if (
       result !== undefined &&
       status !== Status.incompleteResults &&
       status !== Status.success
     ) {
-      console.log('setting status to incomplete results')
       statusChange(Status.incompleteResults)
-      console.log('status after change:', status)
     }
-    console.log('returning whether there are results')
     return result !== undefined
   }
 
