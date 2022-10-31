@@ -16,6 +16,7 @@
   import { checkMyInputs } from '../stores/store'
   export let placeholder = 'placeholder'
   export let bindValue
+  export let disabledState = false
 
   export let infoObj = {
     infoText: 'some text...',
@@ -95,6 +96,7 @@
   <!-- no info icon on disabled -->
   <!-- disabled = {disabledState} -->
   <input
+    disabled={disabledState}
     class="simple_txt_input monaco-inputbox idle"
     type="text"
     maxlength="255"
