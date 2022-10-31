@@ -63,7 +63,7 @@ export function smartMergeVerificationResult(
   name: string,
 ): void {
   const tree: Tree = newResult.verificationProgress
-  // look for Verification with the same contract name and spec file
+  // look for Verification with the same name
   const index = results.findIndex(item => item.name === name)
   // if found
   if (index > -1) {

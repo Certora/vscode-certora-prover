@@ -534,7 +534,7 @@
     >
       <ul class="running-scripts">
         {#each Array(runsCounter) as _, index (index)}
-          {#key [runs[index], focusedRun, runs[index].status, verificationResults, runningScripts]}
+          {#key [runs[index], focusedRun, runs[index].status, runningScripts]}
             <li>
               <NewRun
                 doRename={runs[index].name === ''}
