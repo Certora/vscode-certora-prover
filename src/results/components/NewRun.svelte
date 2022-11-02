@@ -217,7 +217,7 @@
       },
       {
         title: 'duplicate',
-        icon: 'add',
+        icon: 'files',
         onClick: duplicate,
       },
     ]
