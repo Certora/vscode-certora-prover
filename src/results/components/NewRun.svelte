@@ -26,6 +26,7 @@
   export let deleteFunc: () => void
   export let namesMap: Map<string, string>
   export let runName: string = ''
+  // this creates the new conf file
   export let renameRun: (oldName: string, newName: string) => void
   export let duplicateFunc: (
     nameToDuplicate: string,
@@ -102,7 +103,7 @@
       if (e.currentTarget.value === '') {
         runName = UNTITLED
         titleHandle()
-        renameRun('', spacesToUnderscores(runName)) //this creates the new conf file
+        renameRun('', spacesToUnderscores(runName))
       }
     }
   }
@@ -287,6 +288,9 @@
     return []
   }
 
+  /**
+   * if this job has no name - delete!
+   */
   function deleteOutOfFocus() {
     if (!runName) {
       deleteFunc()
@@ -316,6 +320,9 @@
     return result !== undefined
   }
 
+  /**
+   * checks if there exists complete results for this job
+   */
   function hasCompleteResults(): boolean {
     const result = verificationResults.find(vr => {
       return vr.name === runName
