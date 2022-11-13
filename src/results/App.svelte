@@ -355,8 +355,10 @@
       clearOutput()
     }
 
-    //delete conf file
-    deleteConf(confNameMap)
+    if (runToDelete.name) {
+      //delete conf file
+      deleteConf(confNameMap)
+    }
     runsCounter--
   }
 

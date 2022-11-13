@@ -55,7 +55,7 @@
   export let vrLink
 
   let beforeRename = ''
-  let activateRunRename = false
+
   let stop = false
 
   const UNTITLED = 'untitled'
@@ -82,6 +82,12 @@
 
   onMount(() => {
     window.addEventListener('message', listener)
+    var input = document.getElementById(
+      'rename_input ' + namesMap.keys.length.toString(),
+    )
+    if (doRename) {
+      input.focus()
+    }
   })
 
   onDestroy(() => {
@@ -96,9 +102,8 @@
       if (e.currentTarget.value === '') {
         runName = UNTITLED
         titleHandle()
-        renameRun('', spacesToUnderscores(runName))
+        renameRun('', spacesToUnderscores(runName)) //this creates the new conf file
       }
-      activateRunRename = true
     }
   }
 
@@ -159,8 +164,7 @@
     runName = e.currentTarget.value
     titleHandle()
     // in rename mode we rename
-    if (activateRunRename) {
-      activateRunRename = false
+    if (e.currentTarget.value) {
       renameRun(beforeRename, spacesToUnderscores(runName))
     }
   }
@@ -283,6 +287,12 @@
     return []
   }
 
+  function deleteOutOfFocus() {
+    if (!runName) {
+      deleteFunc()
+    }
+  }
+
   /**
    * checks if a run has results
    */
@@ -334,6 +344,8 @@
         alt=""
       />
       <input
+        id={'rename_input ' + namesMap.keys.length.toString()}
+        on:focusout={deleteOutOfFocus}
         type="text"
         maxlength="35"
         class="input"
@@ -415,6 +427,7 @@
     display: flex;
     flex-direction: row;
     align-items: flex-start;
+
     .icon {
       position: relative;
       left: 22px;
@@ -433,6 +446,8 @@
       color: white;
       margin-left: 24px;
       margin-right: 0;
+    }
+    .input:focus {
     }
   }
 </style>
