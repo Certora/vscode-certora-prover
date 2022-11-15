@@ -20,17 +20,14 @@ export function activate(context: vscode.ExtensionContext): void {
    */
   function showSettings(name: ConfNameMap) {
     const path = vscode.workspace.workspaceFolders?.[0]
-
     if (!path) return
     const confFileDefault = getDefaultSettings()
     const emptyForm: InputFormData = confFileToFormData(
       confFileDefault,
       name.fileName,
     )
-
     createConfFile(emptyForm)
-    SettingsPanel.setResultsWebviewProvider(resultsWebviewProvider)
-    SettingsPanel.render(context.extensionUri, name, confFileDefault)
+    renderSettingsPannel(name, confFileDefault)
   }
 
   /**
@@ -133,22 +130,39 @@ export function activate(context: vscode.ExtensionContext): void {
    * @returns Promise<void>
    */
   async function editConf(name: ConfNameMap): Promise<void> {
-    const path = vscode.workspace.workspaceFolders?.[0]
-    if (!path) return
-    const confFile = getConfFilePath(name.fileName)
-    const confFileUri = vscode.Uri.joinPath(path.uri, confFile)
-    const decoder = new TextDecoder()
-    try {
-      const confFileContent = JSON.parse(
-        decoder.decode(await vscode.workspace.fs.readFile(confFileUri)),
-      )
-      SettingsPanel.setResultsWebviewProvider(resultsWebviewProvider)
-      SettingsPanel.render(context.extensionUri, name, confFileContent)
-    } catch (e) {
-      vscode.window.showErrorMessage(
-        `Can't read conf file: ${confFile}. Error: ${e}`,
-      )
+    const confFileUri = getConfUri(name.fileName)
+    if (confFileUri) {
+      try {
+        const confFileContent = readConf(confFileUri)
+        renderSettingsPannel(name, await confFileContent)
+      } catch (e) {
+        vscode.window.showErrorMessage(
+          `Can't read conf file: ${confFileUri.path}. Error: ${e}`,
+        )
+      }
     }
+  }
+
+  /**
+   * render the settings pannel for a conf file, with the name [confName] and the content [confFile]
+   * @param confName name of the conf file, in the format: {fileName, displayName}
+   * @param confFile contant of the conf file
+   */
+  function renderSettingsPannel(confName: ConfNameMap, confFile: ConfFile) {
+    SettingsPanel.setResultsWebviewProvider(resultsWebviewProvider)
+    SettingsPanel.render(context.extensionUri, confName, confFile)
+  }
+
+  /**
+   * reads a file and returns it's content - in json format
+   * @param confFileUri uri of file to read
+   * @returns content of a file
+   */
+  async function readConf(confFileUri: vscode.Uri): Promise<ConfFile> {
+    const decoder = new TextDecoder()
+    return JSON.parse(
+      decoder.decode(await vscode.workspace.fs.readFile(confFileUri)),
+    )
   }
 
   /**
@@ -165,32 +179,30 @@ export function activate(context: vscode.ExtensionContext): void {
   ): Promise<void> {
     // get the content of the conf to duplicate
     // cretate a new conf file with the name of "duplicated", content of "to duplicate", and open it with settings view
-    const path = vscode.workspace.workspaceFolders?.[0]
-    if (!path) return
-    const confFile = getConfFilePath(toDuplicate.fileName)
-    const confFileUri = vscode.Uri.joinPath(path.uri, confFile)
-    const decoder = new TextDecoder()
-    try {
-      const confFileContent: ConfFile = JSON.parse(
-        decoder.decode(await vscode.workspace.fs.readFile(confFileUri)),
-      )
-      confFileContent.msg = ''
-
+    const confFileUri = getConfUri(toDuplicate.fileName)
+    if (confFileUri) {
       try {
-        const newConfFilePath = getConfFilePath(duplicated.fileName)
-        const newConfFileUri = vscode.Uri.joinPath(path.uri, newConfFilePath)
-        const encoder = new TextEncoder()
-        const content = encoder.encode(JSON.stringify(confFileContent, null, 2))
-        await vscode.workspace.fs.writeFile(newConfFileUri, content)
+        const confFileContent = readConf(confFileUri)
+        // the ; is required for the (await) to work, messesary becasue we have a Promise<ConfFile> type from readConf function return
+        ;(await confFileContent).msg = ''
+        try {
+          const newConfFileUri = getConfUri(duplicated.fileName)
+          if (newConfFileUri) {
+            const encoder = new TextEncoder()
+            const content = encoder.encode(
+              JSON.stringify(confFileContent, null, 2),
+            )
+            await vscode.workspace.fs.writeFile(newConfFileUri, content)
+          }
+        } catch (e) {
+          vscode.window.showErrorMessage(`Can't create conf file. Error: ${e}`)
+        }
+        renderSettingsPannel(duplicated, await confFileContent)
       } catch (e) {
-        vscode.window.showErrorMessage(`Can't create conf file. Error: ${e}`)
+        vscode.window.showErrorMessage(
+          `Can't read conf file: ${confFileUri.path}. Error: ${e}`,
+        )
       }
-      SettingsPanel.setResultsWebviewProvider(resultsWebviewProvider)
-      SettingsPanel.render(context.extensionUri, duplicated, confFileContent)
-    } catch (e) {
-      vscode.window.showErrorMessage(
-        `Can't read conf file: ${confFile}. Error: ${e}`,
-      )
     }
   }
 
