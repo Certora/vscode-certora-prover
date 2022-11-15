@@ -8,7 +8,7 @@ import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { SettingsPanel } from './SettingsPanel'
 import { ScriptRunner } from './ScriptRunner'
 import { ConfFile, InputFormData, ConfNameMap } from './types'
-import { createAndOpenConfFile } from './utils/createAndOpenConfFile'
+import { createConfFile } from './utils/createConfFile'
 import { confFileToFormData } from './utils/confFileToInputForm'
 
 export function activate(context: vscode.ExtensionContext): void {
@@ -28,7 +28,7 @@ export function activate(context: vscode.ExtensionContext): void {
       name.fileName,
     )
 
-    createAndOpenConfFile(emptyForm)
+    createConfFile(emptyForm)
     SettingsPanel.setResultsWebviewProvider(resultsWebviewProvider)
     SettingsPanel.render(context.extensionUri, name, confFileDefault)
   }
@@ -215,7 +215,13 @@ export function activate(context: vscode.ExtensionContext): void {
   function deleteConfFile(name: ConfNameMap): void {
     const confFileUri: vscode.Uri | void = getConfUri(name.fileName)
     if (confFileUri) {
-      vscode.workspace.fs.delete(confFileUri)
+      try {
+        vscode.workspace.fs.delete(confFileUri)
+      } catch (e) {
+        vscode.window.showErrorMessage(
+          `Can't delete conf file: ${confFileUri.path}. Error: ${e}`,
+        )
+      }
     }
     SettingsPanel.removePanel(name.displayName)
     scriptRunner.removeRunningScriptByName(name.fileName)
@@ -225,18 +231,15 @@ export function activate(context: vscode.ExtensionContext): void {
     context.extensionUri,
   )
 
-  function removeRunningScriptByName(name: string) {
-    scriptRunner.removeRunningScriptByName(name)
-  }
-
   resultsWebviewProvider.editConfFile = editConf
   resultsWebviewProvider.openSettings = showSettings
   resultsWebviewProvider.deleteConf = deleteConfFile
   resultsWebviewProvider.duplicate = duplicate
   resultsWebviewProvider.runScript = runScript
-  resultsWebviewProvider.removeScript = removeRunningScriptByName
 
   const scriptRunner = new ScriptRunner(resultsWebviewProvider)
+
+  resultsWebviewProvider.removeScript = scriptRunner.removeRunningScriptByName
 
   context.subscriptions.push(
     vscode.commands.registerCommand('certora.createConfFile', async () => {
@@ -255,3 +258,7 @@ export function activate(context: vscode.ExtensionContext): void {
     ),
   )
 }
+
+/** deactivate - to be used in the future maybe */
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+export function deactivate(): void {}

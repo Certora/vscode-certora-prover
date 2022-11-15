@@ -217,7 +217,7 @@ function processSpecAttributes(confFile: ConfFile, specObj: SpecObj) {
   if (Object.keys(additionalSettings)?.length > 0) {
     specObj.properties = Object.keys(additionalSettings).map(key => ({
       name: key as string,
-      value: additionalSettings[key].toString(),
+      value: additionalSettings[key] ? additionalSettings[key].toString() : '',
     }))
   }
 }

@@ -17,7 +17,7 @@ export type Link = {
 
 export type AdditionalSetting = {
   id: string
-  option: string
+  flag: string
   value: string
 }
 

@@ -3,12 +3,12 @@
  *-------------------------------------------------------------------------------------------- */
 
 import { workspace, Uri, window } from 'vscode'
-import { log, Sources } from '../utils/log'
+import { log, Sources } from './log'
 import { InputFormData, NewForm, SolcArg, SolidityObj } from '../types'
 
 type ConfFile = {
   files?: string[]
-  verify?: [string]
+  verify?: string[]
   solc?: string
   link?: string[]
   settings?: string[]
@@ -26,14 +26,22 @@ function setAdditionalSetting(val?: string) {
     return JSON.parse(val)
   }
   // for --settings flags:
-  const settingsRegex = /(-(.+)(=(.+))?)(,(-(.+)(=(.+))?))*/g
-  if (settingsRegex.exec(val)) {
+  const arrayRegex = /(-(.+)(=(.+))?)(,(-(.+)(=(.+))?))*/g
+  if (arrayRegex.exec(val)) {
     const squareBracketsRegex = /(\[|\])+/g
     return val[0].replace(squareBracketsRegex, '').split(',')
   }
   return val
 }
 
+/**
+ * handle solidity compiler for multiple contracts:
+ * if only the main contract has solc: using [solc] flag
+ * if additional contracts have solc filled, but all the solc's are the same - use [solc] flag
+ * otherwise, use [solc_map] flag with the different solc's
+ * @param config conf file to whrite the solc/solc_map flag to
+ * @param inputFormData where the data from the user is stored
+ */
 function additionalContractsSolc(
   config: ConfFile,
   inputFormData: InputFormData,
@@ -81,7 +89,9 @@ function convertSourceFormDataToConfFileJSON(
   ) {
     inputFormData.additionalContracts.forEach(contract => {
       config.files?.push(
-        `${contract.file}${contract.name ? `:${contract.name}` : ''}`,
+        `${contract.file}${
+          contract.contractName ? `:${contract.contractName}` : ''
+        }`,
       )
     })
   }
@@ -126,7 +136,7 @@ function convertSourceFormDataToConfFileJSON(
   }
 
   if (inputFormData.additionalSettings?.length) {
-    inputFormData.additionalSettings.forEach(({ option, value }) => {
+    inputFormData.additionalSettings.forEach(({ flag: option, value }) => {
       if (option) {
         config[option] = setAdditionalSetting(value as string)
       }
@@ -176,12 +186,22 @@ function addAdditionalSetting(
   if (value) {
     form.additionalSettings.push({
       id: flag,
-      option: flag,
+      flag: flag,
       value: value,
     })
   }
 }
 
+/**
+ * add solidity arguments (solc_args) into the conf file.
+ * to do this, we nees to create an array with all the solidity argument in the format:
+ * ["someFlag", "someOtherFlag", "valueOfOtherflag"]
+ * where in the example above, the argument "someFlag" has no value, and the argument "someOtherFlag"
+ * has the value "valueOfOtherflag".
+ * @param flag strings that has the name of the flag for solidity arguments ("solc_args")
+ * @param solcArgs array of solidity arguments in the format: { key:string, value: string }
+ * @param form InputFormData to add solc_args to
+ */
 function addSolcArguments(
   flag: string,
   solcArgs: SolcArg[],
@@ -200,7 +220,7 @@ function addSolcArguments(
       strSolcArgs = strSolcArgs.replace(/.$/, ']')
       form.additionalSettings.push({
         id: flag,
-        option: flag,
+        flag: flag,
         value: strSolcArgs,
       })
     }
@@ -226,7 +246,7 @@ function processAdditionalContracts(
     if (solObj.mainContract) {
       form.additionalContracts.push({
         file: solObj.mainFile.value?.toString(),
-        name: solObj.mainContract,
+        contractName: solObj.mainContract,
       })
 
       processLink(form, solObj, solObj.mainContract)
@@ -262,7 +282,7 @@ function processPackages(solObj: SolidityObj, form: InputFormData) {
     if (packages.length > 0) {
       form.additionalSettings.push({
         id: 'packages',
-        option: 'packages',
+        flag: 'packages',
         value: packages,
       })
     }
@@ -357,7 +377,7 @@ export function processForm(
     const rulesArr = newForm.specObj.rules.trim().split(',')
     form.additionalSettings.push({
       id: 'rule',
-      option: 'rule',
+      flag: 'rule',
       value: rulesArr,
     })
   }
@@ -390,9 +410,7 @@ export function processForm(
   return form
 }
 
-export async function createAndOpenConfFile(
-  formData: InputFormData,
-): Promise<void> {
+export async function createConfFile(formData: InputFormData): Promise<void> {
   try {
     const basePath = workspace.workspaceFolders?.[0]
 

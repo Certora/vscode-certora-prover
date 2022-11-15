@@ -5,10 +5,7 @@
 import * as vscode from 'vscode'
 import { SmartContractsFilesWatcher } from './SmartContractsFilesWatcher'
 import { getNonce } from './utils/getNonce'
-import {
-  createAndOpenConfFile,
-  processForm,
-} from './utils/createAndOpenConfFile'
+import { createConfFile, processForm } from './utils/createConfFile'
 import { log, Sources } from './utils/log'
 import {
   CommandFromSettingsWebview,
@@ -86,7 +83,7 @@ export class SettingsPanel {
             })
             if (!e.payload.checkMyInputs) {
               const form: InputFormData = processForm(e.payload, confFileName)
-              createAndOpenConfFile(form)
+              createConfFile(form)
               if (
                 form.mainContractName &&
                 form.mainSolidityFile &&
@@ -312,7 +309,7 @@ export class SettingsPanel {
       <html lang="en">
         <head>
           <meta charset="UTF-8">
-          <meta http-equiv="Content-Security-Content-Security-Policy" content="${csp}">
+          <meta http-equiv="Content-Security-Policy" content="${csp}">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <script type="module" nonce="${nonce}" src="${toolkitUri}"></script>
           <link href="${styleUri}" rel="stylesheet">

@@ -126,7 +126,7 @@ export type InputFormData = {
   useAdditionalContracts: boolean
   additionalContracts: {
     file: string
-    name?: string
+    contractName?: string
   }[]
   link: {
     id: string
@@ -144,7 +144,7 @@ export type InputFormData = {
   message: string
   additionalSettings: {
     id: string
-    option: string
+    flag: string
     value: string | string[]
   }[]
   solc_map: { contract: string; solidityCompiler: string }[]

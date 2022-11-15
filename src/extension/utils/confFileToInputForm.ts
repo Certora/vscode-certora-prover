@@ -21,7 +21,7 @@ const emptyForm: InputFormData = {
   additionalSettings: [
     {
       id: nanoid(),
-      option: '',
+      flag: '',
       value: '',
     },
   ],
@@ -40,7 +40,7 @@ const stableFields = [
   'msg',
 ]
 
-function getAdditionalSettings(confFile: ConfFile) {
+function getNotHandledFlags(confFile: ConfFile) {
   const copy = { ...confFile }
 
   stableFields.forEach(field => {
@@ -53,16 +53,16 @@ function getAdditionalSettings(confFile: ConfFile) {
 /**
  * converts conf file to input form
  * @param confFile to convert
- * @param name of the run
+ * @param jobName of the run
  * @returns input form
  */
 export function confFileToFormData(
   confFile: ConfFile,
-  name: string,
+  jobName: string,
 ): InputFormData {
   const form = emptyForm as InputFormData
 
-  form.name = name
+  form.name = jobName
 
   // convert solidity file / contract
   if (Array.isArray(confFile.files) && confFile.files.length > 0) {
@@ -144,13 +144,13 @@ export function confFileToFormData(
     form.message = confFile.msg as string
   }
 
-  const additionalSettings = getAdditionalSettings(confFile)
+  const additionalSettings = getNotHandledFlags(confFile)
 
   if (Object.keys(additionalSettings).length > 0) {
     form.additionalSettings = Object.keys(additionalSettings).map(key => ({
       id: nanoid(),
-      option: key as string,
-      value: additionalSettings[key].toString(),
+      flag: key as string,
+      value: additionalSettings[key] ? additionalSettings[key].toString() : '',
     }))
   }
 
