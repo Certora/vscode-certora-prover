@@ -20,15 +20,14 @@ type ConfFile = {
 function setAdditionalSetting(val?: string) {
   if (val === 'true' || !val) return true
   if (val === 'false') return false
-  if (/^[0-9]+$/.exec(val)) return val
   const mapRegex = /^{(".+":".+")(,".+":".+")*}/g
   if (mapRegex.exec(val)) {
     return JSON.parse(val)
   }
   // for --settings flags:
   const arrayRegex = /(-(.+)(=(.+))?)(,(-(.+)(=(.+))?))*/g
-  val = val.toString()
   if (arrayRegex.exec(val)) {
+    val = val.toString()
     const squareBracketsRegex = /(\[|\])+/g
     return val.replace(squareBracketsRegex, '').split(',')
   }

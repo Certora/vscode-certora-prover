@@ -239,6 +239,18 @@ export function activate(context: vscode.ExtensionContext): void {
     scriptRunner.removeRunningScriptByName(name.fileName)
   }
 
+  /**
+   * This is for the results webview provider.
+   * ScriptRunner object has to recieve ResultsWebviewProvider object when it is initialized
+   * But, ResultsWebviewProvider has to recieve resultsWebviewProvider.removeScript = removeRunningScriptByName
+   * which is a ScriptRunner method.
+   * The solution to the circle is this function, that is passed to ResultsWebviewProvider after ScriptRunner
+   * is initialized.
+   */
+  function removeRunningScriptByName(name: string) {
+    scriptRunner.removeRunningScriptByName(name)
+  }
+
   const resultsWebviewProvider = new ResultsWebviewProvider(
     context.extensionUri,
   )
@@ -248,10 +260,9 @@ export function activate(context: vscode.ExtensionContext): void {
   resultsWebviewProvider.deleteConf = deleteConfFile
   resultsWebviewProvider.duplicate = duplicate
   resultsWebviewProvider.runScript = runScript
+  resultsWebviewProvider.removeScript = removeRunningScriptByName
 
   const scriptRunner = new ScriptRunner(resultsWebviewProvider)
-
-  resultsWebviewProvider.removeScript = scriptRunner.removeRunningScriptByName
 
   context.subscriptions.push(
     vscode.commands.registerCommand('certora.createConfFile', async () => {

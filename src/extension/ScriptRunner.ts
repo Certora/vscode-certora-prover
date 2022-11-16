@@ -23,7 +23,7 @@ export class ScriptRunner {
   private readonly resultsWebviewProvider: ResultsWebviewProvider
   private script: ChildProcessWithoutNullStreams | null = null
   private runningScripts: RunningScript[] = []
-  private logFile: Uri | undefined
+  // private logFile: Uri | undefined
   private logFiles: Uri[] = []
 
   constructor(resultsWebviewProvider: ResultsWebviewProvider) {
@@ -64,7 +64,11 @@ export class ScriptRunner {
   ): Promise<void> {
     const logFilePath = this.getLogFilePath(pathToConfFile, ts)
     if (logFilePath) {
-      this.logFiles.push(logFilePath)
+      if (
+        this.logFiles.find(lf => lf.path === logFilePath.path) === undefined
+      ) {
+        this.logFiles.push(logFilePath)
+      }
     }
     if (!logFilePath) {
       return
@@ -149,13 +153,17 @@ export class ScriptRunner {
         if (progressUrl) {
           await this.polling.run(progressUrl, data => {
             data.runName = confFileName
-            const curLogFile = this.logFiles.find(
-              lf =>
-                lf.path.split('/').reverse()[0].split('.conf')[0] ===
-                data.runName,
-            )
-            if (curLogFile !== undefined) {
-              workspace.fs.readFile(curLogFile).then(content => {
+            const curLogFiles = this.logFiles
+              .filter(
+                lf =>
+                  lf.path.split('/').reverse()[0].split('.conf')[0] ===
+                  data.runName,
+              )
+              .sort()
+              .reverse()
+            console.log(curLogFiles, 'curlogfiles')
+            if (curLogFiles !== undefined) {
+              workspace.fs.readFile(curLogFiles[0]).then(content => {
                 const decoder = new TextDecoder()
                 const strContent: string = decoder.decode(content)
                 const pattern =
@@ -163,11 +171,12 @@ export class ScriptRunner {
                 const vrLinkRegExp = new RegExp(pattern)
                 const vrLink = vrLinkRegExp.exec(strContent)
                 if (
-                  vrLink &&
                   this.runningScripts.find(rs => rs.pid === pid) !== undefined
                 ) {
-                  // this.removeRunningScript(pid)
-                  data.verificationReportLink = (vrLink[0] as string) || ''
+                  data.verificationReportLink = ''
+                  if (vrLink) {
+                    data.verificationReportLink = vrLink[0] as string
+                  }
                   this.resultsWebviewProvider.postMessage<Job>({
                     type: 'receive-new-job-result',
                     payload: data,
@@ -248,6 +257,7 @@ export class ScriptRunner {
   }
 
   public removeRunningScriptByName(name: string): void {
+    console.log('running scripts:', this.runningScripts)
     this.runningScripts = this.runningScripts.filter(script => {
       return script.confFile.replace('.conf', '').replace('conf/', '') !== name
     })

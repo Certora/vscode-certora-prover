@@ -224,7 +224,7 @@
           action: 'Received "create-new-job" command',
           source: Sources.ResultsWebview,
         })
-        createRun({ id: runs.length, name: '', status: Status.finishSetup })
+        createRun()
         break
       }
       case EventTypesFromExtension.FocusChanged: {
@@ -314,6 +314,8 @@
     if (run) {
       runsCounter = runs.push(run)
     } else {
+      // don't create more than one new run while in rename state
+      if (runs.find(r => r.name === '')) return
       runsCounter = runs.push({
         id: runs.length,
         name: '',
@@ -532,7 +534,7 @@
           onClick: runAll,
         },
         {
-          title: 'create new run',
+          title: 'create new job',
           icon: 'diff-added',
           onClick: createRun,
         },

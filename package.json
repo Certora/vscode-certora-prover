@@ -146,7 +146,7 @@
     "commands": [
       {
         "command": "certora.createConfFile",
-        "title": "Create conf file",
+        "title": "create new job",
         "category": "Certora",
         "icon": "$(settings)"
       }
