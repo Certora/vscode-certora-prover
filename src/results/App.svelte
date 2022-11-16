@@ -252,6 +252,7 @@
         run.vrLink = link
       }
     })
+    runs = runs
   }
 
   /**

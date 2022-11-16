@@ -53,7 +53,7 @@
 
   export let status: Status
 
-  export let vrLink
+  export let vrLink = ''
 
   let beforeRename = ''
 
@@ -226,7 +226,7 @@
         onClick: duplicate,
       },
     ]
-    if (hasResults()) {
+    if (hasResults() && vrLink) {
       actions.unshift({
         title: 'go to verification report',
         icon: 'file-symlink-file',

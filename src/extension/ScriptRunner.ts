@@ -161,7 +161,6 @@ export class ScriptRunner {
               )
               .sort()
               .reverse()
-            console.log(curLogFiles, 'curlogfiles')
             if (curLogFiles !== undefined) {
               workspace.fs.readFile(curLogFiles[0]).then(content => {
                 const decoder = new TextDecoder()
@@ -257,7 +256,6 @@ export class ScriptRunner {
   }
 
   public removeRunningScriptByName(name: string): void {
-    console.log('running scripts:', this.runningScripts)
     this.runningScripts = this.runningScripts.filter(script => {
       return script.confFile.replace('.conf', '').replace('conf/', '') !== name
     })
