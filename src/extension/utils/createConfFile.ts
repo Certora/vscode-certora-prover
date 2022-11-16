@@ -27,9 +27,10 @@ function setAdditionalSetting(val?: string) {
   }
   // for --settings flags:
   const arrayRegex = /(-(.+)(=(.+))?)(,(-(.+)(=(.+))?))*/g
+  val = val.toString()
   if (arrayRegex.exec(val)) {
     const squareBracketsRegex = /(\[|\])+/g
-    return val[0].replace(squareBracketsRegex, '').split(',')
+    return val.replace(squareBracketsRegex, '').split(',')
   }
   return val
 }
@@ -136,9 +137,9 @@ function convertSourceFormDataToConfFileJSON(
   }
 
   if (inputFormData.additionalSettings?.length) {
-    inputFormData.additionalSettings.forEach(({ flag: option, value }) => {
-      if (option) {
-        config[option] = setAdditionalSetting(value as string)
+    inputFormData.additionalSettings.forEach(({ flag, value }) => {
+      if (flag) {
+        config[flag] = setAdditionalSetting(value as string)
       }
     })
   }

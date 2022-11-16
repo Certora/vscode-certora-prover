@@ -9,7 +9,6 @@ import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { getProgressUrl } from './utils/getProgressUrl'
 import type { Job } from './types'
 import { PostProblems } from './PostProblems'
-import { Console } from 'console'
 
 type RunningScript = {
   pid: number

@@ -111,6 +111,7 @@ function processPackages(packages: string[], solidityObj: SolidityObj) {
 
 function processLink(linkArr: string[], solidityObj: SolidityObj) {
   linkArr.forEach(link => {
+    // looking for linking format [CurrentContract : Variable = OtherContract]
     const linkArr = link.split(/[:=]/)
     if (linkArr.length === 3 && linkArr[0] === solidityObj.mainContract) {
       solidityObj.linking.push({
