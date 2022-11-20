@@ -228,6 +228,27 @@ function addSolcArguments(
 }
 
 /**
+ * check validity of full path of the compiler, and return a valid path, or
+ * jost the compiler file name if the path to it is not valid
+ * @param file compiler file
+ * @param pathToFile path to compiler file
+ * @returns valid path
+ */
+function processCompilerPath(file: string, pathToFile?: string): string {
+  let compDir: string = pathToFile || ''
+  if (compDir !== '' && compDir.split('').reverse()[0] !== '/') {
+    compDir += '/'
+  }
+  // checks if the path given in compDir is valid
+  const compDirUri: Uri = Uri.parse(compDir)
+  let compilerFullPath = file
+  if (compDirUri.path !== '/' && compDirUri.path !== undefined) {
+    compilerFullPath = compDirUri.path + file
+  }
+  return compilerFullPath
+}
+
+/**
  * add additional contracts information to the [form]
  * @param solidityAdditionalContracts additional contracts to add
  * @param form to add contracts to
@@ -252,13 +273,13 @@ function processAdditionalContracts(
       processLink(form, solObj, solObj.mainContract)
 
       if (solObj.compiler.ver) {
-        let compDir: string = solObj.compiler.exe || ''
-        if (compDir !== '') {
-          compDir += '/'
-        }
+        const compilerFullPath = processCompilerPath(
+          solObj.compiler.ver,
+          solObj.compiler.exe,
+        )
         form.solc_map.push({
           contract: solObj.mainContract,
-          solidityCompiler: compDir + solObj.compiler.ver,
+          solidityCompiler: compilerFullPath,
         })
       }
     }
@@ -299,10 +320,10 @@ export function processForm(
   newForm: NewForm,
   confFileName: string,
 ): InputFormData {
-  let compilerDirectory: string = newForm.solidyObj.compiler.exe
-  if (compilerDirectory !== '') {
-    compilerDirectory += '/'
-  }
+  const compilerDirectory: string = processCompilerPath(
+    newForm.solidyObj.compiler.ver,
+    newForm.solidyObj.compiler.exe,
+  )
   const mainSolFile = newForm.solidyObj.mainFile?.value || ''
   const mainSpecFile = newForm.specObj.specFile.value || ''
   const form: InputFormData = {
@@ -310,7 +331,7 @@ export function processForm(
     mainSolidityFile: mainSolFile,
     mainContractName: newForm.solidyObj.mainContract,
     specFile: mainSpecFile,
-    solidityCompiler: compilerDirectory + newForm.solidyObj.compiler.ver,
+    solidityCompiler: compilerDirectory,
     useAdditionalContracts: false,
     additionalContracts: [],
     link: [],
