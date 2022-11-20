@@ -129,13 +129,11 @@ export type InputFormData = {
     contractName?: string
   }[]
   link: {
-    id: string
     contractName: string
     fieldName: string
     associatedContractName: string
   }[]
   extendedSettings: {
-    id: string
     flag: string
   }[]
   useStaging: boolean
@@ -143,7 +141,6 @@ export type InputFormData = {
   cacheName: string
   message: string
   additionalSettings: {
-    id: string
     flag: string
     value: string | string[]
   }[]
@@ -166,7 +163,6 @@ export type SolidityPackageDir = {
 }
 
 export type Link = {
-  id?: string
   variable: string
   contractName: string
   fieldName?: string

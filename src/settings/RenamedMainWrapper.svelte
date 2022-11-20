@@ -38,6 +38,7 @@
       solidityAdditionalContracts: $solAdditionalContracts,
       checkMyInputs: $checkMyInputs,
     }
+    console.log('solidity additional', form.solidityAdditionalContracts)
     log({
       action: 'Send "create-conf-file" command',
       source: Sources.SettingsWebview,

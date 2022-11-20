@@ -162,7 +162,6 @@ function processLink(
     linking.forEach(link => {
       if (link.variable && link.contractName) {
         form.link.push({
-          id: '',
           contractName: contractName,
           fieldName: link.variable,
           associatedContractName: link.contractName,
@@ -185,7 +184,6 @@ function addAdditionalSetting(
 ) {
   if (value) {
     form.additionalSettings.push({
-      id: flag,
       flag: flag,
       value: value,
     })
@@ -219,7 +217,6 @@ function addSolcArguments(
     if (strSolcArgs !== '[') {
       strSolcArgs = strSolcArgs.replace(/.$/, ']')
       form.additionalSettings.push({
-        id: flag,
         flag: flag,
         value: strSolcArgs,
       })
@@ -302,7 +299,6 @@ function processPackages(solObj: SolidityObj, form: InputFormData) {
     })
     if (packages.length > 0) {
       form.additionalSettings.push({
-        id: 'packages',
         flag: 'packages',
         value: packages,
       })
@@ -397,7 +393,6 @@ export function processForm(
   if (newForm.specObj.rules) {
     const rulesArr = newForm.specObj.rules.trim().split(',')
     form.additionalSettings.push({
-      id: 'rule',
       flag: 'rule',
       value: rulesArr,
     })

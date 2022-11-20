@@ -2,7 +2,6 @@
  *  Convert conf file to input form
  *-------------------------------------------------------------------------------------------- */
 
-import { nanoid } from 'nanoid'
 import type { InputFormData, ConfFile } from '../types'
 
 const emptyForm: InputFormData = {
@@ -13,14 +12,13 @@ const emptyForm: InputFormData = {
   useAdditionalContracts: false,
   additionalContracts: [],
   link: [],
-  extendedSettings: [{ id: nanoid(), flag: '' }],
+  extendedSettings: [{ flag: '' }],
   useStaging: false,
   branch: 'master',
   cacheName: '',
   message: '',
   additionalSettings: [
     {
-      id: nanoid(),
       flag: '',
       value: '',
     },
@@ -73,7 +71,7 @@ export function confFileToFormData(
     }
 
     if (confFile.files.length > 1) {
-      const [, ...additional] = confFile.files
+      const [...additional] = confFile.files
 
       form.useAdditionalContracts = true
       form.additionalContracts = additional.map(contract => {
@@ -115,7 +113,6 @@ export function confFileToFormData(
       const linkArr = link.split(/[:=]/)
       if (linkArr.length === 3 && linkArr[0] && linkArr[1] && linkArr[2]) {
         form.link.push({
-          id: nanoid(),
           contractName: linkArr[0],
           fieldName: linkArr[1],
           associatedContractName: linkArr[2],
@@ -126,7 +123,6 @@ export function confFileToFormData(
 
   if (Array.isArray(confFile.settings) && confFile.settings.length > 0) {
     form.extendedSettings = confFile.settings.map((flag: string) => ({
-      id: nanoid(),
       flag,
     }))
   }
@@ -148,7 +144,6 @@ export function confFileToFormData(
 
   if (Object.keys(additionalSettings).length > 0) {
     form.additionalSettings = Object.keys(additionalSettings).map(key => ({
-      id: nanoid(),
       flag: key as string,
       value: additionalSettings[key] ? additionalSettings[key].toString() : '',
     }))

@@ -8,7 +8,6 @@ export type AdditionalContract = {
 }
 
 export type Link = {
-  id?: string
   variable: string
   contractName: string
   fieldName?: string
@@ -16,13 +15,11 @@ export type Link = {
 }
 
 export type AdditionalSetting = {
-  id: string
   flag: string
   value: string
 }
 
 export type Flag = {
-  id: string
   flag: string
 }
 
