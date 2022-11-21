@@ -14,7 +14,6 @@
     specObj,
     verification_message,
     solAdditionalContracts,
-    RunName,
   } from './stores/store.js'
   import { log, Sources } from './utils/log'
 
@@ -38,7 +37,6 @@
       solidityAdditionalContracts: $solAdditionalContracts,
       checkMyInputs: $checkMyInputs,
     }
-    console.log('solidity additional', form.solidityAdditionalContracts)
     log({
       action: 'Send "create-conf-file" command',
       source: Sources.SettingsWebview,
@@ -58,6 +56,16 @@
     <SolSettingsTab />
     <SpecSettingsTab />
     <VerificationMessageTab />
+    <div class="feedback">
+      <a
+        id="feedback-button"
+        class="feedback-button"
+        title="Feedback"
+        href="https://docs.google.com/forms/d/1tyTnEFByOAANtcfmz3O7GTQ_lfJJev0kTSyVEm9dumQ/prefill"
+        >Feedback
+        <div class="action-label codicon codicon-action codicon-feedback" />
+      </a>
+    </div>
   </div>
 </div>
 
@@ -73,6 +81,38 @@
     overflow: hidden;
     /* width: 100%; */
     /* overflow: hidden; */
+  }
+  .feedback {
+    position: fixed;
+    width: 1000px;
+    height: 60px;
+    bottom: 0px;
+    right: 0px;
+    background-color: var(--background);
+  }
+  .feedback-button {
+    position: fixed;
+    width: 100px;
+    height: 22px;
+    bottom: 15px;
+    right: 15px;
+    background-color: var(--vscode-button-foreground);
+    color: var(--vscode-button-background);
+    border-radius: 30px;
+    /* text-align: center; */
+    padding-left: 13px;
+    padding-top: 6px;
+    /* padding-right: 2px; */
+    border-color: transparent;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .action-label {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+    float: right;
+    padding-right: 15px;
   }
   .left_wrapper {
     box-sizing: border-box;
