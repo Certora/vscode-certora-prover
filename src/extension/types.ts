@@ -147,7 +147,7 @@ export type InputFormData = {
   solc_map: { contract: string; solidityCompiler: string }[]
 }
 
-export type ConfNameMap = {
+export type JobNameMap = {
   displayName: string
   fileName: string
 }
@@ -217,9 +217,9 @@ export type SpecObj = {
 }
 
 export type NewForm = {
-  solidyObj: SolidityObj
+  solidityObj: SolidityObj
   specObj: SpecObj
-  verificatoinMessage: string
+  verificationMessage: string
   solidityAdditionalContracts?: SolidityObj[] // multiple contracts
   checkMyInputs: boolean
 }
@@ -230,7 +230,7 @@ export enum CommandFromResultsWebview {
   RunScript = 'run-script',
   OpenSettings = 'open-settings',
   GetOutput = 'get-output',
-  GetCreationTime = 'get-creation-time',
+  // GetCreationTime = 'get-creation-time',
   EditConfFile = 'edit-confFile',
   DeleteConfFile = 'delete-confFile',
   Duplicate = 'duplicate',
@@ -254,31 +254,31 @@ export type EventFromResultsWebview =
     }
   | {
       command: CommandFromResultsWebview.RunScript
-      payload: ConfNameMap
+      payload: JobNameMap
     }
   | {
       command: CommandFromResultsWebview.OpenSettings
-      payload: ConfNameMap
+      payload: JobNameMap
     }
   | {
       command: CommandFromResultsWebview.GetOutput
       payload: string
     }
-  | {
-      command: CommandFromResultsWebview.GetCreationTime
-      payload: string
-    }
+  // | {
+  //     command: CommandFromResultsWebview.GetCreationTime
+  //     payload: string
+  //   }
   | {
       command: CommandFromResultsWebview.EditConfFile
-      payload: ConfNameMap
+      payload: JobNameMap
     }
   | {
       command: CommandFromResultsWebview.DeleteConfFile
-      payload: ConfNameMap
+      payload: JobNameMap
     }
   | {
       command: CommandFromResultsWebview.Duplicate
-      payload: { toDuplicate: ConfNameMap; duplicatedName: ConfNameMap }
+      payload: { toDuplicate: JobNameMap; duplicatedName: JobNameMap }
     }
   | {
       command: CommandFromResultsWebview.RemoveScript

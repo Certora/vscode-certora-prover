@@ -1,6 +1,6 @@
 /* ---------------------------------------------------------------------------------------------
  *  Results webview actions. When there is an action that has to do with sending
- *  information from the Results part of the applicaiton to the extention part,
+ *  information from the Results part of the application to the extension part,
  *  it is listened to in here, than the corresponding function is called.
  *-------------------------------------------------------------------------------------------- */
 
@@ -13,22 +13,22 @@ import {
   Output,
   CommandFromResultsWebview,
   EventFromResultsWebview,
-  ConfNameMap,
+  JobNameMap,
 } from './types'
-import type { CreationTime } from '../results/types'
+// import type { CreationTime } from '../results/types'
 
 export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   public viewType = 'results'
   private _panel: vscode.Webview | null = null
   public stopScript: null | ((pid: number) => void) = null
-  public editConfFile: null | ((name: ConfNameMap) => Promise<void>) = null
-  public openSettings: null | ((name: ConfNameMap) => void) = null
-  public deleteConf: null | ((name: ConfNameMap) => void) = null
+  public editConfFile: null | ((name: JobNameMap) => Promise<void>) = null
+  public openSettings: null | ((name: JobNameMap) => void) = null
+  public deleteConf: null | ((name: JobNameMap) => void) = null
   public duplicate:
     | null
-    | ((toDuplicate: ConfNameMap, duplicated: ConfNameMap) => void) = null
+    | ((toDuplicate: JobNameMap, duplicated: JobNameMap) => void) = null
 
-  public runScript: null | ((name: ConfNameMap) => void) = null
+  public runScript: null | ((name: JobNameMap) => void) = null
   public removeScript: null | ((name: string) => void) = null
   constructor(private readonly _extensionUri: vscode.Uri) {
     this._extensionUri = _extensionUri
@@ -100,14 +100,14 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
             })
             this.getOutput(e.payload)
             break
-          case CommandFromResultsWebview.GetCreationTime:
-            log({
-              action: 'Received "get-creation-time" command',
-              source: Sources.Extension,
-              info: e.payload,
-            })
-            this.getCreationTime(e.payload)
-            break
+          // case CommandFromResultsWebview.GetCreationTime:
+          //   log({
+          //     action: 'Received "get-creation-time" command',
+          //     source: Sources.Extension,
+          //     info: e.payload,
+          //   })
+          // this.getCreationTime(e.payload)
+          // break
           case CommandFromResultsWebview.DeleteConfFile:
             log({
               action: 'Received "delete-confFile" command',
@@ -170,26 +170,26 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
       this.postMessage<Output>({ type: 'set-output', payload: data })
     } catch (e) {
       vscode.window.showErrorMessage(
-        `Certora verification service is currently unavailable. Please, try again later.1`,
+        `Certora verification service is currently unavailable. Please, try again later.`,
       )
     }
   }
 
-  private async getCreationTime(creationTimeUrl: string): Promise<void> {
-    try {
-      const { data } = await axios.get<CreationTime>(creationTimeUrl)
+  // private async getCreationTime(creationTimeUrl: string): Promise<void> {
+  //   try {
+  //     const { data } = await axios.get<CreationTime>(creationTimeUrl)
 
-      log({
-        action: 'Send "set-creation-time" command',
-        source: Sources.Extension,
-        info: data,
-      })
-    } catch (e) {
-      vscode.window.showErrorMessage(
-        `Certora verification service is currently unavailable. Please, try again later.2`,
-      )
-    }
-  }
+  //     log({
+  //       action: 'Send "set-creation-time" command',
+  //       source: Sources.Extension,
+  //       info: data,
+  //     })
+  //   } catch (e) {
+  //     vscode.window.showErrorMessage(
+  //       `Certora verification service is currently unavailable. Please, try again later.`,
+  //     )
+  //   }
+  // }
 
   private _getHtmlForWebview(webview: vscode.Webview) {
     const path = vscode.workspace.workspaceFolders?.[0]

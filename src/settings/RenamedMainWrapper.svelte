@@ -31,9 +31,9 @@
       return el.classList.contains('field-danger')
     })
     let form = {
-      solidyObj: $solidityObj,
+      solidityObj: $solidityObj,
       specObj: $specObj,
-      verificatoinMessage: $verification_message,
+      verificationMessage: $verification_message,
       solidityAdditionalContracts: $solAdditionalContracts,
       checkMyInputs: $checkMyInputs,
     }
@@ -79,8 +79,6 @@
     box-sizing: border-box;
     height: 100vh;
     overflow: hidden;
-    /* width: 100%; */
-    /* overflow: hidden; */
   }
   .feedback {
     position: fixed;
@@ -99,10 +97,8 @@
     background-color: var(--vscode-button-foreground);
     color: var(--vscode-button-background);
     border-radius: 30px;
-    /* text-align: center; */
     padding-left: 13px;
     padding-top: 6px;
-    /* padding-right: 2px; */
     border-color: transparent;
     text-decoration: none;
     cursor: pointer;

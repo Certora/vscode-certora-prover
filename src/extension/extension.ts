@@ -7,7 +7,7 @@ import * as vscode from 'vscode'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { SettingsPanel } from './SettingsPanel'
 import { ScriptRunner } from './ScriptRunner'
-import { ConfFile, InputFormData, ConfNameMap } from './types'
+import { ConfFile, InputFormData, JobNameMap } from './types'
 import { createConfFile } from './utils/createConfFile'
 import { confFileToFormData } from './utils/confFileToInputForm'
 
@@ -18,7 +18,7 @@ export function activate(context: vscode.ExtensionContext): void {
    * and display name of the run
    * @returns null
    */
-  function showSettings(name: ConfNameMap) {
+  function showSettings(name: JobNameMap) {
     const path = vscode.workspace.workspaceFolders?.[0]
     if (!path) return
     const confFileDefault = getDefaultSettings()
@@ -126,7 +126,7 @@ export function activate(context: vscode.ExtensionContext): void {
    * and display name of the run
    * @returns Promise<void>
    */
-  async function editConf(name: ConfNameMap): Promise<void> {
+  async function editConf(name: JobNameMap): Promise<void> {
     const confFileUri = getConfUri(name.fileName)
     if (confFileUri) {
       try {
@@ -145,7 +145,7 @@ export function activate(context: vscode.ExtensionContext): void {
    * @param confName name of the conf file, in the format: {fileName, displayName}
    * @param confFile contant of the conf file
    */
-  function renderSettingsPanel(confName: ConfNameMap, confFile: ConfFile) {
+  function renderSettingsPanel(confName: JobNameMap, confFile: ConfFile) {
     SettingsPanel.setResultsWebviewProvider(resultsWebviewProvider)
     SettingsPanel.render(context.extensionUri, confName, confFile)
   }
@@ -171,8 +171,8 @@ export function activate(context: vscode.ExtensionContext): void {
    * @returns Promise<void>
    */
   async function duplicate(
-    toDuplicate: ConfNameMap,
-    duplicated: ConfNameMap,
+    toDuplicate: JobNameMap,
+    duplicated: JobNameMap,
   ): Promise<void> {
     // get the content of the conf to duplicate
     // cretate a new conf file with the name of "duplicated", content of "to duplicate", and open it with settings view
@@ -207,7 +207,7 @@ export function activate(context: vscode.ExtensionContext): void {
     return 'conf/' + name + '.conf'
   }
 
-  async function runScript(name: ConfNameMap) {
+  async function runScript(name: JobNameMap) {
     SettingsPanel.removePanel(name.displayName)
     const confFile = getConfFilePath(name.fileName)
     scriptRunner.run(confFile)
@@ -221,7 +221,7 @@ export function activate(context: vscode.ExtensionContext): void {
     return confFileUri
   }
 
-  function deleteConfFile(name: ConfNameMap): void {
+  function deleteConfFile(name: JobNameMap): void {
     const confFileUri: vscode.Uri | void = getConfUri(name.fileName)
     if (confFileUri) {
       try {

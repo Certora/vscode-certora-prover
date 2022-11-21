@@ -11,7 +11,7 @@ import type {
 } from '../types'
 
 const newForm: NewForm = {
-  solidyObj: {
+  solidityObj: {
     mainFile: '',
     mainContract: '',
     linking: [],
@@ -40,7 +40,7 @@ const newForm: NewForm = {
     multiAssert: false,
     sendOnly: true,
   },
-  verificatoinMessage: '',
+  verificationMessage: '',
   checkMyInputs: false,
 }
 
@@ -227,11 +227,11 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
   const form = newForm as NewForm
 
   if (Array.isArray(confFile.files) && confFile.files.length > 0) {
-    form.solidyObj.mainFile = confFile.files[0] as string
+    form.solidityObj.mainFile = confFile.files[0] as string
 
-    if (form.solidyObj.mainFile.includes(':')) {
-      form.solidyObj.mainFile = form.solidyObj.mainFile.split(':')[0]
-      form.solidyObj.mainContract = confFile.files[0].split(':')[1]
+    if (form.solidityObj.mainFile.includes(':')) {
+      form.solidityObj.mainFile = form.solidityObj.mainFile.split(':')[0]
+      form.solidityObj.mainContract = confFile.files[0].split(':')[1]
     }
   }
 
@@ -240,18 +240,18 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
     const [mainContractName, specFile] = verifyStr.split(':')
 
     if (mainContractName) {
-      form.solidyObj.mainContract = mainContractName
+      form.solidityObj.mainContract = mainContractName
     }
     if (specFile) {
       form.specObj.specFile = specFile
     }
   }
 
-  processSolidityAttributes(confFile, form.solidyObj)
+  processSolidityAttributes(confFile, form.solidityObj)
   processSpecAttributes(confFile, form.specObj)
 
   if (confFile.msg) {
-    form.verificatoinMessage = confFile.msg
+    form.verificationMessage = confFile.msg
   }
 
   // additional contracts
@@ -298,8 +298,8 @@ function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
         Object.entries(confFile.solc_map).forEach(([key, value]) => {
           if (key === tempForm.mainContract) {
             processCompiler(value, tempForm)
-          } else if (key === form.solidyObj.mainContract) {
-            processCompiler(value, form.solidyObj)
+          } else if (key === form.solidityObj.mainContract) {
+            processCompiler(value, form.solidityObj)
           }
         })
       }

@@ -319,15 +319,15 @@ export function processForm(
   confFileName: string,
 ): InputFormData {
   const compilerDirectory: string = processCompilerPath(
-    newForm.solidyObj.compiler.ver,
-    newForm.solidyObj.compiler.exe,
+    newForm.solidityObj.compiler.ver,
+    newForm.solidityObj.compiler.exe,
   )
-  const mainSolFile = newForm.solidyObj.mainFile?.value || ''
+  const mainSolFile = newForm.solidityObj.mainFile?.value || ''
   const mainSpecFile = newForm.specObj.specFile.value || ''
   const form: InputFormData = {
     name: confFileName,
     mainSolidityFile: mainSolFile,
-    mainContractName: newForm.solidyObj.mainContract,
+    mainContractName: newForm.solidityObj.mainContract,
     specFile: mainSpecFile,
     solidityCompiler: compilerDirectory,
     useAdditionalContracts: false,
@@ -349,8 +349,8 @@ export function processForm(
     processAdditionalContracts(newForm.solidityAdditionalContracts, form)
   }
 
-  if (newForm.verificatoinMessage as string) {
-    form.message = newForm.verificatoinMessage as string
+  if (newForm.verificationMessage as string) {
+    form.message = newForm.verificationMessage as string
   }
 
   addAdditionalSetting(
@@ -388,7 +388,7 @@ export function processForm(
 
   addAdditionalSetting(
     'packages_path',
-    newForm.solidyObj.solidityPackageDefaultPath,
+    newForm.solidityObj.solidityPackageDefaultPath,
     form,
   )
 
@@ -400,7 +400,7 @@ export function processForm(
     })
   }
 
-  addAdditionalSetting('method', newForm.solidyObj.specifiMethod, form)
+  addAdditionalSetting('method', newForm.solidityObj.specifiMethod, form)
 
   if (newForm.specObj.ruleSanity) {
     if (newForm.specObj.advancedSanity) {
@@ -410,9 +410,9 @@ export function processForm(
     }
   }
 
-  addSolcArguments('solc_args', newForm.solidyObj.solidityArgs, form)
+  addSolcArguments('solc_args', newForm.solidityObj.solidityArgs, form)
 
-  processPackages(newForm.solidyObj, form)
+  processPackages(newForm.solidityObj, form)
 
   const additionalSettings = newForm.specObj.properties
   if (
@@ -424,7 +424,7 @@ export function processForm(
       addAdditionalSetting(flag.name, flag.value || 'true', form)
     })
   }
-  processLink(form, newForm.solidyObj, newForm.solidyObj.mainContract)
+  processLink(form, newForm.solidityObj, newForm.solidityObj.mainContract)
   return form
 }
 

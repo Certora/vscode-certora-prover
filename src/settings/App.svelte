@@ -24,10 +24,10 @@
   import { refreshFiles } from './utils/refreshFiles'
 
   function fillFields(newForm: NewForm) {
-    $solidityObj = newForm.solidyObj
+    $solidityObj = newForm.solidityObj
     $specObj = newForm.specObj
     $verification_message =
-      newForm.verificatoinMessage ||
+      newForm.verificationMessage ||
       $RunName.replaceAll('(', '').replaceAll(')', '')
     $solAdditionalContracts = newForm.solidityAdditionalContracts || []
   }

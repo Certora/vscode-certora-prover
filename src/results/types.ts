@@ -214,7 +214,7 @@ export type EventsFromExtension =
       payload: number
     }
 
-export type ConfNameMap = {
+export type JobNameMap = {
   displayName: string
   fileName: string
 }

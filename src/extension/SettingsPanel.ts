@@ -10,7 +10,7 @@ import { log, Sources } from './utils/log'
 import {
   CommandFromSettingsWebview,
   ConfFile,
-  ConfNameMap,
+  JobNameMap,
   EventFromSettingsWebview,
   InputFormData,
 } from './types'
@@ -81,6 +81,8 @@ export class SettingsPanel {
               source: Sources.Extension,
               info: e.payload,
             })
+            // [e.payload.checkMyInputs] is true when the frontend validator found a format error in the input
+            // therefore it is not valid
             if (!e.payload.checkMyInputs) {
               const form: InputFormData = processForm(e.payload, confFileName)
               createConfFile(form)
@@ -96,7 +98,7 @@ export class SettingsPanel {
                   payload: confFileName,
                 })
               } else {
-                // deuplicate fix - if all mandatory fields are filled in the conf file - allow runnig
+                // deduplicate fix - if all mandatory fields are filled in the conf file - allow running
                 if (this.editConfFile) {
                   if (
                     this.editConfFile?.files &&
@@ -170,7 +172,7 @@ export class SettingsPanel {
    */
   private static _openNewPanel(
     extensionUri: vscode.Uri,
-    confFileName: ConfNameMap,
+    confFileName: JobNameMap,
     editConfFile?: ConfFile,
   ) {
     const panel = vscode.window.createWebviewPanel(
@@ -251,7 +253,7 @@ export class SettingsPanel {
    */
   public static render(
     extensionUri: vscode.Uri,
-    confName: ConfNameMap,
+    confName: JobNameMap,
     editConfFile?: ConfFile,
   ): void {
     let isOpened = false

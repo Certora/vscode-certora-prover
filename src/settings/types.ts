@@ -98,9 +98,9 @@ export type SpecObj = {
 }
 // todo: change to multiple solidity / spec
 export type NewForm = {
-  solidyObj: SolidityObj
+  solidityObj: SolidityObj
   specObj: SpecObj
-  verificatoinMessage: string
+  verificationMessage: string
   solidityAdditionalContracts?: SolidityObj[] // multiple contracts
   checkMyInputs: boolean
 }

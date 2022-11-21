@@ -63,19 +63,14 @@ export class ScriptRunner {
     ts: number,
   ): Promise<void> {
     const logFilePath = this.getLogFilePath(pathToConfFile, ts)
-    if (logFilePath) {
-      if (
-        this.logFiles.find(lf => lf.path === logFilePath.path) === undefined
-      ) {
-        this.logFiles.push(logFilePath)
-      }
-    }
     if (!logFilePath) {
       return
     }
+    if (this.logFiles.find(lf => lf.path === logFilePath.path) === undefined) {
+      this.logFiles.push(logFilePath)
+    }
     const encoder = new TextEncoder()
     const content = encoder.encode(str)
-
     let file
 
     try {
@@ -112,111 +107,109 @@ export class ScriptRunner {
     this.script = spawn(`certoraRun`, [confFile], {
       cwd: path.uri.fsPath,
     })
+
+    if (!this.script) return
+
     const { pid } = this.script
     this.addRunningScript(confFile, pid)
 
-    if (this.script) {
-      this.script.stdout.on('data', async data => {
-        let str = data.toString() as string
-        // remove all the bash color characters
-        str = str.replace(re, '')
-        this.log(str, confFile, ts)
-        // parse errors are shown in an error message.
-        if (str.includes('CRITICAL')) {
-          // remove irrelevant --debug suggestion
-          const shortMsg = str.split('consider running the script again')[0]
-          // window.showErrorMessage(shortMsg).then(action => {
-          //   if (action === 'Show The Script Output') {
-          //     channel.show()
-          //   }
-          // })
-          const action = await window.showErrorMessage(
-            shortMsg,
-            'Open Execution Log File',
+    this.script.stdout.on('data', async data => {
+      let str = data.toString() as string
+      // remove all the bash color characters
+      str = str.replace(re, '')
+      this.log(str, confFile, ts)
+      // parse errors are shown in an error message.
+      if (str.includes('CRITICAL')) {
+        // remove irrelevant --debug suggestion
+        const shortMsg = str.split('consider running the script again')[0]
+
+        // the use of [action] is necessary to add the button that opens the log file
+        const action = await window.showErrorMessage(
+          shortMsg,
+          'Open Execution Log File',
+        )
+        if (action === 'Open Execution Log File') {
+          const logFilePath = Uri.joinPath(
+            path.uri,
+            'certora-logs',
+            `${this.getConfFileName(confFile)}-${ts}.log`,
           )
-          if (action === 'Open Execution Log File') {
-            const logFilePath = Uri.joinPath(
-              path.uri,
-              'certora-logs',
-              `${this.getConfFileName(confFile)}-${ts}.log`,
+          const document = await workspace.openTextDocument(logFilePath)
+          await window.showTextDocument(document)
+        }
+      }
+      channel.appendLine(str)
+
+      const progressUrl = getProgressUrl(str)
+
+      const confFileName = confFile.replace('conf/', '').replace('.conf', '')
+
+      if (progressUrl) {
+        await this.polling.run(progressUrl, data => {
+          data.runName = confFileName
+          const curLogFiles = this.logFiles
+            .filter(
+              lf =>
+                lf.path.split('/').reverse()[0].split('.conf')[0] ===
+                data.runName,
             )
-            const document = await workspace.openTextDocument(logFilePath)
-            await window.showTextDocument(document)
-          }
-        }
-        channel.appendLine(str)
-
-        const progressUrl = getProgressUrl(str)
-
-        const confFileName = confFile.replace('conf/', '').replace('.conf', '')
-
-        if (progressUrl) {
-          await this.polling.run(progressUrl, data => {
-            data.runName = confFileName
-            const curLogFiles = this.logFiles
-              .filter(
-                lf =>
-                  lf.path.split('/').reverse()[0].split('.conf')[0] ===
-                  data.runName,
-              )
-              .sort()
-              .reverse()
-            if (curLogFiles !== undefined) {
-              workspace.fs.readFile(curLogFiles[0]).then(content => {
-                const decoder = new TextDecoder()
-                const strContent: string = decoder.decode(content)
-                const pattern =
-                  'https://prover.certora.com/output/[a-zA-Z0-9/?=]+'
-                const vrLinkRegExp = new RegExp(pattern)
-                const vrLink = vrLinkRegExp.exec(strContent)
-                if (
-                  this.runningScripts.find(rs => rs.pid === pid) !== undefined
-                ) {
-                  data.verificationReportLink = ''
-                  if (vrLink) {
-                    data.verificationReportLink = vrLink[0] as string
-                  }
-                  this.resultsWebviewProvider.postMessage<Job>({
-                    type: 'receive-new-job-result',
-                    payload: data,
-                  })
+            .sort()
+            .reverse()
+          if (curLogFiles !== undefined) {
+            workspace.fs.readFile(curLogFiles[0]).then(content => {
+              const decoder = new TextDecoder()
+              const strContent: string = decoder.decode(content)
+              const pattern =
+                'https://prover.certora.com/output/[a-zA-Z0-9/?=]+'
+              const vrLinkRegExp = new RegExp(pattern)
+              const vrLink = vrLinkRegExp.exec(strContent)
+              if (
+                this.runningScripts.find(rs => rs.pid === pid) !== undefined
+              ) {
+                data.verificationReportLink = ''
+                if (vrLink) {
+                  data.verificationReportLink = vrLink[0] as string
                 }
-              })
-            }
-          })
-        }
-      })
-
-      this.script.stderr.on('data', async data => {
-        // this.removeRunningScript(pid)
-      })
-
-      this.script.on('error', async err => {
-        console.error(err)
-        this.removeRunningScript(pid)
-      })
-
-      this.script.on('close', async code => {
-        this.runningScripts.forEach(rs => {
-          if (rs.pid === pid) {
-            rs.uploaded = true
+                this.resultsWebviewProvider.postMessage<Job>({
+                  type: 'receive-new-job-result',
+                  payload: data,
+                })
+              }
+            })
           }
         })
-        this.resultsWebviewProvider.postMessage<number>({
-          type: 'run-next',
-          payload: pid,
-        })
-        if (code !== 0) {
-          this.removeRunningScript(pid)
-          // when there is a parse error, post it to PROBLEMS and send 'parse-error' to results
-          PostProblems.postProblems(confFile)
-          this.resultsWebviewProvider.postMessage({
-            type: 'parse-error',
-            payload: this.getConfFileName(confFile).replace('.conf', ''),
-          })
+      }
+    })
+
+    this.script.stderr.on('data', async data => {
+      // this.removeRunningScript(pid)
+    })
+
+    this.script.on('error', async err => {
+      console.error(err)
+      this.removeRunningScript(pid)
+    })
+
+    this.script.on('close', async code => {
+      this.runningScripts.forEach(rs => {
+        if (rs.pid === pid) {
+          rs.uploaded = true
         }
       })
-    }
+      this.resultsWebviewProvider.postMessage<number>({
+        type: 'run-next',
+        payload: pid,
+      })
+      if (code !== 0) {
+        this.removeRunningScript(pid)
+        // when there is a parse error, post it to PROBLEMS and send 'parse-error' to results
+        PostProblems.postProblems(confFile)
+        this.resultsWebviewProvider.postMessage({
+          type: 'parse-error',
+          payload: this.getConfFileName(confFile).replace('.conf', ''),
+        })
+      }
+    })
   }
 
   public stop = (pid: number): void => {

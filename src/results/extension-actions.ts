@@ -5,7 +5,7 @@
  *-------------------------------------------------------------------------------------------- */
 
 import { log, Sources } from './utils/log'
-import type { ConfNameMap, JumpToDefinition } from './types'
+import type { JobNameMap, JumpToDefinition } from './types'
 
 enum Commands {
   StopScript = 'stop-script',
@@ -43,7 +43,7 @@ export function stopScript(pid: number): void {
   })
 }
 
-export function runScript(name: ConfNameMap): void {
+export function runScript(name: JobNameMap): void {
   log({
     action: 'Send "run-script" command',
     source: Sources.ResultsWebview,
@@ -54,7 +54,7 @@ export function runScript(name: ConfNameMap): void {
   })
 }
 
-export function openSettings(name: ConfNameMap): void {
+export function openSettings(name: JobNameMap): void {
   log({
     action: 'Send "open-settings" command',
     source: Sources.ResultsWebview,
@@ -65,7 +65,7 @@ export function openSettings(name: ConfNameMap): void {
   })
 }
 
-export function editConfFile(name: ConfNameMap): void {
+export function editConfFile(name: JobNameMap): void {
   log({
     action: 'Send "edit-confFile" command',
     source: Sources.ResultsWebview,
@@ -76,7 +76,7 @@ export function editConfFile(name: ConfNameMap): void {
   })
 }
 
-export function deleteConf(name: ConfNameMap): void {
+export function deleteConf(name: JobNameMap): void {
   log({
     action: 'Send "delete-confFile" command',
     source: Sources.ResultsWebview,
@@ -88,8 +88,8 @@ export function deleteConf(name: ConfNameMap): void {
 }
 
 export function duplicate(
-  toDuplicate: ConfNameMap,
-  duplicated: ConfNameMap,
+  toDuplicate: JobNameMap,
+  duplicated: JobNameMap,
 ): void {
   log({
     action: 'Send "duplicate" command',

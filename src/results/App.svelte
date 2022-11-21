@@ -29,7 +29,7 @@
     Rule,
     Verification,
     Run,
-    ConfNameMap,
+    JobNameMap,
     Status,
   } from './types'
   import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
@@ -43,7 +43,7 @@
   let runningScripts: { pid: number; confFile: string; uploaded: boolean }[] =
     []
   let runs: Run[] = []
-  let pendingQueue: ConfNameMap[] = []
+  let pendingQueue: JobNameMap[] = []
   let pendingQueueCounter = 0
   let namesMap: Map<string, string> = new Map()
   let runsCounter = 0
@@ -293,12 +293,12 @@
 
     createRun(duplicated)
 
-    const confNameMapDuplicated: ConfNameMap = {
+    const confNameMapDuplicated: JobNameMap = {
       fileName: duplicated.name,
       displayName: namesMap.get(duplicated.name),
     }
 
-    const confNameMapToDuplicate: ConfNameMap = {
+    const confNameMapToDuplicate: JobNameMap = {
       fileName: toDuplicate.name,
       displayName: namesMap.get(toDuplicate.name),
     }
@@ -326,11 +326,11 @@
   }
 
   function editRun(run: Run): void {
-    const confNameMap: ConfNameMap = {
+    const JobNameMap: JobNameMap = {
       fileName: run.name,
       displayName: namesMap.get(run.name),
     }
-    editConfFile(confNameMap)
+    editConfFile(JobNameMap)
   }
 
   /**
@@ -344,7 +344,7 @@
     verificationResults = verificationResults.filter(vr => {
       return vr.name !== name
     })
-    const confNameMap: ConfNameMap = {
+    const JobNameMap: JobNameMap = {
       fileName: name,
       displayName: namesMap.get(name),
     }
@@ -360,7 +360,7 @@
 
     if (runToDelete.name) {
       //delete conf file
-      deleteConf(confNameMap)
+      deleteConf(JobNameMap)
     }
     runsCounter--
   }
@@ -371,13 +371,13 @@
    * @param index if 0 - run, else: add to pending queue
    */
   function run(run: Run, index = 0): void {
-    const confNameMap: ConfNameMap = {
+    const JobNameMap: JobNameMap = {
       fileName: run.name,
       displayName: namesMap.get(run.name),
     }
 
     //add to pending queue
-    pendingQueue.push(confNameMap)
+    pendingQueue.push(JobNameMap)
     pendingQueueCounter++
 
     if (output && output.runName === run.name) {
@@ -417,11 +417,11 @@
         verificationResults.push(newResult)
       }
 
-      const oldConfNameMap: ConfNameMap = {
+      const oldConfNameMap: JobNameMap = {
         fileName: oldName,
         displayName: namesMap.get(oldName),
       }
-      const newConfNameMap: ConfNameMap = {
+      const newConfNameMap: JobNameMap = {
         fileName: newName,
         displayName: namesMap.get(newName),
       }
@@ -432,11 +432,11 @@
     }
     // rename new run
     else {
-      const confNameMap: ConfNameMap = {
+      const JobNameMap: JobNameMap = {
         fileName: newName,
         displayName: namesMap.get(newName),
       }
-      openSettings(confNameMap)
+      openSettings(JobNameMap)
     }
     focusedRun = newName
   }
