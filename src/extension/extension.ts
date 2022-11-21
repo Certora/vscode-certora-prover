@@ -1,6 +1,6 @@
 /* ---------------------------------------------------------------------------------------------
- *  This is the main file of the [extention] part. Here, there are the main tasks
- *  of the extention.
+ *  This is the main file of the [extension] part. Here, there are the main tasks
+ *  of the extension.
  *-------------------------------------------------------------------------------------------- */
 
 import * as vscode from 'vscode'
@@ -27,7 +27,7 @@ export function activate(context: vscode.ExtensionContext): void {
       name.fileName,
     )
     createConfFile(emptyForm)
-    renderSettingsPannel(name, confFileDefault)
+    renderSettingsPanel(name, confFileDefault)
   }
 
   /**
@@ -77,20 +77,17 @@ export function activate(context: vscode.ExtensionContext): void {
       staging: branch,
     }
     if (solcArgs !== '{}') {
-      confFileDefault.solc_args = ''
+      // from object '{'flag': '', 'flag2': 'value2'}' to array of strings ['--flag', '--flag2', 'value2']
+      const tempSolcArgs: string[] = []
       const tempArgs = JSON.parse(solcArgs)
       Object.entries(tempArgs).forEach(arg => {
-        let tempValue = arg[1]
+        const tempValue = arg[1]
+        tempSolcArgs.push('--' + arg[0].replace('--', ''))
         if (tempValue) {
-          tempValue += ','
+          tempSolcArgs.push(tempValue.toString())
         }
-        confFileDefault.solc_args +=
-          '--' + arg[0].replace('--', '') + ',' + tempValue
       })
-      confFileDefault.solc_args = confFileDefault.solc_args
-        .toString()
-        .replace(/.$/, '')
-        .split(',')
+      confFileDefault.solc_args = tempSolcArgs
     }
     if (defaultDirectoryForPackagesDependencies) {
       confFileDefault.packages_path = defaultDirectoryForPackagesDependencies
@@ -134,7 +131,7 @@ export function activate(context: vscode.ExtensionContext): void {
     if (confFileUri) {
       try {
         const confFileContent = readConf(confFileUri)
-        renderSettingsPannel(name, await confFileContent)
+        renderSettingsPanel(name, await confFileContent)
       } catch (e) {
         vscode.window.showErrorMessage(
           `Can't read conf file: ${confFileUri.path}. Error: ${e}`,
@@ -148,7 +145,7 @@ export function activate(context: vscode.ExtensionContext): void {
    * @param confName name of the conf file, in the format: {fileName, displayName}
    * @param confFile contant of the conf file
    */
-  function renderSettingsPannel(confName: ConfNameMap, confFile: ConfFile) {
+  function renderSettingsPanel(confName: ConfNameMap, confFile: ConfFile) {
     SettingsPanel.setResultsWebviewProvider(resultsWebviewProvider)
     SettingsPanel.render(context.extensionUri, confName, confFile)
   }
@@ -197,7 +194,7 @@ export function activate(context: vscode.ExtensionContext): void {
         } catch (e) {
           vscode.window.showErrorMessage(`Can't create conf file. Error: ${e}`)
         }
-        renderSettingsPannel(duplicated, await confFileContent)
+        renderSettingsPanel(duplicated, await confFileContent)
       } catch (e) {
         vscode.window.showErrorMessage(
           `Can't read conf file: ${confFileUri.path}. Error: ${e}`,
