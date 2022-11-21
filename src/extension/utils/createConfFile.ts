@@ -52,12 +52,14 @@ function additionalContractsSolc(
   if (findSimilar) {
     config.solc = inputFormData.solc_map[0].solidityCompiler || 'solc'
   } else {
-    config.solc_map = '{'
-    inputFormData.solc_map.forEach(map => {
-      config.solc_map +=
-        '"' + map.contract + '":"' + map.solidityCompiler + '",'
-    })
-    config.solc_map = JSON.parse(config.solc_map.replace(/.$/, '}'))
+    // object with contracts as keys and solc versions as values
+    config.solc_map = JSON.parse(
+      JSON.stringify(
+        Object.fromEntries(
+          inputFormData.solc_map.map(i => [i.contract, i.solidityCompiler]),
+        ),
+      ),
+    )
   }
 }
 
