@@ -15,7 +15,6 @@ import {
   EventFromResultsWebview,
   JobNameMap,
 } from './types'
-// import type { CreationTime } from '../results/types'
 
 export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   public viewType = 'results'
@@ -100,14 +99,6 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
             })
             this.getOutput(e.payload)
             break
-          // case CommandFromResultsWebview.GetCreationTime:
-          //   log({
-          //     action: 'Received "get-creation-time" command',
-          //     source: Sources.Extension,
-          //     info: e.payload,
-          //   })
-          // this.getCreationTime(e.payload)
-          // break
           case CommandFromResultsWebview.DeleteConfFile:
             log({
               action: 'Received "delete-confFile" command',
@@ -174,22 +165,6 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
       )
     }
   }
-
-  // private async getCreationTime(creationTimeUrl: string): Promise<void> {
-  //   try {
-  //     const { data } = await axios.get<CreationTime>(creationTimeUrl)
-
-  //     log({
-  //       action: 'Send "set-creation-time" command',
-  //       source: Sources.Extension,
-  //       info: data,
-  //     })
-  //   } catch (e) {
-  //     vscode.window.showErrorMessage(
-  //       `Certora verification service is currently unavailable. Please, try again later.`,
-  //     )
-  //   }
-  // }
 
   private _getHtmlForWebview(webview: vscode.Webview) {
     const path = vscode.workspace.workspaceFolders?.[0]

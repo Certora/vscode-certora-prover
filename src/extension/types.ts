@@ -230,7 +230,6 @@ export enum CommandFromResultsWebview {
   RunScript = 'run-script',
   OpenSettings = 'open-settings',
   GetOutput = 'get-output',
-  // GetCreationTime = 'get-creation-time',
   EditConfFile = 'edit-confFile',
   DeleteConfFile = 'delete-confFile',
   Duplicate = 'duplicate',
@@ -264,10 +263,6 @@ export type EventFromResultsWebview =
       command: CommandFromResultsWebview.GetOutput
       payload: string
     }
-  // | {
-  //     command: CommandFromResultsWebview.GetCreationTime
-  //     payload: string
-  //   }
   | {
       command: CommandFromResultsWebview.EditConfFile
       payload: JobNameMap
