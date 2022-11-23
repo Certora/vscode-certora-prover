@@ -42,8 +42,6 @@ To create your first job, click either the “Create verification run” button.
 
 Job name is limited to 35 characters.
 
-![image](https://user-images.githubusercontent.com/101042618/203574292-fdec5bf2-b2f0-4741-9e08-5b4952c8a915.png)
-
 After pressing Enter you will see your job list item and the job’s settings form tub will open (see next step for a deeper dive into job list items and the settings form).
 
 ![image](https://user-images.githubusercontent.com/101042618/203574324-03d52268-3c4b-40b1-915c-6af23e9189d1.png)
