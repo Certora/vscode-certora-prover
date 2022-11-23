@@ -1,4 +1,8 @@
 <script lang="ts">
+  /* ---------------------------------------------------------------------------------------------
+   *  Component that shows results of a run, in a tree view
+   *-------------------------------------------------------------------------------------------- */
+
   import RulesTreeItem from './RulesTreeItem.svelte'
   import CalltraceTreeItem from './CalltraceTreeItem.svelte'
   import { navigateToCode } from '../extension-actions'

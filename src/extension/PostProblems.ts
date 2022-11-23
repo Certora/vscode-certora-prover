@@ -1,3 +1,7 @@
+/* ---------------------------------------------------------------------------------------------
+ *  post problems from resource_errors.json the the PROBLEMS view of vscode
+ *-------------------------------------------------------------------------------------------- */
+
 import {
   workspace,
   Uri,
@@ -12,9 +16,6 @@ import {
 } from 'vscode'
 import type { ResourceError } from './types'
 
-/**
- *  post problems from resource_errors.json the the PROBLEMS view of vscode
- */
 export abstract class PostProblems {
   private static diagnosticCollection: DiagnosticCollection =
     languages.createDiagnosticCollection()

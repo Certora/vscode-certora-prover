@@ -1,3 +1,7 @@
+/* ---------------------------------------------------------------------------------------------
+ *  run job and recieve job results
+ *-------------------------------------------------------------------------------------------- */
+
 import { window } from 'vscode'
 import axios from 'axios'
 import type { Job, ProgressResponse } from './types'
@@ -23,9 +27,7 @@ export class ScriptProgressLongPolling {
       if (url) {
         const creationTimeUrl = getCreationTimeUrl(url)
         if (creationTimeUrl) {
-          console.log(creationTimeUrl)
           const { data } = await axios.get<CreationTime>(creationTimeUrl)
-          console.log(data)
           postTime = data.postTime
         }
       }
@@ -59,16 +61,10 @@ export class ScriptProgressLongPolling {
 
       if (data.jobEnded && data.jobStatus === 'SUCCEEDED' && dataToUI) {
         if (Object.keys(dataToUI.verificationProgress).length === 0) {
-          window.showErrorMessage(
-            `Job ${dataToUI.jobId} completed successfully, with an empty output. Please contact Certora team`,
-          )
           return
         }
 
         callback(dataToUI)
-        window.showInformationMessage(
-          `Job ${dataToUI.jobId} completed successfully. Checked spec file: ${dataToUI.verificationProgress.spec}`,
-        )
         return
       }
 
@@ -84,7 +80,7 @@ export class ScriptProgressLongPolling {
       }
     } catch (e) {
       window.showErrorMessage(
-        `Certora verification service is currently unavailable. Please, try again later.`,
+        `Certora verification service is currently unavailable. Please, try again later.3`,
       )
     }
   }

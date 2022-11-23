@@ -1,3 +1,9 @@
+/* ---------------------------------------------------------------------------------------------
+ *  Results webview actions. When there is an action that has to do with sending
+ *  information from the Results part of the application to the extension part,
+ *  it is listened to in here, than the corresponding function is called.
+ *-------------------------------------------------------------------------------------------- */
+
 import * as vscode from 'vscode'
 import axios from 'axios'
 import { navigateToCode } from './utils/navigateToCode'
@@ -7,22 +13,24 @@ import {
   Output,
   CommandFromResultsWebview,
   EventFromResultsWebview,
+  JobNameMap,
 } from './types'
-import type { CreationTime } from '../results/types'
 
 export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   public viewType = 'results'
   private _panel: vscode.Webview | null = null
   public stopScript: null | ((pid: number) => void) = null
+  public editConfFile: null | ((name: JobNameMap) => Promise<void>) = null
+  public openSettings: null | ((name: JobNameMap) => void) = null
+  public deleteConf: null | ((name: JobNameMap) => void) = null
+  public duplicate:
+    | null
+    | ((toDuplicate: JobNameMap, duplicated: JobNameMap) => void) = null
 
-  constructor(
-    private readonly _extensionUri: vscode.Uri,
-    private readonly runScript: () => Promise<void>,
-    private readonly openSettings: () => void,
-  ) {
+  public runScript: null | ((name: JobNameMap) => void) = null
+  public removeScript: null | ((name: string) => void) = null
+  constructor(private readonly _extensionUri: vscode.Uri) {
     this._extensionUri = _extensionUri
-    this.runScript = runScript
-    this.openSettings = openSettings
   }
 
   resolveWebviewView({ webview }: vscode.WebviewView): void {
@@ -61,14 +69,27 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
               action: 'Received "run-script" command',
               source: Sources.Extension,
             })
-            this.runScript()
+            if (typeof this.runScript === 'function') {
+              this.runScript(e.payload)
+            }
             break
           case CommandFromResultsWebview.OpenSettings:
             log({
               action: 'Received "open-settings" command',
               source: Sources.Extension,
             })
-            this.openSettings()
+            if (typeof this.openSettings === 'function') {
+              this.openSettings(e.payload)
+            }
+            break
+          case CommandFromResultsWebview.EditConfFile:
+            log({
+              action: 'Received "edit-confFile" command',
+              source: Sources.Extension,
+            })
+            if (typeof this.editConfFile === 'function') {
+              this.editConfFile(e.payload)
+            }
             break
           case CommandFromResultsWebview.GetOutput:
             log({
@@ -78,13 +99,35 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
             })
             this.getOutput(e.payload)
             break
-          case CommandFromResultsWebview.GetCreationTime:
+          case CommandFromResultsWebview.DeleteConfFile:
             log({
-              action: 'Received "get-creation-time" command',
+              action: 'Received "delete-confFile" command',
               source: Sources.Extension,
               info: e.payload,
             })
-            this.getCreationTime(e.payload)
+            if (typeof this.deleteConf === 'function') {
+              this.deleteConf(e.payload)
+            }
+            break
+          case CommandFromResultsWebview.Duplicate:
+            log({
+              action: 'Received "duplicate" command',
+              source: Sources.Extension,
+              info: e.payload,
+            })
+            if (typeof this.duplicate === 'function') {
+              this.duplicate(e.payload.toDuplicate, e.payload.duplicatedName)
+            }
+            break
+          case CommandFromResultsWebview.RemoveScript:
+            log({
+              action: 'Received "remove-script" command',
+              source: Sources.Extension,
+              info: e.payload,
+            })
+            if (typeof this.removeScript === 'function') {
+              this.removeScript(e.payload)
+            }
             break
           default:
             break
@@ -123,23 +166,6 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
     }
   }
 
-  private async getCreationTime(creationTimeUrl: string): Promise<void> {
-    try {
-      const { data } = await axios.get<CreationTime>(creationTimeUrl)
-      console.log(data)
-
-      log({
-        action: 'Send "set-creation-time" command',
-        source: Sources.Extension,
-        info: data,
-      })
-    } catch (e) {
-      vscode.window.showErrorMessage(
-        `Certora verification service is currently unavailable. Please, try again later.`,
-      )
-    }
-  }
-
   private _getHtmlForWebview(webview: vscode.Webview) {
     const path = vscode.workspace.workspaceFolders?.[0]
 
@@ -148,7 +174,7 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
       <html>
         <head>
           <meta charset="UTF-8">
-          <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource};">
+          <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource};">          
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
         </head>
         <body>
@@ -194,7 +220,7 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
     <html>
       <head>
         <meta charset="UTF-8">
-        <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; font-src ${webview.cspSource}; img-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; font-src ${webview.cspSource}; img-src ${webview.cspSource}; script-src 'nonce-${nonce}';">        
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta data-media-path="${mediaPath}">
         <script type="module" nonce="${nonce}" src="${toolkitUri}"></script>

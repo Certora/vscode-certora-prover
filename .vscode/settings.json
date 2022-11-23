@@ -3,6 +3,9 @@
   "svelte.plugin.svelte.compilerWarnings": {
     "a11y-missing-attribute": "ignore",
     "a11y-missing-content": "ignore"
-  }
+  },
+  "cSpell.words": [
+    "certora"
+  ]
 }
 

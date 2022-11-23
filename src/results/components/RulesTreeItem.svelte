@@ -1,4 +1,8 @@
 <script lang="ts">
+  /* ---------------------------------------------------------------------------------------------
+   *  Component that shows one rule results
+   *-------------------------------------------------------------------------------------------- */
+
   import { createEventDispatcher } from 'svelte'
   import BaseTreeItem from './BaseTreeItem.svelte'
   import TreeIcon from './TreeIcon.svelte'

@@ -1,3 +1,7 @@
+/* ---------------------------------------------------------------------------------------------
+ *  Convert from source variable to result variable type
+ *-------------------------------------------------------------------------------------------- */
+
 import type { SourceVariable, ResultVariable, JumpToDefinition } from '../types'
 
 export function variablesAdapter(

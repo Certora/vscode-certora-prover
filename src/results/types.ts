@@ -1,4 +1,13 @@
-export type Action = { title: string; onClick: () => void; icon: string }
+/* ---------------------------------------------------------------------------------------------
+ *  Here we declare types and enums
+ *-------------------------------------------------------------------------------------------- */
+
+export type Action = {
+  title: string
+  onClick?: () => void
+  icon: string
+  link?: string
+}
 
 export type JumpToDefinition = {
   file: string
@@ -94,6 +103,7 @@ type TreeViewPath = {
 }
 
 export type Output = {
+  runName?: string
   treeViewPath: TreeViewPath
   graph_link: string
   jumpToDefinition: JumpToDefinition[]
@@ -118,6 +128,8 @@ export type Job = {
   verificationProgress: Tree
   progressUrl: string
   creationTime: string
+  runName?: string
+  verificationReportLink?: string
 }
 
 export type ProgressResponse = {
@@ -129,6 +141,7 @@ export type ProgressResponse = {
 }
 
 export type Verification = {
+  name: string
   spec: string
   contract: string
   jobs: Job[]
@@ -144,6 +157,13 @@ export enum EventTypesFromExtension {
   SetOutput = 'set-output',
   ClearAllJobs = 'clear-all-jobs',
   SetCreationTime = 'set-creation-time',
+  CreateJob = 'create-new-job',
+  ParseError = 'parse-error',
+  AllowRun = 'allow-run',
+  BlockRun = 'block-run',
+  FocusChanged = 'focus-changed',
+  UploadingFiles = 'run-next',
+  ScriptStopped = 'script-stopped',
 }
 
 export type EventsFromExtension =
@@ -153,7 +173,7 @@ export type EventsFromExtension =
     }
   | {
       type: EventTypesFromExtension.RunningScriptChanged
-      payload: { pid: number; confFile: string }[]
+      payload: { pid: number; confFile: string; uploaded: boolean }[]
     }
   | {
       type: EventTypesFromExtension.SetOutput
@@ -166,3 +186,52 @@ export type EventsFromExtension =
       type: EventTypesFromExtension.SetCreationTime
       payload: CreationTime
     }
+  | {
+      type: EventTypesFromExtension.CreateJob
+    }
+  | {
+      type: EventTypesFromExtension.ParseError
+      payload: string
+    }
+  | {
+      type: EventTypesFromExtension.AllowRun
+      payload: string
+    }
+  | {
+      type: EventTypesFromExtension.BlockRun
+      payload: string
+    }
+  | {
+      type: EventTypesFromExtension.FocusChanged
+      payload: string
+    }
+  | {
+      type: EventTypesFromExtension.UploadingFiles
+      payload: number
+    }
+  | {
+      type: EventTypesFromExtension.ScriptStopped
+      payload: number
+    }
+
+export type JobNameMap = {
+  displayName: string
+  fileName: string
+}
+
+export enum Status {
+  finishSetup = 'Finish setup',
+  ready = 'Ready',
+  running = 'Running',
+  pending = 'Pending',
+  success = 'Ready success',
+  unableToRun = 'Unable to run',
+  incompleteResults = 'Incomplete results',
+}
+
+export type Run = {
+  id: number
+  name: string
+  status: Status
+  vrLink?: string
+}

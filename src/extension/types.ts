@@ -1,3 +1,7 @@
+/* ---------------------------------------------------------------------------------------------
+ *  Here we declare types and enums
+ *-------------------------------------------------------------------------------------------- */
+
 export type JumpToDefinition = {
   file: string
   line: number
@@ -46,6 +50,8 @@ export type Job = {
   verificationProgress: Tree
   progressUrl: string
   creationTime: string
+  runName?: string
+  verificationReportLink?: string
 }
 
 export type ProgressResponse = {
@@ -112,6 +118,7 @@ export type Output = {
 }
 
 export type InputFormData = {
+  name: string
   mainSolidityFile: string
   mainContractName: string
   specFile: string
@@ -119,16 +126,14 @@ export type InputFormData = {
   useAdditionalContracts: boolean
   additionalContracts: {
     file: string
-    name?: string
+    contractName?: string
   }[]
   link: {
-    id: string
     contractName: string
     fieldName: string
     associatedContractName: string
   }[]
   extendedSettings: {
-    id: string
     flag: string
   }[]
   useStaging: boolean
@@ -136,10 +141,87 @@ export type InputFormData = {
   cacheName: string
   message: string
   additionalSettings: {
-    id: string
-    option: string
-    value: string
+    flag: string
+    value: string | string[]
   }[]
+  solc_map: { contract: string; solidityCompiler: string }[]
+}
+
+export type JobNameMap = {
+  displayName: string
+  fileName: string
+}
+
+export type Compiler = {
+  exe: string
+  ver: string
+}
+
+export type SolidityPackageDir = {
+  packageName: string
+  path: string
+}
+
+export type Link = {
+  variable: string
+  contractName: string
+  fieldName?: string
+  associatedContractName?: string
+}
+
+export type SolcArg = {
+  key: string
+  value: string
+}
+
+export type FileFormat = {
+  value: string
+  label: string
+  path: string
+  type?: string
+}
+
+// solidity part of the new settings view
+export type SolidityObj = {
+  mainFile: FileFormat
+  mainContract: string
+  linking: Link[]
+  specifiMethod: string
+  compiler: Compiler
+  solidityArgs: SolcArg[]
+  solidityPackageDefaultPath: string
+  solidityPackageDir: SolidityPackageDir[]
+}
+
+export type Property = {
+  name: string
+  value: string
+}
+
+// spec part of the new settings view
+export type SpecObj = {
+  specFile: FileFormat
+  rules: string
+  duration: string
+  inherit: string
+  optimisticLoop: boolean
+  loopUnroll: string
+  properties: Property[]
+  runOnStg: boolean
+  branchName: string
+  ruleSanity: boolean
+  advancedSanity: boolean
+  localTypeChecking: boolean
+  multiAssert: boolean
+  sendOnly: boolean
+}
+
+export type NewForm = {
+  solidityObj: SolidityObj
+  specObj: SpecObj
+  verificationMessage: string
+  solidityAdditionalContracts?: SolidityObj[] // multiple contracts
+  checkMyInputs: boolean
 }
 
 export enum CommandFromResultsWebview {
@@ -148,12 +230,16 @@ export enum CommandFromResultsWebview {
   RunScript = 'run-script',
   OpenSettings = 'open-settings',
   GetOutput = 'get-output',
-  GetCreationTime = 'get-creation-time',
+  EditConfFile = 'edit-confFile',
+  DeleteConfFile = 'delete-confFile',
+  Duplicate = 'duplicate',
+  RemoveScript = 'remove-script',
 }
 
 export enum CommandFromSettingsWebview {
   SmartContractsFilesRefresh = 'smart-contracts-files-refresh',
   CreateConfFile = 'create-conf-file',
+  OpenBrowser = 'open-browser',
 }
 
 export type EventFromResultsWebview =
@@ -167,16 +253,30 @@ export type EventFromResultsWebview =
     }
   | {
       command: CommandFromResultsWebview.RunScript
+      payload: JobNameMap
     }
   | {
       command: CommandFromResultsWebview.OpenSettings
+      payload: JobNameMap
     }
   | {
       command: CommandFromResultsWebview.GetOutput
       payload: string
     }
   | {
-      command: CommandFromResultsWebview.GetCreationTime
+      command: CommandFromResultsWebview.EditConfFile
+      payload: JobNameMap
+    }
+  | {
+      command: CommandFromResultsWebview.DeleteConfFile
+      payload: JobNameMap
+    }
+  | {
+      command: CommandFromResultsWebview.Duplicate
+      payload: { toDuplicate: JobNameMap; duplicatedName: JobNameMap }
+    }
+  | {
+      command: CommandFromResultsWebview.RemoveScript
       payload: string
     }
 
@@ -186,7 +286,11 @@ export type EventFromSettingsWebview =
     }
   | {
       command: CommandFromSettingsWebview.CreateConfFile
-      payload: InputFormData
+      payload: NewForm
+    }
+  | {
+      command: CommandFromSettingsWebview.OpenBrowser
+      payload: { fileType: string; index: number }
     }
 
 export type ConfFile = {
@@ -198,6 +302,7 @@ export type ConfFile = {
   staging?: string
   cache?: string
   msg?: string
+  solc_map?: string
 } & Record<string, boolean | string | string[] | number>
 
 export type Message = {

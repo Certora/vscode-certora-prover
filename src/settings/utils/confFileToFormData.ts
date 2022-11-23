@@ -1,33 +1,47 @@
-import { nanoid } from 'nanoid'
-import type { Form, ConfFile } from '../types'
+/* ---------------------------------------------------------------------------------------------
+ *  Convert conf file to new form type
+ *-------------------------------------------------------------------------------------------- */
 
-const emptyForm: Form = {
-  mainSolidityFile: '',
-  mainContractName: '',
-  specFile: '',
-  solidityCompiler: '',
-  useAdditionalContracts: false,
-  additionalContracts: [],
-  link: [
-    {
-      id: nanoid(),
-      contractName: '',
-      fieldName: '',
-      associatedContractName: '',
+import type {
+  ConfFile,
+  NewForm,
+  SolidityObj,
+  SolidityPackageDir,
+  SpecObj,
+} from '../types'
+
+const newForm: NewForm = {
+  solidityObj: {
+    mainFile: '',
+    mainContract: '',
+    linking: [],
+    specifiMethod: '',
+    compiler: {
+      exe: '',
+      ver: '',
     },
-  ],
-  extendedSettings: [{ id: nanoid(), flag: '' }],
-  useStaging: false,
-  branch: 'master',
-  cacheName: '',
-  message: '',
-  additionalSettings: [
-    {
-      id: nanoid(),
-      option: '',
-      value: '',
-    },
-  ],
+    solidityArgs: [],
+    solidityPackageDefaultPath: '',
+    solidityPackageDir: [],
+  },
+  specObj: {
+    specFile: '',
+    rules: '',
+    duration: '',
+    inherit: '',
+    optimisticLoop: false,
+    loopUnroll: '',
+    properties: [],
+    runOnStg: false,
+    branchName: 'master',
+    ruleSanity: false,
+    advancedSanity: false,
+    localTypeChecking: false,
+    multiAssert: false,
+    sendOnly: true,
+  },
+  verificationMessage: '',
+  checkMyInputs: false,
 }
 
 const stableFields = [
@@ -35,10 +49,22 @@ const stableFields = [
   'verify',
   'solc',
   'link',
-  'settings',
   'staging',
   'cache',
   'msg',
+  'multi_assert_check',
+  'packages',
+  'rule',
+  'solc_args',
+  'smt_timeout',
+  'loop_iter',
+  'method',
+  'disableLocalTypeChecking',
+  'optimistic_loop',
+  'packages_path',
+  'solc_map',
+  'rule_sanity',
+  'send_only',
 ]
 
 function getAdditionalSettings(confFile: ConfFile) {
@@ -51,35 +77,161 @@ function getAdditionalSettings(confFile: ConfFile) {
   return copy
 }
 
-export function confFileToFormData(confFile: ConfFile): Form {
-  const form = emptyForm as Form
+/**
+ * convert solc data from conf file to form
+ * @param solc string path to solidity compiler executable
+ * @param solidityObj solidity object
+ */
+function processCompiler(solc: string, solidityObj: SolidityObj) {
+  if (solc.includes('/')) {
+    const index = solc.lastIndexOf('/')
+    solidityObj.compiler.exe = solc.slice(0, index)
+    solidityObj.compiler.ver = solc.slice(index + 1, solc.length)
+  } else {
+    solidityObj.compiler.ver = solc
+  }
+}
+
+/**
+ * convert packages data from conf file to form
+ * @param packages packages in conf file format
+ * @param solidityObj solidity object
+ */
+function processPackages(packages: string[], solidityObj: SolidityObj) {
+  packages.forEach(packageStr => {
+    const re = /"/gi
+    const packageArray = packageStr.replace(re, '').split(/[:|=]/)
+    const tempPackage: SolidityPackageDir = {
+      packageName: packageArray[0],
+      path: packageArray[1],
+    }
+    solidityObj.solidityPackageDir.push(tempPackage)
+  })
+}
+
+function processLink(linkArr: string[], solidityObj: SolidityObj) {
+  linkArr.forEach(link => {
+    // looking for linking format [CurrentContract : Variable = OtherContract]
+    const linkArr = link.split(/[:=]/)
+    if (linkArr.length === 3 && linkArr[0] === solidityObj.mainContract) {
+      solidityObj.linking.push({
+        variable: linkArr[1],
+        contractName: linkArr[2],
+      })
+    }
+  })
+}
+
+/**
+ * convert conf file attributes to solidity object attributes (form)
+ * @param confFile conf file
+ * @param solidityObj soility object
+ */
+function processSolidityAttributes(
+  confFile: ConfFile,
+  solidityObj: SolidityObj,
+) {
+  if (confFile.solc) {
+    processCompiler(confFile.solc, solidityObj)
+  }
+
+  if (confFile.link && confFile.link.length > 0) {
+    processLink(confFile.link, solidityObj)
+  }
+
+  if (confFile.packages) {
+    processPackages(confFile.packages, solidityObj)
+  }
+
+  if (confFile.solc_args) {
+    const solcArgsArr = confFile.solc_args
+      .toString()
+      .replace(/[[]']/, '')
+      .split(',')
+    solcArgsArr.forEach(arg => {
+      const tempArg = { key: '', value: '' }
+      if (arg.includes('--')) {
+        tempArg.key = arg.replace('--', '')
+        solidityObj.solidityArgs.push(tempArg)
+      } else {
+        const index = solidityObj.solidityArgs.length - 1
+        solidityObj.solidityArgs[index].value = arg
+      }
+    })
+  } else {
+    solidityObj.solidityArgs.push({ key: '', value: '' })
+  }
+  if (confFile.method) {
+    solidityObj.specifiMethod = confFile.method.toString()
+  }
+}
+
+/**
+ * convert conf file data to spec object
+ * @param confFile conf file
+ * @param specObj spec object
+ */
+function processSpecAttributes(confFile: ConfFile, specObj: SpecObj) {
+  if (confFile.multi_assert_check) {
+    specObj.multiAssert = true
+  }
+
+  if (confFile.optimistic_loop) {
+    specObj.optimisticLoop = true
+  }
+
+  if (confFile.rule) {
+    specObj.rules = confFile.rule.toString().replace(/[[]]/, '')
+  }
+
+  if (confFile.smt_timeout) {
+    specObj.duration = confFile.smt_timeout.toString()
+  }
+
+  if (confFile.loop_iter) {
+    specObj.loopUnroll = confFile.loop_iter.toString()
+  }
+
+  if (confFile.disableLocalTypeChecking !== undefined) {
+    specObj.localTypeChecking = !confFile.disableLocalTypeChecking as boolean
+  }
+
+  if (confFile.staging) {
+    specObj.runOnStg = true
+    specObj.branchName = (confFile.staging as string) || 'master'
+  }
+
+  if (confFile.rule_sanity) {
+    if (confFile.rule_sanity === 'basic') {
+      specObj.ruleSanity = true
+    }
+    if (confFile.rule_sanity === 'advanced') {
+      specObj.ruleSanity = true
+      specObj.advancedSanity = true
+    }
+    if (confFile.send_only) {
+      specObj.sendOnly = true
+    }
+  }
+
+  const additionalSettings = getAdditionalSettings(confFile)
+  if (Object.keys(additionalSettings)?.length > 0) {
+    specObj.properties = Object.keys(additionalSettings).map(key => ({
+      name: key as string,
+      value: additionalSettings[key] ? additionalSettings[key].toString() : '',
+    }))
+  }
+}
+
+export function confFileToFormData(confFile: ConfFile): NewForm {
+  const form = newForm as NewForm
 
   if (Array.isArray(confFile.files) && confFile.files.length > 0) {
-    form.mainSolidityFile = confFile.files[0] as string
+    form.solidityObj.mainFile = confFile.files[0] as string
 
-    if (form.mainSolidityFile.includes(':')) {
-      form.mainSolidityFile = form.mainSolidityFile.split(':')[0]
-    }
-
-    if (confFile.files.length > 1) {
-      const [, ...additional] = confFile.files
-
-      form.useAdditionalContracts = true
-      form.additionalContracts = additional.map(contract => {
-        const [file, name] = contract.split(':')
-
-        if (file && name) {
-          return {
-            file,
-            name,
-          }
-        }
-
-        return {
-          file: contract,
-          name: '',
-        }
-      })
+    if (form.solidityObj.mainFile.includes(':')) {
+      form.solidityObj.mainFile = form.solidityObj.mainFile.split(':')[0]
+      form.solidityObj.mainContract = confFile.files[0].split(':')[1]
     }
   }
 
@@ -88,66 +240,71 @@ export function confFileToFormData(confFile: ConfFile): Form {
     const [mainContractName, specFile] = verifyStr.split(':')
 
     if (mainContractName) {
-      form.mainContractName = mainContractName
+      form.solidityObj.mainContract = mainContractName
     }
     if (specFile) {
-      form.specFile = specFile
+      form.specObj.specFile = specFile
     }
   }
 
-  if (confFile.solc) {
-    form.solidityCompiler = confFile.solc as string
-  }
-
-  if (
-    form.useAdditionalContracts &&
-    Array.isArray(confFile.link) &&
-    confFile.link.length > 0
-  ) {
-    form.link = confFile.link.map((linkItem: string) => {
-      const [contractName, fieldNameAndAssociatedContractName] =
-        linkItem.split(':')
-      const [fieldName, associatedContractName] =
-        fieldNameAndAssociatedContractName.split('=')
-
-      return {
-        id: nanoid(),
-        contractName,
-        fieldName,
-        associatedContractName,
-      }
-    })
-  }
-
-  if (Array.isArray(confFile.settings) && confFile.settings.length > 0) {
-    form.extendedSettings = confFile.settings.map((flag: string) => ({
-      id: nanoid(),
-      flag,
-    }))
-  }
-
-  if (confFile.staging) {
-    form.useStaging = true
-    form.branch = confFile.staging as string
-  }
-
-  if (confFile.cache) {
-    form.cacheName = confFile.cache as string
-  }
+  processSolidityAttributes(confFile, form.solidityObj)
+  processSpecAttributes(confFile, form.specObj)
 
   if (confFile.msg) {
-    form.message = confFile.msg as string
+    form.verificationMessage = confFile.msg
   }
 
-  const additionalSettings = getAdditionalSettings(confFile)
-
-  if (Object.keys(additionalSettings).length > 0) {
-    form.additionalSettings = Object.keys(additionalSettings).map(key => ({
-      id: nanoid(),
-      option: key as string,
-      value: additionalSettings[key].toString(),
-    }))
+  // additional contracts
+  if (confFile.files?.length > 1) {
+    processAdditionalContracts(confFile, form)
   }
-
   return form
+}
+
+/**
+ * fill additional contracts values from the conf file
+ * @param confFile to get values from (solidity file, contract name, compiler, link)
+ * @param form to fill additional contract data
+ */
+function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
+  const tempFormArr: SolidityObj[] = []
+  confFile.files.forEach((contractStr, index) => {
+    const solArr = contractStr.split(':') || []
+    if (solArr.length === 2 && index !== 0) {
+      // create contract
+      const tempForm: SolidityObj = {
+        mainFile: '',
+        mainContract: '',
+        linking: [],
+        specifiMethod: '',
+        compiler: {
+          exe: '',
+          ver: '',
+        },
+        solidityArgs: [],
+        solidityPackageDefaultPath: '',
+        solidityPackageDir: [],
+      }
+      tempForm.mainFile = solArr[0] || ''
+      tempForm.mainContract = solArr[1] || ''
+
+      // link
+      if (confFile.link && confFile.link.length > 0) {
+        processLink(confFile.link, tempForm)
+      }
+
+      // solc map:
+      if (confFile.solc_map) {
+        Object.entries(confFile.solc_map).forEach(([key, value]) => {
+          if (key === tempForm.mainContract) {
+            processCompiler(value, tempForm)
+          } else if (key === form.solidityObj.mainContract) {
+            processCompiler(value, form.solidityObj)
+          }
+        })
+      }
+      tempFormArr.push(tempForm)
+    }
+  })
+  form.solidityAdditionalContracts = tempFormArr
 }

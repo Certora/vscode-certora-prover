@@ -1,4 +1,8 @@
 <script lang="ts">
+  /* ---------------------------------------------------------------------------------------------
+   *  Component that shows one results variable
+   *-------------------------------------------------------------------------------------------- */
+
   import { navigateToCode } from '../extension-actions'
   import type { JumpToDefinition } from '../types'
 

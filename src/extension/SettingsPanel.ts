@@ -1,23 +1,40 @@
+/* ---------------------------------------------------------------------------------------------
+ *  Settings webview actions.
+ *-------------------------------------------------------------------------------------------- */
+
 import * as vscode from 'vscode'
 import { SmartContractsFilesWatcher } from './SmartContractsFilesWatcher'
 import { getNonce } from './utils/getNonce'
-import { createAndOpenConfFile } from './utils/createAndOpenConfFile'
+import { createConfFile, processForm } from './utils/createConfFile'
 import { log, Sources } from './utils/log'
-import { CommandFromSettingsWebview, EventFromSettingsWebview } from './types'
+import {
+  CommandFromSettingsWebview,
+  ConfFile,
+  JobNameMap,
+  EventFromSettingsWebview,
+  InputFormData,
+} from './types'
+import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 
 export class SettingsPanel {
   public static currentPanel?: SettingsPanel
   private readonly _panel: vscode.WebviewPanel
   private _disposables: vscode.Disposable[] = []
   private watcher: SmartContractsFilesWatcher
-  private editConfFile?: Record<string, unknown>
+  private editConfFile?: ConfFile
   private static allPanels: SettingsPanel[] = []
+  private curConfFileDisplayName: string
+  private static resultsWebviewProvider: ResultsWebviewProvider
 
   private constructor(
     panel: vscode.WebviewPanel,
     extensionUri: vscode.Uri,
-    editConfFile?: Record<string, unknown>,
+    confFileDisplayName: string,
+    confFileName: string,
+    editConfFile?: ConfFile,
   ) {
+    this.curConfFileDisplayName = confFileDisplayName
+
     this._panel = panel
 
     this._panel.webview.html = this._getWebviewContent(
@@ -27,14 +44,26 @@ export class SettingsPanel {
 
     this.watcher = new SmartContractsFilesWatcher()
     this.watcher.init(this._panel.webview)
-
     if (editConfFile) {
+      const name =
+        confFileDisplayName !== '' ? confFileDisplayName : confFileName
       this._panel.webview.postMessage({
         type: 'edit-conf-file',
-        payload: editConfFile,
+        payload: { confFile: editConfFile, runName: name },
       })
       this.editConfFile = editConfFile
     }
+
+    this._panel.onDidChangeViewState(e => {
+      if (e.webviewPanel.visible) {
+        if (SettingsPanel.resultsWebviewProvider) {
+          SettingsPanel.resultsWebviewProvider.postMessage({
+            type: 'focus-changed',
+            payload: confFileName,
+          })
+        }
+      }
+    })
 
     this._panel.webview.onDidReceiveMessage(
       (e: EventFromSettingsWebview) => {
@@ -52,8 +81,59 @@ export class SettingsPanel {
               source: Sources.Extension,
               info: e.payload,
             })
-            createAndOpenConfFile(e.payload)
-            this._panel?.dispose()
+            // [e.payload.checkMyInputs] is true when the frontend validator found a format error in the input
+            // therefore it is not valid
+            if (!e.payload.checkMyInputs) {
+              const form: InputFormData = processForm(e.payload, confFileName)
+              createConfFile(form)
+              if (
+                form.mainContractName &&
+                form.mainSolidityFile &&
+                form.solidityCompiler &&
+                form.specFile
+              ) {
+                // if all mandatory fields are filled - allow running
+                SettingsPanel.resultsWebviewProvider.postMessage({
+                  type: 'allow-run',
+                  payload: confFileName,
+                })
+              } else {
+                // deduplicate fix - if all mandatory fields are filled in the conf file - allow running
+                if (this.editConfFile) {
+                  if (
+                    this.editConfFile?.files &&
+                    this.editConfFile?.files?.length > 0 &&
+                    this.editConfFile?.verify &&
+                    this.editConfFile?.verify?.length > 0 &&
+                    (this.editConfFile?.solc || this.editConfFile?.solc_map)
+                  ) {
+                    SettingsPanel.resultsWebviewProvider.postMessage({
+                      type: 'allow-run',
+                      payload: confFileName,
+                    })
+                    break
+                  }
+                }
+                SettingsPanel.resultsWebviewProvider.postMessage({
+                  type: 'block-run',
+                  payload: confFileName,
+                })
+              }
+            } else {
+              SettingsPanel.resultsWebviewProvider.postMessage({
+                type: 'block-run',
+                payload: confFileName,
+              })
+            }
+            break
+          }
+          case CommandFromSettingsWebview.OpenBrowser: {
+            log({
+              action: 'Received "open-browser" command',
+              source: Sources.Extension,
+              info: e.payload,
+            })
+            this.openOsPicker(e.payload.fileType, e.payload.index)
             break
           }
           default:
@@ -72,42 +152,32 @@ export class SettingsPanel {
 
   removeFromAllPanelsAndDispose = (): void => {
     SettingsPanel.allPanels = SettingsPanel.allPanels.filter(p => p !== this)
-    this.dispose()
-  }
-
-  /**
-   * returns the name of the conf file to edit, if such file exists and has a name
-   * empty string otherwise
-   * @param editConfFile conf file to edit
-   * @returns string name
-   */
-  private static _getConfFileName(
-    editConfFile?: Record<string, unknown>,
-  ): string {
-    let editFileName = ''
-    if (editConfFile?.verify !== undefined) {
-      editFileName = editConfFile?.verify + ''
-      return editFileName.replace(':', '.').replace('spec', 'conf')
+    if (SettingsPanel.allPanels.length === 0) {
+      if (SettingsPanel.resultsWebviewProvider) {
+        SettingsPanel.resultsWebviewProvider.postMessage({
+          type: 'focus-changed',
+          payload: '',
+        })
+      }
     }
-    return editFileName
+    this.dispose()
   }
 
   /**
    * opens a new settings panel in a new tab
    * @param extensionUri uri of the extension folder
+   * @param confFileName the name of a run, in a type that holds both conf file name
+   * and display name of the run
    * @param editConfFile conf file content
    */
   private static _openNewPanel(
     extensionUri: vscode.Uri,
-    editConfFile?: Record<string, unknown>,
+    confFileName: JobNameMap,
+    editConfFile?: ConfFile,
   ) {
-    let confFileName = this._getConfFileName(editConfFile)
-    if (confFileName) {
-      confFileName = ': ' + confFileName
-    }
     const panel = vscode.window.createWebviewPanel(
       'certoraSettings',
-      'Certora IDE Settings' + confFileName,
+      'Certora IDE Settings: ' + confFileName.displayName,
       vscode.ViewColumn.One,
       {
         retainContextWhenHidden: true,
@@ -118,27 +188,78 @@ export class SettingsPanel {
     SettingsPanel.currentPanel = new SettingsPanel(
       panel,
       extensionUri,
+      confFileName.displayName,
+      confFileName.fileName,
       editConfFile,
     )
     this.allPanels.push(SettingsPanel.currentPanel)
+    if (SettingsPanel.resultsWebviewProvider) {
+      SettingsPanel.resultsWebviewProvider.postMessage({
+        type: 'focus-changed',
+        payload: confFileName.fileName,
+      })
+    }
+  }
+
+  public static removePanel(name: string): void {
+    const panelToRemove = SettingsPanel.allPanels.find(
+      panel => panel.curConfFileDisplayName === name,
+    )
+    panelToRemove?.dispose()
   }
 
   /**
    * Open a new webview panel when creating or editing conf files.
    * If the panel is already opened (for editing an existing configuration file),
    * show the same panel.
-   * @param extensionUri uri of the extension folder
-   * @param editConfFile conf file content
+   * @param fileType file extension
+   * @param index if the file is an additional contract file - the index of the additional file.
+   */
+
+  private openOsPicker(fileType: string, index: number) {
+    const uri =
+      vscode.workspace.workspaceFolders?.[0].uri || vscode.Uri.parse('')
+    const options: vscode.OpenDialogOptions = {
+      canSelectMany: false,
+      canSelectFolders: false,
+      openLabel: 'Open',
+      defaultUri: uri,
+      filters: {
+        'File type': [fileType],
+      },
+    }
+
+    vscode.window.showOpenDialog(options).then(fileUri => {
+      if (fileUri && fileUri[0]) {
+        this._panel.webview.postMessage({
+          type: 'file-chosen',
+          payload: {
+            file: fileUri[0].fsPath.replace(uri.path + '/', ''),
+            index: index,
+          },
+        })
+      }
+    })
+  }
+
+  /**
+   * renders a settings webview.
+   * if the settings webview with name [confName] already exists, skip to it
+   * if not - create and skip to it
+   * @param extensionUri extention uri
+   * @param confName the name of a run, in a type that holds both conf file name
+   * and display name of the run
+   * @param editConfFile conf file with information to fill settings view with
    */
   public static render(
     extensionUri: vscode.Uri,
-    editConfFile?: Record<string, unknown>,
+    confName: JobNameMap,
+    editConfFile?: ConfFile,
   ): void {
     let isOpened = false
     if (editConfFile) {
-      const editFileName = editConfFile.verify + '' // name as string
       SettingsPanel.allPanels.forEach(panel => {
-        if (panel.editConfFile?.verify + '' === editFileName) {
+        if (panel.curConfFileDisplayName === confName.displayName) {
           isOpened = true
           SettingsPanel.currentPanel = panel
         }
@@ -147,7 +268,7 @@ export class SettingsPanel {
     if (isOpened && SettingsPanel.currentPanel) {
       SettingsPanel.currentPanel._panel.reveal(vscode.ViewColumn.One)
     } else {
-      this._openNewPanel(extensionUri, editConfFile)
+      this._openNewPanel(extensionUri, confName, editConfFile)
     }
   }
 
@@ -217,5 +338,11 @@ export class SettingsPanel {
 
       if (disposable) disposable.dispose()
     }
+  }
+
+  public static setResultsWebviewProvider(
+    resultsWebviewProvide: ResultsWebviewProvider,
+  ): void {
+    SettingsPanel.resultsWebviewProvider = resultsWebviewProvide
   }
 }

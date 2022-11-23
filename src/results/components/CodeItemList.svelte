@@ -1,4 +1,8 @@
 <script lang="ts">
+  /* ---------------------------------------------------------------------------------------------
+   *  Component that shows results variables
+   *-------------------------------------------------------------------------------------------- */
+
   import CodeItem from './CodeItem.svelte'
   import { variablesAdapter } from '../utils/variablesAdapter'
   import type { SourceVariable } from '../types'

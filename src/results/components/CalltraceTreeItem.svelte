@@ -1,4 +1,8 @@
 <script lang="ts">
+  /* ---------------------------------------------------------------------------------------------
+   *  An item that shows the call trace tree item.
+   *-------------------------------------------------------------------------------------------- */
+
   import { createEventDispatcher } from 'svelte'
   import BaseTreeItem from './BaseTreeItem.svelte'
   import TreeIcon from './TreeIcon.svelte'

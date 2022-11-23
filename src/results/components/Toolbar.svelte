@@ -1,4 +1,8 @@
 <script lang="ts">
+  /* ---------------------------------------------------------------------------------------------
+   *  Component that shows action buttons for the Pane component
+   *-------------------------------------------------------------------------------------------- */
+
   import ToolbarItem from './ToolbarItem.svelte'
   import type { Action } from '../types'
 
@@ -12,6 +16,7 @@
         <ToolbarItem
           title={action.title}
           icon={action.icon}
+          link={action.link}
           on:click={action.onClick}
         />
       {/each}

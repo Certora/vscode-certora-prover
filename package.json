@@ -47,10 +47,10 @@
         "order": 1,
         "properties": {
           "SolidityArguments": {
-            "markdownDescription": "A list of arguments to pass to the Solidity compiler.\nThe arguments will be passed as is, without any formatting, in the same order.\n\n**Example:**\n\n```js\n['--optimize', '--optimize-runs', '200']\n```",
-            "type": "string",
-            "pattern": "^(\\[(\\'.+\\',(\\s?))*((\\'.+\\')*)\\])*$",
-            "patternErrorMessage": "Input must be an array of string commands",
+            "markdownDescription": "A list of arguments to pass to the Solidity compiler.\nNo need to add ```'--'``` to the keys.",
+            "type": "object",
+            "additionalProperties": "string",
+            "properties": {},
             "order": 0
           },
           "Solidity.DefaultDirectoryForPackagesDependencies": {
@@ -99,8 +99,8 @@
         "title": "Prover Advanced Settings",
         "order": 3,
         "properties": {
-          "AdditionalSetting": {
-            "markdownDescription": "[Additional settings explanation](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html)\n\n**For example:**\n\n```solver: z3```",
+          "AdditionalFlags": {
+            "markdownDescription": "[Additional flags explanation](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html)\n\n**For example:**\n\n```solver: z3```",
             "type": "object",
             "order": 0,
             "additionalProperties": "string",
@@ -130,7 +130,7 @@
         {
           "type": "webview",
           "id": "results",
-          "name": "Results"
+          "name": "Certora plugin"
         }
       ]
     },
@@ -138,66 +138,23 @@
       "activitybar": [
         {
           "id": "results",
-          "title": "Results",
+          "title": "Certora plugin",
           "icon": "/media/extension-icon.svg"
         }
       ]
     },
     "commands": [
       {
-        "command": "certora.runScript",
-        "title": "Run Script",
-        "category": "Certora",
-        "icon": "$(play)"
-      },
-      {
         "command": "certora.createConfFile",
-        "title": "Create conf file",
+        "title": "create new job",
         "category": "Certora",
         "icon": "$(settings)"
-      },
-      {
-        "command": "certora.editConfFile",
-        "title": "Edit conf file",
-        "category": "Certora",
-        "icon": "$(edit)"
-      },
-      {
-        "command": "certora.clearResults",
-        "title": "Clear Results",
-        "category": "Certora",
-        "icon": "$(close)"
       }
     ],
     "menus": {
-      "commandPalette": [
-        {
-          "command": "certora.runScript",
-          "when": "focusedView == results"
-        },
-        {
-          "command": "certora.clearResults",
-          "when": "focusedView == results"
-        }
-      ],
       "view/title": [
         {
-          "command": "certora.runScript",
-          "when": "view == results",
-          "group": "navigation"
-        },
-        {
-          "command": "certora.clearResults",
-          "when": "view == results",
-          "group": "navigation"
-        },
-        {
           "command": "certora.createConfFile",
-          "when": "view == results",
-          "group": "navigation"
-        },
-        {
-          "command": "certora.editConfFile",
           "when": "view == results",
           "group": "navigation"
         }
@@ -218,7 +175,9 @@
     "@vscode/webview-ui-toolkit": "^1.0.0",
     "axios": "^0.24.0",
     "lodash.uniqby": "^4.7.0",
-    "nanoid": "^3.1.30"
+    "nanoid": "^3.1.30",
+    "svelte-collapse": "^0.1.1",
+    "svelte-select": "^4.4.7"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^20.0.0",
@@ -254,6 +213,7 @@
     "rollup-plugin-css-only": "^3.1.0",
     "rollup-plugin-svelte": "^7.1.0",
     "rollup-plugin-terser": "^7.0.2",
+    "scss": "^0.2.4",
     "simple-git-hooks": "^2.6.1",
     "stylelint": "^14.1.0",
     "stylelint-config-html": "^1.0.0",
@@ -339,8 +299,7 @@
   },
   "lint-staged": {
     "*.{js,ts}": "eslint --fix",
-    "*.{js,ts,svelte}": "prettier --write",
-    "*.svelte": "stylelint --ip *.md src/**/*.svelte --fix"
+    "*.{js,ts,svelte}": "prettier --write"
   },
   "simple-git-hooks": {
     "pre-commit": "npx lint-staged"

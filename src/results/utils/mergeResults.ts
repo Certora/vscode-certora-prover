@@ -1,3 +1,7 @@
+/* ---------------------------------------------------------------------------------------------
+ *  Add a new verification result to the VerificationResults array.
+ *-------------------------------------------------------------------------------------------- */
+
 import type { Assert, Job, Rule, Tree, Verification } from '../types'
 
 export function mergeResults(results: Job[], newResult: Job): void {
@@ -37,15 +41,30 @@ function addJobIdToProperties(job: Job) {
   addJobIdToRules(jobId, tree.rules)
 }
 
+export function addVerificationResult(
+  results: Verification[],
+  newResult: Job,
+  name: string,
+): void {
+  const tree: Tree = newResult.verificationProgress
+  addJobIdToProperties(newResult)
+  const newVerification: Verification = {
+    name: name,
+    contract: tree.contract,
+    spec: tree.spec,
+    jobs: [newResult],
+  }
+  results.push(newVerification)
+}
+
 export function smartMergeVerificationResult(
   results: Verification[],
   newResult: Job,
+  name: string,
 ): void {
   const tree: Tree = newResult.verificationProgress
-  // look for Verification with the same contract name and spec file
-  const index = results.findIndex(
-    item => item.contract === tree.contract && item.spec === tree.spec,
-  )
+  // look for Verification with the same name
+  const index = results.findIndex(item => item.name === name)
   // if found
   if (index > -1) {
     console.log(
@@ -54,13 +73,12 @@ export function smartMergeVerificationResult(
         ' spec=' +
         tree.spec,
     )
-    console.log(results[index])
     mergeVerification(results[index], newResult)
   } else {
     addJobIdToProperties(newResult)
-    console.log(newResult)
     // create a new Verification object and push to the Verification[]
     const newVerification: Verification = {
+      name: name,
       contract: tree.contract,
       spec: tree.spec,
       jobs: [newResult],
@@ -70,8 +88,6 @@ export function smartMergeVerificationResult(
 }
 
 function mergeVerification(prevResult: Verification, newJob: Job): void {
-  console.log('mergeVerification')
-  console.log(newJob.jobId)
   const prevJobs: Job[] = prevResult.jobs
   // Look for the same jobId
   const index = prevJobs.findIndex(job => job.jobId === newJob.jobId)

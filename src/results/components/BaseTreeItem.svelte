@@ -1,4 +1,8 @@
 <script lang="ts">
+  /* ---------------------------------------------------------------------------------------------
+   *  Base tree item is expendable (has children) and has a toolbar of action buttons
+   *-------------------------------------------------------------------------------------------- */
+
   import Toolbar from './Toolbar.svelte'
   import type { Action } from '../types'
 
