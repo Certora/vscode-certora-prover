@@ -1,17 +1,19 @@
 # Certora IDE
 
+The new version of the Certora IDE extension is out!
+
 The Certora Prover checks at compile-time that all smart contract executions fulfill a set of security rules and interface requirements of other contracts. Certora’s blockchain-independent and language-agnostic Prover technology precisely identifies bugs in Smart Contracts and proves their absence.
-![overview](assets/overview_comments.png)
+
 
 Content
 
 - [Features](#features)
 - [Prerequisites](#prerequisites)
 - [Usage](#usage)
-  - [Create a conf file](#create-a-conf-file)
+  - [Create a new job](#create-a-new-job)
   - [Start a verification](#start-a-verification)
   - [Results](#results)
-- [Commands](#commands)
+  - [Statuses](#statuses)
 - [Troubleshooting](#troubleshooting)
 - [License](#license)
 
@@ -28,19 +30,56 @@ Please follow the Certora Prover [installation instructions](https://certora.atl
 
 ## Usage
 
-### Create a conf file
+### Create a new job
 
-When starting the verification, you will be prompted to set the configurations, such as the main contract name, solidity compiler version, and more. These configurations will be stored in a local configuration file in the `conf` subfolder. You can edit the configuration file manually or create a new one (by clicking on the `Create Certora IDE conf file` button). For the list of available options see - [Certora Prover CLI Options](https://certora.atlassian.net/wiki/spaces/CPD/pages/7340043/Certora+Prover+CLI+Options)
+When you first open the IDE, you will see this starting screen:
 
-![create_conf_file](assets/conf_file.png)
+![image](https://user-images.githubusercontent.com/101042618/203574085-3fc6dd36-6298-4c28-9591-59277ab93a3f.png)
+
+To create your first job, click either the “Create verification run” button. Then, you will get a new input window where you can name your job.
+
+![image](https://user-images.githubusercontent.com/101042618/203574167-116485cc-ffcc-48e5-b1cc-0e2bc2a2840b.png)
+
+Job name is limited to 35 characters.
+
+![image](https://user-images.githubusercontent.com/101042618/203574292-fdec5bf2-b2f0-4741-9e08-5b4952c8a915.png)
+
+After pressing Enter you will see your job list item and the job’s settings form tub will open (see next step for a deeper dive into job list items and the settings form).
+
+![image](https://user-images.githubusercontent.com/101042618/203574324-03d52268-3c4b-40b1-915c-6af23e9189d1.png)
+
+
 
 ### Start a verification
 
-The `conf` file will be used to start the verification process. Use the VS Code Command Palette (`Ctrl/Cmd + Shift + P`) to trigger the `Certora Run Script` command. Alternatively, click the `Run Certora IDE` button.
+The job list and setting form looks like this following image:
 
-Note that you can run multiple contracts verification in parallel. A special section shows all ongoing processes, which can be stopped and removed from the list.
+![image](https://user-images.githubusercontent.com/101042618/203574517-ea48ecce-56b0-4ea7-94a6-77485fa5fdbe.png)
 
-![start](assets/run-the-script.gif)
+* Notice that the order of filling the settings form is solidity files and contracts related settings first, and spec related settings second.
+
+* Red star next to a field name means it is a mandatory field, and it must be filled to be able to run the job.
+
+* The description inside each setting input box is there to assist you - please read it carefully, in many cases the input required will be different than the flag value you are used to.
+
+* Some values are filled automatically according to popular conventions, but it is best to make sure the value is true to your current requirements.
+
+The Certora spec settings looks like the following image:
+
+![image](https://user-images.githubusercontent.com/101042618/203575021-ba39433b-58e2-4ae5-85e7-a50b16ff70d4.png)
+
+* If staging is not checked - run on production
+
+* The Certora Spec settings form will not be available until the mandatory fields in the Solidity Contracts part are filled
+
+A message that describes the job:
+
+![image](https://user-images.githubusercontent.com/101042618/203575303-a7bae547-dcc4-4fff-8378-a382d9e58262.png)
+
+* The default value is the job name. 
+
+* It is best to keep it short and informative.
+
 
 ### Results
 
@@ -48,16 +87,23 @@ While the verification process advances, you'll see each property (rule or invar
 
 ![go-to-code](assets/go-to-code.gif)
 
-## Commands
+Go to verification report from the job list item:
 
-The following commands can be accessed via the [Command Palette](https://code.visualstudio.com/docs/getstarted/userinterface#_command-palette):
+![image](https://user-images.githubusercontent.com/101042618/203575476-264a610a-87cd-4adf-94e5-45c54531b7bb.png)
 
-| command                   | description                                       | availability   |
-| ------------------------- | ------------------------------------------------- | -------------- |
-| Certora: Run Script       | Choose a conf-file & start verifying              | On Results Tab |
-| Certora: Create conf file | Shows the `settings` window                       | Always         |
-| Certora: Edit conf file   | Edit conf file in the `settings` window           | Always         |
-| Certora: Clear Results    | Clears the results list                           | On Results Tab |
+
+## Statuses
+
+The following image shows the possible job statuses and their meaning:
+
+![image](https://user-images.githubusercontent.com/101042618/203576203-c9de1cba-47fb-45ab-b7bb-2d07a595a01d.png)
+
+* Job can’t run while in Finish Setup status. 
+
+* Job can’t be edited, renamed or duplicated while in Running / Pending status.
+
+* See the job’s verification report by pressing the icon in the job list item while in Success status (see the following image).
+
 
 ## Troubleshooting
 
