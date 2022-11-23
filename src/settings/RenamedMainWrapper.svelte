@@ -61,7 +61,7 @@
         id="feedback-button"
         class="feedback-button"
         title="Feedback"
-        href="https://docs.google.com/forms/d/1tyTnEFByOAANtcfmz3O7GTQ_lfJJev0kTSyVEm9dumQ/prefill"
+        href="https://forms.gle/zTadNeJZ7g1vmqFg6"
         >Feedback
         <div class="action-label codicon codicon-action codicon-feedback" />
       </a>
