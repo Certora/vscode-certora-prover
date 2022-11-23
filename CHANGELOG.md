@@ -2,13 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-### 0.0.4 (2022-11-13)
+### 0.0.4 (2022-11-23)
 
 ## Features 
 
 * New settings form with a new design and better flags handling ([#67] (https://github.com/Certora/vscode-certora-prover/pull/67))
 * Run multiple jobs in parallel ([#67] (https://github.com/Certora/vscode-certora-prover/pull/67))
-* Manage jobs separatly (job actions: rename, edit, delete, duplicate, run, show results - per job) ([#67] (https://github.com/Certora/vscode-certora-prover/pull/67))
+* Manage jobs separately (job actions: rename, edit, delete, duplicate, run, show results - per job) ([#67] (https://github.com/Certora/vscode-certora-prover/pull/67))
 
 ### 0.0.3 (2022-05-30)
 
