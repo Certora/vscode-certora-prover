@@ -139,7 +139,7 @@ export type EventsFromExtension =
     }
   | {
       type: EventTypesFromExtension.FileChosen
-      payload: { file: string; index: number }
+      payload: { file: FileFormat; index: number }
     }
   | {
       type: EventTypesFromExtension.notifyWebviewAboutUpdates

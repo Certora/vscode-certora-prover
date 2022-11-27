@@ -233,9 +233,16 @@ export class SettingsPanel {
       if (fileUri && fileUri[0]) {
         const file = fileUri[0].fsPath.replace(uri.path + '/', '')
         const fileArr = file.split('/')
-        const label = fileArr.reverse()[0].split('.')[0]
+        const labelTypeArr = fileArr.reverse()[0].split('.')
+        const label = labelTypeArr[0]
         const path = fileArr[0]
-        const fileInFormat = { value: file, label: label, path: path }
+        const type = labelTypeArr[1]
+        const fileInFormat = {
+          value: file,
+          label: label,
+          path: path,
+          type: type,
+        }
         this._panel.webview.postMessage({
           type: 'file-chosen',
           payload: {
