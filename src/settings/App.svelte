@@ -85,7 +85,7 @@
       const fileName = e.data.payload.file
       const contractName = fileName.label
       const index = e.data.payload.index
-      if (fileName.type === 'sol') {
+      if (fileName.type === '.sol') {
         if (index === -1) {
           $solidityObj.mainFile = fileName.value
           $solidityObj.mainContract = contractName
@@ -93,8 +93,12 @@
           $solAdditionalContracts[index].mainFile = fileName
           $solAdditionalContracts[index].mainContract = contractName
         }
-      } else if (fileName.type === 'spec') {
-        $specObj.specFile = fileName as unknown as string
+      } else if (fileName.type === '.spec') {
+        $specObj.specFile = {
+          value: fileName.value,
+          label: fileName.label,
+          type: fileName.type,
+        } as unknown as string
       }
     }
   }

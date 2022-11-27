@@ -189,7 +189,9 @@
             <i class="codicon codicon-file" />
             <h3>Main Spec File</h3>
             <h3 style="margin-left: auto; margin-right: 0; margin-top: 2px">
-              {JSON.parse(JSON.stringify($specObj.specFile)).label || ''}
+              {JSON.parse(JSON.stringify($specObj.specFile)).label
+                ? JSON.parse(JSON.stringify($specObj.specFile)).label + '.spec'
+                : ''}
             </h3>
           </div>
           <div slot="body" class="p-12 pt-0">

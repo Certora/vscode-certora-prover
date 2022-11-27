@@ -50,7 +50,7 @@
     on:click={() => selectNavMenu('specCheck')}
     class:checked={$specObj.specFile !== ''}
     class:active={$navState.specCheck.active}
-    disabled={!solDisabledState}
+    disabled={false}
   >
     <i class="codicon codicon-symbol-method" />
     <h3>Certora spec</h3>
@@ -61,7 +61,7 @@
     on:click={() => selectNavMenu('msgCheck')}
     class:checked={$verification_message !== ''}
     class:active={$navState.msgCheck.active}
-    disabled={$specObj.specFile == ''}
+    disabled={false}
   >
     <i class="codicon codicon-comment " />
     <h3>Verification message</h3>
