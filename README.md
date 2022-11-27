@@ -2,7 +2,7 @@
 
 The new version of the Certora IDE extension is out!
 
-The Certora Prover checks at compile-time that all smart contract executions fulfill a set of security rules and interface requirements of other contracts. Certora’s blockchain-independent and language-agnostic Prover technology precisely identifies bugs in Smart Contracts and proves their absence.
+The Certora Prover checks at compile-time that all smart contract executions fulfill a set of security rules and interface requirements of other contracts. Certora’s blockchain-independent and language-agnostic Prover technology precisely identifies bugs in Smart Contracts or proove their absence.
 
 
 Content
@@ -23,6 +23,8 @@ Content
 - Call Trace & Variables View
 - Check multiple contracts in parallel
 - Checking progress status
+- Support Multiple Jobs in parallel
+- New and Extended Settings Form
 
 ## Prerequisites
 
