@@ -83,22 +83,22 @@
         info: e.data.payload,
       })
       const fileName = e.data.payload.file
-      const contractName = fileName
-        .toString()
-        .split('/')
-        .reverse()[0]
-        .replace('.sol', '')
+      const contractName = fileName.label
       const index = e.data.payload.index
-      if (fileName.endsWith('.sol')) {
+      if (fileName.type === '.sol') {
         if (index === -1) {
-          $solidityObj.mainFile = fileName
+          $solidityObj.mainFile = fileName.value
           $solidityObj.mainContract = contractName
         } else if ($solAdditionalContracts.length > index) {
           $solAdditionalContracts[index].mainFile = fileName
           $solAdditionalContracts[index].mainContract = contractName
         }
-      } else if (fileName.endsWith('.spec')) {
-        $specObj.specFile = fileName
+      } else if (fileName.type === '.spec') {
+        $specObj.specFile = {
+          value: fileName.value,
+          label: fileName.label,
+          type: fileName.type,
+        } as unknown as string
       }
     }
   }
