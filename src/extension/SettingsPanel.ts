@@ -231,10 +231,15 @@ export class SettingsPanel {
 
     vscode.window.showOpenDialog(options).then(fileUri => {
       if (fileUri && fileUri[0]) {
+        const file = fileUri[0].fsPath.replace(uri.path + '/', '')
+        const fileArr = file.split('/')
+        const label = fileArr.reverse()[0].split('.')[0]
+        const path = fileArr[0]
+        const fileInFormat = { value: file, label: label, path: path }
         this._panel.webview.postMessage({
           type: 'file-chosen',
           payload: {
-            file: fileUri[0].fsPath.replace(uri.path + '/', ''),
+            file: fileInFormat,
             index: index,
           },
         })
