@@ -146,7 +146,7 @@
                 <!-- no placeholder, this filed should have the default compiler selected by default -->
                 <CustomInput
                   infoObj={infoObjArr.solCompiler}
-                  placeholder="exaple: solc7.6"
+                  placeholder="example: solc7.6"
                   bind:bindValue={$solAdditionalContracts[index].compiler.ver}
                 />
               </div>

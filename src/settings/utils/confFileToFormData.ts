@@ -85,7 +85,7 @@ function getAdditionalSettings(confFile: ConfFile) {
 function processCompiler(solc: string, solidityObj: SolidityObj) {
   if (solc.includes('/')) {
     const index = solc.lastIndexOf('/')
-    solidityObj.compiler.exe = solc.slice(0, index)
+    solidityObj.compiler.exe = solc.slice(1, index)
     solidityObj.compiler.ver = solc.slice(index + 1, solc.length)
   } else {
     solidityObj.compiler.ver = solc
@@ -302,6 +302,16 @@ function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
             processCompiler(value, form.solidityObj)
           }
         })
+      } else if (confFile.solc) {
+        if (confFile.solc.includes('/')) {
+          const solcArr = confFile.solc.split('/')
+          tempForm.compiler.ver = solcArr.reverse()[0]
+          tempForm.compiler.exe = solcArr
+            .join('')
+            .replace(tempForm.compiler.ver, '')
+        } else {
+          tempForm.compiler.ver = confFile.solc
+        }
       }
       tempFormArr.push(tempForm)
     }
