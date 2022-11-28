@@ -139,12 +139,6 @@
     openBrowser(fileType, index)
   }
 
-  $: solDisabledState = !(
-    $solidityObj.mainFile.value !== '' &&
-    $solidityObj.mainContract !== '' &&
-    $solidityObj.compiler.ver !== ''
-  )
-
   // push new linking/directory
   function pushNewObj(arr, obj) {
     arr.push(obj)
@@ -175,7 +169,6 @@
     chevron="padding-right:16px;"
     bind:open={$navState.specCheck.active}
     resetNavProp={true}
-    bind:disabledState={solDisabledState}
   >
     <div slot="header" class="header header_contracts">
       <i class="codicon codicon-symbol-method" />
