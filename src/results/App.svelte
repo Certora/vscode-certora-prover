@@ -543,52 +543,52 @@
     >
       <ul class="running-scripts">
         {#each Array(runsCounter) as _, index (index)}
-          {#key [runs[index], focusedRun, runs[index].status, runningScripts]}
-            <li>
-              <NewRun
-                doRename={runs[index].name === ''}
-                editFunc={() => editRun(runs[index])}
-                deleteFunc={() => deleteRun(runs[index])}
-                {namesMap}
-                {renameRun}
-                duplicateFunc={duplicateRun}
-                runFunc={() => run(runs[index])}
-                status={runs[index].status}
-                {verificationResults}
-                {newFetchOutput}
-                nowRunning={(runningScripts.find(
-                  rs => getFilename(rs.confFile) === runs[index].name,
-                ) !== undefined ||
-                  (pendingQueue.find(rs => rs.fileName === runs[index].name) !==
-                    undefined &&
-                    pendingQueueCounter > 0)) &&
-                  verificationResults.find(
-                    vr => runs[index].name === vr.name,
-                  ) === undefined}
-                isPending={pendingQueue.find(
-                  rs => rs.fileName === runs[index].name,
-                ) !== undefined && pendingQueueCounter > 0}
-                expandedState={verificationResults.find(
-                  vr => vr.name === runs[index].name,
-                ) !== undefined}
-                pendingStopFunc={() => {
-                  pendingStopFunc(runs[index])
-                }}
-                runningStopFunc={() => {
-                  verificationResults = verificationResults.filter(vr => {
-                    return vr.name !== runs[index].name
-                  })
-                  runs = setStatus(runs[index].name, Status.ready)
-                  stopScript(runs[index].id)
-                  // runNext()
-                }}
-                inactiveSelected={focusedRun}
-                {setStatus}
-                vrLink={runs[index].vrLink}
-                bind:runName={runs[index].name}
-              />
-            </li>
-          {/key}
+          <!-- removing the keys in hope the one refreshed job won't refresh everying -->
+          <!-- {#key [runs[index], focusedRun, runs[index].status, runningScripts]} -->
+          <li>
+            <NewRun
+              doRename={runs[index].name === ''}
+              editFunc={() => editRun(runs[index])}
+              deleteFunc={() => deleteRun(runs[index])}
+              {namesMap}
+              {renameRun}
+              duplicateFunc={duplicateRun}
+              runFunc={() => run(runs[index])}
+              status={runs[index].status}
+              {verificationResults}
+              {newFetchOutput}
+              nowRunning={(runningScripts.find(
+                rs => getFilename(rs.confFile) === runs[index].name,
+              ) !== undefined ||
+                (pendingQueue.find(rs => rs.fileName === runs[index].name) !==
+                  undefined &&
+                  pendingQueueCounter > 0)) &&
+                verificationResults.find(vr => runs[index].name === vr.name) ===
+                  undefined}
+              isPending={pendingQueue.find(
+                rs => rs.fileName === runs[index].name,
+              ) !== undefined && pendingQueueCounter > 0}
+              expandedState={verificationResults.find(
+                vr => vr.name === runs[index].name,
+              ) !== undefined}
+              pendingStopFunc={() => {
+                pendingStopFunc(runs[index])
+              }}
+              runningStopFunc={() => {
+                verificationResults = verificationResults.filter(vr => {
+                  return vr.name !== runs[index].name
+                })
+                runs = setStatus(runs[index].name, Status.ready)
+                stopScript(runs[index].id)
+                // runNext()
+              }}
+              inactiveSelected={focusedRun}
+              {setStatus}
+              vrLink={runs[index].vrLink}
+              bind:runName={runs[index].name}
+            />
+          </li>
+          <!-- {/key} -->
         {/each}
       </ul>
     </Pane>
