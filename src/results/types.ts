@@ -151,6 +151,11 @@ export type CreationTime = {
   postTime: string
 }
 
+export type ConfToCreate = {
+  fileName: string
+  allowRun: number
+}
+
 export enum EventTypesFromExtension {
   ReceiveNewJobResult = 'receive-new-job-result',
   RunningScriptChanged = 'running-scripts-changed',
@@ -164,6 +169,7 @@ export enum EventTypesFromExtension {
   FocusChanged = 'focus-changed',
   UploadingFiles = 'run-next',
   ScriptStopped = 'script-stopped',
+  InitialJobs = 'initial-jobs',
 }
 
 export type EventsFromExtension =
@@ -212,6 +218,10 @@ export type EventsFromExtension =
   | {
       type: EventTypesFromExtension.ScriptStopped
       payload: number
+    }
+  | {
+      type: EventTypesFromExtension.InitialJobs
+      payload: ConfToCreate[]
     }
 
 export type JobNameMap = {

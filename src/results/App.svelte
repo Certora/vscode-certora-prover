@@ -236,6 +236,29 @@
         focusedRun = e.data.payload
         break
       }
+      case EventTypesFromExtension.InitialJobs: {
+        log({
+          action: 'Received "initial-jobs" command',
+          source: Sources.ResultsWebview,
+          info: e.data.payload,
+        })
+        const confList = e.data.payload
+
+        confList.forEach(file => {
+          let curStatus = Status.missingSettings
+          if (file.allowRun) {
+            curStatus = Status.ready
+          }
+          const newRun = {
+            id: runs.length,
+            name: file.fileName.replace('.conf', ''),
+            status: curStatus,
+          }
+          createRun(newRun)
+          namesMap.set(newRun.name, newRun.name)
+        })
+        break
+      }
       default:
         break
     }

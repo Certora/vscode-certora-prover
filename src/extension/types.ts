@@ -318,3 +318,8 @@ export type Topic = {
 export type ResourceError = {
   topics: Topic[]
 }
+
+export type ConfToCreate = {
+  fileName: string
+  allowRun: number
+}
