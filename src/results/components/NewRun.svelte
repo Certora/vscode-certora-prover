@@ -457,7 +457,7 @@
       border-style: solid;
       border-color: var(--vscode-inputValidation-infoBorder);
       background-color: var(--vscode-editor-inactiveSelectionBackground);
-      color: white;
+      color: var(--vscode-disabledForeground);
       margin-left: 24px;
       margin-right: 0;
     }

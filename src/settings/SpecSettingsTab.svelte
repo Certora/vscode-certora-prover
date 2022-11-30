@@ -30,19 +30,19 @@
     specFile: {
       infoText: 'pick spec file',
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html',
     },
     rules: {
       infoText:
         'Rules separated by commas. \nFormally verifies one or more given properties instead of the whole specification file. An invariant can also be selected.',
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#rules',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html#rules',
       validator: 'spaceAndDash',
     },
     duration: {
       infoText: 'Sets the maximal timeout for all the SMT solvers.',
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#smt-timeout',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html#smt-timeout',
       validator: 'number',
     },
     optimistic_loop: {
@@ -55,14 +55,14 @@
       infoText:
         'The Certora Prover unrolls loops - if the loop should be executed three times, it will copy the code inside the loop three times. After we finish the loop’s iterations, we add an assertion to verify we have actually finished running the loop',
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#loop-iter',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html#loop-iter',
       validator: 'number',
     },
     flag: {
       infoText:
         'additional flags - you can find all available flags in the documentation',
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html',
       validator: 'alphaNum',
     },
     value: {
@@ -73,31 +73,31 @@
     stg: {
       infoText: 'run on staging environment',
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html',
       validator: 'alphaNum',
     },
     typecheck_only: {
       infoText:
         'Stops after running the Solidity compiler and type checking of the spec, before submitting the verification task.',
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#typecheck-only',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html#typecheck-only',
     },
     multi_assert_check: {
       infoText:
         'This mode checks each assertion statement that occurs in a rule, separately.',
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#multi-assert-check',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html#multi-assert-check',
     },
     ruleSanity: {
       infoText: 'This option enables sanity checking for rules.',
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#rule-sanity',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html#rule-sanity',
     },
     advancedSanity: {
       infoText:
         'If this box is checked, all the sanity checks will be performed for all invariants and rules.',
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#rule-sanity',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html#rule-sanity',
     },
   }
   // on click on the input get al the files (sol or spec) based on what os passded to the function

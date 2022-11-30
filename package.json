@@ -73,13 +73,13 @@
         "order": 2,
         "properties": {
           "OptimisticLoop": {
-            "markdownDescription": "Ignore some executions of loops. [Read More](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#optimistic-loop)",
+            "markdownDescription": "Ignore some executions of loops. [Read More](https://docs.certora.com/en/latest/docs/prover/cli/options.html#optimistic-loop)",
             "type": "boolean",
             "default": false,
             "order": 0
           },
           "LoopUnroll": {
-            "markdownDescription": "The maximal number of loop iterations. [Read More](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#loop-iter)",
+            "markdownDescription": "The maximal number of loop iterations. [Read More](https://docs.certora.com/en/latest/docs/prover/cli/options.html#loop-iter)",
             "type": "integer",
             "exclusiveMinimum": -1,
             "exclusiveMaximum": 10,
@@ -100,7 +100,7 @@
         "order": 3,
         "properties": {
           "AdditionalFlags": {
-            "markdownDescription": "[Additional flags explanation](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html)\n\n**For example:**\n\n```solver: z3```",
+            "markdownDescription": "[Additional flags explanation](https://docs.certora.com/en/latest/docs/prover/cli/options.html)\n\n**For example:**\n\n```solver: z3```",
             "type": "object",
             "order": 0,
             "additionalProperties": "string",

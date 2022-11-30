@@ -10,7 +10,7 @@
     msg: {
       infoText: 'Adds a message description to your run. ',
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#msg',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html#msg',
       validator: 'spaceAndDash',
     },
   }
