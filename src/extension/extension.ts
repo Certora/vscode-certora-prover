@@ -339,8 +339,21 @@ export function activate(context: vscode.ExtensionContext): void {
       ),
     )
     fileSystemWatcher.onDidCreate(async file => {
+      // TODO: check if it was created by the extension's [createConfFile] function
       const fileObj: ConfToCreate = await createFileObject(file)
       sendFilesToCreateJobs([fileObj])
+    })
+    // vscode asks to delete a conf file before is it deleted to avoid mistakes,
+    // so I think deleting the job with it is a good idea
+    fileSystemWatcher.onDidDelete(file => {
+      // TODO: deal with the [results] part - delete the jon from [runs] + namesMap
+      resultsWebviewProvider.postMessage<string>({
+        type: 'delete-job',
+        payload: vscode.workspace
+          .asRelativePath(file.path)
+          .replace('conf/', '')
+          .replace('.conf', ''),
+      })
     })
   }
 }
