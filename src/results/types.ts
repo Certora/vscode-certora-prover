@@ -220,7 +220,7 @@ export type JobNameMap = {
 }
 
 export enum Status {
-  finishSetup = 'Finish setup',
+  missingSettings = 'Missing settings',
   ready = 'Ready',
   running = 'Running',
   pending = 'Pending',

@@ -100,7 +100,7 @@
     if (e.key === 'Enter') {
       doRename = false
       // empty names are not allowed - we use UNTITLED instead
-      if (e.currentTarget.value === '') {
+      if (e.currentTarget.value === createInitialName()) {
         runName = UNTITLED
         titleHandle()
         renameRun('', spacesToUnderscores(runName))
@@ -108,14 +108,21 @@
     }
   }
 
+  function createInitialName() {
+    if (namesMap.has(UNTITLED)) {
+      return duplicateName(UNTITLED)
+    }
+    return UNTITLED
+  }
+
   /**
    * returns a name for a duplicated item
    * example: name => name (1)
    */
-  function duplicateName(): string {
-    let nameToDuplicate = runName
-    if (namesMap.has(runName)) {
-      nameToDuplicate = namesMap.get(runName)
+  function duplicateName(name: string): string {
+    let nameToDuplicate = name
+    if (namesMap.has(name)) {
+      nameToDuplicate = namesMap.get(name)
     }
     let counter = 1
     let currentName = renameDuplicate(nameToDuplicate, counter)
@@ -143,7 +150,7 @@
     }
     // already been
     if (namesMap.has(spacesToUnderscores(runName))) {
-      runName = duplicateName()
+      runName = duplicateName(runName)
     }
     namesMap.set(spacesToUnderscores(runName), runName)
     runName = spacesToUnderscores(runName)
@@ -194,13 +201,13 @@
    * duplicate this run
    */
   function duplicate(): void {
-    let duplicatedName = duplicateName()
+    let duplicatedName = duplicateName(runName)
     namesMap.set(spacesToUnderscores(duplicatedName), duplicatedName)
     duplicateFunc(runName, spacesToUnderscores(duplicatedName))
   }
 
   /**
-   * creates actions for the finishSetup, ready and unableToRun statuses.
+   * creates actions for the missingSettings, ready and unableToRun statuses.
    * the actions are: rename, edit, delete, duplicate, and if possible: run
    */
   function createActions(): Action[] {
@@ -356,7 +363,7 @@
         type="text"
         maxlength="35"
         class="input"
-        value={namesMap.get(runName) || ''}
+        value={namesMap.get(runName) || createInitialName()}
         placeholder="Enter run name"
         on:keypress={onKeyPress}
         on:change={onChange}

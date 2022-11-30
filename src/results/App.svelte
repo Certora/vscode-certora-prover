@@ -204,7 +204,7 @@
           info: e.data.payload,
         })
         // status is changed to 'finish setup' when job isn't allowed to run
-        runs = setStatus(e.data.payload, Status.finishSetup)
+        runs = setStatus(e.data.payload, Status.missingSettings)
         break
       }
       case EventTypesFromExtension.ClearAllJobs: {
@@ -320,7 +320,7 @@
       runsCounter = runs.push({
         id: runs.length,
         name: '',
-        status: Status.finishSetup,
+        status: Status.missingSettings,
       })
     }
   }
@@ -469,7 +469,7 @@
     runs.forEach((singleRun, index) => {
       // runs with these statuses should not run automatically
       if (
-        singleRun.status === Status.finishSetup ||
+        singleRun.status === Status.missingSettings ||
         singleRun.status === Status.pending ||
         singleRun.status === Status.running ||
         singleRun.status === Status.unableToRun
@@ -519,7 +519,7 @@
         To check your smart contract start by creating a verification run
       </div>
       <vscode-button class="command-button" on:click={() => createRun()}>
-        Create verification run
+        Create new job
       </vscode-button>
     </div>
   </div>
