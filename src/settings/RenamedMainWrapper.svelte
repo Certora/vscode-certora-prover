@@ -82,7 +82,7 @@
   }
   .feedback {
     position: fixed;
-    width: 1000px;
+    width: 100%;
     height: 60px;
     bottom: 0px;
     right: 0px;

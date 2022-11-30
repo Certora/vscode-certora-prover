@@ -40,7 +40,8 @@
       validator: 'spaceAndDash',
     },
     duration: {
-      infoText: 'Sets the maximal timeout for all the SMT solvers.',
+      infoText:
+        'Sets the maximal timeout (in seconds) for all the SMT solvers.',
       infoLink:
         'https://docs.certora.com/en/latest/docs/prover/cli/options.html#smt-timeout',
       validator: 'number',
@@ -294,7 +295,7 @@
                       style="margin: auto 16px 8px auto;"
                     >
                       <label class="checkbox_container" style="margin: 0;">
-                        Optomistic Loop
+                        Optimistic Loop
                         <input
                           type="checkbox"
                           bind:checked={$specObj.optimisticLoop}
@@ -306,7 +307,6 @@
                     <div class="dark_input input_x3">
                       <h3>Loop Unroll</h3>
                       <CustomInput
-                        disabledState={!$specObj.optimisticLoop}
                         placeholder="default: 1"
                         bind:bindValue={$specObj.loopUnroll}
                         infoObj={infoObjArr.loop_iter}

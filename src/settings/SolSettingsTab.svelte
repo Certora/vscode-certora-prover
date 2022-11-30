@@ -24,12 +24,12 @@
   // validator comes from validators.js
   let infoObjArr = {
     mainFile: {
-      infoText: 'pick main solidity file',
+      infoText: 'pick solidity file',
       infoLink:
         'https://docs.certora.com/en/latest/docs/prover/cli/options.html',
     },
     contractName: {
-      infoText: 'type main contract name',
+      infoText: 'type contract name',
       infoLink:
         'https://docs.certora.com/en/latest/docs/prover/cli/options.html',
       validator: 'alphaNum',
