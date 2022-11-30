@@ -2,7 +2,7 @@
 
 The new version of the Certora IDE extension is out!
 
-The Certora Prover checks at compile-time that all smart contract executions fulfill a set of security rules and interface requirements of other contracts. Certora’s blockchain-independent and language-agnostic Prover technology precisely identifies bugs in Smart Contracts or proove their absence.
+The Certora Prover checks at compile-time that all smart contract executions fulfill a set of security rules and interface requirements of other contracts. Certora’s blockchain-independent and language-agnostic Prover technology precisely identifies bugs in Smart Contracts or prove their absence.
 
 
 Content
@@ -44,7 +44,7 @@ To create your first job, click either the “Create verification run” button.
 
 Job name is limited to 35 characters.
 
-After pressing Enter you will see your job list item and the job’s settings form tub will open (see next step for a deeper dive into job list items and the settings form).
+After pressing Enter you will see your job list item and the job’s settings form tab will open (see next step for a deeper dive into job list items and the settings form).
 
 ![image](https://user-images.githubusercontent.com/101042618/203574324-03d52268-3c4b-40b1-915c-6af23e9189d1.png)
 
