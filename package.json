@@ -145,16 +145,16 @@
     },
     "commands": [
       {
-        "command": "certora.createConfFile",
-        "title": "create new job",
-        "category": "Certora",
+        "command": "workbench.action.openSettings",
+        "title": "Open settings",
+        "category": "VSCode",
         "icon": "$(settings)"
       }
     ],
     "menus": {
       "view/title": [
         {
-          "command": "certora.createConfFile",
+          "command": "workbench.action.openSettings",
           "when": "view == results",
           "group": "navigation"
         }

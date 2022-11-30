@@ -262,11 +262,6 @@ export function activate(context: vscode.ExtensionContext): void {
   const scriptRunner = new ScriptRunner(resultsWebviewProvider)
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('certora.createConfFile', async () => {
-      resultsWebviewProvider.postMessage({
-        type: 'create-new-job',
-      })
-    }),
     vscode.window.registerWebviewViewProvider(
       resultsWebviewProvider.viewType,
       resultsWebviewProvider,
