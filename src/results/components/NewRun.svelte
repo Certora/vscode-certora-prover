@@ -83,12 +83,6 @@
 
   onMount(() => {
     window.addEventListener('message', listener)
-    var input = document.getElementById(
-      'rename_input ' + namesMap.keys.length.toString(),
-    )
-    if (doRename) {
-      input.focus()
-    }
   })
 
   onDestroy(() => {
@@ -302,6 +296,11 @@
     if (!runName) {
       deleteFunc()
     }
+    var activeElement = document.activeElement
+    var myElement = document.getElementById('rename_input ' + runName)
+    if (activeElement !== myElement) {
+      doRename = false
+    }
   }
 
   /**
@@ -345,6 +344,11 @@
     )
     return [].concat(...rulesArrays)
   }
+
+  /** focus on this element */
+  function focusOnThis(element) {
+    element.focus()
+  }
 </script>
 
 <div class="body">
@@ -358,7 +362,8 @@
         alt=""
       />
       <input
-        id={'rename_input ' + namesMap.keys.length.toString()}
+        id={'rename_input ' + runName}
+        use:focusOnThis
         on:focusout={deleteOutOfFocus}
         type="text"
         maxlength="35"
@@ -457,7 +462,7 @@
       border-style: solid;
       border-color: var(--vscode-inputValidation-infoBorder);
       background-color: var(--vscode-editor-inactiveSelectionBackground);
-      color: var(--vscode-disabledForeground);
+      color: var(--vscode-button-foreground);
       margin-left: 24px;
       margin-right: 0;
     }
