@@ -221,6 +221,35 @@ export function activate(context: vscode.ExtensionContext): void {
     return confFileUri
   }
 
+  /**
+   * modal that asks the user if they are sure they want to delete a job named [name]
+   * if they are sure - delete conf and send "delete-job" message through the resultsWebviewProvider
+   * else - cancel the modal
+   * @param name name of the job to delete
+   */
+  function askToDeleteJob(name: JobNameMap): void {
+    const deleteAction = "Delete '" + name.displayName + "' forever"
+    vscode.window
+      .showInformationMessage(
+        "Are you sure you want to delete '" + name.displayName + "'?",
+        {
+          modal: true,
+          detail:
+            "You won't be able restore the job list item after it was deleted",
+        },
+        ...[deleteAction],
+      )
+      .then(items => {
+        if (items === deleteAction) {
+          resultsWebviewProvider.postMessage<string>({
+            type: 'delete-job',
+            payload: name.fileName,
+          })
+          deleteConfFile(name)
+        }
+      })
+  }
+
   function deleteConfFile(name: JobNameMap): void {
     const confFileUri: vscode.Uri | void = getConfUri(name.fileName)
     if (confFileUri) {
@@ -258,6 +287,7 @@ export function activate(context: vscode.ExtensionContext): void {
   resultsWebviewProvider.duplicate = duplicate
   resultsWebviewProvider.runScript = runScript
   resultsWebviewProvider.removeScript = removeRunningScriptByName
+  resultsWebviewProvider.askToDeleteJob = askToDeleteJob
 
   const scriptRunner = new ScriptRunner(resultsWebviewProvider)
 

@@ -155,6 +155,11 @@ export type CreationTime = {
   postTime: string
 }
 
+export type JobNameMap = {
+  displayName: string
+  fileName: string
+}
+
 export enum EventTypesFromExtension {
   ReceiveNewJobResult = 'receive-new-job-result',
   RunningScriptChanged = 'running-scripts-changed',
@@ -168,6 +173,7 @@ export enum EventTypesFromExtension {
   FocusChanged = 'focus-changed',
   UploadingFiles = 'run-next',
   ScriptStopped = 'script-stopped',
+  DeleteJob = 'delete-job',
 }
 
 export type EventsFromExtension =
@@ -217,11 +223,10 @@ export type EventsFromExtension =
       type: EventTypesFromExtension.ScriptStopped
       payload: number
     }
-
-export type JobNameMap = {
-  displayName: string
-  fileName: string
-}
+  | {
+      type: EventTypesFromExtension.DeleteJob
+      payload: string
+    }
 
 export enum Status {
   missingSettings = 'Missing settings',

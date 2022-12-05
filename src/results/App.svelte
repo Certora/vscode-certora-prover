@@ -19,6 +19,7 @@
     deleteConf,
     duplicate,
     removeScript,
+    askToDeleteJob,
   } from './extension-actions'
   import { smartMergeVerificationResult } from './utils/mergeResults'
   import { log, Sources } from './utils/log'
@@ -246,6 +247,17 @@
         focusedRun = e.data.payload
         break
       }
+      case EventTypesFromExtension.DeleteJob: {
+        log({
+          action: 'Received "delete-job" command',
+          source: Sources.ResultsWebview,
+          info: e.data.payload,
+        })
+        const runName = e.data.payload
+        const runToDelete = runs.find(run => run.name === runName)
+        deleteRun(runToDelete)
+        break
+      }
       default:
         break
     }
@@ -344,7 +356,7 @@
   }
 
   /**
-   * deletes a run, it's conf file and it's results
+   * deletes a run and it's results
    * @param runToDelete run to delete
    */
   function deleteRun(runToDelete: Run): void {
@@ -368,10 +380,6 @@
       clearOutput()
     }
 
-    if (runToDelete.name) {
-      //delete conf file
-      deleteConf(JobNameMap)
-    }
     runsCounter--
   }
 
@@ -513,6 +521,18 @@
     runs = setStatus(run.name, Status.ready)
   }
 
+  /**
+   * ask to delete the job "run"
+   * @param run the job to delete
+   */
+  function askToDeleteThis(run: Run): void {
+    const jobNameMap: JobNameMap = {
+      fileName: run.name,
+      displayName: namesMap.get(run.name),
+    }
+    askToDeleteJob(jobNameMap)
+  }
+
   onMount(() => {
     window.addEventListener('message', listener)
   })
@@ -559,7 +579,7 @@
               <NewRun
                 doRename={runs[index].name === ''}
                 editFunc={() => editRun(runs[index])}
-                deleteFunc={() => deleteRun(runs[index])}
+                deleteFunc={() => askToDeleteThis(runs[index])}
                 {namesMap}
                 {renameRun}
                 duplicateFunc={duplicateRun}
