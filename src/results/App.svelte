@@ -57,11 +57,21 @@
     )
 
     if (index > -1) {
+      // type of Rule.output / Assert.output is going to be changed to string[] in a new version
+      // of certora prover. support both new & old versions:
+      let curOutput: string | null = null
+      if (typeof clickedRuleOrAssert.output === 'string') {
+        curOutput = clickedRuleOrAssert.output
+      } else if (
+        clickedRuleOrAssert.output &&
+        clickedRuleOrAssert.output.length > 0
+      ) {
+        curOutput = clickedRuleOrAssert.output[0]
+      }
       const outputUrl = `${vr.jobs[index].progressUrl.replace(
         'progress',
         'result',
       )}&output=${clickedRuleOrAssert.output}`
-
       getOutput(outputUrl)
       outputRunName = vr.name
     } else {

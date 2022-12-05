@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------------------------------
- *  Runs certoraRun command with the contant of a conf file.
+ *  Runs certoraRun command with the content of a conf file.
  *-------------------------------------------------------------------------------------------- */
 import { workspace, window, Uri } from 'vscode'
 import { spawn, exec, ChildProcessWithoutNullStreams } from 'child_process'

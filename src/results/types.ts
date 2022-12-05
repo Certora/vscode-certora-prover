@@ -25,16 +25,20 @@ export enum RuleStatuses {
   Timeout = 'TIMEOUT',
 }
 
+// TODO: output can be either a string of a path or array of strings of path
+// need to change it here, and in the code that handles rules
 export type Assert = {
   message: string
   status: RuleStatuses
   id: number
   duration: number
   jumpToDefinition: JumpToDefinition[]
-  output: string | null
+  output: string | null | string[]
   jobId: string | null
 }
 
+// TODO: output can be either a string of a path or array of strings of path
+// need to change it here, and in the code that handles rules
 export type Rule = {
   name: string
   children: Rule[]
@@ -42,7 +46,7 @@ export type Rule = {
   asserts: Assert[]
   jumpToDefinition: JumpToDefinition[]
   duration: number
-  output: string | null
+  output: string | null | string[]
   jobId: string | null
 }
 
