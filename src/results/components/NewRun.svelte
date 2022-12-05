@@ -376,36 +376,38 @@
       />
     </div>
   {:else if !nowRunning}
-    <div class="results" on:click={expandedState ? null : editFunc}>
-      <Pane
-        title={namesMap.get(runName)}
-        initialExpandedState={expandedState}
-        actions={createActions()}
-        showExpendIcon={expandedState}
-        {status}
-        inactiveSelected={runName === inactiveSelected}
-        runFunc={status === Status.ready ||
-        status === Status.success ||
-        status === Status.unableToRun ||
-        status === Status.incompleteResults
-          ? runFunc
-          : null}
-      >
-        {#each verificationResults as vr, index (index)}
-          {#if vr.name === runName}
-            <li class="tree">
-              <Tree
-                data={{
-                  type: TreeType.Rules,
-                  tree: retrieveRules(vr.jobs),
-                }}
-                on:fetchOutput={e => newFetchOutput(e, vr)}
-              />
-            </li>
-          {/if}
-        {/each}
-      </Pane>
-    </div>
+    {#key [status]}
+      <div class="results" on:click={expandedState ? null : editFunc}>
+        <Pane
+          title={namesMap.get(runName)}
+          initialExpandedState={expandedState}
+          actions={createActions()}
+          showExpendIcon={expandedState}
+          {status}
+          inactiveSelected={runName === inactiveSelected}
+          runFunc={status === Status.ready ||
+          status === Status.success ||
+          status === Status.unableToRun ||
+          status === Status.incompleteResults
+            ? runFunc
+            : null}
+        >
+          {#each verificationResults as vr, index (index)}
+            {#if vr.name === runName}
+              <li class="tree">
+                <Tree
+                  data={{
+                    type: TreeType.Rules,
+                    tree: retrieveRules(vr.jobs),
+                  }}
+                  on:fetchOutput={e => newFetchOutput(e, vr)}
+                />
+              </li>
+            {/if}
+          {/each}
+        </Pane>
+      </div>
+    {/key}
   {:else}
     <div class="running">
       <Pane

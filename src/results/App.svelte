@@ -366,10 +366,7 @@
     verificationResults = verificationResults.filter(vr => {
       return vr.name !== name
     })
-    const JobNameMap: JobNameMap = {
-      fileName: name,
-      displayName: namesMap.get(name),
-    }
+
     //delete run
     runs = runs.filter(run => {
       return run !== runToDelete
@@ -574,7 +571,7 @@
       <ul class="running-scripts">
         {#each Array(runsCounter) as _, index (index)}
           <!-- removing the keys in hope the one refreshed job won't refresh everying -->
-          {#key [focusedRun, runs[index].status]}
+          {#key [focusedRun]}
             <li>
               <NewRun
                 doRename={runs[index].name === ''}
