@@ -462,7 +462,7 @@
       border-style: solid;
       border-color: var(--vscode-inputValidation-infoBorder);
       background-color: var(--vscode-editor-inactiveSelectionBackground);
-      color: var(--vscode-button-foreground);
+      color: var(--foreground);
       margin-left: 24px;
       margin-right: 0;
     }

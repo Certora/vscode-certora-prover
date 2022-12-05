@@ -141,7 +141,7 @@
       &:hover {
         border-radius: 20px;
         border: 0px solid rgb(184 184 184 / 31%);
-        background: var(--vscode-button-foreground);
+        background: var(--foreground);
       }
     }
 
