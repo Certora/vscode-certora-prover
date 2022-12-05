@@ -24,6 +24,7 @@
   export let doRename: boolean = true
   export let editFunc: () => void
   export let deleteFunc: () => void
+  export let deleteRun: () => void
   export let namesMap: Map<string, string>
   export let runName: string = ''
   // this creates the new conf file
@@ -294,7 +295,7 @@
    */
   function deleteOutOfFocus() {
     if (!runName) {
-      deleteFunc()
+      deleteRun()
     }
     var activeElement = document.activeElement
     var myElement = document.getElementById('rename_input ' + runName)

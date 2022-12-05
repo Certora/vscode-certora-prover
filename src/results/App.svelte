@@ -580,6 +580,7 @@
                 doRename={runs[index].name === ''}
                 editFunc={() => editRun(runs[index])}
                 deleteFunc={() => askToDeleteThis(runs[index])}
+                deleteRun={() => deleteRun(runs[index])}
                 {namesMap}
                 {renameRun}
                 duplicateFunc={duplicateRun}
