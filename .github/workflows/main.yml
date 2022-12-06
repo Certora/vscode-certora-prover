@@ -66,5 +66,5 @@ jobs:
           code --install-extension $(Get-ChildItem *.vsix).name
 
       - name: Publish extension
-        if: github.ref == 'refs/heads/main' and runner.os == 'Linux'
+        if: github.ref == 'refs/heads/main' && runner.os == 'Linux'
         run: echo works # vsce publish -p ${{ secrets.VSCE_PAT }}
