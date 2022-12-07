@@ -76,7 +76,7 @@ jobs:
 
   publish:
     needs: build-and-test
-    if: github.ref == 'refs/heads/publish'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Download extension
@@ -84,4 +84,4 @@ jobs:
         with:
           name: vscode-certora-prover
       - name: Publish extension
-        run: ls -l; echo ${{ secrets.VSCE_PAT }} # vsce publish -p ${{ secrets.VSCE_PAT }}
+        run: vsce publish -p ${{ secrets.VSCE_PAT }}
