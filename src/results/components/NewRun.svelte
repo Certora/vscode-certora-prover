@@ -94,8 +94,16 @@
     // get out of 'rename' mode when enter is pressed
     if (e.key === 'Enter') {
       doRename = false
-      // empty names are not allowed - we use UNTITLED instead
+
+      // we use untitled as default name, when creating a new run
       if (e.currentTarget.value === createInitialName()) {
+        runName = UNTITLED
+        titleHandle()
+        renameRun('', spacesToUnderscores(runName))
+      }
+
+      // if user entered empty run name in rename mode
+      if (!e.currentTarget.value && !runName) {
         runName = UNTITLED
         titleHandle()
         renameRun('', spacesToUnderscores(runName))
@@ -164,6 +172,10 @@
       currentTarget: EventTarget & HTMLInputElement
     },
   ) {
+    // this function doe'nt handle empty input
+    if (!e.currentTarget.value) {
+      return
+    }
     runName = e.currentTarget.value
     titleHandle()
     // in rename mode we rename
