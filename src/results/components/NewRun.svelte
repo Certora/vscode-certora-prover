@@ -71,7 +71,7 @@
           info: e.data.payload,
         })
         if (e.data.payload === runName) {
-          // change status to 'unableToRun' only if run wasn't stoped manually / intentionly
+          // change status to 'unableToRun' only if run wasn't stopped manually / intentionally
           if (!stop) {
             statusChange(Status.unableToRun)
             stop = false
@@ -131,9 +131,9 @@
   /**
    * process a title so it can become a suitable run name
    * a run name cannot contain spaces in the beginning/end of the name,
-   * cannot have multiple spaces in a row, cannot contain special cheracters
+   * cannot have multiple spaces in a row, cannot contain special characters
    * outside space.
-   * run name that only contains illegal characters and spaces will become 'undtitled'
+   * run name that only contains illegal characters and spaces will become 'untitled'
    */
   function titleHandle(): void {
     runName = runName
@@ -266,7 +266,7 @@
   }
 
   /**
-   * creates 'stop' actios according to run status
+   * creates 'stop' action according to run status
    */
   function createActionsForRunningScript(): Action[] {
     if (isPending) {

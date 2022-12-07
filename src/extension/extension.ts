@@ -141,9 +141,9 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   /**
-   * render the settings pannel for a conf file, with the name [confName] and the content [confFile]
+   * render the settings panel for a conf file, with the name [confName] and the content [confFile]
    * @param confName name of the conf file, in the format: {fileName, displayName}
-   * @param confFile contant of the conf file
+   * @param confFile content of the conf file
    */
   function renderSettingsPanel(confName: JobNameMap, confFile: ConfFile) {
     SettingsPanel.setResultsWebviewProvider(resultsWebviewProvider)
@@ -175,12 +175,12 @@ export function activate(context: vscode.ExtensionContext): void {
     duplicated: JobNameMap,
   ): Promise<void> {
     // get the content of the conf to duplicate
-    // cretate a new conf file with the name of "duplicated", content of "to duplicate", and open it with settings view
+    // create a new conf file with the name of "duplicated", content of "to duplicate", and open it with settings view
     const confFileUri = getConfUri(toDuplicate.fileName)
     if (confFileUri) {
       try {
         const confFileContent = readConf(confFileUri)
-        // the ; is required for the (await) to work, messesary becasue we have a Promise<ConfFile> type from readConf function return
+        // the ; is required for the (await) to work, necessary because we have a Promise<ConfFile> type from readConf function return
         ;(await confFileContent).msg = ''
         try {
           const newConfFileUri = getConfUri(duplicated.fileName)
@@ -267,8 +267,8 @@ export function activate(context: vscode.ExtensionContext): void {
 
   /**
    * This is for the results webview provider.
-   * ScriptRunner object has to recieve ResultsWebviewProvider object when it is initialized
-   * But, ResultsWebviewProvider has to recieve resultsWebviewProvider.removeScript = removeRunningScriptByName
+   * ScriptRunner object has to receive ResultsWebviewProvider object when it is initialized
+   * But, ResultsWebviewProvider has to receive resultsWebviewProvider.removeScript = removeRunningScriptByName
    * which is a ScriptRunner method.
    * The solution to the circle is this function, that is passed to ResultsWebviewProvider after ScriptRunner
    * is initialized.

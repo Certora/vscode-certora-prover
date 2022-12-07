@@ -141,7 +141,7 @@
           }
         })
         runningScripts = runningScripts
-        // when we recieve the results of the last run, we run the next job!
+        // when we receive the results of the last run, we run the next job!
         runNext()
         break
       }
@@ -301,7 +301,7 @@
   function duplicateRun(nameToDuplicate: string, duplicatedName: string): void {
     const toDuplicate: Run = runs.find(run => run.name === nameToDuplicate)
 
-    // the status of the new run cannot be 'success' (havn't run yet => no results)
+    // the status of the new run cannot be 'success' (haven't run yet => no results)
     let newStatus = toDuplicate.status
     if (newStatus === Status.success) {
       newStatus = Status.ready
@@ -457,7 +457,7 @@
   }
 
   /**
-   * run the fisrt pending run in the queue
+   * run the first pending run in the queue
    */
   function runNext(): void {
     if (pendingQueue.length > 0) {
@@ -497,7 +497,7 @@
       const inQueue = pendingQueue.find(pendingRun => {
         return pendingRun.fileName === singleRun.name
       })
-      //make sure runs arn't ran in parallel to themself
+      //make sure runs aren't ran in parallel to themselves
       if (inQueue === undefined && nowRunning === undefined) {
         run(singleRun, index)
       }
@@ -570,7 +570,7 @@
     >
       <ul class="running-scripts">
         {#each Array(runsCounter) as _, index (index)}
-          <!-- removing the keys in hope the one refreshed job won't refresh everying -->
+          <!-- removing the keys in hope the one refreshed job won't refresh everything -->
           {#key [focusedRun]}
             <li>
               <NewRun
