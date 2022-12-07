@@ -72,7 +72,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: vscode-certora-prover
-          path: *.vsix
+          path: ./*.vsix
 
   publish:
     needs: build-and-test
