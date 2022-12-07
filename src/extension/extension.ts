@@ -234,8 +234,7 @@ export function activate(context: vscode.ExtensionContext): void {
         "Are you sure you want to delete '" + name.displayName + "'?",
         {
           modal: true,
-          detail:
-            "You won't be able restore the job list item after it was deleted",
+          detail: 'Job configuration will be lost',
         },
         ...[deleteAction],
       )

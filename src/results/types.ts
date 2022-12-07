@@ -37,7 +37,7 @@ export type Assert = {
   jobId: string | null
 }
 
-// TODO: output can be either a string of a path or array of strings of path
+// output can be either a string of a path or array of strings of path
 // need to change it here, and in the code that handles rules
 export type Rule = {
   name: string
