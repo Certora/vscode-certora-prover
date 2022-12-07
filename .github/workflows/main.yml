@@ -11,16 +11,22 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-test:
     strategy:
       matrix:
         os: [windows-latest, macos-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
     
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
+        # Build
+      - name: Build extension
+        run: |
+          yarn
+          npx vsce package
+
+        # Prepare test environemnts
       - name: Install vscode for macos
         if: runner.os == 'macOS'
         shell: bash
@@ -49,22 +55,33 @@ jobs:
           Invoke-WebRequest -Uri "https://code.visualstudio.com/sha/download?build=stable&os=win32-x64-archive" -OutFile VSCode_x64.zip
           Expand-Archive .\VSCode_x64.zip
 
-      - name: Build extension
-        run: |
-          yarn
-          npx vsce package
-  
-      - name: Install extension on linux and mac
+        # Test by installing the extesnsion
+      - name: Test extension on linux and mac
         if: runner.os != 'Windows'
-        run: code --install-extension *.vsix
+        run: code --install-extension vscode-certora-prover-*.vsix
       
-      - name: Install extension on windows
+      - name: Test extension on windows
         shell: pwsh
         if: runner.os == 'Windows'
         run: |
           $env:Path += ";$pwd\VSCode_x64\bin" # Adding the 'code' application to the PATH
-          code --install-extension $(Get-ChildItem *.vsix).name
+          code --install-extension $(Get-ChildItem vscode-certora-prover-*.vsix).name
 
+      - name: Upload extension
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v3
+        with:
+          name: extension
+          path: vscode-certora-prover-*.vsix
+
+  publish:
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download extension
+        uses: actions/download-artifact@v3
+        with:
+          name: extension
       - name: Publish extension
-        if: github.ref == 'refs/heads/main' && runner.os == 'Linux'
-        run: echo works # vsce publish -p ${{ secrets.VSCE_PAT }}
+        run: ls -l; echo ${{ secrets.VSCE_PAT }} # vsce publish -p ${{ secrets.VSCE_PAT }}
