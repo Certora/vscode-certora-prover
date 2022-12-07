@@ -58,30 +58,30 @@ jobs:
         # Test by installing the extesnsion
       - name: Test extension on linux and mac
         if: runner.os != 'Windows'
-        run: code --install-extension vscode-certora-prover-*.vsix
+        run: code --install-extension *.vsix
       
       - name: Test extension on windows
         shell: pwsh
         if: runner.os == 'Windows'
         run: |
           $env:Path += ";$pwd\VSCode_x64\bin" # Adding the 'code' application to the PATH
-          code --install-extension $(Get-ChildItem vscode-certora-prover-*.vsix).name
+          code --install-extension $(Get-ChildItem *.vsix).name
 
       - name: Upload extension
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@v3
         with:
-          name: extension
-          path: vscode-certora-prover-*.vsix
+          name: vscode-certora-prover
+          path: *.vsix
 
   publish:
     needs: build-and-test
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/publish'
     runs-on: ubuntu-latest
     steps:
       - name: Download extension
         uses: actions/download-artifact@v3
         with:
-          name: extension
+          name: vscode-certora-prover
       - name: Publish extension
         run: ls -l; echo ${{ secrets.VSCE_PAT }} # vsce publish -p ${{ secrets.VSCE_PAT }}
