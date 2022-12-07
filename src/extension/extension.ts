@@ -207,6 +207,10 @@ export function activate(context: vscode.ExtensionContext): void {
     return 'conf/' + name + '.conf'
   }
 
+  function getConfFileName(path: string): string {
+    return path.replace('conf/', '').replace('.conf', '')
+  }
+
   async function runScript(name: JobNameMap) {
     SettingsPanel.removePanel(name.displayName)
     const confFile = getConfFilePath(name.fileName)
@@ -275,7 +279,7 @@ export function activate(context: vscode.ExtensionContext): void {
    */
   async function createFileObject(file: vscode.Uri): Promise<ConfToCreate> {
     const fileObj: ConfToCreate = {
-      fileName: vscode.workspace.asRelativePath(file).replace('conf/', ''),
+      fileName: getConfFileName(vscode.workspace.asRelativePath(file)),
       allowRun: 0,
     }
     const content: ConfFile = await readConf(file)
@@ -339,20 +343,16 @@ export function activate(context: vscode.ExtensionContext): void {
       ),
     )
     fileSystemWatcher.onDidCreate(async file => {
-      // TODO: check if it was created by the extension's [createConfFile] function
       const fileObj: ConfToCreate = await createFileObject(file)
       sendFilesToCreateJobs([fileObj])
     })
     // vscode asks to delete a conf file before is it deleted to avoid mistakes,
     // so I think deleting the job with it is a good idea
     fileSystemWatcher.onDidDelete(file => {
-      // TODO: deal with the [results] part - delete the jon from [runs] + namesMap
+      // TODO: deal with the [results] part - delete the job from [runs] + namesMap
       resultsWebviewProvider.postMessage<string>({
         type: 'delete-job',
-        payload: vscode.workspace
-          .asRelativePath(file.path)
-          .replace('conf/', '')
-          .replace('.conf', ''),
+        payload: getConfFileName(vscode.workspace.asRelativePath(file.path)),
       })
     })
   }

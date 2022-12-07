@@ -245,18 +245,33 @@
         const confList = e.data.payload
 
         confList.forEach(file => {
-          let curStatus = Status.missingSettings
-          if (file.allowRun) {
-            curStatus = Status.ready
+          if (!namesMap.has(file.fileName)) {
+            let curStatus = Status.missingSettings
+            if (file.allowRun) {
+              curStatus = Status.ready
+            }
+            const newRun = {
+              id: runs.length,
+              name: file.fileName,
+              status: curStatus,
+            }
+            createRun(newRun)
+            namesMap.set(newRun.name, newRun.name)
           }
-          const newRun = {
-            id: runs.length,
-            name: file.fileName.replace('.conf', ''),
-            status: curStatus,
-          }
-          createRun(newRun)
-          namesMap.set(newRun.name, newRun.name)
         })
+        break
+      }
+      case EventTypesFromExtension.DeleteJob: {
+        log({
+          action: 'Received "delete-job" command',
+          source: Sources.ResultsWebview,
+          info: e.data.payload,
+        })
+        const nameToDelete: string = e.data.payload
+        const runToDelete: Run = runs.find(r => {
+          return r.name === nameToDelete
+        })
+        deleteRun(runToDelete)
         break
       }
       default:

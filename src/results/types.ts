@@ -170,6 +170,7 @@ export enum EventTypesFromExtension {
   UploadingFiles = 'run-next',
   ScriptStopped = 'script-stopped',
   InitialJobs = 'initial-jobs',
+  DeleteJob = 'delete-job',
 }
 
 export type EventsFromExtension =
@@ -222,6 +223,10 @@ export type EventsFromExtension =
   | {
       type: EventTypesFromExtension.InitialJobs
       payload: ConfToCreate[]
+    }
+  | {
+      type: EventTypesFromExtension.DeleteJob
+      payload: string
     }
 
 export type JobNameMap = {
