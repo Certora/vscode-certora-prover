@@ -12,9 +12,6 @@ on:
 
 jobs:
   build-and-test:
-    strategy:
-      matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
     runs-on: ubuntu-latest
     
     steps:
@@ -79,12 +76,16 @@ jobs:
     if: github.ref == 'refs/heads/publish'
     runs-on: ubuntu-latest
     steps:
+      - name: Install nodejs
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
       - name: Download extension
         uses: actions/download-artifact@v3
         with:
           name: vscode-certora-prover
       - name: Publish extension
         run: |
-          yarn; npx vsce package
-          vsce --help # vsce publish -p ${{ secrets.VSCE_PAT }}
+          vsce --help
+          # vsce publish -p ${{ secrets.VSCE_PAT }}
           vsce --version
