@@ -12,7 +12,10 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
     
     steps:
       - uses: actions/checkout@v3
@@ -88,6 +91,4 @@ jobs:
           name: vscode-certora-prover
       - name: Publish extension
         run: |
-          vsce --help
-          # vsce publish -p ${{ secrets.VSCE_PAT }}
-          vsce --version
+          vsce --help # vsce publish -p ${{ secrets.VSCE_PAT }}
