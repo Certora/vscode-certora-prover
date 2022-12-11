@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, macos-latest, ubuntu-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     
     steps:
       - uses: actions/checkout@v3
@@ -76,7 +76,7 @@ jobs:
 
   publish:
     needs: build-and-test
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/publish'
     runs-on: ubuntu-latest
     steps:
       - name: Download extension
