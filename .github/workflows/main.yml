@@ -91,4 +91,4 @@ jobs:
           name: vscode-certora-prover
       - name: Publish extension
         run: |
-          vsce --help # vsce publish -p ${{ secrets.VSCE_PAT }}
+          vsce publish -p ${{ secrets.VSCE_PAT }}
