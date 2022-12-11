@@ -285,8 +285,15 @@
         const runToDelete: Run = runs.find(r => {
           return r.name === nameToDelete
         })
+        if (runToDelete !== undefined) {
+          const jobNameMap: JobNameMap = {
+            fileName: nameToDelete,
+            displayName: namesMap.get(nameToDelete),
+          }
+          deleteRun(runToDelete)
+          deleteConf(jobNameMap)
+        }
 
-        deleteRun(runToDelete)
         break
       }
       default:

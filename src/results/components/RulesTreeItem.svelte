@@ -123,10 +123,6 @@
     text-overflow: ellipsis;
   }
 
-  .pointer-cursor {
-    cursor: pointer;
-  }
-
   .label-container {
     overflow: hidden;
     min-width: 0;
