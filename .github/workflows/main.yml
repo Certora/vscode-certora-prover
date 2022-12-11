@@ -79,6 +79,12 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
+      - name: Install nodejs
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install vscode extensions cli
+        run: npm install -g @vscode/vsce
       - name: Download extension
         uses: actions/download-artifact@v3
         with:
