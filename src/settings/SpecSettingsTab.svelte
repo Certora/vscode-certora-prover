@@ -75,7 +75,7 @@
       infoText: 'run on staging environment',
       infoLink:
         'https://docs.certora.com/en/latest/docs/prover/cli/options.html',
-      validator: 'alphaNum',
+      validator: 'filePathValidator',
     },
     typecheck_only: {
       infoText:
@@ -182,9 +182,14 @@
           <div slot="header" class="p-12 header header_contract">
             <i class="codicon codicon-file" />
             <h3>Main Spec File</h3>
-            <h3 style="margin-left: auto; margin-right: 0; margin-top: 2px">
+            <h3
+              style="margin-left: auto; margin-right: 0; margin-top: 2px; text-transform: none;"
+            >
               {JSON.parse(JSON.stringify($specObj.specFile)).label
-                ? JSON.parse(JSON.stringify($specObj.specFile)).label + '.spec'
+                ? JSON.parse(JSON.stringify($specObj.specFile)).label +
+                  (JSON.parse(JSON.stringify($specObj.specFile)).type
+                    ? JSON.parse(JSON.stringify($specObj.specFile)).type
+                    : '')
                 : ''}
             </h3>
           </div>

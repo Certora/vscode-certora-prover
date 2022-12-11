@@ -51,7 +51,7 @@
       infoText: 'Gets an argument to pass to the Solidity compiler.',
       infoLink:
         'https://docs.certora.com/en/latest/docs/prover/cli/options.html#solc-args',
-      validator: 'alphaNum',
+      validator: 'spaceAndDash',
     },
     package: {
       infoText:
@@ -191,7 +191,9 @@
           <div slot="header" class="p-12 header header_contract">
             <i class="codicon codicon-file" />
             <h3>Main contract</h3>
-            <h3 style="margin-left: auto; margin-right: 0; margin-top: 2px">
+            <h3
+              style="margin-left: auto; margin-right: 0; margin-top: 2px; text-transform: none;"
+            >
               {$solidityObj.mainContract}
             </h3>
           </div>

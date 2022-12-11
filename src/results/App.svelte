@@ -19,6 +19,7 @@
     deleteConf,
     duplicate,
     removeScript,
+    askToDeleteJob,
   } from './extension-actions'
   import { smartMergeVerificationResult } from './utils/mergeResults'
   import { log, Sources } from './utils/log'
@@ -57,11 +58,21 @@
     )
 
     if (index > -1) {
+      // type of Rule.output / Assert.output is going to be changed to string[] in a new version
+      // of certora prover. support both new & old versions:
+      let curOutput: string | null = null
+      if (typeof clickedRuleOrAssert.output === 'string') {
+        curOutput = clickedRuleOrAssert.output
+      } else if (
+        clickedRuleOrAssert.output &&
+        clickedRuleOrAssert.output.length > 0
+      ) {
+        curOutput = clickedRuleOrAssert.output[0]
+      }
       const outputUrl = `${vr.jobs[index].progressUrl.replace(
         'progress',
         'result',
       )}&output=${clickedRuleOrAssert.output}`
-
       getOutput(outputUrl)
       outputRunName = vr.name
     } else {
@@ -130,7 +141,7 @@
           }
         })
         runningScripts = runningScripts
-        // when we recieve the results of the last run, we run the next job!
+        // when we receive the results of the last run, we run the next job!
         runNext()
         break
       }
@@ -236,6 +247,7 @@
         focusedRun = e.data.payload
         break
       }
+
       case EventTypesFromExtension.InitialJobs: {
         log({
           action: 'Received "initial-jobs" command',
@@ -261,16 +273,22 @@
         })
         break
       }
+
       case EventTypesFromExtension.DeleteJob: {
         log({
           action: 'Received "delete-job" command',
           source: Sources.ResultsWebview,
           info: e.data.payload,
         })
+
         const nameToDelete: string = e.data.payload
         const runToDelete: Run = runs.find(r => {
           return r.name === nameToDelete
         })
+
+        const runName = e.data.payload
+        const runToDelete = runs.find(run => run.name === runName)
+
         deleteRun(runToDelete)
         break
       }
@@ -317,7 +335,7 @@
   function duplicateRun(nameToDuplicate: string, duplicatedName: string): void {
     const toDuplicate: Run = runs.find(run => run.name === nameToDuplicate)
 
-    // the status of the new run cannot be 'success' (havn't run yet => no results)
+    // the status of the new run cannot be 'success' (haven't run yet => no results)
     let newStatus = toDuplicate.status
     if (newStatus === Status.success) {
       newStatus = Status.ready
@@ -372,7 +390,7 @@
   }
 
   /**
-   * deletes a run, it's conf file and it's results
+   * deletes a run and it's results
    * @param runToDelete run to delete
    */
   function deleteRun(runToDelete: Run): void {
@@ -382,10 +400,7 @@
     verificationResults = verificationResults.filter(vr => {
       return vr.name !== name
     })
-    const JobNameMap: JobNameMap = {
-      fileName: name,
-      displayName: namesMap.get(name),
-    }
+
     //delete run
     runs = runs.filter(run => {
       return run !== runToDelete
@@ -396,10 +411,6 @@
       clearOutput()
     }
 
-    if (runToDelete.name) {
-      //delete conf file
-      deleteConf(JobNameMap)
-    }
     runsCounter--
   }
 
@@ -480,7 +491,7 @@
   }
 
   /**
-   * run the fisrt pending run in the queue
+   * run the first pending run in the queue
    */
   function runNext(): void {
     if (pendingQueue.length > 0) {
@@ -520,7 +531,7 @@
       const inQueue = pendingQueue.find(pendingRun => {
         return pendingRun.fileName === singleRun.name
       })
-      //make sure runs arn't ran in parallel to themself
+      //make sure runs aren't ran in parallel to themselves
       if (inQueue === undefined && nowRunning === undefined) {
         run(singleRun, index)
       }
@@ -539,6 +550,18 @@
     })
     pendingQueueCounter--
     runs = setStatus(run.name, Status.ready)
+  }
+
+  /**
+   * ask to delete the job "run"
+   * @param run the job to delete
+   */
+  function askToDeleteThis(run: Run): void {
+    const jobNameMap: JobNameMap = {
+      fileName: run.name,
+      displayName: namesMap.get(run.name),
+    }
+    askToDeleteJob(jobNameMap)
   }
 
   onMount(() => {
@@ -581,52 +604,53 @@
     >
       <ul class="running-scripts">
         {#each Array(runsCounter) as _, index (index)}
-          <!-- removing the keys in hope the one refreshed job won't refresh everying -->
-          <!-- {#key [runs[index], focusedRun, runs[index].status, runningScripts]} -->
-          <li>
-            <NewRun
-              doRename={runs[index].name === ''}
-              editFunc={() => editRun(runs[index])}
-              deleteFunc={() => deleteRun(runs[index])}
-              {namesMap}
-              {renameRun}
-              duplicateFunc={duplicateRun}
-              runFunc={() => run(runs[index])}
-              status={runs[index].status}
-              {verificationResults}
-              {newFetchOutput}
-              nowRunning={(runningScripts.find(
-                rs => getFilename(rs.confFile) === runs[index].name,
-              ) !== undefined ||
-                (pendingQueue.find(rs => rs.fileName === runs[index].name) !==
-                  undefined &&
-                  pendingQueueCounter > 0)) &&
-                verificationResults.find(vr => runs[index].name === vr.name) ===
-                  undefined}
-              isPending={pendingQueue.find(
-                rs => rs.fileName === runs[index].name,
-              ) !== undefined && pendingQueueCounter > 0}
-              expandedState={verificationResults.find(
-                vr => vr.name === runs[index].name,
-              ) !== undefined}
-              pendingStopFunc={() => {
-                pendingStopFunc(runs[index])
-              }}
-              runningStopFunc={() => {
-                verificationResults = verificationResults.filter(vr => {
-                  return vr.name !== runs[index].name
-                })
-                runs = setStatus(runs[index].name, Status.ready)
-                stopScript(runs[index].id)
-                // runNext()
-              }}
-              inactiveSelected={focusedRun}
-              {setStatus}
-              vrLink={runs[index].vrLink}
-              bind:runName={runs[index].name}
-            />
-          </li>
-          <!-- {/key} -->
+          <!-- removing the keys in hope the one refreshed job won't refresh everything -->
+          {#key [focusedRun]}
+            <li>
+              <NewRun
+                doRename={runs[index].name === ''}
+                editFunc={() => editRun(runs[index])}
+                deleteFunc={() => askToDeleteThis(runs[index])}
+                deleteRun={() => deleteRun(runs[index])}
+                {namesMap}
+                {renameRun}
+                duplicateFunc={duplicateRun}
+                runFunc={() => run(runs[index])}
+                status={runs[index].status}
+                {verificationResults}
+                {newFetchOutput}
+                nowRunning={(runningScripts.find(
+                  rs => getFilename(rs.confFile) === runs[index].name,
+                ) !== undefined ||
+                  (pendingQueue.find(rs => rs.fileName === runs[index].name) !==
+                    undefined &&
+                    pendingQueueCounter > 0)) &&
+                  verificationResults.find(
+                    vr => runs[index].name === vr.name,
+                  ) === undefined}
+                isPending={pendingQueue.find(
+                  rs => rs.fileName === runs[index].name,
+                ) !== undefined && pendingQueueCounter > 0}
+                expandedState={verificationResults.find(
+                  vr => vr.name === runs[index].name,
+                ) !== undefined}
+                pendingStopFunc={() => {
+                  pendingStopFunc(runs[index])
+                }}
+                runningStopFunc={() => {
+                  verificationResults = verificationResults.filter(vr => {
+                    return vr.name !== runs[index].name
+                  })
+                  runs = setStatus(runs[index].name, Status.ready)
+                  stopScript(runs[index].id)
+                }}
+                inactiveSelected={focusedRun}
+                {setStatus}
+                vrLink={runs[index].vrLink}
+                bind:runName={runs[index].name}
+              />
+            </li>
+          {/key}
         {/each}
       </ul>
     </Pane>

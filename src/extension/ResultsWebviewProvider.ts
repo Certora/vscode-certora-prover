@@ -23,12 +23,14 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   public editConfFile: null | ((name: JobNameMap) => Promise<void>) = null
   public openSettings: null | ((name: JobNameMap) => void) = null
   public deleteConf: null | ((name: JobNameMap) => void) = null
+  public askToDeleteJob: null | ((name: JobNameMap) => void) = null
   public duplicate:
     | null
     | ((toDuplicate: JobNameMap, duplicated: JobNameMap) => void) = null
 
   public runScript: null | ((name: JobNameMap) => void) = null
   public removeScript: null | ((name: string) => void) = null
+
   constructor(private readonly _extensionUri: vscode.Uri) {
     this._extensionUri = _extensionUri
   }
@@ -107,6 +109,16 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
             })
             if (typeof this.deleteConf === 'function') {
               this.deleteConf(e.payload)
+            }
+            break
+          case CommandFromResultsWebview.AskToDeleteJob:
+            log({
+              action: 'Received "ask-to-delete-job" command',
+              source: Sources.Extension,
+              info: e.payload,
+            })
+            if (typeof this.askToDeleteJob === 'function') {
+              this.askToDeleteJob(e.payload)
             }
             break
           case CommandFromResultsWebview.Duplicate:

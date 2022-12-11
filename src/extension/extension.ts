@@ -141,9 +141,9 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   /**
-   * render the settings pannel for a conf file, with the name [confName] and the content [confFile]
+   * render the settings panel for a conf file, with the name [confName] and the content [confFile]
    * @param confName name of the conf file, in the format: {fileName, displayName}
-   * @param confFile contant of the conf file
+   * @param confFile content of the conf file
    */
   function renderSettingsPanel(confName: JobNameMap, confFile: ConfFile) {
     SettingsPanel.setResultsWebviewProvider(resultsWebviewProvider)
@@ -175,12 +175,14 @@ export function activate(context: vscode.ExtensionContext): void {
     duplicated: JobNameMap,
   ): Promise<void> {
     // get the content of the conf to duplicate
-    // cretate a new conf file with the name of "duplicated", content of "to duplicate", and open it with settings view
+    // create a new conf file with the name of "duplicated", content of "to duplicate", and open it with settings view
     const confFileUri = getConfUri(toDuplicate.fileName)
     if (confFileUri) {
       try {
         const confFileContent = readConf(confFileUri)
+
         // the ; is required for the (await) to work, nessesary becasue we have a Promise<ConfFile> type from readConf function return
+
         ;(await confFileContent).msg = ''
         try {
           const newConfFileUri = getConfUri(duplicated.fileName)
@@ -223,6 +225,34 @@ export function activate(context: vscode.ExtensionContext): void {
     const confFile = getConfFilePath(name)
     const confFileUri = vscode.Uri.joinPath(path.uri, confFile)
     return confFileUri
+  }
+
+  /**
+   * modal that asks the user if they are sure they want to delete a job named [name]
+   * if they are sure - delete conf and send "delete-job" message through the resultsWebviewProvider
+   * else - cancel the modal
+   * @param name name of the job to delete
+   */
+  function askToDeleteJob(name: JobNameMap): void {
+    const deleteAction = "Delete '" + name.displayName + "' forever"
+    vscode.window
+      .showInformationMessage(
+        "Are you sure you want to delete '" + name.displayName + "'?",
+        {
+          modal: true,
+          detail: 'Job configuration will be lost',
+        },
+        ...[deleteAction],
+      )
+      .then(items => {
+        if (items === deleteAction) {
+          resultsWebviewProvider.postMessage<string>({
+            type: 'delete-job',
+            payload: name.fileName,
+          })
+          deleteConfFile(name)
+        }
+      })
   }
 
   function deleteConfFile(name: JobNameMap): void {
@@ -316,6 +346,7 @@ export function activate(context: vscode.ExtensionContext): void {
   resultsWebviewProvider.duplicate = duplicate
   resultsWebviewProvider.runScript = runScript
   resultsWebviewProvider.removeScript = removeRunningScriptByName
+  resultsWebviewProvider.askToDeleteJob = askToDeleteJob
 
   const scriptRunner = new ScriptRunner(resultsWebviewProvider)
 

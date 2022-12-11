@@ -14,7 +14,7 @@ function emailValidator() {
 function spaceAndDashValidator() {
   return function email(value) {
     return (
-      !!value.match('^[-_, a-zA-Z0-9]*$') ||
+      !!value.match('^(($)|[a-zA-Z0-9]+)-{0,1}[_, a-zA-Z0-9]*$') ||
       'Accepting only alphanumeric characters (including underscore, space, dash, comma)*'
     )
   }

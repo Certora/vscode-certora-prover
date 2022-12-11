@@ -3,7 +3,7 @@
   "displayName": "Certora IDE",
   "description": "Check and validate smart contracts in VS Code",
   "publisher": "Certora",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "license": "SEE LICENSE IN LICENSE",
   "repository": {
     "type": "git",

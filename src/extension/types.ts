@@ -234,6 +234,7 @@ export enum CommandFromResultsWebview {
   DeleteConfFile = 'delete-confFile',
   Duplicate = 'duplicate',
   RemoveScript = 'remove-script',
+  AskToDeleteJob = 'ask-to-delete-job',
 }
 
 export enum CommandFromSettingsWebview {
@@ -269,6 +270,10 @@ export type EventFromResultsWebview =
     }
   | {
       command: CommandFromResultsWebview.DeleteConfFile
+      payload: JobNameMap
+    }
+  | {
+      command: CommandFromResultsWebview.AskToDeleteJob
       payload: JobNameMap
     }
   | {

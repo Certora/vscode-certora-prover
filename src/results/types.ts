@@ -25,16 +25,20 @@ export enum RuleStatuses {
   Timeout = 'TIMEOUT',
 }
 
+// output can be either a string of a path or array of strings of path
+// need to change it here, and in the code that handles rules
 export type Assert = {
   message: string
   status: RuleStatuses
   id: number
   duration: number
   jumpToDefinition: JumpToDefinition[]
-  output: string | null
+  output: string | null | string[]
   jobId: string | null
 }
 
+// output can be either a string of a path or array of strings of path
+// need to change it here, and in the code that handles rules
 export type Rule = {
   name: string
   children: Rule[]
@@ -42,7 +46,7 @@ export type Rule = {
   asserts: Assert[]
   jumpToDefinition: JumpToDefinition[]
   duration: number
-  output: string | null
+  output: string | null | string[]
   jobId: string | null
 }
 
@@ -151,9 +155,15 @@ export type CreationTime = {
   postTime: string
 }
 
+
 export type ConfToCreate = {
   fileName: string
   allowRun: number
+}
+export type JobNameMap = {
+  displayName: string
+  fileName: string
+
 }
 
 export enum EventTypesFromExtension {
@@ -229,10 +239,7 @@ export type EventsFromExtension =
       payload: string
     }
 
-export type JobNameMap = {
-  displayName: string
-  fileName: string
-}
+
 
 export enum Status {
   missingSettings = 'Missing settings',

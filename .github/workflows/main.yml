@@ -1,4 +1,4 @@
-name: CI
+name: Build Test and Publish
 
 on:
   # Triggers the workflow on push events for all branches or pull request for main branch
@@ -11,33 +11,42 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-test:
     strategy:
       matrix:
         os: [windows-latest, macos-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
     
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
-      - name: Install vscode for linux and mac
-        if: runner.os != 'Windows' # Limit step to run only on linux and mac
+        # Build
+      - name: Build extension
+        run: |
+          yarn
+          npx vsce package
+
+        # Prepare test environemnts
+      - name: Install vscode for macos
+        if: runner.os == 'macOS'
         shell: bash
         run: |
-          if [ "$RUNNER_OS" == "Linux" ]; then # ref: https://code.visualstudio.com/docs/setup/linux
-            sudo apt-get install wget gpg
-            wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
-            sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings
-            sudo sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
-            rm -f packages.microsoft.gpg
-            sudo apt install apt-transport-https
-            sudo apt update
-            sudo apt install code
-          elif [ "$RUNNER_OS" == "macOS" ]; then
-            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" # Using brew to install vscode on mac
-            brew install --cask visual-studio-code
-          fi
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" # Using brew to install vscode on mac
+          brew install --cask visual-studio-code
+
+      - name: Install vscode for linux
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          # ref: https://code.visualstudio.com/docs/setup/linux
+          sudo apt-get install wget gpg
+          wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+          sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings
+          sudo sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
+          rm -f packages.microsoft.gpg
+          sudo apt install apt-transport-https
+          sudo apt update
+          sudo apt install code
   
       - name: Install vscode for windows
         shell: pwsh # Using powershell to run commands on windows
@@ -46,18 +55,33 @@ jobs:
           Invoke-WebRequest -Uri "https://code.visualstudio.com/sha/download?build=stable&os=win32-x64-archive" -OutFile VSCode_x64.zip
           Expand-Archive .\VSCode_x64.zip
 
-      - name: Build extension
-        run: |
-          yarn
-          npx vsce package
-  
-      - name: Install extension on linux and mac
+        # Test by installing the extesnsion
+      - name: Test extension on linux and mac
         if: runner.os != 'Windows'
         run: code --install-extension *.vsix
       
-      - name: Install extension on windows
+      - name: Test extension on windows
         shell: pwsh
         if: runner.os == 'Windows'
         run: |
           $env:Path += ";$pwd\VSCode_x64\bin" # Adding the 'code' application to the PATH
           code --install-extension $(Get-ChildItem *.vsix).name
+
+      - name: Upload extension
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v3
+        with:
+          name: vscode-certora-prover
+          path: ./*.vsix
+
+  publish:
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download extension
+        uses: actions/download-artifact@v3
+        with:
+          name: vscode-certora-prover
+      - name: Publish extension
+        run: vsce publish -p ${{ secrets.VSCE_PAT }}

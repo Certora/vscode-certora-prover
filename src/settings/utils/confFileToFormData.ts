@@ -243,7 +243,18 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
       form.solidityObj.mainContract = mainContractName
     }
     if (specFile) {
-      form.specObj.specFile = specFile
+      const fileArr = specFile.split('/')
+      const labelTypeArr = fileArr.reverse()[0].split('.')
+      const label = labelTypeArr[0]
+      const path = fileArr[0]
+      const type = '.' + labelTypeArr[1]
+      const fileInFormat = {
+        value: specFile,
+        label: label,
+        path: path,
+        type: type,
+      }
+      form.specObj.specFile = fileInFormat
     }
   }
 

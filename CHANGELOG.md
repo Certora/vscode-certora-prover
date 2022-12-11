@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+### 0.0.5 (2022-12-11)
+
+## Bug Fixes
+
+* Settings button opens settings tab ([#71] (https://github.com/Certora/vscode-certora-prover/pull/71))
+* UI improvements in the settings form & results view ([#71] (https://github.com/Certora/vscode-certora-prover/pull/71))
+* Additional files always shows solc version, if it was provided ([#71] (https://github.com/Certora/vscode-certora-prover/pull/71))
+* Rename mode is fixed ([#71] (https://github.com/Certora/vscode-certora-prover/pull/71))
+
+## Features
+
+* Modal that asks the user if they are sure before deleting a job list item ([#71] (https://github.com/Certora/vscode-certora-prover/pull/71))
+
 ### 0.0.4 (2022-11-23)
 
 ## Features 
@@ -16,6 +29,7 @@ All notable changes to this project will be documented in this file.
 
 * Disable creation of an empty conf file ([#65](https://github.com/Certora/vscode-certora-prover/pull/65))
 * Better handling of the file inputs ([#65](https://github.com/Certora/vscode-certora-prover/pull/65), [#66](https://github.com/Certora/vscode-certora-prover/pull/66))
+
 ## Features
 
 * Add VSCode settings to set default values for conf file creation ([#64](https://github.com/Certora/vscode-certora-prover/pull/64))
