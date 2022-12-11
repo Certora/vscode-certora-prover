@@ -343,6 +343,7 @@ export function activate(context: vscode.ExtensionContext): void {
       ),
     )
     fileSystemWatcher.onDidCreate(async file => {
+      // TODO: check if it was created by the extension's [createConfFile] function
       const fileObj: ConfToCreate = await createFileObject(file)
       sendFilesToCreateJobs([fileObj])
     })
