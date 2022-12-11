@@ -24,52 +24,52 @@
   // validator comes from validators.js
   let infoObjArr = {
     mainFile: {
-      infoText: 'pick main solidity file',
+      infoText: 'pick solidity file',
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html',
     },
     contractName: {
-      infoText: 'type main contract name',
+      infoText: 'type contract name',
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html',
       validator: 'alphaNum',
     },
     solCompiler: {
       infoText: 'type solidity compiler \n example: solc8.1',
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#solc',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html#solc',
       validator: 'compilerValidator',
     },
     solPackages: {
       infoText:
         'Use this option to provide a path to the Solidity compiler executable file. We check in all directories in the $PATH environment variable for an executable with this name. If --solc is not used, we look for an executable called solc, or solc.exe on windows platforms.',
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#solc',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html#solc',
       validator: 'filePathValidator',
     },
     solc_args: {
       infoText: 'Gets an argument to pass to the Solidity compiler.',
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#solc-args',
-      validator: 'alphaNum',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html#solc-args',
+      validator: 'spaceAndDash',
     },
     package: {
       infoText:
         'For each package, gets the path to a directory including that Solidity package.',
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#packages',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html#packages',
       validator: 'filePathValidator',
     },
     linkVar: {
       infoText: `Links a slot in a contract with another contract.<p style='font-family:monospace'> --link CurrentContract : <ins><b>Variable</b></ins> = OtherContract</p>`,
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#link',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html#link',
       validator: 'alphaNum',
     },
     linkContract: {
       infoText: `Links a slot in a contract with another contract.<p style='font-family:monospace'> --link CurrentContract : Variable = <ins><b>OtherContract</b></ins></p>`,
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#link',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html#link',
       validator: 'alphaNum',
     },
   }
@@ -191,7 +191,9 @@
           <div slot="header" class="p-12 header header_contract">
             <i class="codicon codicon-file" />
             <h3>Main contract</h3>
-            <h3 style="margin-left: auto; margin-right: 0; margin-top: 2px">
+            <h3
+              style="margin-left: auto; margin-right: 0; margin-top: 2px; text-transform: none;"
+            >
               {$solidityObj.mainContract}
             </h3>
           </div>

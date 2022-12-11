@@ -30,19 +30,20 @@
     specFile: {
       infoText: 'pick spec file',
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html',
     },
     rules: {
       infoText:
         'Rules separated by commas. \nFormally verifies one or more given properties instead of the whole specification file. An invariant can also be selected.',
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#rules',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html#rules',
       validator: 'spaceAndDash',
     },
     duration: {
-      infoText: 'Sets the maximal timeout for all the SMT solvers.',
+      infoText:
+        'Sets the maximal timeout (in seconds) for all the SMT solvers.',
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#smt-timeout',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html#smt-timeout',
       validator: 'number',
     },
     optimistic_loop: {
@@ -55,14 +56,14 @@
       infoText:
         'The Certora Prover unrolls loops - if the loop should be executed three times, it will copy the code inside the loop three times. After we finish the loop’s iterations, we add an assertion to verify we have actually finished running the loop',
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#loop-iter',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html#loop-iter',
       validator: 'number',
     },
     flag: {
       infoText:
         'additional flags - you can find all available flags in the documentation',
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html',
       validator: 'alphaNum',
     },
     value: {
@@ -73,31 +74,31 @@
     stg: {
       infoText: 'run on staging environment',
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html',
-      validator: 'alphaNum',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html',
+      validator: 'filePathValidator',
     },
     typecheck_only: {
       infoText:
         'Stops after running the Solidity compiler and type checking of the spec, before submitting the verification task.',
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#typecheck-only',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html#typecheck-only',
     },
     multi_assert_check: {
       infoText:
         'This mode checks each assertion statement that occurs in a rule, separately.',
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#multi-assert-check',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html#multi-assert-check',
     },
     ruleSanity: {
       infoText: 'This option enables sanity checking for rules.',
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#rule-sanity',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html#rule-sanity',
     },
     advancedSanity: {
       infoText:
         'If this box is checked, all the sanity checks will be performed for all invariants and rules.',
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#rule-sanity',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html#rule-sanity',
     },
   }
   // on click on the input get al the files (sol or spec) based on what os passded to the function
@@ -139,12 +140,6 @@
     openBrowser(fileType, index)
   }
 
-  $: solDisabledState = !(
-    $solidityObj.mainFile.value !== '' &&
-    $solidityObj.mainContract !== '' &&
-    $solidityObj.compiler.ver !== ''
-  )
-
   // push new linking/directory
   function pushNewObj(arr, obj) {
     arr.push(obj)
@@ -175,7 +170,6 @@
     chevron="padding-right:16px;"
     bind:open={$navState.specCheck.active}
     resetNavProp={true}
-    bind:disabledState={solDisabledState}
   >
     <div slot="header" class="header header_contracts">
       <i class="codicon codicon-symbol-method" />
@@ -188,9 +182,14 @@
           <div slot="header" class="p-12 header header_contract">
             <i class="codicon codicon-file" />
             <h3>Main Spec File</h3>
-            <h3 style="margin-left: auto; margin-right: 0; margin-top: 2px">
+            <h3
+              style="margin-left: auto; margin-right: 0; margin-top: 2px; text-transform: none;"
+            >
               {JSON.parse(JSON.stringify($specObj.specFile)).label
-                ? JSON.parse(JSON.stringify($specObj.specFile)).label + '.spec'
+                ? JSON.parse(JSON.stringify($specObj.specFile)).label +
+                  (JSON.parse(JSON.stringify($specObj.specFile)).type
+                    ? JSON.parse(JSON.stringify($specObj.specFile)).type
+                    : '')
                 : ''}
             </h3>
           </div>
@@ -301,7 +300,7 @@
                       style="margin: auto 16px 8px auto;"
                     >
                       <label class="checkbox_container" style="margin: 0;">
-                        Optomistic Loop
+                        Optimistic Loop
                         <input
                           type="checkbox"
                           bind:checked={$specObj.optimisticLoop}
@@ -313,7 +312,6 @@
                     <div class="dark_input input_x3">
                       <h3>Loop Unroll</h3>
                       <CustomInput
-                        disabledState={!$specObj.optimisticLoop}
                         placeholder="default: 1"
                         bind:bindValue={$specObj.loopUnroll}
                         infoObj={infoObjArr.loop_iter}

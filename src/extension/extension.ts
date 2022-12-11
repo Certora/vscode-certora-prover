@@ -141,9 +141,9 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   /**
-   * render the settings pannel for a conf file, with the name [confName] and the content [confFile]
+   * render the settings panel for a conf file, with the name [confName] and the content [confFile]
    * @param confName name of the conf file, in the format: {fileName, displayName}
-   * @param confFile contant of the conf file
+   * @param confFile content of the conf file
    */
   function renderSettingsPanel(confName: JobNameMap, confFile: ConfFile) {
     SettingsPanel.setResultsWebviewProvider(resultsWebviewProvider)
@@ -175,12 +175,12 @@ export function activate(context: vscode.ExtensionContext): void {
     duplicated: JobNameMap,
   ): Promise<void> {
     // get the content of the conf to duplicate
-    // cretate a new conf file with the name of "duplicated", content of "to duplicate", and open it with settings view
+    // create a new conf file with the name of "duplicated", content of "to duplicate", and open it with settings view
     const confFileUri = getConfUri(toDuplicate.fileName)
     if (confFileUri) {
       try {
         const confFileContent = readConf(confFileUri)
-        // the ; is required for the (await) to work, messesary becasue we have a Promise<ConfFile> type from readConf function return
+        // the ; is required for the (await) to work, necessary because we have a Promise<ConfFile> type from readConf function return
         ;(await confFileContent).msg = ''
         try {
           const newConfFileUri = getConfUri(duplicated.fileName)
@@ -221,6 +221,34 @@ export function activate(context: vscode.ExtensionContext): void {
     return confFileUri
   }
 
+  /**
+   * modal that asks the user if they are sure they want to delete a job named [name]
+   * if they are sure - delete conf and send "delete-job" message through the resultsWebviewProvider
+   * else - cancel the modal
+   * @param name name of the job to delete
+   */
+  function askToDeleteJob(name: JobNameMap): void {
+    const deleteAction = "Delete '" + name.displayName + "' forever"
+    vscode.window
+      .showInformationMessage(
+        "Are you sure you want to delete '" + name.displayName + "'?",
+        {
+          modal: true,
+          detail: 'Job configuration will be lost',
+        },
+        ...[deleteAction],
+      )
+      .then(items => {
+        if (items === deleteAction) {
+          resultsWebviewProvider.postMessage<string>({
+            type: 'delete-job',
+            payload: name.fileName,
+          })
+          deleteConfFile(name)
+        }
+      })
+  }
+
   function deleteConfFile(name: JobNameMap): void {
     const confFileUri: vscode.Uri | void = getConfUri(name.fileName)
     if (confFileUri) {
@@ -238,8 +266,8 @@ export function activate(context: vscode.ExtensionContext): void {
 
   /**
    * This is for the results webview provider.
-   * ScriptRunner object has to recieve ResultsWebviewProvider object when it is initialized
-   * But, ResultsWebviewProvider has to recieve resultsWebviewProvider.removeScript = removeRunningScriptByName
+   * ScriptRunner object has to receive ResultsWebviewProvider object when it is initialized
+   * But, ResultsWebviewProvider has to receive resultsWebviewProvider.removeScript = removeRunningScriptByName
    * which is a ScriptRunner method.
    * The solution to the circle is this function, that is passed to ResultsWebviewProvider after ScriptRunner
    * is initialized.
@@ -258,15 +286,11 @@ export function activate(context: vscode.ExtensionContext): void {
   resultsWebviewProvider.duplicate = duplicate
   resultsWebviewProvider.runScript = runScript
   resultsWebviewProvider.removeScript = removeRunningScriptByName
+  resultsWebviewProvider.askToDeleteJob = askToDeleteJob
 
   const scriptRunner = new ScriptRunner(resultsWebviewProvider)
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('certora.createConfFile', async () => {
-      resultsWebviewProvider.postMessage({
-        type: 'create-new-job',
-      })
-    }),
     vscode.window.registerWebviewViewProvider(
       resultsWebviewProvider.viewType,
       resultsWebviewProvider,

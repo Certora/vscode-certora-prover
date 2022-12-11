@@ -25,16 +25,20 @@ export enum RuleStatuses {
   Timeout = 'TIMEOUT',
 }
 
+// output can be either a string of a path or array of strings of path
+// need to change it here, and in the code that handles rules
 export type Assert = {
   message: string
   status: RuleStatuses
   id: number
   duration: number
   jumpToDefinition: JumpToDefinition[]
-  output: string | null
+  output: string | null | string[]
   jobId: string | null
 }
 
+// output can be either a string of a path or array of strings of path
+// need to change it here, and in the code that handles rules
 export type Rule = {
   name: string
   children: Rule[]
@@ -42,7 +46,7 @@ export type Rule = {
   asserts: Assert[]
   jumpToDefinition: JumpToDefinition[]
   duration: number
-  output: string | null
+  output: string | null | string[]
   jobId: string | null
 }
 
@@ -151,6 +155,11 @@ export type CreationTime = {
   postTime: string
 }
 
+export type JobNameMap = {
+  displayName: string
+  fileName: string
+}
+
 export enum EventTypesFromExtension {
   ReceiveNewJobResult = 'receive-new-job-result',
   RunningScriptChanged = 'running-scripts-changed',
@@ -164,6 +173,7 @@ export enum EventTypesFromExtension {
   FocusChanged = 'focus-changed',
   UploadingFiles = 'run-next',
   ScriptStopped = 'script-stopped',
+  DeleteJob = 'delete-job',
 }
 
 export type EventsFromExtension =
@@ -213,14 +223,13 @@ export type EventsFromExtension =
       type: EventTypesFromExtension.ScriptStopped
       payload: number
     }
-
-export type JobNameMap = {
-  displayName: string
-  fileName: string
-}
+  | {
+      type: EventTypesFromExtension.DeleteJob
+      payload: string
+    }
 
 export enum Status {
-  finishSetup = 'Finish setup',
+  missingSettings = 'Missing settings',
   ready = 'Ready',
   running = 'Running',
   pending = 'Pending',

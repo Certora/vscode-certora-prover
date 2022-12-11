@@ -56,6 +56,7 @@
     <SolSettingsTab />
     <SpecSettingsTab />
     <VerificationMessageTab />
+    <div class="feedback_space" />
     <div class="feedback">
       <a
         id="feedback-button"
@@ -82,8 +83,16 @@
   }
   .feedback {
     position: fixed;
-    width: 1000px;
+    width: 100%;
     height: 60px;
+    bottom: 0px;
+    right: 0px;
+    background-color: var(--background);
+  }
+  .feedback_space {
+    position: relative;
+    width: 100%;
+    height: 70px;
     bottom: 0px;
     right: 0px;
     background-color: var(--background);

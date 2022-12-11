@@ -1,6 +1,6 @@
 /* ---------------------------------------------------------------------------------------------
- *  Results actions to send to the extention part. When there is an action that has to do with sending
- *  information from the Results part of the applicaiton to the extention part,
+ *  Results actions to send to the extension part. When there is an action that has to do with sending
+ *  information from the Results part of the application to the extension part,
  *  it is sent in here, with the corresponding function.
  *-------------------------------------------------------------------------------------------- */
 
@@ -17,6 +17,7 @@ enum Commands {
   DeleteConf = 'delete-confFile',
   Duplicate = 'duplicate',
   RemoveScript = 'remove-script',
+  AskToDeleteJob = 'ask-to-delete-job',
 }
 
 export function removeScript(name: string): void {
@@ -83,6 +84,17 @@ export function deleteConf(name: JobNameMap): void {
   })
   vscode.postMessage({
     command: Commands.DeleteConf,
+    payload: name,
+  })
+}
+
+export function askToDeleteJob(name: JobNameMap): void {
+  log({
+    action: 'Send "ask-to-delete-job" command',
+    source: Sources.ResultsWebview,
+  })
+  vscode.postMessage({
+    command: Commands.AskToDeleteJob,
     payload: name,
   })
 }

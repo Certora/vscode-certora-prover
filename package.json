@@ -3,7 +3,7 @@
   "displayName": "Certora IDE",
   "description": "Check and validate smart contracts in VS Code",
   "publisher": "Certora",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "license": "SEE LICENSE IN LICENSE",
   "repository": {
     "type": "git",
@@ -73,13 +73,13 @@
         "order": 2,
         "properties": {
           "OptimisticLoop": {
-            "markdownDescription": "Ignore some executions of loops. [Read More](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#optimistic-loop)",
+            "markdownDescription": "Ignore some executions of loops. [Read More](https://docs.certora.com/en/latest/docs/prover/cli/options.html#optimistic-loop)",
             "type": "boolean",
             "default": false,
             "order": 0
           },
           "LoopUnroll": {
-            "markdownDescription": "The maximal number of loop iterations. [Read More](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#loop-iter)",
+            "markdownDescription": "The maximal number of loop iterations. [Read More](https://docs.certora.com/en/latest/docs/prover/cli/options.html#loop-iter)",
             "type": "integer",
             "exclusiveMinimum": -1,
             "exclusiveMaximum": 10,
@@ -100,7 +100,7 @@
         "order": 3,
         "properties": {
           "AdditionalFlags": {
-            "markdownDescription": "[Additional flags explanation](https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html)\n\n**For example:**\n\n```solver: z3```",
+            "markdownDescription": "[Additional flags explanation](https://docs.certora.com/en/latest/docs/prover/cli/options.html)\n\n**For example:**\n\n```solver: z3```",
             "type": "object",
             "order": 0,
             "additionalProperties": "string",
@@ -145,16 +145,16 @@
     },
     "commands": [
       {
-        "command": "certora.createConfFile",
-        "title": "create new job",
-        "category": "Certora",
+        "command": "workbench.action.openSettings",
+        "title": "Open settings",
+        "category": "VSCode",
         "icon": "$(settings)"
       }
     ],
     "menus": {
       "view/title": [
         {
-          "command": "certora.createConfFile",
+          "command": "workbench.action.openSettings",
           "when": "view == results",
           "group": "navigation"
         }

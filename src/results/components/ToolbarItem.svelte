@@ -14,6 +14,7 @@
       class="action-label codicon codicon-action codicon-{icon}"
       {title}
       href={link}
+      tabindex="0"
     />
   {:else}
     <div

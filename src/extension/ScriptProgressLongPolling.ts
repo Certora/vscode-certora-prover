@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------------------------------
- *  run job and recieve job results
+ *  run job and receive job results
  *-------------------------------------------------------------------------------------------- */
 
 import { window } from 'vscode'
@@ -80,7 +80,7 @@ export class ScriptProgressLongPolling {
       }
     } catch (e) {
       window.showErrorMessage(
-        `Certora verification service is currently unavailable. Please, try again later.3`,
+        `Certora verification service is currently unavailable. Please, try again later.`,
       )
     }
   }

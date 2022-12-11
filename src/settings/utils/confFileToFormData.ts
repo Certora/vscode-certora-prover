@@ -85,7 +85,7 @@ function getAdditionalSettings(confFile: ConfFile) {
 function processCompiler(solc: string, solidityObj: SolidityObj) {
   if (solc.includes('/')) {
     const index = solc.lastIndexOf('/')
-    solidityObj.compiler.exe = solc.slice(0, index)
+    solidityObj.compiler.exe = solc.slice(1, index)
     solidityObj.compiler.ver = solc.slice(index + 1, solc.length)
   } else {
     solidityObj.compiler.ver = solc
@@ -243,7 +243,18 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
       form.solidityObj.mainContract = mainContractName
     }
     if (specFile) {
-      form.specObj.specFile = specFile
+      const fileArr = specFile.split('/')
+      const labelTypeArr = fileArr.reverse()[0].split('.')
+      const label = labelTypeArr[0]
+      const path = fileArr[0]
+      const type = '.' + labelTypeArr[1]
+      const fileInFormat = {
+        value: specFile,
+        label: label,
+        path: path,
+        type: type,
+      }
+      form.specObj.specFile = fileInFormat
     }
   }
 
@@ -302,6 +313,16 @@ function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
             processCompiler(value, form.solidityObj)
           }
         })
+      } else if (confFile.solc) {
+        if (confFile.solc.includes('/')) {
+          const solcArr = confFile.solc.split('/')
+          tempForm.compiler.ver = solcArr.reverse()[0]
+          tempForm.compiler.exe = solcArr
+            .join('')
+            .replace(tempForm.compiler.ver, '')
+        } else {
+          tempForm.compiler.ver = confFile.solc
+        }
       }
       tempFormArr.push(tempForm)
     }

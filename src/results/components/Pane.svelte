@@ -18,7 +18,7 @@
   let isExpanded = initialExpandedState
 
   const statusIcons = {
-    finishSetup: 'finish-setup.svg',
+    missingSettings: 'finish-setup.svg',
     ready: 'ready-to-run.svg',
     running: 'running-rule-status.svg',
     pending: 'pending.svg',
@@ -28,7 +28,7 @@
 
   // maps status to icon
   const statusMap: Map<string, string> = new Map([
-    [Status.finishSetup, statusIcons.finishSetup],
+    [Status.missingSettings, statusIcons.missingSettings],
     [Status.running, statusIcons.running],
     [Status.ready, statusIcons.ready],
     [Status.pending, statusIcons.pending],
@@ -141,7 +141,7 @@
       &:hover {
         border-radius: 20px;
         border: 0px solid rgb(184 184 184 / 31%);
-        background: white;
+        background: var(--foreground);
       }
     }
 

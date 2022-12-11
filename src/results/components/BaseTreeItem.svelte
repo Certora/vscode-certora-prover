@@ -20,7 +20,7 @@
 </script>
 
 <div
-  class="tree-item"
+  class={'tree-item' + (!hasChildren && level === 1 ? 'no-pointer' : '')}
   class:focused={isFocused}
   class:selected={isFocused}
   role="treeitem"
@@ -41,10 +41,11 @@
   <div class="row">
     <div class="indent" />
     <div
-      class="twistie {hasChildren || level === 1
+      class="twistie {hasChildren
         ? `codicon codicon-chevron-${isExpanded ? 'down' : 'right'}`
         : ''}"
     />
+
     <div class="contents">
       <slot />
       <div class="actions">
@@ -67,6 +68,10 @@
     line-height: 22px;
     touch-action: none;
     white-space: nowrap;
+
+    .no-pointer {
+      cursor: not-allowed !important;
+    }
 
     .actions {
       display: none;

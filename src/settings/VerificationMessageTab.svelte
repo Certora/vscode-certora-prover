@@ -10,13 +10,13 @@
     msg: {
       infoText: 'Adds a message description to your run. ',
       infoLink:
-        'https://docs.certora.com/en/latest/docs/ref-manual/cli/options.html#msg',
+        'https://docs.certora.com/en/latest/docs/prover/cli/options.html#msg',
       validator: 'spaceAndDash',
     },
   }
 </script>
 
-<div class="card_parent_wrapper bg_dark border-rd">
+<div class="card_parent_wrapper bg_dark border-rd" style="margin-bottom:25px;">
   <div class="header header_contracts">
     <i class="codicon codicon-comment" />
     <h3>Verification message</h3>
