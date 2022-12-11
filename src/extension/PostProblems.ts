@@ -50,11 +50,13 @@ export abstract class PostProblems {
     try {
       data = await workspace.fs.readFile(fileUri)
     } catch (e) {
-      window.showErrorMessage(
-        "Could't find the " +
-          resourceErrorsFile +
-          ' file. Please contact Certora team',
-      )
+      // TODO: decide if we even want this message - probably not
+
+      // window.showErrorMessage(
+      //   "Could't find the " +
+      //     resourceErrorsFile +
+      //     ' file. Please contact Certora team',
+      // )
       return
     }
 

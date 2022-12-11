@@ -399,8 +399,7 @@
           inactiveSelected={runName === inactiveSelected}
           runFunc={status === Status.ready ||
           status === Status.success ||
-          status === Status.unableToRun ||
-          status === Status.incompleteResults
+          status === Status.unableToRun
             ? runFunc
             : null}
         >

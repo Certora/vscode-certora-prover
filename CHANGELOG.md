@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 ## Bug Fixes
 
 * Settings button opens settings tab ([#71] (https://github.com/Certora/vscode-certora-prover/pull/71))
-* Spec and verification message are no longer disabled anywhere in the settings form ([#71] (https://github.com/Certora/vscode-certora-prover/pull/71))
+* UI improvements in the settings form & results view ([#71] (https://github.com/Certora/vscode-certora-prover/pull/71))
 * Additional files always shows solc version, if it was provided ([#71] (https://github.com/Certora/vscode-certora-prover/pull/71))
 * Rename mode is fixed ([#71] (https://github.com/Certora/vscode-certora-prover/pull/71))
 
