@@ -7,7 +7,7 @@ import * as vscode from 'vscode'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { SettingsPanel } from './SettingsPanel'
 import { ScriptRunner } from './ScriptRunner'
-import { ConfFile, InputFormData, JobNameMap } from './types'
+import { ConfFile, ConfToCreate, InputFormData, JobNameMap } from './types'
 import { createConfFile } from './utils/createConfFile'
 import { confFileToFormData } from './utils/confFileToInputForm'
 
@@ -276,6 +276,60 @@ export function activate(context: vscode.ExtensionContext): void {
     scriptRunner.removeRunningScriptByName(name)
   }
 
+  /**
+   * all conf files in the conf folder will become jobs!
+   */
+  async function createInitialJobs() {
+    const path = vscode.workspace.workspaceFolders?.[0]
+    if (path) {
+      const confFolder = vscode.Uri.joinPath(path.uri, 'conf')
+      const confFiles = vscode.workspace.fs.readDirectory(confFolder)
+      confFiles.then(async f => {
+        const confList = f.map(async file => {
+          return createFileObject(
+            vscode.Uri.parse(path.uri.path + '/conf/' + file[0]),
+          )
+        })
+        const awaitedList = await Promise.all(confList)
+        sendFilesToCreateJobs(awaitedList)
+      })
+    }
+  }
+
+  /**
+   * create an object that holds the name of a file, and if the file is runnable in cetora prover
+   * @param file uri
+   * @returns Promise<ConfToCreate>
+   */
+  async function createFileObject(file: vscode.Uri): Promise<ConfToCreate> {
+    const fileObj: ConfToCreate = {
+      fileName: vscode.workspace.asRelativePath(file).replace('conf/', ''),
+      allowRun: 0,
+    }
+    const content: ConfFile = await readConf(file)
+    if (
+      content.files !== undefined &&
+      content.verify !== undefined &&
+      content.files.length > 0 &&
+      content.verify?.length > 0 &&
+      content.solc
+    ) {
+      fileObj.allowRun = 1
+    }
+    return fileObj
+  }
+
+  /**
+   * post message with type: 'initial-jobs'
+   * @param files files in the format of {name, allowRun}
+   */
+  async function sendFilesToCreateJobs(files: ConfToCreate[]) {
+    resultsWebviewProvider.postMessage<ConfToCreate[]>({
+      type: 'initial-jobs',
+      payload: files,
+    })
+  }
+
   const resultsWebviewProvider = new ResultsWebviewProvider(
     context.extensionUri,
   )
@@ -301,6 +355,23 @@ export function activate(context: vscode.ExtensionContext): void {
       },
     ),
   )
+
+  createInitialJobs()
+
+  // users can copy conf files to the conf folder and it will create a job!
+  const path = vscode.workspace.workspaceFolders?.[0]
+  if (path) {
+    const fileSystemWatcher = vscode.workspace.createFileSystemWatcher(
+      new vscode.RelativePattern(
+        vscode.Uri.joinPath(path.uri, 'conf'),
+        '**/*.conf',
+      ),
+    )
+    fileSystemWatcher.onDidCreate(async file => {
+      const fileObj: ConfToCreate = await createFileObject(file)
+      sendFilesToCreateJobs([fileObj])
+    })
+  }
 }
 
 /** deactivate - to be used in the future maybe */
