@@ -286,9 +286,6 @@
           return r.name === nameToDelete
         })
 
-        const runName = e.data.payload
-        const runToDelete = runs.find(run => run.name === runName)
-
         deleteRun(runToDelete)
         break
       }

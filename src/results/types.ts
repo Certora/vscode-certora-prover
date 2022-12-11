@@ -155,7 +155,6 @@ export type CreationTime = {
   postTime: string
 }
 
-
 export type ConfToCreate = {
   fileName: string
   allowRun: number
@@ -163,7 +162,6 @@ export type ConfToCreate = {
 export type JobNameMap = {
   displayName: string
   fileName: string
-
 }
 
 export enum EventTypesFromExtension {
@@ -238,8 +236,6 @@ export type EventsFromExtension =
       type: EventTypesFromExtension.DeleteJob
       payload: string
     }
-
-
 
 export enum Status {
   missingSettings = 'Missing settings',
