@@ -84,4 +84,7 @@ jobs:
         with:
           name: vscode-certora-prover
       - name: Publish extension
-        run: vsce publish -p ${{ secrets.VSCE_PAT }}
+        run: |
+          npx vsce package
+          vsce --help # vsce publish -p ${{ secrets.VSCE_PAT }}
+          vsce --version
