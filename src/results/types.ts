@@ -2,6 +2,8 @@
  *  Here we declare types and enums
  *-------------------------------------------------------------------------------------------- */
 
+export const CONF_DIRECTORY = 'certora_conf/'
+
 export type Action = {
   title: string
   onClick?: () => void

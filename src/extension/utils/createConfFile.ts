@@ -4,7 +4,13 @@
 
 import { workspace, Uri, window } from 'vscode'
 import { log, Sources } from './log'
-import { InputFormData, NewForm, SolcArg, SolidityObj } from '../types'
+import {
+  CONF_DIRECTORY_NAME,
+  InputFormData,
+  NewForm,
+  SolcArg,
+  SolidityObj,
+} from '../types'
 
 type ConfFile = {
   files?: string[]
@@ -439,7 +445,7 @@ export async function createConfFile(formData: InputFormData): Promise<void> {
     const content = encoder.encode(convertedData)
     const path = Uri.joinPath(
       basePath.uri,
-      'certora_conf',
+      CONF_DIRECTORY_NAME,
       `${formData.name}.conf`,
     )
     await workspace.fs.writeFile(path, content)

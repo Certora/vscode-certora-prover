@@ -7,7 +7,14 @@ import * as vscode from 'vscode'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { SettingsPanel } from './SettingsPanel'
 import { ScriptRunner } from './ScriptRunner'
-import { ConfFile, ConfToCreate, InputFormData, JobNameMap } from './types'
+import {
+  ConfFile,
+  ConfToCreate,
+  CONF_DIRECTORY,
+  CONF_DIRECTORY_NAME,
+  InputFormData,
+  JobNameMap,
+} from './types'
 import { createConfFile } from './utils/createConfFile'
 import { confFileToFormData } from './utils/confFileToInputForm'
 
@@ -206,11 +213,11 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   function getConfFilePath(name: string): string {
-    return 'certora_conf/' + name + '.conf'
+    return CONF_DIRECTORY + name + '.conf'
   }
 
   function getConfFileName(path: string): string {
-    return path.replace('certora_conf/', '').replace('.conf', '')
+    return path.replace(CONF_DIRECTORY, '').replace('.conf', '')
   }
 
   async function runScript(name: JobNameMap) {
@@ -287,7 +294,7 @@ export function activate(context: vscode.ExtensionContext): void {
   async function createInitialJobs() {
     const path = vscode.workspace.workspaceFolders?.[0]
     if (path) {
-      const confFolder = vscode.Uri.joinPath(path.uri, 'certora_conf')
+      const confFolder = vscode.Uri.joinPath(path.uri, CONF_DIRECTORY_NAME)
       const confFiles = vscode.workspace.fs.readDirectory(confFolder)
       confFiles.then(async f => {
         const confList = f.map(async file => {
@@ -368,7 +375,7 @@ export function activate(context: vscode.ExtensionContext): void {
   if (path) {
     const fileSystemWatcher = vscode.workspace.createFileSystemWatcher(
       new vscode.RelativePattern(
-        vscode.Uri.joinPath(path.uri, 'certora_conf'),
+        vscode.Uri.joinPath(path.uri, CONF_DIRECTORY_NAME),
         '**/*.conf',
       ),
     )

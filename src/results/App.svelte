@@ -32,6 +32,7 @@
     Run,
     JobNameMap,
     Status,
+    CONF_DIRECTORY,
   } from './types'
   import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
   import NewRun from './components/NewRun.svelte'
@@ -516,7 +517,7 @@
    * from conf file uri to only the file name
    */
   function getFilename(confFile: string): string {
-    return confFile.replace('certora_conf/', '').replace('.conf', '')
+    return confFile.replace(CONF_DIRECTORY, '').replace('.conf', '')
   }
 
   /**

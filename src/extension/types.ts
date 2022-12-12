@@ -2,6 +2,9 @@
  *  Here we declare types and enums
  *-------------------------------------------------------------------------------------------- */
 
+export const CONF_DIRECTORY_NAME = 'certora_conf'
+export const CONF_DIRECTORY = 'certora_conf/'
+
 export type JumpToDefinition = {
   file: string
   line: number
