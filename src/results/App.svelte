@@ -293,7 +293,6 @@
           deleteRun(runToDelete)
           deleteConf(jobNameMap)
         }
-
         break
       }
       default:
@@ -405,6 +404,11 @@
       return vr.name !== name
     })
 
+    //delete from running scripts
+    runningScripts = runningScripts.filter(rs => {
+      return rs.confFile !== name
+    })
+
     //delete run
     runs = runs.filter(run => {
       return run !== runToDelete
@@ -512,7 +516,7 @@
    * from conf file uri to only the file name
    */
   function getFilename(confFile: string): string {
-    return confFile.replace('conf/', '').replace('.conf', '')
+    return confFile.replace('certora_conf/', '').replace('.conf', '')
   }
 
   /**

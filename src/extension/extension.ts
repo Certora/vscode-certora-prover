@@ -206,11 +206,11 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   function getConfFilePath(name: string): string {
-    return 'conf/' + name + '.conf'
+    return 'certora_conf/' + name + '.conf'
   }
 
   function getConfFileName(path: string): string {
-    return path.replace('conf/', '').replace('.conf', '')
+    return path.replace('certora_conf/', '').replace('.conf', '')
   }
 
   async function runScript(name: JobNameMap) {
@@ -287,12 +287,12 @@ export function activate(context: vscode.ExtensionContext): void {
   async function createInitialJobs() {
     const path = vscode.workspace.workspaceFolders?.[0]
     if (path) {
-      const confFolder = vscode.Uri.joinPath(path.uri, 'conf')
+      const confFolder = vscode.Uri.joinPath(path.uri, 'certora_conf')
       const confFiles = vscode.workspace.fs.readDirectory(confFolder)
       confFiles.then(async f => {
         const confList = f.map(async file => {
           return createFileObject(
-            vscode.Uri.parse(path.uri.path + '/conf/' + file[0]),
+            vscode.Uri.parse(path.uri.path + '/certora_conf/' + file[0]),
           )
         })
         const awaitedList = await Promise.all(confList)
@@ -368,7 +368,7 @@ export function activate(context: vscode.ExtensionContext): void {
   if (path) {
     const fileSystemWatcher = vscode.workspace.createFileSystemWatcher(
       new vscode.RelativePattern(
-        vscode.Uri.joinPath(path.uri, 'conf'),
+        vscode.Uri.joinPath(path.uri, 'certora_conf'),
         '**/*.conf',
       ),
     )

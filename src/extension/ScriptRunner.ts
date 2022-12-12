@@ -142,10 +142,10 @@ export class ScriptRunner {
 
       const progressUrl = getProgressUrl(str)
 
-      const confFileName = confFile.replace('conf/', '').replace('.conf', '')
+      const confFileName = this.getConfFileName(confFile).replace('.conf', '')
 
       if (progressUrl) {
-        await this.polling.run(progressUrl, data => {
+        await this.polling.run(progressUrl, async data => {
           data.runName = confFileName
           const curLogFiles = this.logFiles
             .filter(
@@ -155,38 +155,48 @@ export class ScriptRunner {
             )
             .sort()
             .reverse()
-          if (curLogFiles !== undefined) {
-            workspace.fs.readFile(curLogFiles[0]).then(content => {
-              const decoder = new TextDecoder()
-              const strContent: string = decoder.decode(content)
-              const pattern =
-                'https://prover.certora.com/output/[a-zA-Z0-9/?=]+'
-              const vrLinkRegExp = new RegExp(pattern)
-              const vrLink = vrLinkRegExp.exec(strContent)
-              if (
-                this.runningScripts.find(rs => rs.pid === pid) !== undefined
-              ) {
-                data.verificationReportLink = ''
-                if (vrLink) {
-                  data.verificationReportLink = vrLink[0] as string
+          if (curLogFiles !== undefined && curLogFiles.length > 0) {
+            try {
+              await workspace.fs.readFile(curLogFiles[0]).then(content => {
+                const decoder = new TextDecoder()
+                const strContent: string = decoder.decode(content)
+                const pattern =
+                  'https://prover.certora.com/output/[a-zA-Z0-9/?=]+'
+                const vrLinkRegExp = new RegExp(pattern)
+                const vrLink = vrLinkRegExp.exec(strContent)
+                if (
+                  this.runningScripts.find(rs => rs.pid === pid) !== undefined
+                ) {
+                  data.verificationReportLink = ''
+                  if (vrLink) {
+                    data.verificationReportLink = vrLink[0] as string
+                  }
+                  this.resultsWebviewProvider.postMessage<Job>({
+                    type: 'receive-new-job-result',
+                    payload: data,
+                  })
                 }
-                this.resultsWebviewProvider.postMessage<Job>({
-                  type: 'receive-new-job-result',
-                  payload: data,
-                })
-              }
-            })
+              })
+            } catch (e) {
+              // internal error message for problem reading log file
+              console.log(
+                'There was an error reading the log file for:',
+                confFile,
+                '[internal error message]',
+                e,
+              )
+            }
           }
         })
       }
     })
 
-    this.script.stderr.on('data', async data => {
-      // this.removeRunningScript(pid)
-    })
+    // this.script.stderr.on('data', async data => {
+    //   // this.removeRunningScript(pid)
+    // })
 
     this.script.on('error', async err => {
-      console.error(err)
+      console.error(err, 'this is an error from the script')
       this.removeRunningScript(pid)
     })
 
@@ -235,27 +245,30 @@ export class ScriptRunner {
     this.sendRunningScriptsToWebview()
   }
 
+  // filter log files by name
+  private filterLogFiles(name: string): void {
+    this.logFiles = this.logFiles.filter(lf => {
+      return lf.path.split('/').reverse()[0].split('.conf')[0] !== name
+    })
+  }
+
   private removeRunningScript(pid: number): void {
     const confFile = this.runningScripts.find(rs => rs.pid === pid)
-    this.runningScripts = this.runningScripts.filter(
-      script => script.pid !== pid,
-    )
-    this.logFiles = this.logFiles.filter(
-      lf =>
-        lf.path.split('/').reverse()[0].split('.conf')[0] !==
-        confFile?.confFile,
-    )
+    this.runningScripts = this.runningScripts.filter(script => {
+      return script.pid !== pid
+    })
+    const name = confFile?.confFile
+    if (name) {
+      this.filterLogFiles(name)
+    }
     this.sendRunningScriptsToWebview()
   }
 
   public removeRunningScriptByName(name: string): void {
     this.runningScripts = this.runningScripts.filter(script => {
-      return script.confFile.replace('.conf', '').replace('conf/', '') !== name
+      return this.getConfFileName(script.confFile).replace('.conf', '') !== name
     })
-
-    this.logFiles = this.logFiles.filter(lf => {
-      return lf.path.split('/').reverse()[0].split('.conf')[0] !== name
-    })
+    this.filterLogFiles(name)
     this.sendRunningScriptsToWebview()
   }
 

@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-### 0.0.5 (2022-12-11)
+### 0.0.5 (2022-12-12)
 
 ## Bug Fixes
 
@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 
 ## Features
 
+* Create jobs from conf files in certora_conf folder ([#72](https://github.com/Certora/vscode-certora-prover/pull/72))
 * Modal that asks the user if they are sure before deleting a job list item ([#71] (https://github.com/Certora/vscode-certora-prover/pull/71))
 
 ### 0.0.4 (2022-11-23)

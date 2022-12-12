@@ -437,7 +437,11 @@ export async function createConfFile(formData: InputFormData): Promise<void> {
     const encoder = new TextEncoder()
     const convertedData = convertSourceFormDataToConfFileJSON(formData)
     const content = encoder.encode(convertedData)
-    const path = Uri.joinPath(basePath.uri, 'conf', `${formData.name}.conf`)
+    const path = Uri.joinPath(
+      basePath.uri,
+      'certora_conf',
+      `${formData.name}.conf`,
+    )
     await workspace.fs.writeFile(path, content)
     log({
       action: `Conf file was created`,
