@@ -368,7 +368,10 @@ export function activate(context: vscode.ExtensionContext): void {
     ),
   )
 
-  createInitialJobs()
+  // set timeout is here so we could await this async function (createInitialJobs)
+  setTimeout(async () => {
+    await createInitialJobs()
+  }, 100)
 
   // users can copy conf files to the conf folder and it will create a job!
   const path = vscode.workspace.workspaceFolders?.[0]
