@@ -294,12 +294,29 @@ export function activate(context: vscode.ExtensionContext): void {
   async function createInitialJobs() {
     const path = vscode.workspace.workspaceFolders?.[0]
     if (path) {
-      const confFolder = vscode.Uri.joinPath(path.uri, CONF_DIRECTORY_NAME)
-      const confFiles = vscode.workspace.fs.readDirectory(confFolder)
+      const confDirectoryPath = path.uri.path + '/' + CONF_DIRECTORY
+      const confDirectoryUri = vscode.Uri.parse(confDirectoryPath)
+      // if the conf directory doesn't exist, create one
+      try {
+        await vscode.workspace.fs.stat(confDirectoryUri)
+      } catch (e) {
+        console.log('got here with error: ', e)
+        try {
+          await vscode.workspace.fs.createDirectory(confDirectoryUri)
+        } catch (e) {
+          console.log(
+            'ERROR: could not create directory: ',
+            CONF_DIRECTORY_NAME,
+            '[this is an internal error]',
+          )
+          // nothing
+        }
+      }
+      const confFiles = vscode.workspace.fs.readDirectory(confDirectoryUri)
       confFiles.then(async f => {
         const confList = f.map(async file => {
-          return createFileObject(
-            vscode.Uri.parse(path.uri.path + '/certora_conf/' + file[0]),
+          return await createFileObject(
+            vscode.Uri.parse(confDirectoryPath + file[0]),
           )
         })
         const awaitedList = await Promise.all(confList)
@@ -371,33 +388,34 @@ export function activate(context: vscode.ExtensionContext): void {
   // set timeout is here so we could await this async function (createInitialJobs)
   setTimeout(async () => {
     await createInitialJobs()
-  }, 100)
-
-  // users can copy conf files to the conf folder and it will create a job!
-  const path = vscode.workspace.workspaceFolders?.[0]
-  if (path) {
-    const fileSystemWatcher = vscode.workspace.createFileSystemWatcher(
-      new vscode.RelativePattern(
-        vscode.Uri.joinPath(path.uri, CONF_DIRECTORY_NAME),
-        '**/*.conf',
-      ),
-    )
-    fileSystemWatcher.onDidCreate(async file => {
-      const fileObj: ConfToCreate = await createFileObject(file)
-      sendFilesToCreateJobs([fileObj])
-    })
-    // vscode asks to delete a conf file before is it deleted to avoid mistakes,
-    // so I think deleting the job with it is a good idea
-    fileSystemWatcher.onDidDelete(file => {
-      const nameToRemove = getConfFileName(
-        vscode.workspace.asRelativePath(file.path),
+    // users can copy conf files to the conf folder and it will create a job!
+    const path = vscode.workspace.workspaceFolders?.[0]
+    if (path) {
+      const directoryToWatch = vscode.Uri.joinPath(
+        path.uri,
+        CONF_DIRECTORY_NAME,
       )
-      resultsWebviewProvider.postMessage<string>({
-        type: 'delete-job',
-        payload: nameToRemove,
+      // try catch create new directory
+      const fileSystemWatcher = vscode.workspace.createFileSystemWatcher(
+        new vscode.RelativePattern(directoryToWatch, '**/*.conf'),
+      )
+      fileSystemWatcher.onDidCreate(async file => {
+        const fileObj: ConfToCreate = await createFileObject(file)
+        sendFilesToCreateJobs([fileObj])
       })
-    })
-  }
+      // vscode asks to delete a conf file before is it deleted to avoid mistakes,
+      // so I think deleting the job with it is a good idea
+      fileSystemWatcher.onDidDelete(file => {
+        const nameToRemove = getConfFileName(
+          vscode.workspace.asRelativePath(file.path),
+        )
+        resultsWebviewProvider.postMessage<string>({
+          type: 'delete-job',
+          payload: nameToRemove,
+        })
+      })
+    }
+  }, 100)
 }
 
 /** deactivate - to be used in the future maybe */

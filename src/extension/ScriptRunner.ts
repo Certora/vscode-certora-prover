@@ -161,7 +161,7 @@ export class ScriptRunner {
                 const decoder = new TextDecoder()
                 const strContent: string = decoder.decode(content)
                 const pattern =
-                  'https://prover.certora.com/output/[a-zA-Z0-9/?=]+'
+                  'https://(prover|vaas-stg).certora.com/output/[a-zA-Z0-9/?=]+'
                 const vrLinkRegExp = new RegExp(pattern)
                 const vrLink = vrLinkRegExp.exec(strContent)
                 if (
