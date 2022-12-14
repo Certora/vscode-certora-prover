@@ -359,6 +359,13 @@ export function activate(context: vscode.ExtensionContext): void {
     })
   }
 
+  function openExtensionSettings() {
+    vscode.commands.executeCommand(
+      'workbench.action.openSettings',
+      '@ext:certora.vscode-certora-prover',
+    )
+  }
+
   const resultsWebviewProvider = new ResultsWebviewProvider(
     context.extensionUri,
   )
@@ -374,6 +381,10 @@ export function activate(context: vscode.ExtensionContext): void {
   const scriptRunner = new ScriptRunner(resultsWebviewProvider)
 
   context.subscriptions.push(
+    vscode.commands.registerCommand(
+      'certora.openSettings',
+      openExtensionSettings,
+    ),
     vscode.window.registerWebviewViewProvider(
       resultsWebviewProvider.viewType,
       resultsWebviewProvider,
