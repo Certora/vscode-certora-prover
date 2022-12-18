@@ -1,7 +1,7 @@
 /* ---------------------------------------------------------------------------------------------
  *  Runs certoraRun command with the content of a conf file.
  *-------------------------------------------------------------------------------------------- */
-import { workspace, window, Uri } from 'vscode'
+import { workspace, window, Uri, FileType } from 'vscode'
 import { spawn, exec, ChildProcessWithoutNullStreams } from 'child_process'
 import * as os from 'os'
 import { ScriptProgressLongPolling } from './ScriptProgressLongPolling'
@@ -9,6 +9,7 @@ import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { getProgressUrl } from './utils/getProgressUrl'
 import { Job, LOG_DIRECTORY } from './types'
 import { PostProblems } from './PostProblems'
+import { checkDir } from './utils/checkDir'
 
 type RunningScript = {
   pid: number
@@ -23,7 +24,6 @@ export class ScriptRunner {
   private readonly resultsWebviewProvider: ResultsWebviewProvider
   private script: ChildProcessWithoutNullStreams | null = null
   private runningScripts: RunningScript[] = []
-  // private logFile: Uri | undefined
   private logFiles: Uri[] = []
 
   constructor(resultsWebviewProvider: ResultsWebviewProvider) {
@@ -40,18 +40,71 @@ export class ScriptRunner {
   }
 
   /**
+   * returns a Date if possible, null if not possible
+   * @param dir string in the format of 22_12_05_14_22_09_BLA
+   * @returns date object
+   */
+  private getDateFormat(dir: string): [Date, string] {
+    const arr = dir.split('_').slice(0, 6)
+    const dateStr = '20' + arr.slice(0, 3).join('-') + 'T'
+    const timeStr = arr.slice(3, 6).join(':') + 'Z'
+    const str = dateStr + timeStr
+    return [new Date(str), dir]
+  }
+
+  /**
    * returns a uri of the conf.log file if the workspace path exists, null otherwise
    * @param pathToConfFile path to the .conf file (relative)
    * @param ts the time the file was created
    * @returns the full path to the conf.log file or null
    */
-  private getLogFilePath(pathToConfFile: string, ts: number) {
+  private async getLogFilePath(pathToConfFile: string, ts: number) {
     const path = workspace.workspaceFolders?.[0]
     if (!path) return
 
+    // TODO: find the right directory inside ".certora_internal and add it to path"
+    // find the directory that was created last
+    const internalUri = Uri.parse(path.uri.path + LOG_DIRECTORY)
+    const checked = await checkDir(internalUri)
+    if (checked) {
+      const innerDirs = await workspace.fs.readDirectory(internalUri)
+      const dates = innerDirs.map(dir => {
+        if (dir[1] === 2) {
+          return this.getDateFormat(dir[0])
+        }
+        return null
+      })
+
+      const datesNew = dates.filter(date => {
+        if (date && date[0]) {
+          return true
+        }
+        return false
+      })
+
+      const sortedDates = datesNew.sort(function (a, b) {
+        if (a !== null && b !== null) {
+          return a[0] > b[0] ? -1 : 1
+        }
+        return 0
+      })
+
+      const curDate = sortedDates[0]
+
+      if (curDate) {
+        const logFilePath = Uri.joinPath(
+          path.uri,
+          LOG_DIRECTORY,
+          curDate[1],
+          `${this.getConfFileName(pathToConfFile)}.log`,
+        )
+        return logFilePath
+      }
+    }
     const logFilePath = Uri.joinPath(
       path.uri,
       LOG_DIRECTORY,
+      'certora_logs',
       `${this.getConfFileName(pathToConfFile)}-${ts}.log`,
     )
     return logFilePath
@@ -62,7 +115,7 @@ export class ScriptRunner {
     pathToConfFile: string,
     ts: number,
   ): Promise<void> {
-    const logFilePath = this.getLogFilePath(pathToConfFile, ts)
+    const logFilePath = await this.getLogFilePath(pathToConfFile, ts)
     if (!logFilePath) {
       return
     }
@@ -129,13 +182,11 @@ export class ScriptRunner {
           'Open Execution Log File',
         )
         if (action === 'Open Execution Log File') {
-          const logFilePath = Uri.joinPath(
-            path.uri,
-            LOG_DIRECTORY,
-            `${this.getConfFileName(confFile)}-${ts}.log`,
-          )
-          const document = await workspace.openTextDocument(logFilePath)
-          await window.showTextDocument(document)
+          const logFilePath = await this.getLogFilePath(confFile, ts)
+          if (logFilePath !== undefined) {
+            const document = await workspace.openTextDocument(logFilePath)
+            await window.showTextDocument(document)
+          }
         }
       }
       channel.appendLine(str)

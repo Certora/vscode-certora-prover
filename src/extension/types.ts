@@ -4,7 +4,7 @@
 
 export const CONF_DIRECTORY_NAME = 'certora/conf'
 export const CONF_DIRECTORY = 'certora/conf/'
-export const LOG_DIRECTORY = 'certora-logs'
+export const LOG_DIRECTORY = '/.certora_internal/'
 
 export type JumpToDefinition = {
   file: string

@@ -17,6 +17,7 @@ import {
 } from './types'
 import { createConfFile } from './utils/createConfFile'
 import { confFileToFormData } from './utils/confFileToInputForm'
+import { checkDir } from './utils/checkDir'
 
 export function activate(context: vscode.ExtensionContext): void {
   /**
@@ -296,30 +297,20 @@ export function activate(context: vscode.ExtensionContext): void {
     if (path) {
       const confDirectoryPath = path.uri.path + '/' + CONF_DIRECTORY
       const confDirectoryUri = vscode.Uri.parse(confDirectoryPath)
-      // if the conf directory doesn't exist, create one
-      try {
-        await vscode.workspace.fs.stat(confDirectoryUri)
-      } catch (e) {
-        try {
-          await vscode.workspace.fs.createDirectory(confDirectoryUri)
-        } catch (e) {
-          console.log(
-            'ERROR: could not create directory: ',
-            CONF_DIRECTORY_NAME,
-            '[this is an internal error]',
-          )
-        }
-      }
-      const confFiles = vscode.workspace.fs.readDirectory(confDirectoryUri)
-      confFiles.then(async f => {
-        const confList = f.map(async file => {
-          return await createFileObject(
-            vscode.Uri.parse(confDirectoryPath + file[0]),
-          )
+      const checked = await checkDir(confDirectoryUri)
+      if (checked) {
+        console.log(confDirectoryUri)
+        const confFiles = vscode.workspace.fs.readDirectory(confDirectoryUri)
+        confFiles.then(async f => {
+          const confList = f.map(async file => {
+            return await createFileObject(
+              vscode.Uri.parse(confDirectoryPath + file[0]),
+            )
+          })
+          const awaitedList = await Promise.all(confList)
+          sendFilesToCreateJobs(awaitedList)
         })
-        const awaitedList = await Promise.all(confList)
-        sendFilesToCreateJobs(awaitedList)
-      })
+      }
     }
   }
 
