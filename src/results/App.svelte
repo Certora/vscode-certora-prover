@@ -20,6 +20,7 @@
     duplicate,
     removeScript,
     askToDeleteJob,
+    initResults,
   } from './extension-actions'
   import { smartMergeVerificationResult } from './utils/mergeResults'
   import { log, Sources } from './utils/log'
@@ -575,6 +576,7 @@
 
   onMount(() => {
     window.addEventListener('message', listener)
+    initResults()
   })
 
   onDestroy(() => {

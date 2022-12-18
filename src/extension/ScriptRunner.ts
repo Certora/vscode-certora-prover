@@ -7,7 +7,7 @@ import * as os from 'os'
 import { ScriptProgressLongPolling } from './ScriptProgressLongPolling'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { getProgressUrl } from './utils/getProgressUrl'
-import type { Job } from './types'
+import { Job, LOG_DIRECTORY } from './types'
 import { PostProblems } from './PostProblems'
 
 type RunningScript = {
@@ -51,7 +51,7 @@ export class ScriptRunner {
 
     const logFilePath = Uri.joinPath(
       path.uri,
-      'certora-logs',
+      LOG_DIRECTORY,
       `${this.getConfFileName(pathToConfFile)}-${ts}.log`,
     )
     return logFilePath
@@ -131,7 +131,7 @@ export class ScriptRunner {
         if (action === 'Open Execution Log File') {
           const logFilePath = Uri.joinPath(
             path.uri,
-            'certora-logs',
+            LOG_DIRECTORY,
             `${this.getConfFileName(confFile)}-${ts}.log`,
           )
           const document = await workspace.openTextDocument(logFilePath)

@@ -18,6 +18,17 @@ enum Commands {
   Duplicate = 'duplicate',
   RemoveScript = 'remove-script',
   AskToDeleteJob = 'ask-to-delete-job',
+  InitResults = 'init-results',
+}
+
+export function initResults(): void {
+  log({
+    action: 'Send "init-results" command',
+    source: Sources.ResultsWebview,
+  })
+  vscode.postMessage({
+    command: Commands.InitResults,
+  })
 }
 
 export function removeScript(name: string): void {

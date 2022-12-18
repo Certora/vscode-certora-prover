@@ -407,7 +407,6 @@
         <!-- needs new changes -->
         <SolidityFiles
           {index}
-          solFiles={$solFilesArr}
           {updateItems}
           {handleClear}
           {loadFilesFolder}

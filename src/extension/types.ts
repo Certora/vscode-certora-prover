@@ -2,8 +2,9 @@
  *  Here we declare types and enums
  *-------------------------------------------------------------------------------------------- */
 
-export const CONF_DIRECTORY_NAME = 'certora_conf'
-export const CONF_DIRECTORY = 'certora_conf/'
+export const CONF_DIRECTORY_NAME = 'certora/conf'
+export const CONF_DIRECTORY = 'certora/conf/'
+export const LOG_DIRECTORY = 'certora-logs'
 
 export type JumpToDefinition = {
   file: string
@@ -238,6 +239,7 @@ export enum CommandFromResultsWebview {
   Duplicate = 'duplicate',
   RemoveScript = 'remove-script',
   AskToDeleteJob = 'ask-to-delete-job',
+  InitResults = 'init-results',
 }
 
 export enum CommandFromSettingsWebview {
@@ -278,6 +280,9 @@ export type EventFromResultsWebview =
   | {
       command: CommandFromResultsWebview.AskToDeleteJob
       payload: JobNameMap
+    }
+  | {
+      command: CommandFromResultsWebview.InitResults
     }
   | {
       command: CommandFromResultsWebview.Duplicate

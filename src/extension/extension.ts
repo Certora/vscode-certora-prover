@@ -291,7 +291,7 @@ export function activate(context: vscode.ExtensionContext): void {
   /**
    * all conf files in the conf folder will become jobs!
    */
-  async function createInitialJobs() {
+  async function createInitialJobs(): Promise<void> {
     const path = vscode.workspace.workspaceFolders?.[0]
     if (path) {
       const confDirectoryPath = path.uri.path + '/' + CONF_DIRECTORY
@@ -300,7 +300,6 @@ export function activate(context: vscode.ExtensionContext): void {
       try {
         await vscode.workspace.fs.stat(confDirectoryUri)
       } catch (e) {
-        console.log('got here with error: ', e)
         try {
           await vscode.workspace.fs.createDirectory(confDirectoryUri)
         } catch (e) {
@@ -309,7 +308,6 @@ export function activate(context: vscode.ExtensionContext): void {
             CONF_DIRECTORY_NAME,
             '[this is an internal error]',
           )
-          // nothing
         }
       }
       const confFiles = vscode.workspace.fs.readDirectory(confDirectoryUri)
@@ -326,7 +324,7 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   /**
-   * create an object that holds the name of a file, and if the file is runnable in cetora prover
+   * create an object that holds the name of a file, and if the file is runnable in certora prover
    * @param file uri
    * @returns Promise<ConfToCreate>
    */
@@ -377,6 +375,7 @@ export function activate(context: vscode.ExtensionContext): void {
   resultsWebviewProvider.runScript = runScript
   resultsWebviewProvider.removeScript = removeRunningScriptByName
   resultsWebviewProvider.askToDeleteJob = askToDeleteJob
+  resultsWebviewProvider.createInitialJobs = createInitialJobs
 
   const scriptRunner = new ScriptRunner(resultsWebviewProvider)
 
@@ -396,17 +395,11 @@ export function activate(context: vscode.ExtensionContext): void {
     ),
   )
 
-  // set timeout is here so we could await this async function (createInitialJobs)
-  setTimeout(async () => {
-    await createInitialJobs()
-    // users can copy conf files to the conf folder and it will create a job!
-    const path = vscode.workspace.workspaceFolders?.[0]
-    if (path) {
-      const directoryToWatch = vscode.Uri.joinPath(
-        path.uri,
-        CONF_DIRECTORY_NAME,
-      )
-      // try catch create new directory
+  // users can copy conf files to the conf folder and it will create a job!
+  const path = vscode.workspace.workspaceFolders?.[0]
+  if (path) {
+    const directoryToWatch = vscode.Uri.joinPath(path.uri, CONF_DIRECTORY_NAME)
+    try {
       const fileSystemWatcher = vscode.workspace.createFileSystemWatcher(
         new vscode.RelativePattern(directoryToWatch, '**/*.conf'),
       )
@@ -425,8 +418,10 @@ export function activate(context: vscode.ExtensionContext): void {
           payload: nameToRemove,
         })
       })
+    } catch (e) {
+      console.log('ERROR:', e, '[internal error from  the file system watcher]')
     }
-  }, 100)
+  }
 }
 
 /** deactivate - to be used in the future maybe */
