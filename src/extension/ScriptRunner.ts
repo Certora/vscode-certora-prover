@@ -7,7 +7,7 @@ import * as os from 'os'
 import { ScriptProgressLongPolling } from './ScriptProgressLongPolling'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { getProgressUrl } from './utils/getProgressUrl'
-import { Job, LOG_DIRECTORY } from './types'
+import { Job, CERTORA_INNER_DIR, LOG_DIRECTORY_DEFAULT } from './types'
 import { PostProblems } from './PostProblems'
 import { checkDir } from './utils/checkDir'
 
@@ -62,9 +62,7 @@ export class ScriptRunner {
     const path = workspace.workspaceFolders?.[0]
     if (!path) return
 
-    // TODO: find the right directory inside ".certora_internal and add it to path"
-    // find the directory that was created last
-    const internalUri = Uri.parse(path.uri.path + LOG_DIRECTORY)
+    const internalUri = Uri.parse(path.uri.path + CERTORA_INNER_DIR)
     const checked = await checkDir(internalUri)
     if (checked) {
       const innerDirs = await workspace.fs.readDirectory(internalUri)
@@ -74,14 +72,12 @@ export class ScriptRunner {
         }
         return null
       })
-
+      // filter out null values
       const datesNew = dates.filter(date => {
-        if (date && date[0]) {
-          return true
-        }
-        return false
+        return date && date[0]
       })
 
+      // sort by date
       const sortedDates = datesNew.sort(function (a, b) {
         if (a !== null && b !== null) {
           return a[0] > b[0] ? -1 : 1
@@ -89,22 +85,24 @@ export class ScriptRunner {
         return 0
       })
 
+      // get the most recent date / dir
       const curDate = sortedDates[0]
 
       if (curDate) {
         const logFilePath = Uri.joinPath(
           path.uri,
-          LOG_DIRECTORY,
+          CERTORA_INNER_DIR,
           curDate[1],
           `${this.getConfFileName(pathToConfFile)}.log`,
         )
         return logFilePath
       }
     }
+    // if we can't find the relevant directory in [CERTORA_INNER_DIR] --> create log file in another directory named [LOG_DIRECTORY_DEFAULT] inside it. in this case we need timestamps to be not run over older log files
     const logFilePath = Uri.joinPath(
       path.uri,
-      LOG_DIRECTORY,
-      'certora_logs',
+      CERTORA_INNER_DIR,
+      LOG_DIRECTORY_DEFAULT,
       `${this.getConfFileName(pathToConfFile)}-${ts}.log`,
     )
     return logFilePath
