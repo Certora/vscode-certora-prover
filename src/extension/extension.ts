@@ -181,6 +181,7 @@ export function activate(context: vscode.ExtensionContext): void {
   async function duplicate(
     toDuplicate: JobNameMap,
     duplicated: JobNameMap,
+    rule?: string,
   ): Promise<void> {
     // get the content of the conf to duplicate
     // create a new conf file with the name of "duplicated", content of "to duplicate", and open it with settings view
@@ -190,8 +191,18 @@ export function activate(context: vscode.ExtensionContext): void {
         const confFileContent = readConf(confFileUri)
 
         // the ; is required for the (await) to work, nessesary becasue we have a Promise<ConfFile> type from readConf function return
-
         ;(await confFileContent).msg = ''
+
+        // duplicate the conf file with rule
+        if (rule) {
+          // eslint-disable-next-line @typescript-eslint/no-extra-semi
+          ;(await confFileContent).rule = rule
+          duplicated = {
+            fileName: duplicated.fileName + '_' + rule,
+            displayName: duplicated.displayName + '_' + rule,
+          }
+        }
+
         try {
           const newConfFileUri = getConfUri(duplicated.fileName)
           if (newConfFileUri) {

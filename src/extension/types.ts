@@ -287,7 +287,11 @@ export type EventFromResultsWebview =
     }
   | {
       command: CommandFromResultsWebview.Duplicate
-      payload: { toDuplicate: JobNameMap; duplicatedName: JobNameMap }
+      payload: {
+        toDuplicate: JobNameMap
+        duplicatedName: JobNameMap
+        rule: string | undefined
+      }
     }
   | {
       command: CommandFromResultsWebview.RemoveScript

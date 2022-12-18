@@ -27,7 +27,11 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   public createInitialJobs: null | (() => Promise<void>) = null
   public duplicate:
     | null
-    | ((toDuplicate: JobNameMap, duplicated: JobNameMap) => void) = null
+    | ((
+        toDuplicate: JobNameMap,
+        duplicated: JobNameMap,
+        rule?: string,
+      ) => void) = null
 
   public runScript: null | ((name: JobNameMap) => void) = null
   public removeScript: null | ((name: string) => void) = null
@@ -137,7 +141,11 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
               info: e.payload,
             })
             if (typeof this.duplicate === 'function') {
-              this.duplicate(e.payload.toDuplicate, e.payload.duplicatedName)
+              this.duplicate(
+                e.payload.toDuplicate,
+                e.payload.duplicatedName,
+                e.payload.rule,
+              )
             }
             break
           case CommandFromResultsWebview.RemoveScript:

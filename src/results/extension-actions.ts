@@ -113,6 +113,7 @@ export function askToDeleteJob(name: JobNameMap): void {
 export function duplicate(
   toDuplicate: JobNameMap,
   duplicated: JobNameMap,
+  rule?: string,
 ): void {
   log({
     action: 'Send "duplicate" command',
@@ -120,7 +121,11 @@ export function duplicate(
   })
   vscode.postMessage({
     command: Commands.Duplicate,
-    payload: { toDuplicate: toDuplicate, duplicatedName: duplicated },
+    payload: {
+      toDuplicate: toDuplicate,
+      duplicatedName: duplicated,
+      rule: rule,
+    },
   })
 }
 
