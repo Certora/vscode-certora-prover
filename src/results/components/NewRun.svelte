@@ -32,6 +32,7 @@
   export let duplicateFunc: (
     nameToDuplicate: string,
     duplicatedName: string,
+    rule?: string,
   ) => void
   export let runFunc: () => void
   export let verificationResults: Verification[]
@@ -207,10 +208,14 @@
   /**
    * duplicate this run
    */
-  function duplicate(): void {
-    let duplicatedName = duplicateName(runName)
-    namesMap.set(spacesToUnderscores(duplicatedName), duplicatedName)
-    duplicateFunc(runName, spacesToUnderscores(duplicatedName))
+  function duplicate(rule?: string): void {
+    if (rule) {
+      duplicateFunc(runName, spacesToUnderscores(runName + '_' + rule), rule)
+    } else {
+      let duplicatedName = duplicateName(runName)
+      namesMap.set(spacesToUnderscores(duplicatedName), duplicatedName)
+      duplicateFunc(runName, spacesToUnderscores(duplicatedName))
+    }
   }
 
   /**
@@ -237,7 +242,9 @@
       {
         title: 'duplicate',
         icon: 'files',
-        onClick: duplicate,
+        onClick: () => {
+          duplicate()
+        },
       },
     ]
     if (hasResults() && vrLink) {
@@ -410,6 +417,7 @@
                   data={{
                     type: TreeType.Rules,
                     tree: retrieveRules(vr.jobs),
+                    duplicateFunc: duplicate,
                   }}
                   on:fetchOutput={e => newFetchOutput(e, vr)}
                 />

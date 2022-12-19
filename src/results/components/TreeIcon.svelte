@@ -12,9 +12,13 @@
 </script>
 
 {#if codicon}
-  <div class="icon codicon {codicon}" />
+  <div class="icon codicon {codicon}" on:click|preventDefault|stopPropagation />
 {:else if fullPath}
-  <div class="icon" style="background-image: url({fullPath});" />
+  <div
+    class="icon"
+    style="background-image: url({fullPath});"
+    on:click|preventDefault|stopPropagation
+  />
 {/if}
 
 <style lang="postcss">

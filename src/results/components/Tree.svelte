@@ -13,6 +13,7 @@
     | {
         type: TreeType.Rules
         tree: Rule[]
+        duplicateFunc
       }
     | {
         type: TreeType.Calltrace
@@ -38,6 +39,7 @@
               },
             ]
           : []}
+        duplicateFunc={data.duplicateFunc}
         on:fetchOutput
       />
     {/each}

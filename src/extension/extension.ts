@@ -197,10 +197,6 @@ export function activate(context: vscode.ExtensionContext): void {
         if (rule) {
           // eslint-disable-next-line @typescript-eslint/no-extra-semi
           ;(await confFileContent).rule = rule
-          duplicated = {
-            fileName: duplicated.fileName + '_' + rule,
-            displayName: duplicated.displayName + '_' + rule,
-          }
         }
 
         try {

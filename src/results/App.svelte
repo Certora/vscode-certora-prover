@@ -337,7 +337,11 @@
    * @param nameToDuplicate
    * @param duplicatedName
    */
-  function duplicateRun(nameToDuplicate: string, duplicatedName: string): void {
+  function duplicateRun(
+    nameToDuplicate: string,
+    duplicatedName: string,
+    rule?: string,
+  ): void {
     const toDuplicate: Run = runs.find(run => run.name === nameToDuplicate)
 
     // the status of the new run cannot be 'success' (haven't run yet => no results)
@@ -363,8 +367,7 @@
       fileName: toDuplicate.name,
       displayName: namesMap.get(toDuplicate.name),
     }
-
-    duplicate(confNameMapToDuplicate, confNameMapDuplicated)
+    duplicate(confNameMapToDuplicate, confNameMapDuplicated, rule)
     focusedRun = duplicatedName
   }
 
@@ -576,7 +579,9 @@
 
   onMount(() => {
     window.addEventListener('message', listener)
-    initResults()
+    if (runs.length === 0) {
+      initResults()
+    }
   })
 
   onDestroy(() => {

@@ -1,7 +1,7 @@
 /* ---------------------------------------------------------------------------------------------
  *  Runs certoraRun command with the content of a conf file.
  *-------------------------------------------------------------------------------------------- */
-import { workspace, window, Uri, FileType } from 'vscode'
+import { workspace, window, Uri } from 'vscode'
 import { spawn, exec, ChildProcessWithoutNullStreams } from 'child_process'
 import * as os from 'os'
 import { ScriptProgressLongPolling } from './ScriptProgressLongPolling'

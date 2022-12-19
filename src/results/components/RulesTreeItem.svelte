@@ -15,6 +15,7 @@
   export let posInset = 1
   export let actions: Action[] = []
   export let level = 1
+  export let duplicateFunc
 
   const dispatch = createEventDispatcher<{ fetchOutput: Assert | Rule }>()
 
@@ -28,6 +29,11 @@
     : `unknown-assert-message.svg`
 
   let isExpanded = false
+
+  function duplicateRule() {
+    console.log('duplicate rule was clicked')
+    duplicateFunc(rule.name)
+  }
 </script>
 
 <BaseTreeItem
@@ -51,7 +57,12 @@
     isExpanded = !isExpanded
   }}
 >
-  <TreeIcon path={rule ? ruleIcon : assertIcon} />
+  <TreeIcon
+    path={rule ? ruleIcon : assertIcon}
+    on:click={() => {
+      duplicateRule()
+    }}
+  />
   <div class="label">
     <div class="label-container">
       <span class="name-container">

@@ -118,6 +118,7 @@ export function duplicate(
   log({
     action: 'Send "duplicate" command',
     source: Sources.ResultsWebview,
+    info: [toDuplicate, duplicated, rule],
   })
   vscode.postMessage({
     command: Commands.Duplicate,
