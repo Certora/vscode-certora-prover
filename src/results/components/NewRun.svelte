@@ -209,15 +209,12 @@
    * duplicate this run
    */
   function duplicate(rule?: string): void {
-    if (rule) {
-      let duplicatedName = runName + '_' + rule
-      namesMap.set(spacesToUnderscores(duplicatedName), duplicatedName)
-      duplicateFunc(runName, spacesToUnderscores(duplicatedName), rule)
-    } else {
-      let duplicatedName = duplicateName(runName)
-      namesMap.set(spacesToUnderscores(duplicatedName), duplicatedName)
-      duplicateFunc(runName, spacesToUnderscores(duplicatedName))
+    let duplicatedName = rule ? runName + ' ' + rule : runName
+    if (namesMap.has(spacesToUnderscores(duplicatedName))) {
+      duplicatedName = duplicateName(duplicatedName)
     }
+    namesMap.set(spacesToUnderscores(duplicatedName), duplicatedName)
+    duplicateFunc(runName, spacesToUnderscores(duplicatedName), rule)
   }
 
   /**
