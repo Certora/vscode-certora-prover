@@ -192,8 +192,9 @@
         })
         if (
           e.data.payload &&
-          (e.data.payload.callResolution.length > 0 ||
-            e.data.payload.variables.length > 0)
+          ((e.data.payload.callResolution &&
+            e.data.payload.callResolution.length > 0) ||
+            (e.data.payload.variables && e.data.payload.variables.length > 0))
         ) {
           output = e.data.payload
           output.runName = outputRunName

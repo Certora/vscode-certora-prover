@@ -20,7 +20,7 @@
 </script>
 
 <div
-  class={'tree-item' + (!hasChildren && level === 1 ? 'no-pointer' : '')}
+  class={'tree-item' + (!hasChildren && level === 1 ? ' no-pointer' : '')}
   class:focused={isFocused}
   class:selected={isFocused}
   role="treeitem"
@@ -56,6 +56,9 @@
 </div>
 
 <style lang="postcss">
+  .no-pointer {
+    cursor: default !important;
+  }
   .tree-item {
     overflow: hidden;
     width: 100%;
@@ -68,10 +71,6 @@
     line-height: 22px;
     touch-action: none;
     white-space: nowrap;
-
-    .no-pointer {
-      cursor: not-allowed !important;
-    }
 
     .actions {
       display: none;
