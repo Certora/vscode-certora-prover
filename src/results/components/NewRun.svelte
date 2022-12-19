@@ -210,7 +210,9 @@
    */
   function duplicate(rule?: string): void {
     if (rule) {
-      duplicateFunc(runName, spacesToUnderscores(runName + '_' + rule), rule)
+      let duplicatedName = runName + '_' + rule
+      namesMap.set(spacesToUnderscores(duplicatedName), duplicatedName)
+      duplicateFunc(runName, spacesToUnderscores(duplicatedName), rule)
     } else {
       let duplicatedName = duplicateName(runName)
       namesMap.set(spacesToUnderscores(duplicatedName), duplicatedName)

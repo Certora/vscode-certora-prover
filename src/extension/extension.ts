@@ -402,6 +402,7 @@ export function activate(context: vscode.ExtensionContext): void {
         new vscode.RelativePattern(directoryToWatch, '**/*.conf'),
       )
       fileSystemWatcher.onDidCreate(async file => {
+        console.log('conf file created - from listener')
         const fileObj: ConfToCreate = await createFileObject(file)
         sendFilesToCreateJobs([fileObj])
       })

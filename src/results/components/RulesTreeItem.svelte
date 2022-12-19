@@ -57,12 +57,7 @@
     isExpanded = !isExpanded
   }}
 >
-  <TreeIcon
-    path={rule ? ruleIcon : assertIcon}
-    on:click={() => {
-      duplicateRule()
-    }}
-  />
+  <TreeIcon path={rule ? ruleIcon : assertIcon} duplicateFunc={duplicateRule} />
   <div class="label">
     <div class="label-container">
       <span class="name-container">

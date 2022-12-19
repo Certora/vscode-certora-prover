@@ -7,17 +7,21 @@
 
   export let path: string = ''
   export let codicon: string = ''
+  export let duplicateFunc
 
   $: fullPath = path && getIconPath(path)
 </script>
 
 {#if codicon}
-  <div class="icon codicon {codicon}" on:click|preventDefault|stopPropagation />
+  <div
+    class="icon codicon {codicon}"
+    on:click|stopPropagation={duplicateFunc}
+  />
 {:else if fullPath}
   <div
     class="icon"
     style="background-image: url({fullPath});"
-    on:click|preventDefault|stopPropagation
+    on:click|stopPropagation={duplicateFunc}
   />
 {/if}
 

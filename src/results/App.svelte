@@ -257,9 +257,16 @@
           info: e.data.payload,
         })
         const confList = e.data.payload
-
         confList.forEach(file => {
           if (!namesMap.has(file.fileName)) {
+            console.log(
+              'new file:',
+              file.fileName,
+              'namesMap:',
+              namesMap,
+              'has file name:',
+              namesMap.has(file.fileName),
+            )
             let curStatus = Status.missingSettings
             if (file.allowRun) {
               curStatus = Status.ready
