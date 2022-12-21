@@ -138,8 +138,8 @@ export function activate(context: vscode.ExtensionContext): void {
     const confFileUri = getConfUri(name.fileName)
     if (confFileUri) {
       try {
-        const confFileContent = readConf(confFileUri)
-        renderSettingsPanel(name, await confFileContent)
+        const confFileContent = await readConf(confFileUri)
+        renderSettingsPanel(name, confFileContent)
       } catch (e) {
         vscode.window.showErrorMessage(
           `Can't read conf file: ${confFileUri.path}. Error: ${e}`,
@@ -188,15 +188,14 @@ export function activate(context: vscode.ExtensionContext): void {
     const confFileUri = getConfUri(toDuplicate.fileName)
     if (confFileUri) {
       try {
-        const confFileContent = readConf(confFileUri)
+        const confFileContent = await readConf(confFileUri)
 
         // the ; is required for the (await) to work, nessesary becasue we have a Promise<ConfFile> type from readConf function return
-        ;(await confFileContent).msg = ''
+        confFileContent.msg = ''
 
         // duplicate the conf file with rule
         if (rule) {
-          // eslint-disable-next-line @typescript-eslint/no-extra-semi
-          ;(await confFileContent).rule = rule
+          confFileContent.rule = [rule]
         }
 
         try {
@@ -211,7 +210,14 @@ export function activate(context: vscode.ExtensionContext): void {
         } catch (e) {
           vscode.window.showErrorMessage(`Can't create conf file. Error: ${e}`)
         }
-        renderSettingsPanel(duplicated, await confFileContent)
+        if (rule) {
+          resultsWebviewProvider.postMessage<string>({
+            type: 'run-job',
+            payload: duplicated.fileName,
+          })
+        } else {
+          renderSettingsPanel(duplicated, confFileContent)
+        }
       } catch (e) {
         vscode.window.showErrorMessage(
           `Can't read conf file: ${confFileUri.path}. Error: ${e}`,

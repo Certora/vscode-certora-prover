@@ -275,7 +275,22 @@
         })
         break
       }
+      case EventTypesFromExtension.RunJob: {
+        log({
+          action: 'Received "run-job" command',
+          source: Sources.ResultsWebview,
+          info: e.data.payload,
+        })
 
+        const name: string = e.data.payload
+        const runToRun: Run = runs.find(r => {
+          return r.name === name
+        })
+        if (runToRun !== undefined) {
+          run(runToRun)
+        }
+        break
+      }
       case EventTypesFromExtension.DeleteJob: {
         log({
           action: 'Received "delete-job" command',
@@ -367,7 +382,9 @@
     }
     duplicate(confNameMapToDuplicate, confNameMapDuplicated, rule)
     createRun(duplicated)
-    focusedRun = duplicatedName
+    if (!rule) {
+      focusedRun = duplicatedName
+    }
   }
 
   /**

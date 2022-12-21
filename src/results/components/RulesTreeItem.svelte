@@ -18,7 +18,10 @@
   export let duplicateFunc = null
 
   const dispatch = createEventDispatcher<{ fetchOutput: Assert | Rule }>()
-
+  $: allowDuplicate =
+    rule &&
+    typeof duplicateFunc === 'function' &&
+    rule.jumpToDefinition.length > 0
   $: label = rule?.name || assert?.message
   $: formattedLabel = label === null || label === 'null' ? 'No message' : label
   $: ruleIcon = rule?.status
@@ -31,13 +34,13 @@
   let isExpanded = false
 
   function duplicateRule() {
-    if (rule && typeof duplicateFunc === 'function') {
+    if (allowDuplicate) {
       duplicateFunc(rule.name)
     }
   }
 
   function getHoverPath(rule) {
-    if (!rule || !(typeof duplicateFunc === 'function')) {
+    if (!allowDuplicate) {
       return ''
     } else if (rule && rule.status && rule.status === RuleStatuses.Verified) {
       return 'rerun-success.svg'
