@@ -182,8 +182,12 @@ export class ScriptRunner {
         if (action === 'Open Execution Log File') {
           const logFilePath = await this.getLogFilePath(confFile, ts)
           if (logFilePath !== undefined) {
-            const document = await workspace.openTextDocument(logFilePath)
-            await window.showTextDocument(document)
+            try {
+              const document = await workspace.openTextDocument(logFilePath)
+              await window.showTextDocument(document)
+            } catch (e) {
+              console.log('ERROR: ', e, '[Internal error from extension]')
+            }
           }
         }
       }

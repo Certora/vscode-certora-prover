@@ -47,7 +47,7 @@
 </script>
 
 <BaseTreeItem
-  {label}
+  label={rule?.status ? rule.status : formattedLabel}
   {setSize}
   {posInset}
   {level}

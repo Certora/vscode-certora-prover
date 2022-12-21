@@ -25,6 +25,7 @@ export enum RuleStatuses {
   Unknown = 'UNKNOWN',
   Running = 'RUNNING',
   Timeout = 'TIMEOUT',
+  Sanity = 'SANITY_FAILED',
 }
 
 // output can be either a string of a path or array of strings of path

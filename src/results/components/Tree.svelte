@@ -39,7 +39,7 @@
               },
             ]
           : []}
-        duplicateFunc={data.duplicateFunc}
+        duplicateFunc={data.tree.length !== 1 ? data.duplicateFunc : null}
         on:fetchOutput
       />
     {/each}

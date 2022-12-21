@@ -248,7 +248,7 @@
     ]
     if (hasResults() && vrLink) {
       actions.unshift({
-        title: 'go to verification report',
+        title: 'go to Rule Report',
         icon: 'file-symlink-file',
         link: vrLink,
       })
