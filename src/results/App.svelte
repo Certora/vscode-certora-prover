@@ -356,8 +356,6 @@
       status: newStatus,
     }
 
-    createRun(duplicated)
-
     const confNameMapDuplicated: JobNameMap = {
       fileName: duplicated.name,
       displayName: namesMap.get(duplicated.name),
@@ -368,6 +366,7 @@
       displayName: namesMap.get(toDuplicate.name),
     }
     duplicate(confNameMapToDuplicate, confNameMapDuplicated, rule)
+    createRun(duplicated)
     focusedRun = duplicatedName
   }
 

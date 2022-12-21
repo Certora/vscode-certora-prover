@@ -14,6 +14,7 @@
     specObj,
     verification_message,
     solAdditionalContracts,
+    isReset,
   } from './stores/store.js'
   import { log, Sources } from './utils/log'
 
@@ -37,15 +38,18 @@
       solidityAdditionalContracts: $solAdditionalContracts,
       checkMyInputs: $checkMyInputs,
     }
-    log({
-      action: 'Send "create-conf-file" command',
-      source: Sources.SettingsWebview,
-      info: form,
-    })
-    vscode.postMessage({
-      command: 'create-conf-file',
-      payload: form,
-    })
+    // do not create run on fields initialization
+    if (!$isReset) {
+      log({
+        action: 'Send "create-conf-file" command',
+        source: Sources.SettingsWebview,
+        info: form,
+      })
+      vscode.postMessage({
+        command: 'create-conf-file',
+        payload: form,
+      })
+    }
   }
 </script>
 
