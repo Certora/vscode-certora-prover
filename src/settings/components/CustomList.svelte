@@ -338,7 +338,7 @@
     text-overflow: ellipsis;
     overflow-x: hidden;
     white-space: nowrap;
-    text-transform: var(--groupTitleTextTransform, uppercase);
+    text-transform: var(--groupTitleTextTransform);
   }
 
   .empty {

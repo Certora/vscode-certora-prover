@@ -21,6 +21,7 @@ export enum RuleStatuses {
   Unknown = 'UNKNOWN',
   Running = 'RUNNING',
   Timeout = 'TIMEOUT',
+  Sanity = 'SANITY_FAILED',
 }
 
 export type Assert = {
