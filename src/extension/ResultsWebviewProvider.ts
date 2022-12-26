@@ -25,6 +25,7 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   public deleteConf: null | ((name: JobNameMap) => void) = null
   public askToDeleteJob: null | ((name: JobNameMap) => void) = null
   public createInitialJobs: null | (() => Promise<void>) = null
+  public uploadConf: null | (() => Promise<void>) = null
   public duplicate:
     | null
     | ((
@@ -156,6 +157,15 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
             })
             if (typeof this.removeScript === 'function') {
               this.removeScript(e.payload)
+            }
+            break
+          case CommandFromResultsWebview.UploadConf:
+            log({
+              action: 'Received "upload-conf" command',
+              source: Sources.Extension,
+            })
+            if (typeof this.uploadConf === 'function') {
+              this.uploadConf()
             }
             break
           default:

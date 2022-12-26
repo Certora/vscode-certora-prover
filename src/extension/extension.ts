@@ -325,6 +325,40 @@ export function activate(context: vscode.ExtensionContext): void {
         })
       }
     }
+    // users can copy conf files to the conf folder and it will create a job!
+    // const path = vscode.workspace.workspaceFolders?.[0]
+    if (path) {
+      const directoryToWatch = vscode.Uri.joinPath(
+        path.uri,
+        CONF_DIRECTORY_NAME,
+      )
+      try {
+        const fileSystemWatcher = vscode.workspace.createFileSystemWatcher(
+          new vscode.RelativePattern(directoryToWatch, '**/*.conf'),
+        )
+        fileSystemWatcher.onDidCreate(async file => {
+          const fileObj: ConfToCreate = await createFileObject(file)
+          sendFilesToCreateJobs([fileObj])
+        })
+        // vscode asks to delete a conf file before is it deleted to avoid mistakes,
+        // so I think deleting the job with it is a good idea
+        fileSystemWatcher.onDidDelete(file => {
+          const nameToRemove = getConfFileName(
+            vscode.workspace.asRelativePath(file.path),
+          )
+          resultsWebviewProvider.postMessage<string>({
+            type: 'delete-job',
+            payload: nameToRemove,
+          })
+        })
+      } catch (e) {
+        console.log(
+          'ERROR:',
+          e,
+          '[internal error from  the file system watcher]',
+        )
+      }
+    }
   }
 
   /**
@@ -361,6 +395,36 @@ export function activate(context: vscode.ExtensionContext): void {
     })
   }
 
+  // browse for conf files, and than copy these files into [CONF_DIRECTORY]
+  async function uploadConf(): Promise<void> {
+    const path = vscode.workspace.workspaceFolders?.[0]
+    if (!path) return
+    const options: vscode.OpenDialogOptions = {
+      canSelectMany: true,
+      canSelectFolders: false,
+      openLabel: 'Open',
+      defaultUri: path.uri,
+      filters: {
+        'File type': ['conf'],
+      },
+    }
+    const confFiles = await vscode.window.showOpenDialog(options)
+    confFiles?.map(async fileUri => {
+      try {
+        const fileArr = fileUri.path.split('/')
+        const fileName = fileArr.reverse()[0]
+        const target = vscode.Uri.joinPath(
+          path.uri,
+          CONF_DIRECTORY_NAME,
+          fileName,
+        )
+        await vscode.workspace.fs.copy(fileUri, target, { overwrite: true })
+      } catch (e) {
+        console.log("Could'nt copy file", fileUri.path, '\nERROR:', e)
+      }
+    })
+  }
+
   function openExtensionSettings() {
     vscode.commands.executeCommand(
       'workbench.action.openSettings',
@@ -380,6 +444,7 @@ export function activate(context: vscode.ExtensionContext): void {
   resultsWebviewProvider.removeScript = removeRunningScriptByName
   resultsWebviewProvider.askToDeleteJob = askToDeleteJob
   resultsWebviewProvider.createInitialJobs = createInitialJobs
+  resultsWebviewProvider.uploadConf = uploadConf
 
   const scriptRunner = new ScriptRunner(resultsWebviewProvider)
 
@@ -398,34 +463,6 @@ export function activate(context: vscode.ExtensionContext): void {
       },
     ),
   )
-
-  // users can copy conf files to the conf folder and it will create a job!
-  const path = vscode.workspace.workspaceFolders?.[0]
-  if (path) {
-    const directoryToWatch = vscode.Uri.joinPath(path.uri, CONF_DIRECTORY_NAME)
-    try {
-      const fileSystemWatcher = vscode.workspace.createFileSystemWatcher(
-        new vscode.RelativePattern(directoryToWatch, '**/*.conf'),
-      )
-      fileSystemWatcher.onDidCreate(async file => {
-        const fileObj: ConfToCreate = await createFileObject(file)
-        sendFilesToCreateJobs([fileObj])
-      })
-      // vscode asks to delete a conf file before is it deleted to avoid mistakes,
-      // so I think deleting the job with it is a good idea
-      fileSystemWatcher.onDidDelete(file => {
-        const nameToRemove = getConfFileName(
-          vscode.workspace.asRelativePath(file.path),
-        )
-        resultsWebviewProvider.postMessage<string>({
-          type: 'delete-job',
-          payload: nameToRemove,
-        })
-      })
-    } catch (e) {
-      console.log('ERROR:', e, '[internal error from  the file system watcher]')
-    }
-  }
 }
 
 /** deactivate - to be used in the future maybe */

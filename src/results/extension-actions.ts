@@ -19,6 +19,17 @@ enum Commands {
   RemoveScript = 'remove-script',
   AskToDeleteJob = 'ask-to-delete-job',
   InitResults = 'init-results',
+  UploadConf = 'upload-conf',
+}
+
+export function uploadConf(): void {
+  log({
+    action: 'Send "upload-conf" command',
+    source: Sources.ResultsWebview,
+  })
+  vscode.postMessage({
+    command: Commands.UploadConf,
+  })
 }
 
 export function initResults(): void {

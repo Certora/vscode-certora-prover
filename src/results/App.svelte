@@ -21,6 +21,7 @@
     removeScript,
     askToDeleteJob,
     initResults,
+    uploadConf,
   } from './extension-actions'
   import { smartMergeVerificationResult } from './utils/mergeResults'
   import { log, Sources } from './utils/log'
@@ -608,11 +609,29 @@
 {#if runsCounter === 0}
   <div class="zero-state">
     <div class="command">
-      <div class="command-description">
-        To check your smart contract start by creating a verification run
-      </div>
+      <h3 class="command-description">Verify your smart contract</h3>
+    </div>
+  </div>
+
+  <div class="zero-state">
+    <div class="command">
+      <div class="command-description">By creating a new job</div>
       <vscode-button class="command-button" on:click={() => createRun()}>
         Create New Job
+      </vscode-button>
+    </div>
+  </div>
+  <div class="zero-state">
+    <div class="command">
+      <div class="command-description">Or</div>
+    </div>
+  </div>
+
+  <div class="zero-state">
+    <div class="command">
+      <div class="command-description">By uploading a configuration file</div>
+      <vscode-button class="command-button" on:click={() => uploadConf()}>
+        Upload Conf File
       </vscode-button>
     </div>
   </div>

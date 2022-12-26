@@ -242,6 +242,7 @@ export enum CommandFromResultsWebview {
   RemoveScript = 'remove-script',
   AskToDeleteJob = 'ask-to-delete-job',
   InitResults = 'init-results',
+  UploadConf = 'upload-conf',
 }
 
 export enum CommandFromSettingsWebview {
@@ -297,6 +298,9 @@ export type EventFromResultsWebview =
   | {
       command: CommandFromResultsWebview.RemoveScript
       payload: string
+    }
+  | {
+      command: CommandFromResultsWebview.UploadConf
     }
 
 export type EventFromSettingsWebview =
