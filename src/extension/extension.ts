@@ -312,7 +312,6 @@ export function activate(context: vscode.ExtensionContext): void {
       const confDirectoryUri = vscode.Uri.parse(confDirectoryPath)
       const checked = await checkDir(confDirectoryUri)
       if (checked) {
-        console.log(confDirectoryUri)
         const confFiles = vscode.workspace.fs.readDirectory(confDirectoryUri)
         confFiles.then(async f => {
           const confList = f.map(async file => {
@@ -395,7 +394,9 @@ export function activate(context: vscode.ExtensionContext): void {
     })
   }
 
-  // browse for conf files, and than copy these files into [CONF_DIRECTORY]
+  /**
+   * browse for conf files, and than copy these files into [CONF_DIRECTORY]
+   */
   async function uploadConf(): Promise<void> {
     const path = vscode.workspace.workspaceFolders?.[0]
     if (!path) return

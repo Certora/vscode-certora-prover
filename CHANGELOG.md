@@ -18,6 +18,7 @@ All notable changes to this project will be documented in this file.
 * Modal that asks the user if they are sure before deleting a job list item ([#71] (https://github.com/Certora/vscode-certora-prover/pull/71))
 * Changed location of conf files to certora directory, and log files to .certora_internal directory ([#72](https://github.com/Certora/vscode-certora-prover/pull/72))
 * When clicking on the icon by a rule, create a new job with this one rule ([#76](https://github.com/Certora/vscode-certora-prover/pull/76))
+* 'Staging' option moved to the end of 'Additional Prover Settings' in the Settings Form ([#76](https://github.com/Certora/vscode-certora-prover/pull/76))
 
 ### 0.0.4 (2022-11-23)
 
