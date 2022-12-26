@@ -271,7 +271,7 @@
               status: curStatus,
             }
             createRun(newRun)
-            namesMap.set(newRun.name, newRun.name)
+            namesMap.set(newRun.name, newRun.name.replaceAll('_', ' '))
           }
         })
         break

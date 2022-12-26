@@ -146,7 +146,7 @@
    */
   function titleHandle(): void {
     runName = runName
-      .replace(/[^a-zA-Z0-9 ]/g, '')
+      .replace(/[^a-zA-Z0-9_ ]/g, '')
       .replace(/ +/g, ' ')
       .trim()
     if (runName === '') {
