@@ -631,7 +631,7 @@
     <div class="command">
       <div class="command-description">By uploading a configuration file</div>
       <vscode-button class="command-button" on:click={() => uploadConf()}>
-        Upload Conf File
+        Upload Conf Files
       </vscode-button>
     </div>
   </div>
