@@ -365,8 +365,27 @@
   }
 
   /** focus on this element */
-  function focusOnThis(element) {
+  function onRightClick(element) {
+    console.log(element, 'focus on this elemnt')
     element.focus()
+    //open menu with actions for this job (start with rename!), close menu for all other jobs
+  }
+
+  function closeMenu() {
+    // close the actions menu
+  }
+
+  function onFocusEnter(e) {
+    console.log(e, 'eventtt')
+    if (e.key === 'Enter') {
+      setRename()
+    }
+  }
+
+  function onClick(e) {
+    if (!expandedState) {
+      editFunc()
+    }
   }
 </script>
 
@@ -382,7 +401,7 @@
       />
       <input
         id={'rename_input ' + runName}
-        use:focusOnThis
+        use:onRightClick
         on:focusout={deleteOutOfFocus}
         type="text"
         maxlength="35"
@@ -395,7 +414,13 @@
     </div>
   {:else if !nowRunning}
     {#key [status]}
-      <div class="results" on:click={expandedState ? null : editFunc}>
+      <div
+        class="results"
+        on:click={onClick}
+        on:keypress={onFocusEnter}
+        on:contextmenu|preventDefault|stopPropagation={onFocusEnter}
+        on:focusout={closeMenu}
+      >
         <Pane
           title={namesMap.get(runName)}
           initialExpandedState={expandedState}
