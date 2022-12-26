@@ -87,7 +87,7 @@
     >
       <i class="codicon codicon-file" />
       <h3 style="line-height: 18px; margin-right:auto;">
-        {`additional Contract ${index + 1}`}
+        {`Additional Contract ${index + 1}`}
       </h3>
       <h3 style="margin-left: auto; margin-right: 10px; margin-top: 3px">
         {$solAdditionalContracts[index].mainContract}
@@ -141,7 +141,7 @@
           <div slot="body" class="most_inner_card">
             <div class="input_wrapper">
               <div class="dark_input">
-                <h3>Soldity compiler to use</h3>
+                <h3>Solidity Compiler To Use</h3>
 
                 <!-- no placeholder, this filed should have the default compiler selected by default -->
                 <CustomInput
@@ -151,7 +151,7 @@
                 />
               </div>
               <div class="dark_input">
-                <h3>Directory containing compiler (Optional)</h3>
+                <h3>Directory Containing Compiler (Optional)</h3>
                 <CustomInput
                   infoObj={infoObjArr.solPackages}
                   placeholder="CVT-Executables-Mac"

@@ -612,7 +612,7 @@
         To check your smart contract start by creating a verification run
       </div>
       <vscode-button class="command-button" on:click={() => createRun()}>
-        Create new job
+        Create New Job
       </vscode-button>
     </div>
   </div>
