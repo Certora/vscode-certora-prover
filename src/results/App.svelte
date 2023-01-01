@@ -268,7 +268,7 @@
             const newRun = {
               id: runs.length,
               name: file.fileName,
-              status: curStatus,
+              status: curStatus || Status.missingSettings,
             }
             createRun(newRun)
             namesMap.set(newRun.name, newRun.name.replaceAll('_', ' '))
