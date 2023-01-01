@@ -612,29 +612,20 @@
 {#if runsCounter === 0}
   <div class="zero-state">
     <div class="command">
-      <h3 class="command-description">Verify your smart contract</h3>
+      <h3 class="command-description">Welcome To Certora Prover IDE</h3>
+      <div class="command-description">Verify your smart contract</div>
     </div>
   </div>
 
   <div class="zero-state">
     <div class="command">
-      <div class="command-description">By creating a new job</div>
+      <div class="command-description">Create your first job</div>
       <vscode-button class="command-button" on:click={() => createRun()}>
-        Create New Job
+        Configure New Job
       </vscode-button>
-    </div>
-  </div>
-  <div class="zero-state">
-    <div class="command">
       <div class="command-description">Or</div>
-    </div>
-  </div>
-
-  <div class="zero-state">
-    <div class="command">
-      <div class="command-description">By uploading a configuration file</div>
       <vscode-button class="command-button" on:click={() => uploadConf()}>
-        Upload Conf Files
+        Upload Configuration File
       </vscode-button>
     </div>
   </div>
@@ -648,6 +639,11 @@
           title: 'run all',
           icon: 'run-all',
           onClick: runAll,
+        },
+        {
+          title: 'create new job from conf file',
+          icon: 'new-file',
+          onClick: uploadConf,
         },
         {
           title: 'create new job',
@@ -799,8 +795,17 @@
     }
 
     .command-description {
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       line-height: 16px;
+    }
+    .command-button {
+      width: 230px;
+      height: 30px;
+      margin-bottom: 10px;
+      line-height: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
   }
 
