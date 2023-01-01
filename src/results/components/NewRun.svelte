@@ -365,9 +365,11 @@
   }
 
   /** focus on this element */
-  function onRightClick(element) {
-    console.log(element, 'focus on this elemnt')
+  function focusOnThis(element) {
     element.focus()
+  }
+
+  function onRightClick(element) {
     //open menu with actions for this job (start with rename!), close menu for all other jobs
   }
 
@@ -375,12 +377,12 @@
     // close the actions menu
   }
 
-  function onFocusEnter(e) {
-    console.log(e, 'eventtt')
-    if (e.key === 'Enter') {
-      setRename()
-    }
-  }
+  // function onFocusEnter(e) {
+  //   console.log(e, 'eventtt')
+  //   if (e.key === 'Enter') {
+  //     setRename()
+  //   }
+  // }
 
   function onClick(e) {
     if (!expandedState) {
@@ -401,7 +403,7 @@
       />
       <input
         id={'rename_input ' + runName}
-        use:onRightClick
+        use:focusOnThis
         on:focusout={deleteOutOfFocus}
         type="text"
         maxlength="35"
@@ -417,8 +419,7 @@
       <div
         class="results"
         on:click={onClick}
-        on:keypress={onFocusEnter}
-        on:contextmenu|preventDefault|stopPropagation={onFocusEnter}
+        on:contextmenu|preventDefault|stopPropagation={onRightClick}
         on:focusout={closeMenu}
       >
         <Pane
@@ -467,7 +468,7 @@
 <style lang="postcss">
   .body {
     *:focus {
-      background-color: var(--vscode-list-activeSelectionBackground);
+      /* background-color: var(--vscode-list-activeSelectionBackground); */
       outline-color: var(--vscode-list-focusHighlightForeground);
     }
 
