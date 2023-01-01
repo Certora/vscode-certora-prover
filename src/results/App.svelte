@@ -394,6 +394,9 @@
    */
   function createRun(run?: Run): void {
     if (run) {
+      if (!run.status) {
+        run.status = Status.missingSettings
+      }
       runsCounter = runs.push(run)
     } else {
       // don't create more than one new run while in rename state
