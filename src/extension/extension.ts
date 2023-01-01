@@ -370,15 +370,19 @@ export function activate(context: vscode.ExtensionContext): void {
       fileName: getConfFileName(vscode.workspace.asRelativePath(file)),
       allowRun: 0,
     }
-    const content: ConfFile = await readConf(file)
-    if (
-      content.files !== undefined &&
-      content.verify !== undefined &&
-      content.files.length > 0 &&
-      content.verify?.length > 0 &&
-      content.solc
-    ) {
-      fileObj.allowRun = 1
+    try {
+      const content: ConfFile = await readConf(file)
+      if (
+        content.files !== undefined &&
+        content.verify !== undefined &&
+        content.files.length > 0 &&
+        content.verify?.length > 0 &&
+        content.solc
+      ) {
+        fileObj.allowRun = 1
+      }
+    } catch (e) {
+      // listen to file changes
     }
     return fileObj
   }
