@@ -104,8 +104,6 @@ The following image shows the possible job statuses and their meaning:
 
 * Job can’t be edited, renamed or duplicated while in Running / Pending status.
 
-* See the job’s verification report by pressing the icon in the job list item while in Success status (see the following image).
-
 
 ## Troubleshooting
 
