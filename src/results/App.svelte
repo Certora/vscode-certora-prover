@@ -38,10 +38,10 @@
   } from './types'
   import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
   import NewRun from './components/NewRun.svelte'
-  import ContextMenu from './components/ContextMenu.svelte'
 
   import { writable } from 'svelte/store'
-  export const hide = writable(true)
+  export const hide = writable([])
+  export const pos = writable({ x: 0, y: 0 })
 
   let output: Output
   let outputRunName: string
@@ -397,6 +397,7 @@
    * @param run new run. if doest exists - creates a new run object
    */
   function createRun(run?: Run): void {
+    $hide.push(true)
     if (run) {
       if (!run.status) {
         run.status = Status.missingSettings
@@ -612,8 +613,21 @@
     window.removeEventListener('message', listener)
   })
 
+  function resentHide() {
+    $hide = $hide.map(item => {
+      return (item = true)
+    })
+  }
+
+  function showMenu(e, index) {
+    $pos = { x: e.clientX, y: e.clientY }
+    console.log(pos)
+    resentHide()
+    $hide[index] = false
+  }
+
   window.onclick = function (event) {
-    console.log('click')
+    resentHide()
   }
 </script>
 
@@ -664,7 +678,11 @@
         {#each Array(runsCounter) as _, index (index)}
           <!-- removing the keys in hope the one refreshed job won't refresh everything -->
           {#key [focusedRun]}
-            <li>
+            <li
+              on:contextmenu|stopPropagation|preventDefault={e => {
+                showMenu(e, index)
+              }}
+            >
               <NewRun
                 doRename={runs[index].name === ''}
                 editFunc={() => editRun(runs[index])}
@@ -705,9 +723,10 @@
                 inactiveSelected={focusedRun}
                 {setStatus}
                 vrLink={runs[index].vrLink}
+                hide={$hide[index]}
+                pos={$pos}
                 bind:runName={runs[index].name}
               />
-              <ContextMenu />
             </li>
           {/key}
         {/each}

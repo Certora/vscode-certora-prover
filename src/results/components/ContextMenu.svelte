@@ -1,50 +1,62 @@
 <script lang="ts">
-  import { writable } from 'svelte/store'
+  // import { writable } from 'svelte/store'
   import type { Action } from '../types'
 
-  export const hide = writable(true)
+  export let hide = true
   export let actions: Action[] = []
-
-  function openMenu(e) {
-    $hide = false
-  }
-
-  function closeMenu() {
-    $hide = true
-  }
+  export let pos = { x: 0, y: 0 }
 </script>
 
 <div
-  class={'dropdown-content ' + ($hide ? 'hide' : '')}
-  on:focusout={closeMenu}
+  class={'dropdown-content ' + (hide ? 'hide' : '')}
+  style="top: {pos.y}px; left: {pos.x}px;"
 >
+  <div class="gap" />
   {#each actions as action}
-    <button on:click={action.onClick}>action.title</button>
+    <button on:click={action.onClick}>{action.title}</button>
   {/each}
+  <div class="gap" />
 </div>
 
 <style>
   .dropdown-content {
     position: absolute;
     background-color: #f1f1f1;
-    min-width: 90px;
+    width: 90px;
+    height: 90px;
     overflow: auto;
     box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
     z-index: 1;
     left: 10px;
-    border-radius: 10px;
+    border-radius: 5px;
+    background-color: var(--vscode-menu-foreground);
   }
 
   .hide {
     display: none;
   }
 
+  .gap {
+    margin-top: 5px;
+  }
+
   .dropdown-content button {
-    min-width: 90px;
-    min-height: 20px;
+    height: 22%;
+    width: 90%;
+    font-size: 11px;
+    text-align: left;
     color: black;
-    padding: 12px 16px;
+    /* margin-top: 5px; */
+    margin-left: 5px;
     text-decoration: none;
     display: block;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--vscode-menu-foreground);
+
+    &:hover {
+      background-color: var(--vscode-progressBar-background);
+      color: white;
+    }
   }
 </style>
