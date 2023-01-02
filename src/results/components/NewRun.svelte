@@ -369,21 +369,6 @@
     element.focus()
   }
 
-  function onRightClick(element) {
-    //open menu with actions for this job (start with rename!), close menu for all other jobs
-  }
-
-  function closeMenu() {
-    // close the actions menu
-  }
-
-  // function onFocusEnter(e) {
-  //   console.log(e, 'eventtt')
-  //   if (e.key === 'Enter') {
-  //     setRename()
-  //   }
-  // }
-
   function onClick(e) {
     if (!expandedState) {
       editFunc()
@@ -416,12 +401,7 @@
     </div>
   {:else if !nowRunning}
     {#key [status]}
-      <div
-        class="results"
-        on:click={onClick}
-        on:contextmenu|preventDefault|stopPropagation={onRightClick}
-        on:focusout={closeMenu}
-      >
+      <div class="results" on:click={onClick}>
         <Pane
           title={namesMap.get(runName)}
           initialExpandedState={expandedState}
