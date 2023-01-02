@@ -28,7 +28,7 @@ Content
 
 ## Prerequisites
 
-Please follow the Certora Prover [installation instructions](https://docs.certora.com/en/latest/).  Please note that steps 1, 2, and 4 are required, while step number 3 is optional but highly recommended.
+Please follow the Certora Prover [installation instructions](https://docs.certora.com/en/latest/docs/user-guide/getting-started/index.html).  Please note that steps 1, 2, and 4 are required, while step number 3 is optional but highly recommended.
 
 ## Usage
 
