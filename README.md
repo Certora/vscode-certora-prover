@@ -38,7 +38,13 @@ When you first open the IDE, you will see this starting screen:
 
 ![image](https://user-images.githubusercontent.com/96879706/210215779-f7fd12a2-0475-4679-93ef-34cb6654bffc.png)
 
-To create your first job, click either the "Configure New Job" or the "Upload Configuration File" button. 
+To create your first job, click either the
+
+“Configure New Job” button - this option will open an empty new Job. use the Settings Menu to configure Job details.
+
+OR
+
+the “Upload Configuration File” button - this option will automaticly create a new job from the chosen .conf file.
 
 After creating a job, you will see your job list item and the job’s settings form tab will open (see next step for a deeper dive into job list items and the settings form).
 
