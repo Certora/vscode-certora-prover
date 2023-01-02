@@ -5,6 +5,7 @@
 
   import { onDestroy, onMount } from 'svelte'
   import { getIconPath } from '../utils/getIconPath'
+  import ContextMenu from '../components/ContextMenu.svelte'
 
   import {
     Verification,
@@ -56,6 +57,10 @@
   export let status: Status
 
   export let vrLink = ''
+
+  export let hide = true
+
+  export let pos
 
   let beforeRename = ''
 
@@ -444,6 +449,7 @@
     </div>
   {/if}
 </div>
+<ContextMenu {hide} actions={createActions()} {pos} />
 
 <style lang="postcss">
   .body {
