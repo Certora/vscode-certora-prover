@@ -38,6 +38,10 @@
   } from './types'
   import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
   import NewRun from './components/NewRun.svelte'
+  import ContextMenu from './components/ContextMenu.svelte'
+
+  import { writable } from 'svelte/store'
+  export const hide = writable(true)
 
   let output: Output
   let outputRunName: string
@@ -607,6 +611,10 @@
   onDestroy(() => {
     window.removeEventListener('message', listener)
   })
+
+  window.onclick = function (event) {
+    console.log('click')
+  }
 </script>
 
 {#if runsCounter === 0}
@@ -699,6 +707,7 @@
                 vrLink={runs[index].vrLink}
                 bind:runName={runs[index].name}
               />
+              <ContextMenu />
             </li>
           {/key}
         {/each}
