@@ -46,7 +46,7 @@ OR
 
 the “Upload Configuration File” button - this option will automaticly create a new job from the chosen .conf file.
 
-After creating a job, you will see your job list item and the job’s settings form tab will open (see next step for a deeper dive into job list items and the settings form).
+After creating a job, you will see your job list item and the job’s settings form tab will open.
 
 |Description|Location|
 |---|---|
