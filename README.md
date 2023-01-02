@@ -91,16 +91,17 @@ While the verification process advances, you'll see each property (rule or invar
 
 Go to verification report from the job list item:
 
-![image](https://user-images.githubusercontent.com/101042618/203575476-264a610a-87cd-4adf-94e5-45c54531b7bb.png)
+![Screen Shot 2023-01-02 at 16 12 22](https://user-images.githubusercontent.com/101042618/210242771-5da08a0b-d537-4743-b7b0-d148f82678f1.png)
+
 
 
 ## Statuses
 
 The following image shows the possible job statuses and their meaning:
 
-![image](https://user-images.githubusercontent.com/101042618/203576203-c9de1cba-47fb-45ab-b7bb-2d07a595a01d.png)
+![Screen Shot 2023-01-02 at 16 11 18](https://user-images.githubusercontent.com/101042618/210242674-e9cb0906-a45a-47fa-99a9-acfe047530d5.png)
 
-* Job can’t run while in Finish Setup status. 
+* Job can’t run while in Missing Settings status. 
 
 * Job can’t be edited, renamed or duplicated while in Running / Pending status.
 
