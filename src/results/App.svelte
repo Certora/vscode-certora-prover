@@ -636,17 +636,17 @@
       initialExpandedState={true}
       actions={[
         {
-          title: 'run all',
+          title: 'Run All',
           icon: 'run-all',
           onClick: runAll,
         },
         {
-          title: 'create new job from conf file',
+          title: 'Create New Job From Conf File',
           icon: 'new-file',
           onClick: uploadConf,
         },
         {
-          title: 'create new job',
+          title: 'Create New Job',
           icon: 'diff-added',
           onClick: createRun,
         },

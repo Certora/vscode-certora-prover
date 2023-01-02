@@ -224,22 +224,22 @@
   function createActions(): Action[] {
     let actions: Action[] = [
       {
-        title: 'rename',
+        title: 'Rename',
         icon: 'edit',
         onClick: setRename,
       },
       {
-        title: 'edit',
+        title: 'Edit',
         icon: 'gear',
         onClick: editFunc,
       },
       {
-        title: 'delete',
+        title: 'Delete',
         icon: 'trash',
         onClick: deleteFunc,
       },
       {
-        title: 'duplicate',
+        title: 'Duplicate',
         icon: 'files',
         onClick: () => {
           duplicate()
@@ -248,7 +248,7 @@
     ]
     if (hasResults() && vrLink) {
       actions.unshift({
-        title: 'go to Rule Report',
+        title: 'Go To Rule Report',
         icon: 'file-symlink-file',
         link: vrLink,
       })
@@ -290,7 +290,7 @@
     if (isPending) {
       return [
         {
-          title: 'stop',
+          title: 'Stop',
           icon: 'stop-circle',
           onClick: pendingRunStop,
         },
@@ -299,7 +299,7 @@
     if (nowRunning) {
       return [
         {
-          title: 'stop',
+          title: 'Stop',
           icon: 'stop-circle',
           onClick: runningStop,
         },

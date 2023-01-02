@@ -19,7 +19,7 @@
     $solidityObj.compiler.ver !== ''
 </script>
 
-<h1>{$RunName} settings</h1>
+<h1>Settings: {$RunName}</h1>
 <div class="nav_settings">
   <button
     class="nav_settings_child "

@@ -246,13 +246,13 @@ export type EventsFromExtension =
     }
 
 export enum Status {
-  missingSettings = 'Missing settings',
+  missingSettings = 'Missing Settings',
   ready = 'Ready',
   running = 'Running',
   pending = 'Pending',
-  success = 'Ready success',
-  unableToRun = 'Unable to run',
-  incompleteResults = 'Incomplete results',
+  success = 'Ready Success',
+  unableToRun = 'Unable To Run',
+  incompleteResults = 'Incomplete Results',
 }
 
 export type Run = {

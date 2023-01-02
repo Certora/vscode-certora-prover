@@ -97,6 +97,7 @@
         height="16"
         src={getIconPath(statusMap.get(status))}
         alt=""
+        title={runFunc ? 'Run' : status}
         on:click|stopPropagation={runFunc}
       />
     {/if}
