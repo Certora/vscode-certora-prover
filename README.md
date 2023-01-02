@@ -39,6 +39,7 @@ When you first open the IDE, you will see this starting screen:
 ![image](https://user-images.githubusercontent.com/96879706/210215779-f7fd12a2-0475-4679-93ef-34cb6654bffc.png)
 
 To create your first job, click either the "Configure New Job" or the "Upload Configuration File" button. 
+
 After creating a job, you will see your job list item and the job’s settings form tab will open (see next step for a deeper dive into job list items and the settings form).
 
 |Description|Location|
@@ -47,13 +48,11 @@ After creating a job, you will see your job list item and the job’s settings f
 
 ### Start a verification
 
-The job list and setting form looks like this following image:
+#### Solidity settings:
 
 |Description|Location|
 |---|---|
 |<ol><li>Solidity Contracts Settings</li><li>Main Contract Path</li><li>Main Contract Name</li><li>Compiler Executable Name</li><li>Linked Contracts</li><li>Use multiple contracts</li></ol>|<img src="https://user-images.githubusercontent.com/96879706/210220606-71302c46-2c31-47b8-8a62-2906d28f0160.png" width="800"> |
-
-* Notice that the order of filling the settings form is solidity files and contracts related settings first, and spec related settings second.
 
 * Red star next to a field name means it is a mandatory field, and it must be filled to be able to run the job.
 
@@ -61,17 +60,13 @@ The job list and setting form looks like this following image:
 
 * Some values are filled automatically according to popular conventions, but it is best to make sure the value is true to your current requirements.
 
-The Certora spec settings looks like the following image:
+#### Certora spec settings:
 
 |Description|Location|
 |---|---|
 |<ol><li>Spec settings</li><li>Spec file Name</li><li>Verify only Specified Rules<br>(separated by comma)</li></ol>|<img src="https://user-images.githubusercontent.com/96879706/210221289-d00f67d4-3605-4519-b089-177284579ab4.png" width="800">|
 
-* If staging is not checked - run on production
-
-* The Certora Spec settings form will not be available until the mandatory fields in the Solidity Contracts part are filled
-
-A message that describes the job:
+#### Message describing the job:
 
 |Description|Location|
 |---|---|
