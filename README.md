@@ -38,13 +38,9 @@ When you first open the IDE, you will see this starting screen:
 
 ![image](https://user-images.githubusercontent.com/101042618/203574085-3fc6dd36-6298-4c28-9591-59277ab93a3f.png)
 
-To create your first job, click either the “Create verification run” button. Then, you will get a new input window where you can name your job.
+To create your first job, click either the "Configure New Job" or the "Upload Configuration File" button. 
 
-![image](https://user-images.githubusercontent.com/101042618/203574167-116485cc-ffcc-48e5-b1cc-0e2bc2a2840b.png)
-
-Job name is limited to 35 characters.
-
-After pressing Enter you will see your job list item and the job’s settings form tab will open (see next step for a deeper dive into job list items and the settings form).
+After creating a job, you will see your job list item and the job’s settings form tab will open (see next step for a deeper dive into job list items and the settings form).
 
 ![image](https://user-images.githubusercontent.com/101042618/203574324-03d52268-3c4b-40b1-915c-6af23e9189d1.png)
 
