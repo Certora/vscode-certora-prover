@@ -19,7 +19,7 @@
     $solidityObj.compiler.ver !== ''
 </script>
 
-<h1>{$RunName} settings</h1>
+<h1>Settings: {$RunName}</h1>
 <div class="nav_settings">
   <button
     class="nav_settings_child "
@@ -42,7 +42,7 @@
       </svg>
     </i>
 
-    <h3>Solidity contracts</h3>
+    <h3>Solidity Contracts</h3>
     <i class="codicon codicon-check" />
   </button>
   <button
@@ -53,7 +53,7 @@
     disabled={false}
   >
     <i class="codicon codicon-symbol-method" />
-    <h3>Certora spec</h3>
+    <h3>Certora Spec</h3>
     <i class="codicon codicon-check" />
   </button>
   <button
@@ -64,7 +64,7 @@
     disabled={false}
   >
     <i class="codicon codicon-comment " />
-    <h3>Verification message</h3>
+    <h3>Verification Message</h3>
     <i class="codicon codicon-check" />
   </button>
 </div>

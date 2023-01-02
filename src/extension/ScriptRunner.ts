@@ -7,8 +7,9 @@ import * as os from 'os'
 import { ScriptProgressLongPolling } from './ScriptProgressLongPolling'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { getProgressUrl } from './utils/getProgressUrl'
-import type { Job } from './types'
+import { Job, CERTORA_INNER_DIR, LOG_DIRECTORY_DEFAULT } from './types'
 import { PostProblems } from './PostProblems'
+import { checkDir } from './utils/checkDir'
 
 type RunningScript = {
   pid: number
@@ -23,7 +24,6 @@ export class ScriptRunner {
   private readonly resultsWebviewProvider: ResultsWebviewProvider
   private script: ChildProcessWithoutNullStreams | null = null
   private runningScripts: RunningScript[] = []
-  // private logFile: Uri | undefined
   private logFiles: Uri[] = []
 
   constructor(resultsWebviewProvider: ResultsWebviewProvider) {
@@ -40,18 +40,69 @@ export class ScriptRunner {
   }
 
   /**
+   * returns a Date if possible, null if not possible
+   * @param dir string in the format of 22_12_05_14_22_09_BLA
+   * @returns date object
+   */
+  private getDateFormat(dir: string): [Date, string] {
+    const arr = dir.split('_').slice(0, 6)
+    const dateStr = '20' + arr.slice(0, 3).join('-') + 'T'
+    const timeStr = arr.slice(3, 6).join(':') + 'Z'
+    const str = dateStr + timeStr
+    return [new Date(str), dir]
+  }
+
+  /**
    * returns a uri of the conf.log file if the workspace path exists, null otherwise
    * @param pathToConfFile path to the .conf file (relative)
    * @param ts the time the file was created
    * @returns the full path to the conf.log file or null
    */
-  private getLogFilePath(pathToConfFile: string, ts: number) {
+  private async getLogFilePath(pathToConfFile: string, ts: number) {
     const path = workspace.workspaceFolders?.[0]
     if (!path) return
 
+    const internalUri = Uri.parse(path.uri.path + CERTORA_INNER_DIR)
+    const checked = await checkDir(internalUri)
+    if (checked) {
+      const innerDirs = await workspace.fs.readDirectory(internalUri)
+      const dates = innerDirs.map(dir => {
+        if (dir[1] === 2) {
+          return this.getDateFormat(dir[0])
+        }
+        return null
+      })
+      // filter out null values
+      const datesNew = dates.filter(date => {
+        return date && date[0]
+      })
+
+      // sort by date
+      const sortedDates = datesNew.sort(function (a, b) {
+        if (a !== null && b !== null) {
+          return a[0] > b[0] ? -1 : 1
+        }
+        return 0
+      })
+
+      // get the most recent date / dir
+      const curDate = sortedDates[0]
+
+      if (curDate) {
+        const logFilePath = Uri.joinPath(
+          path.uri,
+          CERTORA_INNER_DIR,
+          curDate[1],
+          `${this.getConfFileName(pathToConfFile)}.log`,
+        )
+        return logFilePath
+      }
+    }
+    // if we can't find the relevant directory in [CERTORA_INNER_DIR] --> create log file in another directory named [LOG_DIRECTORY_DEFAULT] inside it. in this case we need timestamps to be not run over older log files
     const logFilePath = Uri.joinPath(
       path.uri,
-      'certora-logs',
+      CERTORA_INNER_DIR,
+      LOG_DIRECTORY_DEFAULT,
       `${this.getConfFileName(pathToConfFile)}-${ts}.log`,
     )
     return logFilePath
@@ -62,7 +113,7 @@ export class ScriptRunner {
     pathToConfFile: string,
     ts: number,
   ): Promise<void> {
-    const logFilePath = this.getLogFilePath(pathToConfFile, ts)
+    const logFilePath = await this.getLogFilePath(pathToConfFile, ts)
     if (!logFilePath) {
       return
     }
@@ -129,23 +180,25 @@ export class ScriptRunner {
           'Open Execution Log File',
         )
         if (action === 'Open Execution Log File') {
-          const logFilePath = Uri.joinPath(
-            path.uri,
-            'certora-logs',
-            `${this.getConfFileName(confFile)}-${ts}.log`,
-          )
-          const document = await workspace.openTextDocument(logFilePath)
-          await window.showTextDocument(document)
+          const logFilePath = await this.getLogFilePath(confFile, ts)
+          if (logFilePath !== undefined) {
+            try {
+              const document = await workspace.openTextDocument(logFilePath)
+              await window.showTextDocument(document)
+            } catch (e) {
+              console.log('ERROR: ', e, '[Internal error from extension]')
+            }
+          }
         }
       }
       channel.appendLine(str)
 
       const progressUrl = getProgressUrl(str)
 
-      const confFileName = confFile.replace('conf/', '').replace('.conf', '')
+      const confFileName = this.getConfFileName(confFile).replace('.conf', '')
 
       if (progressUrl) {
-        await this.polling.run(progressUrl, data => {
+        await this.polling.run(progressUrl, async data => {
           data.runName = confFileName
           const curLogFiles = this.logFiles
             .filter(
@@ -155,38 +208,48 @@ export class ScriptRunner {
             )
             .sort()
             .reverse()
-          if (curLogFiles !== undefined) {
-            workspace.fs.readFile(curLogFiles[0]).then(content => {
-              const decoder = new TextDecoder()
-              const strContent: string = decoder.decode(content)
-              const pattern =
-                'https://prover.certora.com/output/[a-zA-Z0-9/?=]+'
-              const vrLinkRegExp = new RegExp(pattern)
-              const vrLink = vrLinkRegExp.exec(strContent)
-              if (
-                this.runningScripts.find(rs => rs.pid === pid) !== undefined
-              ) {
-                data.verificationReportLink = ''
-                if (vrLink) {
-                  data.verificationReportLink = vrLink[0] as string
+          if (curLogFiles !== undefined && curLogFiles.length > 0) {
+            try {
+              await workspace.fs.readFile(curLogFiles[0]).then(content => {
+                const decoder = new TextDecoder()
+                const strContent: string = decoder.decode(content)
+                const pattern =
+                  'https://(prover|vaas-stg).certora.com/output/[a-zA-Z0-9/?=]+'
+                const vrLinkRegExp = new RegExp(pattern)
+                const vrLink = vrLinkRegExp.exec(strContent)
+                if (
+                  this.runningScripts.find(rs => rs.pid === pid) !== undefined
+                ) {
+                  data.verificationReportLink = ''
+                  if (vrLink) {
+                    data.verificationReportLink = vrLink[0] as string
+                  }
+                  this.resultsWebviewProvider.postMessage<Job>({
+                    type: 'receive-new-job-result',
+                    payload: data,
+                  })
                 }
-                this.resultsWebviewProvider.postMessage<Job>({
-                  type: 'receive-new-job-result',
-                  payload: data,
-                })
-              }
-            })
+              })
+            } catch (e) {
+              // internal error message for problem reading log file
+              console.log(
+                'There was an error reading the log file for:',
+                confFile,
+                '[internal error message]',
+                e,
+              )
+            }
           }
         })
       }
     })
 
-    this.script.stderr.on('data', async data => {
-      // this.removeRunningScript(pid)
-    })
+    // this.script.stderr.on('data', async data => {
+    //   // this.removeRunningScript(pid)
+    // })
 
     this.script.on('error', async err => {
-      console.error(err)
+      console.error(err, 'this is an error from the script')
       this.removeRunningScript(pid)
     })
 
@@ -235,27 +298,30 @@ export class ScriptRunner {
     this.sendRunningScriptsToWebview()
   }
 
+  // filter log files by name
+  private filterLogFiles(name: string): void {
+    this.logFiles = this.logFiles.filter(lf => {
+      return lf.path.split('/').reverse()[0].split('.conf')[0] !== name
+    })
+  }
+
   private removeRunningScript(pid: number): void {
     const confFile = this.runningScripts.find(rs => rs.pid === pid)
-    this.runningScripts = this.runningScripts.filter(
-      script => script.pid !== pid,
-    )
-    this.logFiles = this.logFiles.filter(
-      lf =>
-        lf.path.split('/').reverse()[0].split('.conf')[0] !==
-        confFile?.confFile,
-    )
+    this.runningScripts = this.runningScripts.filter(script => {
+      return script.pid !== pid
+    })
+    const name = confFile?.confFile
+    if (name) {
+      this.filterLogFiles(name)
+    }
     this.sendRunningScriptsToWebview()
   }
 
   public removeRunningScriptByName(name: string): void {
     this.runningScripts = this.runningScripts.filter(script => {
-      return script.confFile.replace('.conf', '').replace('conf/', '') !== name
+      return this.getConfFileName(script.confFile).replace('.conf', '') !== name
     })
-
-    this.logFiles = this.logFiles.filter(lf => {
-      return lf.path.split('/').reverse()[0].split('.conf')[0] !== name
-    })
+    this.filterLogFiles(name)
     this.sendRunningScriptsToWebview()
   }
 

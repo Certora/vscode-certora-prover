@@ -32,6 +32,7 @@
   export let duplicateFunc: (
     nameToDuplicate: string,
     duplicatedName: string,
+    rule?: string,
   ) => void
   export let runFunc: () => void
   export let verificationResults: Verification[]
@@ -145,7 +146,7 @@
    */
   function titleHandle(): void {
     runName = runName
-      .replace(/[^a-zA-Z0-9 ]/g, '')
+      .replace(/[^a-zA-Z0-9_ ]/g, '')
       .replace(/ +/g, ' ')
       .trim()
     if (runName === '') {
@@ -207,10 +208,13 @@
   /**
    * duplicate this run
    */
-  function duplicate(): void {
-    let duplicatedName = duplicateName(runName)
+  function duplicate(rule?: string): void {
+    let duplicatedName = rule ? runName + ' ' + rule : runName
+    if (namesMap.has(spacesToUnderscores(duplicatedName))) {
+      duplicatedName = duplicateName(duplicatedName)
+    }
     namesMap.set(spacesToUnderscores(duplicatedName), duplicatedName)
-    duplicateFunc(runName, spacesToUnderscores(duplicatedName))
+    duplicateFunc(runName, spacesToUnderscores(duplicatedName), rule)
   }
 
   /**
@@ -220,29 +224,31 @@
   function createActions(): Action[] {
     let actions: Action[] = [
       {
-        title: 'rename',
+        title: 'Rename',
         icon: 'edit',
         onClick: setRename,
       },
       {
-        title: 'edit',
+        title: 'Edit',
         icon: 'gear',
         onClick: editFunc,
       },
       {
-        title: 'delete',
+        title: 'Delete',
         icon: 'trash',
         onClick: deleteFunc,
       },
       {
-        title: 'duplicate',
+        title: 'Duplicate',
         icon: 'files',
-        onClick: duplicate,
+        onClick: () => {
+          duplicate()
+        },
       },
     ]
     if (hasResults() && vrLink) {
       actions.unshift({
-        title: 'go to verification report',
+        title: 'Go To Rule Report',
         icon: 'file-symlink-file',
         link: vrLink,
       })
@@ -284,7 +290,7 @@
     if (isPending) {
       return [
         {
-          title: 'stop',
+          title: 'Stop',
           icon: 'stop-circle',
           onClick: pendingRunStop,
         },
@@ -293,7 +299,7 @@
     if (nowRunning) {
       return [
         {
-          title: 'stop',
+          title: 'Stop',
           icon: 'stop-circle',
           onClick: runningStop,
         },
@@ -410,6 +416,7 @@
                   data={{
                     type: TreeType.Rules,
                     tree: retrieveRules(vr.jobs),
+                    duplicateFunc: duplicate,
                   }}
                   on:fetchOutput={e => newFetchOutput(e, vr)}
                 />

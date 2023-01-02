@@ -407,7 +407,6 @@
         <!-- needs new changes -->
         <SolidityFiles
           {index}
-          solFiles={$solFilesArr}
           {updateItems}
           {handleClear}
           {loadFilesFolder}
@@ -415,7 +414,7 @@
         />
       {/each}
       <button class="btn_add" on:click={addNewFile}
-        ><i class="codicon codicon-add" /> Add another contract</button
+        ><i class="codicon codicon-add" /> Add Another Contract</button
       >
     </div>
   </CollapseCard>

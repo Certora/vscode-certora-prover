@@ -21,7 +21,7 @@ export class SettingsPanel {
   private readonly _panel: vscode.WebviewPanel
   private _disposables: vscode.Disposable[] = []
   private watcher: SmartContractsFilesWatcher
-  private editConfFile?: ConfFile
+  // private editConfFile?: ConfFile
   private static allPanels: SettingsPanel[] = []
   private curConfFileDisplayName: string
   private static resultsWebviewProvider: ResultsWebviewProvider
@@ -51,7 +51,7 @@ export class SettingsPanel {
         type: 'edit-conf-file',
         payload: { confFile: editConfFile, runName: name },
       })
-      this.editConfFile = editConfFile
+      // this.editConfFile = editConfFile
     }
 
     this._panel.onDidChangeViewState(e => {
@@ -98,22 +98,6 @@ export class SettingsPanel {
                   payload: confFileName,
                 })
               } else {
-                // deduplicate fix - if all mandatory fields are filled in the conf file - allow running
-                if (this.editConfFile) {
-                  if (
-                    this.editConfFile?.files &&
-                    this.editConfFile?.files?.length > 0 &&
-                    this.editConfFile?.verify &&
-                    this.editConfFile?.verify?.length > 0 &&
-                    (this.editConfFile?.solc || this.editConfFile?.solc_map)
-                  ) {
-                    SettingsPanel.resultsWebviewProvider.postMessage({
-                      type: 'allow-run',
-                      payload: confFileName,
-                    })
-                    break
-                  }
-                }
                 SettingsPanel.resultsWebviewProvider.postMessage({
                   type: 'block-run',
                   payload: confFileName,

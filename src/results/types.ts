@@ -2,6 +2,8 @@
  *  Here we declare types and enums
  *-------------------------------------------------------------------------------------------- */
 
+export const CONF_DIRECTORY = 'certora/conf/'
+
 export type Action = {
   title: string
   onClick?: () => void
@@ -23,6 +25,7 @@ export enum RuleStatuses {
   Unknown = 'UNKNOWN',
   Running = 'RUNNING',
   Timeout = 'TIMEOUT',
+  Sanity = 'SANITY_FAILED',
 }
 
 // output can be either a string of a path or array of strings of path
@@ -155,6 +158,10 @@ export type CreationTime = {
   postTime: string
 }
 
+export type ConfToCreate = {
+  fileName: string
+  allowRun: number
+}
 export type JobNameMap = {
   displayName: string
   fileName: string
@@ -173,7 +180,9 @@ export enum EventTypesFromExtension {
   FocusChanged = 'focus-changed',
   UploadingFiles = 'run-next',
   ScriptStopped = 'script-stopped',
+  InitialJobs = 'initial-jobs',
   DeleteJob = 'delete-job',
+  RunJob = 'run-job',
 }
 
 export type EventsFromExtension =
@@ -224,18 +233,26 @@ export type EventsFromExtension =
       payload: number
     }
   | {
+      type: EventTypesFromExtension.InitialJobs
+      payload: ConfToCreate[]
+    }
+  | {
       type: EventTypesFromExtension.DeleteJob
+      payload: string
+    }
+  | {
+      type: EventTypesFromExtension.RunJob
       payload: string
     }
 
 export enum Status {
-  missingSettings = 'Missing settings',
+  missingSettings = 'Missing Settings',
   ready = 'Ready',
   running = 'Running',
   pending = 'Pending',
-  success = 'Ready success',
-  unableToRun = 'Unable to run',
-  incompleteResults = 'Incomplete results',
+  success = 'Ready Success',
+  unableToRun = 'Unable To Run',
+  incompleteResults = 'Incomplete Results',
 }
 
 export type Run = {

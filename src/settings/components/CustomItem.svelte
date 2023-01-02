@@ -101,7 +101,7 @@
   }
 
   .groupHeader {
-    text-transform: var(--groupTitleTextTransform, uppercase);
+    text-transform: var(--groupTitleTextTransform);
   }
 
   .groupItem {

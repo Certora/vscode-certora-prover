@@ -18,6 +18,28 @@ enum Commands {
   Duplicate = 'duplicate',
   RemoveScript = 'remove-script',
   AskToDeleteJob = 'ask-to-delete-job',
+  InitResults = 'init-results',
+  UploadConf = 'upload-conf',
+}
+
+export function uploadConf(): void {
+  log({
+    action: 'Send "upload-conf" command',
+    source: Sources.ResultsWebview,
+  })
+  vscode.postMessage({
+    command: Commands.UploadConf,
+  })
+}
+
+export function initResults(): void {
+  log({
+    action: 'Send "init-results" command',
+    source: Sources.ResultsWebview,
+  })
+  vscode.postMessage({
+    command: Commands.InitResults,
+  })
 }
 
 export function removeScript(name: string): void {
@@ -102,14 +124,20 @@ export function askToDeleteJob(name: JobNameMap): void {
 export function duplicate(
   toDuplicate: JobNameMap,
   duplicated: JobNameMap,
+  rule?: string,
 ): void {
   log({
     action: 'Send "duplicate" command',
     source: Sources.ResultsWebview,
+    info: [toDuplicate, duplicated, rule],
   })
   vscode.postMessage({
     command: Commands.Duplicate,
-    payload: { toDuplicate: toDuplicate, duplicatedName: duplicated },
+    payload: {
+      toDuplicate: toDuplicate,
+      duplicatedName: duplicated,
+      rule: rule,
+    },
   })
 }
 

@@ -8,7 +8,7 @@
 
   let infoObjArr = {
     msg: {
-      infoText: 'Adds a message description to your run. ',
+      infoText: 'Message describing the job.',
       infoLink:
         'https://docs.certora.com/en/latest/docs/prover/cli/options.html#msg',
       validator: 'spaceAndDash',
@@ -19,7 +19,7 @@
 <div class="card_parent_wrapper bg_dark border-rd" style="margin-bottom:25px;">
   <div class="header header_contracts">
     <i class="codicon codicon-comment" />
-    <h3>Verification message</h3>
+    <h3>Verification Message</h3>
   </div>
   <div>
     <div class="input_wrapper input_single p-16 pt-0">

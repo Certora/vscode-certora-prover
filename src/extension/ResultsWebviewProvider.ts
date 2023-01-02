@@ -24,9 +24,15 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   public openSettings: null | ((name: JobNameMap) => void) = null
   public deleteConf: null | ((name: JobNameMap) => void) = null
   public askToDeleteJob: null | ((name: JobNameMap) => void) = null
+  public createInitialJobs: null | (() => Promise<void>) = null
+  public uploadConf: null | (() => Promise<void>) = null
   public duplicate:
     | null
-    | ((toDuplicate: JobNameMap, duplicated: JobNameMap) => void) = null
+    | ((
+        toDuplicate: JobNameMap,
+        duplicated: JobNameMap,
+        rule?: string,
+      ) => void) = null
 
   public runScript: null | ((name: JobNameMap) => void) = null
   public removeScript: null | ((name: string) => void) = null
@@ -46,6 +52,15 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
     webview.onDidReceiveMessage(
       (e: EventFromResultsWebview) => {
         switch (e.command) {
+          case CommandFromResultsWebview.InitResults:
+            log({
+              action: 'Received "init-results" command',
+              source: Sources.Extension,
+            })
+            if (typeof this.createInitialJobs === 'function') {
+              this.createInitialJobs()
+            }
+            break
           case CommandFromResultsWebview.NavigateToCode:
             log({
               action: 'Received "navigate-to-code" command',
@@ -54,7 +69,7 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
             })
             navigateToCode(e.payload)
             break
-          case CommandFromResultsWebview.StopScript: {
+          case CommandFromResultsWebview.StopScript:
             log({
               action: 'Received "stop-script" command',
               source: Sources.Extension,
@@ -65,7 +80,6 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
               this.stopScript(e.payload)
             }
             break
-          }
           case CommandFromResultsWebview.RunScript:
             log({
               action: 'Received "run-script" command',
@@ -128,7 +142,11 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
               info: e.payload,
             })
             if (typeof this.duplicate === 'function') {
-              this.duplicate(e.payload.toDuplicate, e.payload.duplicatedName)
+              this.duplicate(
+                e.payload.toDuplicate,
+                e.payload.duplicatedName,
+                e.payload.rule,
+              )
             }
             break
           case CommandFromResultsWebview.RemoveScript:
@@ -139,6 +157,15 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
             })
             if (typeof this.removeScript === 'function') {
               this.removeScript(e.payload)
+            }
+            break
+          case CommandFromResultsWebview.UploadConf:
+            log({
+              action: 'Received "upload-conf" command',
+              source: Sources.Extension,
+            })
+            if (typeof this.uploadConf === 'function') {
+              this.uploadConf()
             }
             break
           default:

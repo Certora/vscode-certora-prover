@@ -2,6 +2,11 @@
  *  Here we declare types and enums
  *-------------------------------------------------------------------------------------------- */
 
+export const CONF_DIRECTORY_NAME = 'certora/conf'
+export const CONF_DIRECTORY = 'certora/conf/'
+export const CERTORA_INNER_DIR = '/.certora_internal/'
+export const LOG_DIRECTORY_DEFAULT = 'certora_logs'
+
 export type JumpToDefinition = {
   file: string
   line: number
@@ -16,6 +21,7 @@ export enum RuleStatuses {
   Unknown = 'UNKNOWN',
   Running = 'RUNNING',
   Timeout = 'TIMEOUT',
+  Sanity = 'SANITY_FAILED',
 }
 
 export type Assert = {
@@ -235,6 +241,8 @@ export enum CommandFromResultsWebview {
   Duplicate = 'duplicate',
   RemoveScript = 'remove-script',
   AskToDeleteJob = 'ask-to-delete-job',
+  InitResults = 'init-results',
+  UploadConf = 'upload-conf',
 }
 
 export enum CommandFromSettingsWebview {
@@ -277,12 +285,22 @@ export type EventFromResultsWebview =
       payload: JobNameMap
     }
   | {
+      command: CommandFromResultsWebview.InitResults
+    }
+  | {
       command: CommandFromResultsWebview.Duplicate
-      payload: { toDuplicate: JobNameMap; duplicatedName: JobNameMap }
+      payload: {
+        toDuplicate: JobNameMap
+        duplicatedName: JobNameMap
+        rule: string | undefined
+      }
     }
   | {
       command: CommandFromResultsWebview.RemoveScript
       payload: string
+    }
+  | {
+      command: CommandFromResultsWebview.UploadConf
     }
 
 export type EventFromSettingsWebview =
@@ -322,4 +340,9 @@ export type Topic = {
 
 export type ResourceError = {
   topics: Topic[]
+}
+
+export type ConfToCreate = {
+  fileName: string
+  allowRun: number
 }

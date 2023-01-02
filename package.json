@@ -145,8 +145,8 @@
     },
     "commands": [
       {
-        "command": "workbench.action.openSettings",
-        "title": "Open settings",
+        "command": "certora.openSettings",
+        "title": "Open Settings",
         "category": "VSCode",
         "icon": "$(settings)"
       }
@@ -154,7 +154,7 @@
     "menus": {
       "view/title": [
         {
-          "command": "workbench.action.openSettings",
+          "command": "certora.openSettings",
           "when": "view == results",
           "group": "navigation"
         }

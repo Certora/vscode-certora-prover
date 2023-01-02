@@ -28,7 +28,7 @@ Content
 
 ## Prerequisites
 
-Please follow the Certora Prover [installation instructions](https://docs.certora.com/en/latest/).  Please note that steps 1, 2, and 4 are required, while step number 3 is optional but highly recommended.
+Please follow the Certora Prover [installation instructions](https://docs.certora.com/en/latest/docs/user-guide/getting-started/index.html).  Please note that steps 1, 2, and 4 are required, while step number 3 is optional but highly recommended.
 
 ## Usage
 
@@ -36,23 +36,30 @@ Please follow the Certora Prover [installation instructions](https://docs.certor
 
 When you first open the IDE, you will see this starting screen:
 
-![image](https://user-images.githubusercontent.com/101042618/203574085-3fc6dd36-6298-4c28-9591-59277ab93a3f.png)
+![image](https://user-images.githubusercontent.com/96879706/210215779-f7fd12a2-0475-4679-93ef-34cb6654bffc.png)
 
-To create your first job, click either the "Configure New Job" or the "Upload Configuration File" button. 
+To create your first job, click either the
 
-After creating a job, you will see your job list item and the job’s settings form tab will open (see next step for a deeper dive into job list items and the settings form).
+“Configure New Job” button - this option will open an empty new Job. use the Settings Menu to configure Job details.
 
-![image](https://user-images.githubusercontent.com/101042618/203574324-03d52268-3c4b-40b1-915c-6af23e9189d1.png)
+OR
+
+the “Upload Configuration File” button - this option will automaticly create a new job from the chosen .conf file.
 
 
+After creating a job, you will see your job list item and the job’s settings form tab will open.
+
+|Description|Location|
+|---|---|
+|<ol><li>Certora Plugin Settings</li><li>Job list header actions<br>   - Run All<br>- Create New Job From Conf File<br>- Create New Job</li><li>Start/rerun</li><li>Job list item action<br>- Rule Report<br>- Rename<br>- Settings<br>- Delete<br>- Duplicate</li></ol>|![image](https://user-images.githubusercontent.com/96879706/210216531-61a98a76-7273-4a84-91f6-d4e86319f0b7.png) |
 
 ### Start a verification
 
-The job list and setting form looks like this following image:
+#### Solidity settings:
 
-![image](https://user-images.githubusercontent.com/101042618/203574517-ea48ecce-56b0-4ea7-94a6-77485fa5fdbe.png)
-
-* Notice that the order of filling the settings form is solidity files and contracts related settings first, and spec related settings second.
+|Description|Location|
+|---|---|
+|<ol><li>Solidity Contracts Settings</li><li>Main Contract Path</li><li>Main Contract Name</li><li>Compiler Executable Name</li><li>Linked Contracts</li><li>Use multiple contracts</li></ol>|<img src="https://user-images.githubusercontent.com/96879706/210220606-71302c46-2c31-47b8-8a62-2906d28f0160.png" width="800"> |
 
 * Red star next to a field name means it is a mandatory field, and it must be filled to be able to run the job.
 
@@ -60,17 +67,17 @@ The job list and setting form looks like this following image:
 
 * Some values are filled automatically according to popular conventions, but it is best to make sure the value is true to your current requirements.
 
-The Certora spec settings looks like the following image:
+#### Certora spec settings:
 
-![image](https://user-images.githubusercontent.com/101042618/203575021-ba39433b-58e2-4ae5-85e7-a50b16ff70d4.png)
+|Description|Location|
+|---|---|
+|<ol><li>Spec settings</li><li>Spec file Name</li><li>Verify only Specified Rules<br>(separated by comma)</li></ol>|<img src="https://user-images.githubusercontent.com/96879706/210221289-d00f67d4-3605-4519-b089-177284579ab4.png" width="800">|
 
-* If staging is not checked - run on production
+#### Message describing the job:
 
-* The Certora Spec settings form will not be available until the mandatory fields in the Solidity Contracts part are filled
-
-A message that describes the job:
-
-![image](https://user-images.githubusercontent.com/101042618/203575303-a7bae547-dcc4-4fff-8378-a382d9e58262.png)
+|Description|Location|
+|---|---|
+|<ol><li>Verification Message settings</li><li>Message will be shown on rule report</li></ol>|<img src="https://user-images.githubusercontent.com/96879706/210221556-42f94dc7-50c7-4305-9d63-00b6d70afaa1.png" width="800">|
 
 * The default value is the job name. 
 
@@ -85,20 +92,19 @@ While the verification process advances, you'll see each property (rule or invar
 
 Go to verification report from the job list item:
 
-![image](https://user-images.githubusercontent.com/101042618/203575476-264a610a-87cd-4adf-94e5-45c54531b7bb.png)
+![Screen Shot 2023-01-02 at 16 12 22](https://user-images.githubusercontent.com/101042618/210242771-5da08a0b-d537-4743-b7b0-d148f82678f1.png)
+
 
 
 ## Statuses
 
 The following image shows the possible job statuses and their meaning:
 
-![image](https://user-images.githubusercontent.com/101042618/203576203-c9de1cba-47fb-45ab-b7bb-2d07a595a01d.png)
+![Screen Shot 2023-01-02 at 16 11 18](https://user-images.githubusercontent.com/101042618/210242674-e9cb0906-a45a-47fa-99a9-acfe047530d5.png)
 
-* Job can’t run while in Finish Setup status. 
+* Job can’t run while in Missing Settings status. 
 
 * Job can’t be edited, renamed or duplicated while in Running / Pending status.
-
-* See the job’s verification report by pressing the icon in the job list item while in Success status (see the following image).
 
 
 ## Troubleshooting

@@ -272,7 +272,7 @@
   :global(.header_contracts h3) {
     line-height: 15px;
     margin: 0;
-    text-transform: uppercase;
+    /* text-transform: uppercase; */
     font-size: 12px;
     font-weight: 500;
   }
@@ -300,7 +300,7 @@
     line-height: 14px;
     font-weight: 500;
     margin: 0;
-    text-transform: uppercase;
+    /* text-transform: uppercase; */
   }
   :global(.header_contract .codicon-file),
   :global(.header_contract .codicon-gear) {

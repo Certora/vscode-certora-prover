@@ -7,9 +7,17 @@ import * as vscode from 'vscode'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { SettingsPanel } from './SettingsPanel'
 import { ScriptRunner } from './ScriptRunner'
-import { ConfFile, InputFormData, JobNameMap } from './types'
+import {
+  ConfFile,
+  ConfToCreate,
+  CONF_DIRECTORY,
+  CONF_DIRECTORY_NAME,
+  InputFormData,
+  JobNameMap,
+} from './types'
 import { createConfFile } from './utils/createConfFile'
 import { confFileToFormData } from './utils/confFileToInputForm'
+import { checkDir } from './utils/checkDir'
 
 export function activate(context: vscode.ExtensionContext): void {
   /**
@@ -130,8 +138,8 @@ export function activate(context: vscode.ExtensionContext): void {
     const confFileUri = getConfUri(name.fileName)
     if (confFileUri) {
       try {
-        const confFileContent = readConf(confFileUri)
-        renderSettingsPanel(name, await confFileContent)
+        const confFileContent = await readConf(confFileUri)
+        renderSettingsPanel(name, confFileContent)
       } catch (e) {
         vscode.window.showErrorMessage(
           `Can't read conf file: ${confFileUri.path}. Error: ${e}`,
@@ -173,15 +181,23 @@ export function activate(context: vscode.ExtensionContext): void {
   async function duplicate(
     toDuplicate: JobNameMap,
     duplicated: JobNameMap,
+    rule?: string,
   ): Promise<void> {
     // get the content of the conf to duplicate
     // create a new conf file with the name of "duplicated", content of "to duplicate", and open it with settings view
     const confFileUri = getConfUri(toDuplicate.fileName)
     if (confFileUri) {
       try {
-        const confFileContent = readConf(confFileUri)
-        // the ; is required for the (await) to work, necessary because we have a Promise<ConfFile> type from readConf function return
-        ;(await confFileContent).msg = ''
+        const confFileContent = await readConf(confFileUri)
+
+        // the ; is required for the (await) to work, nessesary becasue we have a Promise<ConfFile> type from readConf function return
+        confFileContent.msg = ''
+
+        // duplicate the conf file with rule
+        if (rule) {
+          confFileContent.rule = [rule]
+        }
+
         try {
           const newConfFileUri = getConfUri(duplicated.fileName)
           if (newConfFileUri) {
@@ -194,7 +210,14 @@ export function activate(context: vscode.ExtensionContext): void {
         } catch (e) {
           vscode.window.showErrorMessage(`Can't create conf file. Error: ${e}`)
         }
-        renderSettingsPanel(duplicated, await confFileContent)
+        if (rule) {
+          resultsWebviewProvider.postMessage<string>({
+            type: 'run-job',
+            payload: duplicated.fileName,
+          })
+        } else {
+          renderSettingsPanel(duplicated, confFileContent)
+        }
       } catch (e) {
         vscode.window.showErrorMessage(
           `Can't read conf file: ${confFileUri.path}. Error: ${e}`,
@@ -204,7 +227,11 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   function getConfFilePath(name: string): string {
-    return 'conf/' + name + '.conf'
+    return CONF_DIRECTORY + name + '.conf'
+  }
+
+  function getConfFileName(path: string): string {
+    return path.replace(CONF_DIRECTORY, '').replace('.conf', '')
   }
 
   async function runScript(name: JobNameMap) {
@@ -249,17 +276,16 @@ export function activate(context: vscode.ExtensionContext): void {
       })
   }
 
-  function deleteConfFile(name: JobNameMap): void {
+  async function deleteConfFile(name: JobNameMap): Promise<void> {
     const confFileUri: vscode.Uri | void = getConfUri(name.fileName)
     if (confFileUri) {
       try {
-        vscode.workspace.fs.delete(confFileUri)
+        await vscode.workspace.fs.delete(confFileUri)
       } catch (e) {
-        vscode.window.showErrorMessage(
-          `Can't delete conf file: ${confFileUri.path}. Error: ${e}`,
-        )
+        // sometimes we call this function just to close the panel
       }
     }
+
     SettingsPanel.removePanel(name.displayName)
     scriptRunner.removeRunningScriptByName(name.fileName)
   }
@@ -276,6 +302,141 @@ export function activate(context: vscode.ExtensionContext): void {
     scriptRunner.removeRunningScriptByName(name)
   }
 
+  /**
+   * all conf files in the conf folder will become jobs!
+   */
+  async function createInitialJobs(): Promise<void> {
+    const path = vscode.workspace.workspaceFolders?.[0]
+    if (path) {
+      const confDirectoryPath = path.uri.path + '/' + CONF_DIRECTORY
+      const confDirectoryUri = vscode.Uri.parse(confDirectoryPath)
+      const checked = await checkDir(confDirectoryUri)
+      if (checked) {
+        const confFiles = vscode.workspace.fs.readDirectory(confDirectoryUri)
+        confFiles.then(async f => {
+          const confList = f.map(async file => {
+            return await createFileObject(
+              vscode.Uri.parse(confDirectoryPath + file[0]),
+            )
+          })
+          const awaitedList = await Promise.all(confList)
+          sendFilesToCreateJobs(awaitedList)
+        })
+      }
+    }
+    // users can copy conf files to the conf folder and it will create a job!
+    // const path = vscode.workspace.workspaceFolders?.[0]
+    if (path) {
+      const directoryToWatch = vscode.Uri.joinPath(
+        path.uri,
+        CONF_DIRECTORY_NAME,
+      )
+      try {
+        const fileSystemWatcher = vscode.workspace.createFileSystemWatcher(
+          new vscode.RelativePattern(directoryToWatch, '**/*.conf'),
+        )
+        fileSystemWatcher.onDidCreate(async file => {
+          const fileObj: ConfToCreate = await createFileObject(file)
+          sendFilesToCreateJobs([fileObj])
+        })
+        // vscode asks to delete a conf file before is it deleted to avoid mistakes,
+        // so I think deleting the job with it is a good idea
+        fileSystemWatcher.onDidDelete(file => {
+          const nameToRemove = getConfFileName(
+            vscode.workspace.asRelativePath(file.path),
+          )
+          resultsWebviewProvider.postMessage<string>({
+            type: 'delete-job',
+            payload: nameToRemove,
+          })
+        })
+      } catch (e) {
+        console.log(
+          'ERROR:',
+          e,
+          '[internal error from  the file system watcher]',
+        )
+      }
+    }
+  }
+
+  /**
+   * create an object that holds the name of a file, and if the file is runnable in certora prover
+   * @param file uri
+   * @returns Promise<ConfToCreate>
+   */
+  async function createFileObject(file: vscode.Uri): Promise<ConfToCreate> {
+    const fileObj: ConfToCreate = {
+      fileName: getConfFileName(vscode.workspace.asRelativePath(file)),
+      allowRun: 0,
+    }
+    try {
+      const content: ConfFile = await readConf(file)
+      if (
+        content.files !== undefined &&
+        content.verify !== undefined &&
+        content.files.length > 0 &&
+        content.verify?.length > 0 &&
+        content.solc
+      ) {
+        fileObj.allowRun = 1
+      }
+    } catch (e) {
+      // listen to file changes
+    }
+    return fileObj
+  }
+
+  /**
+   * post message with type: 'initial-jobs'
+   * @param files files in the format of {name, allowRun}
+   */
+  async function sendFilesToCreateJobs(files: ConfToCreate[]) {
+    resultsWebviewProvider.postMessage<ConfToCreate[]>({
+      type: 'initial-jobs',
+      payload: files,
+    })
+  }
+
+  /**
+   * browse for conf files, and than copy these files into [CONF_DIRECTORY]
+   */
+  async function uploadConf(): Promise<void> {
+    const path = vscode.workspace.workspaceFolders?.[0]
+    if (!path) return
+    const options: vscode.OpenDialogOptions = {
+      canSelectMany: true,
+      canSelectFolders: false,
+      openLabel: 'Open',
+      defaultUri: path.uri,
+      filters: {
+        'File type': ['conf'],
+      },
+    }
+    const confFiles = await vscode.window.showOpenDialog(options)
+    confFiles?.map(async fileUri => {
+      try {
+        const fileArr = fileUri.path.split('/')
+        const fileName = fileArr.reverse()[0]
+        const target = vscode.Uri.joinPath(
+          path.uri,
+          CONF_DIRECTORY_NAME,
+          fileName,
+        )
+        await vscode.workspace.fs.copy(fileUri, target, { overwrite: true })
+      } catch (e) {
+        console.log("Could'nt copy file", fileUri.path, '\nERROR:', e)
+      }
+    })
+  }
+
+  function openExtensionSettings() {
+    vscode.commands.executeCommand(
+      'workbench.action.openSettings',
+      '@ext:certora.vscode-certora-prover',
+    )
+  }
+
   const resultsWebviewProvider = new ResultsWebviewProvider(
     context.extensionUri,
   )
@@ -287,10 +448,16 @@ export function activate(context: vscode.ExtensionContext): void {
   resultsWebviewProvider.runScript = runScript
   resultsWebviewProvider.removeScript = removeRunningScriptByName
   resultsWebviewProvider.askToDeleteJob = askToDeleteJob
+  resultsWebviewProvider.createInitialJobs = createInitialJobs
+  resultsWebviewProvider.uploadConf = uploadConf
 
   const scriptRunner = new ScriptRunner(resultsWebviewProvider)
 
   context.subscriptions.push(
+    vscode.commands.registerCommand(
+      'certora.openSettings',
+      openExtensionSettings,
+    ),
     vscode.window.registerWebviewViewProvider(
       resultsWebviewProvider.viewType,
       resultsWebviewProvider,

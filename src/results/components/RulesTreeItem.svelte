@@ -7,7 +7,7 @@
   import BaseTreeItem from './BaseTreeItem.svelte'
   import TreeIcon from './TreeIcon.svelte'
   import { navigateToCode } from '../extension-actions'
-  import type { Action, Rule, Assert } from '../types'
+  import { Action, Rule, Assert, RuleStatuses } from '../types'
 
   export let rule: Rule = null
   export let assert: Assert = null
@@ -15,9 +15,13 @@
   export let posInset = 1
   export let actions: Action[] = []
   export let level = 1
+  export let duplicateFunc = null
 
   const dispatch = createEventDispatcher<{ fetchOutput: Assert | Rule }>()
-
+  $: allowDuplicate =
+    rule &&
+    typeof duplicateFunc === 'function' &&
+    rule.jumpToDefinition.length > 0
   $: label = rule?.name || assert?.message
   $: formattedLabel = label === null || label === 'null' ? 'No message' : label
   $: ruleIcon = rule?.status
@@ -28,10 +32,25 @@
     : `unknown-assert-message.svg`
 
   let isExpanded = false
+
+  function duplicateRule() {
+    if (allowDuplicate) {
+      duplicateFunc(rule.name)
+    }
+  }
+
+  function getHoverPath(rule) {
+    if (!allowDuplicate) {
+      return ''
+    } else if (rule && rule.status && rule.status === RuleStatuses.Verified) {
+      return 'rerun-success.svg'
+    }
+    return 'unable-to-run.svg'
+  }
 </script>
 
 <BaseTreeItem
-  {label}
+  label={rule?.status ? rule.status : formattedLabel}
   {setSize}
   {posInset}
   {level}
@@ -51,7 +70,11 @@
     isExpanded = !isExpanded
   }}
 >
-  <TreeIcon path={rule ? ruleIcon : assertIcon} />
+  <TreeIcon
+    path={rule ? ruleIcon : assertIcon}
+    duplicateFunc={duplicateRule}
+    hover={getHoverPath(rule)}
+  />
   <div class="label">
     <div class="label-container">
       <span class="name-container">
@@ -121,10 +144,6 @@
     overflow: hidden;
     flex: 1;
     text-overflow: ellipsis;
-  }
-
-  .pointer-cursor {
-    cursor: pointer;
   }
 
   .label-container {

@@ -72,7 +72,8 @@
       validator: 'alphaNum',
     },
     stg: {
-      infoText: 'run on staging environment',
+      infoText:
+        'Run on staging environment.\n\nRunning on Staging Environment requires designated Certora key.',
       infoLink:
         'https://docs.certora.com/en/latest/docs/prover/cli/options.html',
       validator: 'filePathValidator',
@@ -224,29 +225,6 @@
                 />
               </div>
             </div>
-            <h3 class="header_single mt-8px">Staging</h3>
-            <div class="input_wrapper input_single mt-8px">
-              <div class="dark_input check_box_wrapper">
-                <label class="checkbox_container"
-                  >Run on the Staging Environment
-                  <input type="checkbox" bind:checked={$specObj.runOnStg} />
-                  <span class="checkmark" />
-                </label>
-                <CheckBoxInfo infoObj={infoObjArr.stg} />
-              </div>
-            </div>
-            {#if $specObj.runOnStg}
-              <div class="input_wrapper input_single">
-                <div class="dark_input">
-                  <h3>Branch Name</h3>
-                  <CustomInput
-                    placeholder="default: master"
-                    bind:bindValue={$specObj.branchName}
-                    infoObj={infoObjArr.stg}
-                  />
-                </div>
-              </div>
-            {/if}
             <div class="border-rd bg_dark mt-8px">
               <CollapseCard open={false} chevron="padding-right:8px;">
                 <div slot="header" class="p-8 header header_contract">
@@ -375,6 +353,31 @@
                       <CheckBoxInfo infoObj={infoObjArr.typecheck_only} />
                     </div>
                   </div>
+                  <div class="input_wrapper check_between  mt-8px">
+                    <div class="dark_input check_box_wrapper">
+                      <label class="checkbox_container"
+                        >Staging
+                        <input
+                          type="checkbox"
+                          bind:checked={$specObj.runOnStg}
+                        />
+                        <span class="checkmark" />
+                      </label>
+                      <CheckBoxInfo infoObj={infoObjArr.stg} />
+                    </div>
+                  </div>
+                  {#if $specObj.runOnStg}
+                    <div class="input_wrapper input_single">
+                      <div class="dark_input">
+                        <h3>Branch Name</h3>
+                        <CustomInput
+                          placeholder="default: master"
+                          bind:bindValue={$specObj.branchName}
+                          infoObj={infoObjArr.stg}
+                        />
+                      </div>
+                    </div>
+                  {/if}
                 </div>
               </CollapseCard>
             </div>

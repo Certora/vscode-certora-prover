@@ -20,6 +20,8 @@
     duplicate,
     removeScript,
     askToDeleteJob,
+    initResults,
+    uploadConf,
   } from './extension-actions'
   import { smartMergeVerificationResult } from './utils/mergeResults'
   import { log, Sources } from './utils/log'
@@ -32,6 +34,7 @@
     Run,
     JobNameMap,
     Status,
+    CONF_DIRECTORY,
   } from './types'
   import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
   import NewRun from './components/NewRun.svelte'
@@ -190,8 +193,9 @@
         })
         if (
           e.data.payload &&
-          (e.data.payload.callResolution.length > 0 ||
-            e.data.payload.variables.length > 0)
+          ((e.data.payload.callResolution &&
+            e.data.payload.callResolution.length > 0) ||
+            (e.data.payload.variables && e.data.payload.variables.length > 0))
         ) {
           output = e.data.payload
           output.runName = outputRunName
@@ -247,15 +251,66 @@
         focusedRun = e.data.payload
         break
       }
+
+      case EventTypesFromExtension.InitialJobs: {
+        log({
+          action: 'Received "initial-jobs" command',
+          source: Sources.ResultsWebview,
+          info: e.data.payload,
+        })
+        const confList = e.data.payload
+        confList.forEach(file => {
+          if (!namesMap.has(file.fileName)) {
+            let curStatus = Status.missingSettings
+            if (file.allowRun) {
+              curStatus = Status.ready
+            }
+            const newRun = {
+              id: runs.length,
+              name: file.fileName,
+              status: curStatus,
+            }
+            createRun(newRun)
+            namesMap.set(newRun.name, newRun.name.replaceAll('_', ' '))
+          }
+        })
+        break
+      }
+      case EventTypesFromExtension.RunJob: {
+        log({
+          action: 'Received "run-job" command',
+          source: Sources.ResultsWebview,
+          info: e.data.payload,
+        })
+
+        const name: string = e.data.payload
+        const runToRun: Run = runs.find(r => {
+          return r.name === name
+        })
+        if (runToRun !== undefined) {
+          run(runToRun)
+        }
+        break
+      }
       case EventTypesFromExtension.DeleteJob: {
         log({
           action: 'Received "delete-job" command',
           source: Sources.ResultsWebview,
           info: e.data.payload,
         })
-        const runName = e.data.payload
-        const runToDelete = runs.find(run => run.name === runName)
-        deleteRun(runToDelete)
+
+        const nameToDelete: string = e.data.payload
+        const runToDelete: Run = runs.find(r => {
+          return r.name === nameToDelete
+        })
+        if (runToDelete !== undefined) {
+          const jobNameMap: JobNameMap = {
+            fileName: nameToDelete,
+            displayName: namesMap.get(nameToDelete),
+          }
+          deleteRun(runToDelete)
+          deleteConf(jobNameMap)
+        }
         break
       }
       default:
@@ -298,7 +353,11 @@
    * @param nameToDuplicate
    * @param duplicatedName
    */
-  function duplicateRun(nameToDuplicate: string, duplicatedName: string): void {
+  function duplicateRun(
+    nameToDuplicate: string,
+    duplicatedName: string,
+    rule?: string,
+  ): void {
     const toDuplicate: Run = runs.find(run => run.name === nameToDuplicate)
 
     // the status of the new run cannot be 'success' (haven't run yet => no results)
@@ -313,8 +372,6 @@
       status: newStatus,
     }
 
-    createRun(duplicated)
-
     const confNameMapDuplicated: JobNameMap = {
       fileName: duplicated.name,
       displayName: namesMap.get(duplicated.name),
@@ -324,9 +381,11 @@
       fileName: toDuplicate.name,
       displayName: namesMap.get(toDuplicate.name),
     }
-
-    duplicate(confNameMapToDuplicate, confNameMapDuplicated)
-    focusedRun = duplicatedName
+    duplicate(confNameMapToDuplicate, confNameMapDuplicated, rule)
+    createRun(duplicated)
+    if (!rule) {
+      focusedRun = duplicatedName
+    }
   }
 
   /**
@@ -335,6 +394,9 @@
    */
   function createRun(run?: Run): void {
     if (run) {
+      if (!run.status) {
+        run.status = Status.missingSettings
+      }
       runsCounter = runs.push(run)
     } else {
       // don't create more than one new run while in rename state
@@ -365,6 +427,11 @@
     //delete results
     verificationResults = verificationResults.filter(vr => {
       return vr.name !== name
+    })
+
+    //delete from running scripts
+    runningScripts = runningScripts.filter(rs => {
+      return rs.confFile !== name
     })
 
     //delete run
@@ -474,7 +541,7 @@
    * from conf file uri to only the file name
    */
   function getFilename(confFile: string): string {
-    return confFile.replace('conf/', '').replace('.conf', '')
+    return confFile.replace(CONF_DIRECTORY, '').replace('.conf', '')
   }
 
   /**
@@ -532,6 +599,9 @@
 
   onMount(() => {
     window.addEventListener('message', listener)
+    if (runs.length === 0) {
+      initResults()
+    }
   })
 
   onDestroy(() => {
@@ -542,11 +612,20 @@
 {#if runsCounter === 0}
   <div class="zero-state">
     <div class="command">
-      <div class="command-description">
-        To check your smart contract start by creating a verification run
-      </div>
+      <h3 class="command-description">Welcome To Certora Prover IDE</h3>
+      <div class="command-description">Verify your smart contract</div>
+    </div>
+  </div>
+
+  <div class="zero-state">
+    <div class="command">
+      <div class="command-description">Create your first job</div>
       <vscode-button class="command-button" on:click={() => createRun()}>
-        Create new job
+        Configure New Job
+      </vscode-button>
+      <div class="command-description">Or</div>
+      <vscode-button class="command-button" on:click={() => uploadConf()}>
+        Upload Configuration File
       </vscode-button>
     </div>
   </div>
@@ -557,12 +636,17 @@
       initialExpandedState={true}
       actions={[
         {
-          title: 'run all',
+          title: 'Run All',
           icon: 'run-all',
           onClick: runAll,
         },
         {
-          title: 'create new job',
+          title: 'Create New Job From Conf File',
+          icon: 'new-file',
+          onClick: uploadConf,
+        },
+        {
+          title: 'Create New Job',
           icon: 'diff-added',
           onClick: createRun,
         },
@@ -711,8 +795,17 @@
     }
 
     .command-description {
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       line-height: 16px;
+    }
+    .command-button {
+      width: 230px;
+      height: 30px;
+      margin-bottom: 10px;
+      line-height: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
   }
 
