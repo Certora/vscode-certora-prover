@@ -57,7 +57,7 @@ After creating a job, you will see your job list item and the job’s settings f
 
 |Description|Location|
 |---|---|
-|<ol><li>Solidity Contracts Settings</li><li>Main Contract Path</li><li>Main Contract Name</li><li>Compiler Executable Name</li><li>Linked Contracts</li><li>Use Multiple Contracts</li></ol>|<img src="https://user-images.githubusercontent.com/96879706/210220606-71302c46-2c31-47b8-8a62-2906d28f0160.png" width="800"> |
+|<ol><li>Solidity Contracts Settings</li><li>Main Contract Path</li><li>Main Contract Name</li><li>Compiler Executable Name</li><li>Linked Contracts</li><li>Use Multiple Contracts</li></ol>|<img src="https://user-images.githubusercontent.com/101042618/210350567-4b2af592-cb4f-4c33-bea9-5ff812d0997d.png" width="800"> |
 
 * Red star next to a field name means it is a mandatory field, and it must be filled to be able to run the job.
 
@@ -69,13 +69,13 @@ After creating a job, you will see your job list item and the job’s settings f
 
 |Description|Location|
 |---|---|
-|<ol><li>Spec Settings</li><li>Spec File Name</li><li>Verify Only Specified Rules<br>(separated by comma)</li></ol>|<img src="https://user-images.githubusercontent.com/96879706/210221289-d00f67d4-3605-4519-b089-177284579ab4.png" width="800">|
+|<ol><li>Spec Settings</li><li>Spec File Name</li><li>Verify Only Specified Rules<br>(separated by comma)</li></ol>|<img src="![image](https://user-images.githubusercontent.com/101042618/210351128-3543bbb8-fb0b-40a9-a8cd-f1681dadd95b.png)" width="800">|
 
 #### Message Describing The Job:
 
 |Description|Location|
 |---|---|
-|<ol><li>Verification Message Settings</li><li>Message Shown on Rule Report</li></ol>|<img src="https://user-images.githubusercontent.com/96879706/210221556-42f94dc7-50c7-4305-9d63-00b6d70afaa1.png" width="800">|
+|<ol><li>Verification Message Settings</li><li>Message Shown on Rule Report</li></ol>|<img src="![image](https://user-images.githubusercontent.com/101042618/210351190-59dbf3a0-4e8c-45d4-9a31-7b54230743b0.png)" width="800">|
 
 * Default value is job's name. 
 
