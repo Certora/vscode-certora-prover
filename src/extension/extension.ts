@@ -371,13 +371,22 @@ export function activate(context: vscode.ExtensionContext): void {
       allowRun: 0,
     }
     try {
-      const content: ConfFile = await readConf(file)
+      const confFile: ConfFile = await readConf(file)
+      // add send_only flag to conf file, if it doesn't exist
+      if (!confFile.send_only) {
+        try {
+          confFile.send_only = true
+          const encoder = new TextEncoder()
+          const content = encoder.encode(JSON.stringify(confFile, null, 2))
+          await vscode.workspace.fs.writeFile(file, content)
+        } catch (e) {}
+      }
       if (
-        content.files !== undefined &&
-        content.verify !== undefined &&
-        content.files.length > 0 &&
-        content.verify?.length > 0 &&
-        content.solc
+        confFile.files !== undefined &&
+        confFile.verify !== undefined &&
+        confFile.files.length > 0 &&
+        confFile.verify?.length > 0 &&
+        confFile.solc
       ) {
         fileObj.allowRun = 1
       }
