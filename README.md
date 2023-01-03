@@ -13,7 +13,7 @@ Content
   - [Create a new job](#create-a-new-job)
   - [Start a verification](#start-a-verification)
   - [Results](#results)
-  - [Statuses](#statuses)
+  - [Status](#status)
 - [Troubleshooting](#troubleshooting)
 - [License](#license)
 
@@ -32,34 +32,32 @@ Please follow the Certora Prover [installation instructions](https://docs.certor
 
 ## Usage
 
-### Create a new job
+### Create a New Job
 
-When you first open the IDE, you will see this starting screen:
+When you first open the IDE you will see this starting screen:
 
 ![image](https://user-images.githubusercontent.com/96879706/210215779-f7fd12a2-0475-4679-93ef-34cb6654bffc.png)
 
-To create your first job, click either the
+To create your first job click either the
 
 “Configure New Job” button - this option will open an empty new Job. use the Settings Menu to configure Job details.
 
-OR
-
-the “Upload Configuration File” button - this option will automaticly create a new job from the chosen .conf file.
+Or the “Upload Configuration File” button - this option will automaticly create a new job from the chosen .conf file.
 
 
 After creating a job, you will see your job list item and the job’s settings form tab will open.
 
 |Description|Location|
 |---|---|
-|<ol><li>Certora Plugin Settings</li><li>Job list header actions<br>   - Run All<br>- Create New Job From Conf File<br>- Create New Job</li><li>Start/rerun</li><li>Job list item action<br>- Rule Report<br>- Rename<br>- Settings<br>- Delete<br>- Duplicate</li></ol>|![image](https://user-images.githubusercontent.com/96879706/210216531-61a98a76-7273-4a84-91f6-d4e86319f0b7.png) |
+|<ol><li>Certora Plugin Settings</li><li>Job List Header Actions<br>   - Run All<br>- Create New Job From Conf File<br>- Create New Job</li><li>Start/Rerun</li><li>Job List Item Actions<br>- Rule Report<br>- Rename<br>- Settings<br>- Delete<br>- Duplicate</li></ol>|![image](https://user-images.githubusercontent.com/96879706/210216531-61a98a76-7273-4a84-91f6-d4e86319f0b7.png) |
 
-### Start a verification
+### Start a Verification
 
-#### Solidity settings:
+#### Solidity Settings:
 
 |Description|Location|
 |---|---|
-|<ol><li>Solidity Contracts Settings</li><li>Main Contract Path</li><li>Main Contract Name</li><li>Compiler Executable Name</li><li>Linked Contracts</li><li>Use multiple contracts</li></ol>|<img src="https://user-images.githubusercontent.com/96879706/210220606-71302c46-2c31-47b8-8a62-2906d28f0160.png" width="800"> |
+|<ol><li>Solidity Contracts Settings</li><li>Main Contract Path</li><li>Main Contract Name</li><li>Compiler Executable Name</li><li>Linked Contracts</li><li>Use Multiple Contracts</li></ol>|<img src="https://user-images.githubusercontent.com/96879706/210220606-71302c46-2c31-47b8-8a62-2906d28f0160.png" width="800"> |
 
 * Red star next to a field name means it is a mandatory field, and it must be filled to be able to run the job.
 
@@ -67,19 +65,19 @@ After creating a job, you will see your job list item and the job’s settings f
 
 * Some values are filled automatically according to popular conventions, but it is best to make sure the value is true to your current requirements.
 
-#### Certora spec settings:
+#### Certora Spec Settings:
 
 |Description|Location|
 |---|---|
-|<ol><li>Spec settings</li><li>Spec file Name</li><li>Verify only Specified Rules<br>(separated by comma)</li></ol>|<img src="https://user-images.githubusercontent.com/96879706/210221289-d00f67d4-3605-4519-b089-177284579ab4.png" width="800">|
+|<ol><li>Spec Settings</li><li>Spec File Name</li><li>Verify Only Specified Rules<br>(separated by comma)</li></ol>|<img src="https://user-images.githubusercontent.com/96879706/210221289-d00f67d4-3605-4519-b089-177284579ab4.png" width="800">|
 
-#### Message describing the job:
+#### Message Describing The Job:
 
 |Description|Location|
 |---|---|
-|<ol><li>Verification Message settings</li><li>Message will be shown on rule report</li></ol>|<img src="https://user-images.githubusercontent.com/96879706/210221556-42f94dc7-50c7-4305-9d63-00b6d70afaa1.png" width="800">|
+|<ol><li>Verification Message Settings</li><li>Message Shown on Rule Report</li></ol>|<img src="https://user-images.githubusercontent.com/96879706/210221556-42f94dc7-50c7-4305-9d63-00b6d70afaa1.png" width="800">|
 
-* The default value is the job name. 
+* Default value is job's name. 
 
 * It is best to keep it short and informative.
 
@@ -90,21 +88,21 @@ While the verification process advances, you'll see each property (rule or invar
 
 ![go-to-code](assets/go-to-code.gif)
 
-Go to verification report from the job list item:
+Go to Rule Report from the job list item:
 
 ![Screen Shot 2023-01-02 at 16 12 22](https://user-images.githubusercontent.com/101042618/210242771-5da08a0b-d537-4743-b7b0-d148f82678f1.png)
 
 
 
-## Statuses
+## Status
 
-The following image shows the possible job statuses and their meaning:
+The following image shows possible job status:
 
 ![Screen Shot 2023-01-02 at 16 11 18](https://user-images.githubusercontent.com/101042618/210242674-e9cb0906-a45a-47fa-99a9-acfe047530d5.png)
 
-* Job can’t run while in Missing Settings status. 
+* Job cannot run while in "Missing Settings" status. 
 
-* Job can’t be edited, renamed or duplicated while in Running / Pending status.
+* Job cannot be edited, renamed or duplicated while in "Running" / "Pending" status.
 
 
 ## Troubleshooting
@@ -113,7 +111,7 @@ The following image shows the possible job statuses and their meaning:
 
 If you experience a frozen state (buttons don't work), you need to use `cmd/ctrl + shift + p` and find the `Developer: Open Webview Developer Tools` command. Go to the `console` in the devtool window, and copy (or make a screenshot of) the logs. Next, press `cmd/ctrl + shift + p` and type `Developer: Reload Window`.
 
-### CERTORAKEY is missing
+### CERTORAKEY is Missing
 
 The following error message - `Couldn't find Certora Key` may indicate that the `CERTORAKEY` variable was not defined globally. You can try to fix it at the VS Code level. For doing this, please go to the VS Code Settings, in the `Search Settings` input type `integrated env`, and click the `edit in settings.json` based on your OS. Put the `CERTORAKEY` in the opened settings.json file in the following way (replace the `linux` with your OS):
 ```
