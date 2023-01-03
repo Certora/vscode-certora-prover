@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-### 0.0.5 (2023-01-03)
+### 0.1.0 (2023-01-03)
 
 ## Bug Fixes
 
@@ -10,7 +10,7 @@ All notable changes to this project will be documented in this file.
 * UI improvements in the settings form & results view ([#71](https://github.com/Certora/vscode-certora-prover/pull/71))
 * Additional files always shows solc version, if it was provided ([#71](https://github.com/Certora/vscode-certora-prover/pull/71))
 * Rename mode is fixed ([#71](https://github.com/Certora/vscode-certora-prover/pull/71))
-* Rule Report button appears when running on staging as well ([#72]((https://github.com/Certora/vscode-certora-prover/pull/72)))
+* Rule Report button appears when running on staging as well ([#72](https://github.com/Certora/vscode-certora-prover/pull/72))
 
 ## Features
 
