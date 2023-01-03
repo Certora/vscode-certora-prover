@@ -6,16 +6,16 @@ All notable changes to this project will be documented in this file.
 
 ## Bug Fixes
 
-* Settings button opens settings tab ([#71] (https://github.com/Certora/vscode-certora-prover/pull/71))
-* UI improvements in the settings form & results view ([#71] (https://github.com/Certora/vscode-certora-prover/pull/71))
-* Additional files always shows solc version, if it was provided ([#71] (https://github.com/Certora/vscode-certora-prover/pull/71))
-* Rename mode is fixed ([#71] (https://github.com/Certora/vscode-certora-prover/pull/71))
+* Settings button opens settings tab ([#71](https://github.com/Certora/vscode-certora-prover/pull/71))
+* UI improvements in the settings form & results view ([#71](https://github.com/Certora/vscode-certora-prover/pull/71))
+* Additional files always shows solc version, if it was provided ([#71](https://github.com/Certora/vscode-certora-prover/pull/71))
+* Rename mode is fixed ([#71](https://github.com/Certora/vscode-certora-prover/pull/71))
 * Rule Report button appears when running on staging as well ([#72]((https://github.com/Certora/vscode-certora-prover/pull/72)))
 
 ## Features
 
 * Create jobs from conf files in certora/conf folder ([#72](https://github.com/Certora/vscode-certora-prover/pull/72))
-* Modal that asks the user if they are sure before deleting a job list item ([#71] (https://github.com/Certora/vscode-certora-prover/pull/71))
+* Modal that asks the user if they are sure before deleting a job list item ([#71](https://github.com/Certora/vscode-certora-prover/pull/71))
 * Changed location of conf files to certora/conf directory, and log files to .certora_internal directory ([#72](https://github.com/Certora/vscode-certora-prover/pull/72))
 * When clicking on the icon by a rule, create a new job with this one rule ([#76](https://github.com/Certora/vscode-certora-prover/pull/76))
 * 'Staging' option moved to the end of 'Additional Prover Settings' in the Settings Form ([#76](https://github.com/Certora/vscode-certora-prover/pull/76))
@@ -24,9 +24,9 @@ All notable changes to this project will be documented in this file.
 
 ## Features 
 
-* New settings form with a new design and better flags handling ([#67] (https://github.com/Certora/vscode-certora-prover/pull/67))
-* Run multiple jobs in parallel ([#67] (https://github.com/Certora/vscode-certora-prover/pull/67))
-* Manage jobs separately (job actions: rename, edit, delete, duplicate, run, show results - per job) ([#67] (https://github.com/Certora/vscode-certora-prover/pull/67))
+* New settings form with a new design and better flags handling ([#67](https://github.com/Certora/vscode-certora-prover/pull/67))
+* Run multiple jobs in parallel ([#67](https://github.com/Certora/vscode-certora-prover/pull/67))
+* Manage jobs separately (job actions: rename, edit, delete, duplicate, run, show results - per job) ([#67](https://github.com/Certora/vscode-certora-prover/pull/67))
 
 ### 0.0.3 (2022-05-30)
 
