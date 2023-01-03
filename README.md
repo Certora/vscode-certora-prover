@@ -69,13 +69,13 @@ After creating a job, you will see your job list item and the job’s settings f
 
 |Description|Location|
 |---|---|
-|<ol><li>Spec Settings</li><li>Spec File Name</li><li>Verify Only Specified Rules<br>(separated by comma)</li></ol>|<img src="![image](https://user-images.githubusercontent.com/101042618/210351128-3543bbb8-fb0b-40a9-a8cd-f1681dadd95b.png)" width="800">|
+|<ol><li>Spec Settings</li><li>Spec File Name</li><li>Verify Only Specified Rules<br>(separated by comma)</li></ol>|<img src="https://user-images.githubusercontent.com/101042618/210351128-3543bbb8-fb0b-40a9-a8cd-f1681dadd95b.png" width="800">|
 
 #### Message Describing The Job:
 
 |Description|Location|
 |---|---|
-|<ol><li>Verification Message Settings</li><li>Message Shown on Rule Report</li></ol>|<img src="![image](https://user-images.githubusercontent.com/101042618/210351190-59dbf3a0-4e8c-45d4-9a31-7b54230743b0.png)" width="800">|
+|<ol><li>Verification Message Settings</li><li>Message Shown on Rule Report</li></ol>|<img src="https://user-images.githubusercontent.com/101042618/210351190-59dbf3a0-4e8c-45d4-9a31-7b54230743b0.png" width="800">|
 
 * Default value is job's name. 
 
