@@ -209,9 +209,7 @@ function processSpecAttributes(confFile: ConfFile, specObj: SpecObj) {
       specObj.ruleSanity = true
       specObj.advancedSanity = true
     }
-    if (confFile.send_only) {
-      specObj.sendOnly = true
-    }
+    specObj.sendOnly = true
   }
 
   const additionalSettings = getAdditionalSettings(confFile)
