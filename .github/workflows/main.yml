@@ -86,6 +86,8 @@ jobs:
           node-version: '18'
       - name: Install vscode extensions cli
         run: npm install -g @vscode/vsce
+      - name: Install dependecies
+        run: npm install
       - name: Download extension
         uses: actions/download-artifact@v3
         with:
