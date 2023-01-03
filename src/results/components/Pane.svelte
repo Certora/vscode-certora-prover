@@ -9,6 +9,7 @@
 
   export let title: string
   export let actions: Action[] = []
+  export let fixedActions: Action[] = []
   export let initialExpandedState: boolean = false
   export let showExpendIcon: boolean = true
   export let status: Status | string = ''
@@ -108,6 +109,9 @@
     <div class="status">
       {status === Status.success ? Status.ready : status}
     </div>
+    <div class="fixed-actions">
+      <Toolbar actions={fixedActions} />
+    </div>
   </div>
   {#if isExpanded}
     <div class="pane-body">
@@ -173,6 +177,10 @@
 
     .actions {
       display: none;
+      margin-left: auto;
+    }
+
+    .fixed-actions {
       margin-left: auto;
     }
 

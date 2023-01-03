@@ -6,19 +6,21 @@
   export let title: string
   export let icon: string
   export let link: string = ''
+  // export let disabled = true
 </script>
 
 <li class="action-item menu-entry" role="presentation">
   {#if link}
     <a
-      class="action-label codicon codicon-action codicon-{icon}"
+      class="action-label disabled codicon codicon-action codicon-{icon}"
       {title}
+      role="button"
       href={link}
       tabindex="0"
     />
   {:else}
     <div
-      class="action-label codicon codicon-action codicon-{icon}"
+      class="action-label codicon codicon-action codicon-{icon} "
       role="button"
       {title}
       tabindex="0"
@@ -58,5 +60,13 @@
     &:hover {
       background-color: rgb(184 184 184 / 31%);
     }
+  }
+
+  .disabled {
+    color: red !important;
+    cursor: arrow;
+    /* &:hover {
+      background-color: none;
+      } */
   }
 </style>

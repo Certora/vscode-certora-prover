@@ -228,6 +228,61 @@
    */
   function createActions(): Action[] {
     let actions: Action[] = [
+      // {
+      //   title: 'Rename',
+      //   icon: 'edit',
+      //   onClick: setRename,
+      // },
+      {
+        title: 'Edit',
+        icon: 'gear',
+        onClick: editFunc,
+      },
+      {
+        title: 'Delete',
+        icon: 'trash',
+        onClick: deleteFunc,
+      },
+      {
+        title: 'Duplicate',
+        icon: 'files',
+        onClick: () => {
+          duplicate()
+        },
+      },
+    ]
+    // if (hasResults() && vrLink) {
+    //   actions.unshift({
+    //     title: 'Go To Rule Report',
+    //     icon: 'file-symlink-file',
+    //     link: vrLink,
+    //   })
+    // }
+    return actions
+  }
+
+  /**
+   * creates actions for the missingSettings, ready and unableToRun statuses.
+   * the actions are: rename, edit, delete, duplicate, and if possible: run
+   */
+  function createFixedActions(): Action[] {
+    let actions: Action[] = []
+    // if (hasResults() && vrLink) {
+    actions.unshift({
+      title: 'Go To Rule Report',
+      icon: 'file-symlink-file',
+      link: vrLink,
+    })
+    // }
+    return actions
+  }
+
+  /**
+   * creates actions for the missingSettings, ready and unableToRun statuses.
+   * the actions are: rename, edit, delete, duplicate, and if possible: run
+   */
+  function createActionsForContextMenu(): Action[] {
+    let actions: Action[] = [
       {
         title: 'Rename',
         icon: 'edit',
@@ -251,13 +306,13 @@
         },
       },
     ]
-    if (hasResults() && vrLink) {
-      actions.unshift({
-        title: 'Go To Rule Report',
-        icon: 'file-symlink-file',
-        link: vrLink,
-      })
-    }
+    // if (hasResults() && vrLink) {
+    //   actions.unshift({
+    //     title: 'Go To Rule Report',
+    //     icon: 'file-symlink-file',
+    //     link: vrLink,
+    //   })
+    // }
     return actions
   }
 
@@ -411,6 +466,7 @@
           title={namesMap.get(runName)}
           initialExpandedState={expandedState}
           actions={createActions()}
+          fixedActions={createFixedActions()}
           showExpendIcon={expandedState}
           {status}
           inactiveSelected={runName === inactiveSelected}
@@ -449,7 +505,7 @@
     </div>
   {/if}
 </div>
-<ContextMenu {hide} actions={createActions()} {pos} />
+<ContextMenu {hide} actions={createActionsForContextMenu()} {pos} />
 
 <style lang="postcss">
   .body {
