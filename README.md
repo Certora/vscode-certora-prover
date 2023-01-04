@@ -45,7 +45,7 @@ To create your first job click either the “Configure New Job” or “Upload C
 “Upload Configuration File” - This option will automatically create a new job from the chosen .conf file.
 
 
-After creating a job, you will see it in job list and a tab will open with a settings form for the job.
+After creating a job, you will see it in the job list and a tab will open with a settings form for the job.
 
 |Description|Location|
 |---|---|
@@ -61,7 +61,7 @@ After creating a job, you will see it in job list and a tab will open with a set
 
 * A red star next to a field name means it is a mandatory field and must be filled to be able to run the job.
 
-* The description inside each setting input box is there to assist you. Please read it carefully as the input required could be different than the flag value you are used to.
+* The description inside each setting input box is there to assist you. Please read it carefully as the input required will sometimes be different than the flag value you are used to.
 
 * Some values are filled automatically according to common preferences, but it is best to make sure the value is appropriate for your current requirements.
 
