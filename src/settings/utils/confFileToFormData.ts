@@ -83,12 +83,16 @@ function getAdditionalSettings(confFile: ConfFile) {
  * @param solidityObj solidity object
  */
 function processCompiler(solc: string, solidityObj: SolidityObj) {
-  if (solc.includes('/')) {
-    const index = solc.lastIndexOf('/')
-    solidityObj.compiler.exe = solc.slice(1, index)
-    solidityObj.compiler.ver = solc.slice(index + 1, solc.length)
-  } else {
-    solidityObj.compiler.ver = solc
+  try {
+    if (solc.includes('/')) {
+      const index = solc.lastIndexOf('/')
+      solidityObj.compiler.exe = solc.slice(1, index)
+      solidityObj.compiler.ver = solc.slice(index + 1, solc.length)
+    } else {
+      solidityObj.compiler.ver = solc
+    }
+  } catch (e) {
+    console.log(e, 'INNER ERROR')
   }
 }
 
@@ -98,28 +102,36 @@ function processCompiler(solc: string, solidityObj: SolidityObj) {
  * @param solidityObj solidity object
  */
 function processPackages(packages: string[], solidityObj: SolidityObj) {
-  packages.forEach(packageStr => {
-    const re = /"/gi
-    const packageArray = packageStr.replace(re, '').split(/[:|=]/)
-    const tempPackage: SolidityPackageDir = {
-      packageName: packageArray[0],
-      path: packageArray[1],
-    }
-    solidityObj.solidityPackageDir.push(tempPackage)
-  })
+  try {
+    packages.forEach(packageStr => {
+      const re = /"/gi
+      const packageArray = packageStr.replace(re, '').split(/[:|=]/)
+      const tempPackage: SolidityPackageDir = {
+        packageName: packageArray[0],
+        path: packageArray[1],
+      }
+      solidityObj.solidityPackageDir.push(tempPackage)
+    })
+  } catch (e) {
+    console.log(e, '[INNER ERROR]')
+  }
 }
 
 function processLink(linkArr: string[], solidityObj: SolidityObj) {
-  linkArr.forEach(link => {
-    // looking for linking format [CurrentContract : Variable = OtherContract]
-    const linkArr = link.split(/[:=]/)
-    if (linkArr.length === 3 && linkArr[0] === solidityObj.mainContract) {
-      solidityObj.linking.push({
-        variable: linkArr[1],
-        contractName: linkArr[2],
-      })
-    }
-  })
+  try {
+    linkArr.forEach(link => {
+      // looking for linking format [CurrentContract : Variable = OtherContract]
+      const linkArr = link.split(/[:=]/)
+      if (linkArr.length === 3 && linkArr[0] === solidityObj.mainContract) {
+        solidityObj.linking.push({
+          variable: linkArr[1],
+          contractName: linkArr[2],
+        })
+      }
+    })
+  } catch (e) {
+    console.log(e, '[INNER ERROR]')
+  }
 }
 
 /**
@@ -144,20 +156,24 @@ function processSolidityAttributes(
   }
 
   if (confFile.solc_args) {
-    const solcArgsArr = confFile.solc_args
-      .toString()
-      .replace(/[[]']/, '')
-      .split(',')
-    solcArgsArr.forEach(arg => {
-      const tempArg = { key: '', value: '' }
-      if (arg.includes('--')) {
-        tempArg.key = arg.replace('--', '')
-        solidityObj.solidityArgs.push(tempArg)
-      } else {
-        const index = solidityObj.solidityArgs.length - 1
-        solidityObj.solidityArgs[index].value = arg
-      }
-    })
+    try {
+      const solcArgsArr = confFile.solc_args
+        .toString()
+        .replace(/[[]']/, '')
+        .split(',')
+      solcArgsArr.forEach(arg => {
+        const tempArg = { key: '', value: '' }
+        if (arg.includes('--')) {
+          tempArg.key = arg.replace('--', '')
+          solidityObj.solidityArgs.push(tempArg)
+        } else {
+          const index = solidityObj.solidityArgs.length - 1
+          solidityObj.solidityArgs[index].value = arg
+        }
+      })
+    } catch (e) {
+      console.log(e, '[INNER ERROR]')
+    }
   } else {
     solidityObj.solidityArgs.push({ key: '', value: '' })
   }
