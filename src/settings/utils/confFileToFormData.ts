@@ -198,11 +198,17 @@ function processSpecAttributes(confFile: ConfFile, specObj: SpecObj) {
 
   if (confFile.staging) {
     specObj.runOnStg = true
-    specObj.branchName = (confFile.staging as string) || 'master'
+    if (confFile.staging.toString() === 'true') {
+      confFile.staging = 'master'
+    }
+    specObj.branchName = confFile.staging.toString() || 'master'
   }
 
   if (confFile.rule_sanity) {
-    if (confFile.rule_sanity === 'basic') {
+    if (
+      confFile.rule_sanity === 'basic' ||
+      confFile.rule_sanity.toString() === 'true'
+    ) {
       specObj.ruleSanity = true
     }
     if (confFile.rule_sanity === 'advanced') {
