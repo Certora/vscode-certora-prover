@@ -656,7 +656,7 @@
     <Pane
       title="JOB LIST"
       initialExpandedState={true}
-      actions={[
+      fixedActions={[
         {
           title: 'Run All',
           icon: 'run-all',

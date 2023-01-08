@@ -251,13 +251,6 @@
         },
       },
     ]
-    // if (hasResults() && vrLink) {
-    //   actions.unshift({
-    //     title: 'Go To Rule Report',
-    //     icon: 'file-symlink-file',
-    //     link: vrLink,
-    //   })
-    // }
     return actions
   }
 
@@ -267,13 +260,17 @@
    */
   function createFixedActions(): Action[] {
     let actions: Action[] = []
-    // if (hasResults() && vrLink) {
-    actions.unshift({
+    let goToRuleReportAction = {
       title: 'Go To Rule Report',
       icon: 'file-symlink-file',
       link: vrLink,
-    })
-    // }
+      disabled: true,
+    }
+    if (hasResults() && vrLink) {
+      goToRuleReportAction.link = vrLink
+      goToRuleReportAction.disabled = false
+    }
+    actions.push(goToRuleReportAction)
     return actions
   }
 
@@ -306,13 +303,6 @@
         },
       },
     ]
-    // if (hasResults() && vrLink) {
-    //   actions.unshift({
-    //     title: 'Go To Rule Report',
-    //     icon: 'file-symlink-file',
-    //     link: vrLink,
-    //   })
-    // }
     return actions
   }
 
@@ -501,6 +491,7 @@
         actions={createActionsForRunningScript()}
         status={getRunStatus()}
         showExpendIcon={false}
+        fixedActions={createFixedActions()}
       />
     </div>
   {/if}

@@ -9,6 +9,7 @@ export type Action = {
   onClick?: () => void
   icon: string
   link?: string
+  disabled?: boolean
 }
 
 export type JumpToDefinition = {

@@ -167,6 +167,7 @@
     }
 
     .status {
+      position: relative;
       display: initial;
       padding-right: 10px;
       margin-left: auto !important;
@@ -176,12 +177,13 @@
     }
 
     .actions {
+      position: relative;
       display: none;
       margin-left: auto;
     }
 
     .fixed-actions {
-      margin-left: auto;
+      /* margin-left: auto; */
     }
 
     &:hover .actions {
