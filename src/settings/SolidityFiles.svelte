@@ -10,7 +10,11 @@
   import Icon from './components/Icon.svelte'
   import CustomItem from './components/CustomItem.svelte'
   import CustomInput from './components/CustomInput.svelte'
-  import { solAdditionalContracts, solFilesArr } from './stores/store.js'
+  import {
+    solAdditionalContracts,
+    solFilesArr,
+    disableForm,
+  } from './stores/store.js'
   import { manageFiles } from './utils/refreshFiles'
   import CustomList from './components/CustomList.svelte'
 
@@ -45,35 +49,43 @@
     (filteredFiles = manageFiles(filter, filterCountObj, $solFilesArr))
   // push new linking/directory
   function pushNewObj(arr, obj) {
-    arr.push(obj)
-    $solAdditionalContracts[index] = $solAdditionalContracts[index]
+    if (!$disableForm) {
+      arr.push(obj)
+      $solAdditionalContracts[index] = $solAdditionalContracts[index]
+    }
   }
   // remove from linking/directory
   function removeObj(arr, i) {
-    arr.splice(i, 1)
-    $solAdditionalContracts[index] = $solAdditionalContracts[index]
+    if (!$disableForm) {
+      arr.splice(i, 1)
+      $solAdditionalContracts[index] = $solAdditionalContracts[index]
+    }
   }
 
   // remove solidity file by index
   function removeSolFile(index) {
-    $solAdditionalContracts.splice(index, 1)
-    $solAdditionalContracts = $solAdditionalContracts
+    if (!$disableForm) {
+      $solAdditionalContracts.splice(index, 1)
+      $solAdditionalContracts = $solAdditionalContracts
+    }
   }
 
   function handleSelectSol(event, index) {
-    if (event.detail.value === 'Browse...') {
-      loadFilesFolder('sol', index)
-      return
-    }
-    $solAdditionalContracts[index].mainFile = event.detail
-    if ($solAdditionalContracts[index].mainFile) {
-      $solAdditionalContracts[index].mainContract = $solAdditionalContracts[
-        index
-      ].mainFile.label
-        .toString()
-        .split('/')
-        .reverse()[0]
-        .replace('.sol', '')
+    if (!$disableForm) {
+      if (event.detail.value === 'Browse...') {
+        loadFilesFolder('sol', index)
+        return
+      }
+      $solAdditionalContracts[index].mainFile = event.detail
+      if ($solAdditionalContracts[index].mainFile) {
+        $solAdditionalContracts[index].mainContract = $solAdditionalContracts[
+          index
+        ].mainFile.label
+          .toString()
+          .split('/')
+          .reverse()[0]
+          .replace('.sol', '')
+      }
     }
   }
 </script>
@@ -111,6 +123,7 @@
             iconProps={solidityIconsObj}
             items={filteredFiles}
             Item={CustomItem}
+            isDisabled={$disableForm}
             {Icon}
             {ClearIcon}
             on:select={e => handleSelectSol(e, index)}
@@ -125,6 +138,7 @@
           <CustomInput
             infoObj={infoObjArr.contractName}
             placeholder="Contract"
+            disabledState={$disableForm}
             bind:bindValue={$solAdditionalContracts[index].mainContract}
           />
         </div>
@@ -147,6 +161,7 @@
                 <CustomInput
                   infoObj={infoObjArr.solCompiler}
                   placeholder="example: solc7.6"
+                  disabledState={$disableForm}
                   bind:bindValue={$solAdditionalContracts[index].compiler.ver}
                 />
               </div>
@@ -155,6 +170,7 @@
                 <CustomInput
                   infoObj={infoObjArr.solPackages}
                   placeholder="CVT-Executables-Mac"
+                  disabledState={$disableForm}
                   bind:bindValue={$solAdditionalContracts[index].compiler.exe}
                 />
               </div>
@@ -176,6 +192,7 @@
                   <CustomInput
                     infoObj={infoObjArr.linkVar}
                     placeholder="Variable"
+                    disabledState={$disableForm}
                     bind:bindValue={obj.variable}
                   />
                 </div>
@@ -183,6 +200,7 @@
                   <CustomInput
                     infoObj={infoObjArr.linkContract}
                     placeholder="Other Contract"
+                    disabledState={$disableForm}
                     bind:bindValue={obj.contractName}
                   />
                 </div>

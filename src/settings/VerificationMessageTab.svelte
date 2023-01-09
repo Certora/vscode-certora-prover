@@ -4,7 +4,7 @@
    *-------------------------------------------------------------------------------------------- */
 
   import CustomInput from './components/CustomInput.svelte'
-  import { verification_message } from './stores/store.js'
+  import { verification_message, disableForm } from './stores/store.js'
 
   let infoObjArr = {
     msg: {
@@ -26,6 +26,7 @@
       <div class="dark_input">
         <CustomInput
           placeholder="Text message"
+          disabledState={$disableForm}
           bind:bindValue={$verification_message}
           infoObj={infoObjArr.msg}
         />

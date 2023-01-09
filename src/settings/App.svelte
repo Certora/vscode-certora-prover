@@ -20,6 +20,7 @@
     solAdditionalContracts,
     RunName,
     isReset,
+    disableForm,
   } from './stores/store.js'
   import { refreshFiles } from './utils/refreshFiles'
 
@@ -75,6 +76,16 @@
       let newForm: NewForm = confFileToFormData(e.data.payload.confFile) // change the conf file info form data for the settings form
       fillFields(newForm)
       $isReset = true
+    }
+    if (e.data.type === EventTypesFromExtension.DisableForm) {
+      log({
+        action: 'Received "disable-form" command',
+        source: Sources.SettingsWebview,
+        info: e.data.payload,
+      })
+      if ($RunName === e.data.payload) {
+        $disableForm = true
+      }
     }
     if (e.data.type === EventTypesFromExtension.FileChosen) {
       log({

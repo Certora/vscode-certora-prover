@@ -16,6 +16,7 @@
     specObj,
     solidityObj,
     specFilesArr,
+    disableForm,
   } from './stores/store.js'
   import CheckBoxInfo from './components/CheckBoxInfo.svelte'
   import { manageFiles } from './utils/refreshFiles'
@@ -126,15 +127,19 @@
     (filteredFiles = manageFiles(filter, filterCountObj, $specFilesArr))
 
   function handleSelectSpec(event, fileType, index) {
-    if (event.detail.value === 'Browse...') {
-      loadFilesFolder(fileType, index)
-      return
+    if (!$disableForm) {
+      if (event.detail.value === 'Browse...') {
+        loadFilesFolder(fileType, index)
+        return
+      }
+      $specObj.specFile = event.detail
     }
-    $specObj.specFile = event.detail
   }
 
   function handleClear(e, index) {
-    $specObj.specFile = ''
+    if (!$disableForm) {
+      $specObj.specFile = ''
+    }
   }
   // add files from folder
   function loadFilesFolder(fileType, index) {
@@ -143,13 +148,17 @@
 
   // push new linking/directory
   function pushNewObj(arr, obj) {
-    arr.push(obj)
-    $specObj = $specObj
+    if (!$disableForm) {
+      arr.push(obj)
+      $specObj = $specObj
+    }
   }
   // remove from linking/directory
   function removeObj(arr, index) {
-    arr.splice(index, 1)
-    $specObj = $specObj
+    if (!$disableForm) {
+      arr.splice(index, 1)
+      $specObj = $specObj
+    }
   }
 
   let isSpecListOpen = false
@@ -207,6 +216,7 @@
                   iconProps={specIconsObj}
                   items={filteredFiles}
                   Item={CustomItem}
+                  isDisabled={$disableForm}
                   {Icon}
                   {ClearIcon}
                   on:select={e => handleSelectSpec(e, 'spec')}
@@ -220,6 +230,7 @@
                 <h3>Rules</h3>
                 <CustomInput
                   placeholder="deafult: all rules"
+                  disabledState={$disableForm}
                   bind:bindValue={$specObj.rules}
                   infoObj={infoObjArr.rules}
                 />
@@ -239,6 +250,7 @@
                       <div class="dark_input">
                         <CustomInput
                           placeholder="flag name"
+                          disabledState={$disableForm}
                           bind:bindValue={obj.name}
                           infoObj={infoObjArr.flag}
                         />
@@ -246,6 +258,7 @@
                       <div class="dark_input">
                         <CustomInput
                           placeholder="value"
+                          disabledState={$disableForm}
                           bind:bindValue={obj.value}
                           infoObj={infoObjArr.value}
                         />
@@ -268,6 +281,7 @@
                       <h3>Duration</h3>
                       <CustomInput
                         placeholder="default: 600"
+                        disabledState={$disableForm}
                         bind:bindValue={$specObj.duration}
                         infoObj={infoObjArr.duration}
                       />
@@ -280,6 +294,7 @@
                       <label class="checkbox_container" style="margin: 0;">
                         Optimistic Loop
                         <input
+                          disabled={$disableForm}
                           type="checkbox"
                           bind:checked={$specObj.optimisticLoop}
                         />
@@ -291,6 +306,7 @@
                       <h3>Loop Unroll</h3>
                       <CustomInput
                         placeholder="default: 1"
+                        disabledState={$disableForm}
                         bind:bindValue={$specObj.loopUnroll}
                         infoObj={infoObjArr.loop_iter}
                       />
@@ -302,6 +318,7 @@
                         >Rule Sanity
                         <input
                           type="checkbox"
+                          disabled={$disableForm}
                           bind:checked={$specObj.ruleSanity}
                         />
                         <span class="checkmark" />
@@ -332,6 +349,7 @@
                         >Multi Assert
                         <input
                           type="checkbox"
+                          disabled={$disableForm}
                           bind:checked={$specObj.multiAssert}
                         />
                         <span class="checkmark" />
@@ -346,6 +364,7 @@
                         >Local Type Checking
                         <input
                           type="checkbox"
+                          disabled={$disableForm}
                           bind:checked={$specObj.localTypeChecking}
                         />
                         <span class="checkmark" />
@@ -359,6 +378,7 @@
                         >Staging
                         <input
                           type="checkbox"
+                          disabled={$disableForm}
                           bind:checked={$specObj.runOnStg}
                         />
                         <span class="checkmark" />
@@ -372,6 +392,7 @@
                         <h3>Branch Name</h3>
                         <CustomInput
                           placeholder="default: master"
+                          disabledState={$disableForm}
                           bind:bindValue={$specObj.branchName}
                           infoObj={infoObjArr.stg}
                         />

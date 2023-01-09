@@ -235,7 +235,8 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   async function runScript(name: JobNameMap) {
-    SettingsPanel.removePanel(name.displayName)
+    // SettingsPanel.removePanel(name.displayName)
+    SettingsPanel.disableForm(name.displayName)
     const confFile = getConfFilePath(name.fileName)
     scriptRunner.run(confFile)
   }

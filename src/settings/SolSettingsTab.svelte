@@ -18,6 +18,7 @@
     solidityObj,
     solAdditionalContracts,
     isReset,
+    disableForm,
   } from './stores/store.js'
   import CustomList from './components/CustomList.svelte'
 
@@ -102,32 +103,40 @@
   }
   // push new linking/directory
   function pushNewObj(arr, obj) {
-    arr.push(obj)
-    $solidityObj = $solidityObj
+    if (!$disableForm) {
+      arr.push(obj)
+      $solidityObj = $solidityObj
+    }
   }
   // remove from linking/directory
   function removeObj(arr, index) {
-    arr.splice(index, 1)
-    $solidityObj = $solidityObj
+    if (!$disableForm) {
+      arr.splice(index, 1)
+      $solidityObj = $solidityObj
+    }
   }
   // add files from folder
   function loadFilesFolder(fileType, index) {
-    openBrowser(fileType, index)
+    if (!$disableForm) {
+      openBrowser(fileType, index)
+    }
   }
   // add new empty solidity file push new obj to array
   function addNewFile() {
-    $solAdditionalContracts = [
-      ...$solAdditionalContracts,
-      {
-        mainFile: '',
-        mainContract: '',
-        linking: [{ variable: '', contractName: '' }],
-        compiler: {
-          ver: $solidityObj.compiler.ver,
-          exe: $solidityObj.compiler.exe,
+    if (!$disableForm) {
+      $solAdditionalContracts = [
+        ...$solAdditionalContracts,
+        {
+          mainFile: '',
+          mainContract: '',
+          linking: [{ variable: '', contractName: '' }],
+          compiler: {
+            ver: $solidityObj.compiler.ver,
+            exe: $solidityObj.compiler.exe,
+          },
         },
-      },
-    ]
+      ]
+    }
   }
   // main solidity card open/close
   let isSolidityListOpen = false
@@ -209,6 +218,7 @@
                   items={filteredFiles}
                   listOpen={isSolidityListOpen}
                   iconProps={solidityIconsObj}
+                  isDisabled={$disableForm}
                   Item={CustomItem}
                   {Icon}
                   {ClearIcon}
@@ -224,6 +234,7 @@
                 <CustomInput
                   infoObj={infoObjArr.contractName}
                   placeholder="Contract"
+                  disabledState={$disableForm}
                   bind:bindValue={$solidityObj.mainContract}
                 />
               </div>
@@ -245,6 +256,7 @@
                       <CustomInput
                         infoObj={infoObjArr.solCompiler}
                         placeholder="example: solc7.6"
+                        disabledState={$disableForm}
                         bind:bindValue={$solidityObj.compiler.ver}
                       />
                     </div>
@@ -253,6 +265,7 @@
                       <CustomInput
                         infoObj={infoObjArr.solPackages}
                         placeholder="CVT-Executables-Mac"
+                        disabledState={$disableForm}
                         bind:bindValue={$solidityObj.compiler.exe}
                       />
                     </div>
@@ -279,6 +292,7 @@
                                 <CustomInput
                                   infoObj={infoObjArr.solc_args}
                                   placeholder="example: optimize-runs"
+                                  disabledState={$disableForm}
                                   bind:bindValue={obj.key}
                                 />
                               </div>
@@ -286,6 +300,7 @@
                                 <CustomInput
                                   infoObj={infoObjArr.solc_args}
                                   placeholder="value (optional)"
+                                  disabledState={$disableForm}
                                   bind:bindValue={obj.value}
                                 />
                               </div>
@@ -324,6 +339,7 @@
                                 <CustomInput
                                   infoObj={infoObjArr.package}
                                   placeholder="Package name"
+                                  disabledState={$disableForm}
                                   bind:bindValue={obj.packageName}
                                 />
                               </div>
@@ -331,6 +347,7 @@
                                 <CustomInput
                                   infoObj={infoObjArr.package}
                                   placeholder=".../path"
+                                  disabledState={$disableForm}
                                   bind:bindValue={obj.path}
                                 />
                               </div>
@@ -373,6 +390,7 @@
                         <CustomInput
                           infoObj={infoObjArr.linkVar}
                           placeholder="Variable"
+                          disabledState={$disableForm}
                           bind:bindValue={$solidityObj.linking[index].variable}
                         />
                       </div>
@@ -380,6 +398,7 @@
                         <CustomInput
                           infoObj={infoObjArr.linkContract}
                           placeholder="Other Contract"
+                          disabledState={$disableForm}
                           bind:bindValue={$solidityObj.linking[index]
                             .contractName}
                         />
