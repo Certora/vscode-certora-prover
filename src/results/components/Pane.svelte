@@ -6,6 +6,7 @@
   import Toolbar from './Toolbar.svelte'
   import { Action, Status } from '../types'
   import { getIconPath } from '../utils/getIconPath'
+  import { writable } from 'svelte/store'
 
   export let title: string
   export let actions: Action[] = []
@@ -16,7 +17,7 @@
   export let inactiveSelected: boolean = false
   export let runFunc: () => void = null
 
-  let isExpanded = initialExpandedState
+  let isExpanded = writable(initialExpandedState)
 
   const statusIcons = {
     missingSettings: 'finish-setup.svg',
@@ -44,7 +45,7 @@
   function getPaneClassName(): string {
     let className = 'pane-header'
     if (
-      isExpanded ||
+      $isExpanded ||
       (status !== Status.pending && status !== Status.running)
     ) {
       className += ' pointer-cursor'
@@ -69,22 +70,22 @@
   }
 
   function toggleExpand() {
-    isExpanded = !isExpanded
+    $isExpanded = !$isExpanded
   }
 </script>
 
-<div class="pane" class:expanded={isExpanded} id={title}>
+<div class="pane" class:expanded={$isExpanded} id={title}>
   <div
     class={getPaneClassName()}
     on:click={toggleExpand}
     tabindex="0"
     role="button"
     aria-label={`${title} section`}
-    aria-expanded={isExpanded}
+    aria-expanded={$isExpanded}
   >
     {#if showExpendIcon}
       <div
-        class="arrow-icon codicon codicon-chevron-{isExpanded
+        class="arrow-icon codicon codicon-chevron-{$isExpanded
           ? 'down'
           : 'right'}"
       />
@@ -113,7 +114,7 @@
       <Toolbar actions={fixedActions} />
     </div>
   </div>
-  {#if isExpanded}
+  {#if $isExpanded}
     <div class="pane-body">
       <slot />
     </div>

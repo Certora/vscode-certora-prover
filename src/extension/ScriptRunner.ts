@@ -296,7 +296,6 @@ export class ScriptRunner {
 
   public stop = (pid: number): void => {
     this.runningScripts.forEach(async rs => {
-      console.log('job id:', rs)
       if (rs.vrLink !== undefined) {
         try {
           // send api request to the cloud

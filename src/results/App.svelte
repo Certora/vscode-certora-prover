@@ -149,10 +149,8 @@
           }
         })
         runningScripts = runningScripts
-        console.log('runs: from (run next)', runs)
         runs = runs.map(run => {
           if (run.id === curPid) {
-            console.log('run existed')
             run.vrLink = vrLink
           }
           return run
@@ -176,7 +174,6 @@
           })
           return r
         })
-        console.log('runs: ', runs)
         // if there is no running script - run next
         if (e.data.payload.length === 0) {
           runNext()
@@ -639,7 +636,6 @@
 
   function showMenu(e, index) {
     $pos = { x: e.clientX, y: e.clientY }
-    console.log(pos)
     resentHide()
     $hide[index] = false
   }
