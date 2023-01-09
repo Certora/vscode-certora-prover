@@ -141,13 +141,22 @@
           source: Sources.ResultsWebview,
           info: e.data.payload,
         })
-        const curPid = e.data.payload
+        const curPid = e.data.payload.pid
+        const vrLink = e.data.payload.vrLink
         runningScripts.forEach(rs => {
           if (rs.pid === curPid) {
             rs.uploaded = true
           }
         })
         runningScripts = runningScripts
+        console.log('runs: from (run next)', runs)
+        runs = runs.map(run => {
+          if (run.id === curPid) {
+            console.log('run existed')
+            run.vrLink = vrLink
+          }
+          return run
+        })
         // when we receive the results of the last run, we run the next job!
         runNext()
         break
@@ -159,14 +168,15 @@
           info: e.data.payload,
         })
         runningScripts = e.data.payload
-        runs.forEach(r => {
+        runs = runs.map(r => {
           runningScripts.forEach(rs => {
             if (r.name === getFilename(rs.confFile)) {
               r.id = rs.pid
             }
           })
+          return r
         })
-
+        console.log('runs: ', runs)
         // if there is no running script - run next
         if (e.data.payload.length === 0) {
           runNext()
@@ -182,7 +192,14 @@
         const pid = e.data.payload
         const curRun = runs.find(run => run.id === pid)
         if (curRun !== undefined) {
-          runs = setStatus(curRun.name, Status.ready)
+          if (
+            verificationResults.find(vr => vr.name === curRun.name) !==
+            undefined
+          ) {
+            runs = setStatus(curRun.name, Status.unableToRun)
+          } else {
+            runs = setStatus(curRun.name, Status.ready)
+          }
         }
         runningScripts = runningScripts.filter(rs => {
           return rs.pid !== pid
@@ -458,6 +475,7 @@
    * @param index if 0 - run, else: add to pending queue
    */
   function run(run: Run, index = 0): void {
+    run.vrLink = ''
     const JobNameMap: JobNameMap = {
       fileName: run.name,
       displayName: namesMap.get(run.name),
@@ -718,6 +736,7 @@
                     return vr.name !== runs[index].name
                   })
                   runs = setStatus(runs[index].name, Status.ready)
+                  runs[index].vrLink = ''
                   stopScript(runs[index].id)
                 }}
                 inactiveSelected={focusedRun}

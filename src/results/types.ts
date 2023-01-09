@@ -227,7 +227,7 @@ export type EventsFromExtension =
     }
   | {
       type: EventTypesFromExtension.UploadingFiles
-      payload: number
+      payload: { pid: number; vrLink: string }
     }
   | {
       type: EventTypesFromExtension.ScriptStopped

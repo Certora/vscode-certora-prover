@@ -266,7 +266,7 @@
       link: vrLink,
       disabled: true,
     }
-    if (hasResults() && vrLink) {
+    if (vrLink) {
       goToRuleReportAction.link = vrLink
       goToRuleReportAction.disabled = false
     }
@@ -484,16 +484,18 @@
       </div>
     {/key}
   {:else}
-    <div class="running">
-      <Pane
-        title={namesMap.get(runName)}
-        initialExpandedState={false}
-        actions={createActionsForRunningScript()}
-        status={getRunStatus()}
-        showExpendIcon={false}
-        fixedActions={createFixedActions()}
-      />
-    </div>
+    {#key [vrLink]}
+      <div class="running">
+        <Pane
+          title={namesMap.get(runName)}
+          initialExpandedState={false}
+          actions={createActionsForRunningScript()}
+          status={getRunStatus()}
+          showExpendIcon={false}
+          fixedActions={createFixedActions()}
+        />
+      </div>
+    {/key}
   {/if}
 </div>
 <ContextMenu {hide} actions={createActionsForContextMenu()} {pos} />
