@@ -35,6 +35,7 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
       ) => void) = null
 
   public runScript: null | ((name: JobNameMap) => void) = null
+  public enableEdit: null | ((name: JobNameMap) => void) = null
   public removeScript: null | ((name: string) => void) = null
 
   constructor(private readonly _extensionUri: vscode.Uri) {
@@ -167,6 +168,16 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
             })
             if (typeof this.uploadConf === 'function') {
               this.uploadConf()
+            }
+            break
+          case CommandFromResultsWebview.EnableEdit:
+            log({
+              action: 'Received "enable-edit" command',
+              source: Sources.Extension,
+              info: e.payload,
+            })
+            if (typeof this.enableEdit === 'function') {
+              this.enableEdit(e.payload)
             }
             break
           default:

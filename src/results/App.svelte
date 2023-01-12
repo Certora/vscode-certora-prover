@@ -22,6 +22,7 @@
     askToDeleteJob,
     initResults,
     uploadConf,
+    enableEdit,
   } from './extension-actions'
   import { smartMergeVerificationResult } from './utils/mergeResults'
   import { log, Sources } from './utils/log'
@@ -138,9 +139,16 @@
           info: e.data.payload,
         })
         const curPid = e.data.payload
+        let confToEnable: JobNameMap = {
+          displayName: '',
+          fileName: '',
+        }
         runningScripts.forEach(rs => {
           if (rs.pid === curPid) {
             rs.uploaded = true
+            confToEnable.fileName = getFileName(rs.confFile)
+            confToEnable.displayName = namesMap.get(confToEnable.fileName)
+            enableEdit(confToEnable)
           }
         })
         runningScripts = runningScripts
@@ -157,7 +165,7 @@
         runningScripts = e.data.payload
         runs.forEach(r => {
           runningScripts.forEach(rs => {
-            if (r.name === getFilename(rs.confFile)) {
+            if (r.name === getFileName(rs.confFile)) {
               r.id = rs.pid
             }
           })
@@ -540,7 +548,7 @@
   /**
    * from conf file uri to only the file name
    */
-  function getFilename(confFile: string): string {
+  function getFileName(confFile: string): string {
     return confFile.replace(CONF_DIRECTORY, '').replace('.conf', '')
   }
 
@@ -559,7 +567,7 @@
         return
       }
       const nowRunning = runningScripts.find(script => {
-        return getFilename(script.confFile) === singleRun.name
+        return getFileName(script.confFile) === singleRun.name
       })
       const inQueue = pendingQueue.find(pendingRun => {
         return pendingRun.fileName === singleRun.name
@@ -670,7 +678,7 @@
                 {verificationResults}
                 {newFetchOutput}
                 nowRunning={(runningScripts.find(
-                  rs => getFilename(rs.confFile) === runs[index].name,
+                  rs => getFileName(rs.confFile) === runs[index].name,
                 ) !== undefined ||
                   (pendingQueue.find(rs => rs.fileName === runs[index].name) !==
                     undefined &&
@@ -692,6 +700,10 @@
                     return vr.name !== runs[index].name
                   })
                   runs = setStatus(runs[index].name, Status.ready)
+                  enableEdit({
+                    fileName: runs[index].name,
+                    displayName: namesMap.get(runs[index].name),
+                  })
                   stopScript(runs[index].id)
                 }}
                 inactiveSelected={focusedRun}

@@ -438,6 +438,10 @@ export function activate(context: vscode.ExtensionContext): void {
     )
   }
 
+  function enableEdit(name: JobNameMap) {
+    SettingsPanel.enableForm(name.displayName)
+  }
+
   const resultsWebviewProvider = new ResultsWebviewProvider(
     context.extensionUri,
   )
@@ -451,6 +455,7 @@ export function activate(context: vscode.ExtensionContext): void {
   resultsWebviewProvider.askToDeleteJob = askToDeleteJob
   resultsWebviewProvider.createInitialJobs = createInitialJobs
   resultsWebviewProvider.uploadConf = uploadConf
+  resultsWebviewProvider.enableEdit = enableEdit
 
   const scriptRunner = new ScriptRunner(resultsWebviewProvider)
 

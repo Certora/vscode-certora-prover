@@ -20,6 +20,18 @@ enum Commands {
   AskToDeleteJob = 'ask-to-delete-job',
   InitResults = 'init-results',
   UploadConf = 'upload-conf',
+  EnableEdit = 'enable-edit',
+}
+
+export function enableEdit(name: JobNameMap): void {
+  log({
+    action: 'Send "enable-edit" command',
+    source: Sources.ResultsWebview,
+  })
+  vscode.postMessage({
+    command: Commands.EnableEdit,
+    payload: name,
+  })
 }
 
 export function uploadConf(): void {
