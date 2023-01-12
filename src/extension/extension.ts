@@ -234,7 +234,7 @@ export function activate(context: vscode.ExtensionContext): void {
     return path.replace(CONF_DIRECTORY, '').replace('.conf', '')
   }
 
-  async function runScript(name: JobNameMap) {
+  function runScript(name: JobNameMap): void {
     // SettingsPanel.removePanel(name.displayName)
     SettingsPanel.disableForm(name.displayName)
     const confFile = getConfFilePath(name.fileName)

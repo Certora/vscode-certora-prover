@@ -111,6 +111,7 @@ export enum EventTypesFromExtension {
   FileChosen = 'file-chosen',
   notifyWebviewAboutUpdates = 'minor-files-change',
   DisableForm = 'disable-form',
+  EnableForm = 'enable-form',
 }
 
 export type ConfFile = {
@@ -144,6 +145,10 @@ export type EventsFromExtension =
     }
   | {
       type: EventTypesFromExtension.DisableForm
+      payload: string
+    }
+  | {
+      type: EventTypesFromExtension.EnableForm
       payload: string
     }
   | {

@@ -84,6 +84,7 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
             log({
               action: 'Received "run-script" command',
               source: Sources.Extension,
+              info: e.payload,
             })
             if (typeof this.runScript === 'function') {
               this.runScript(e.payload)

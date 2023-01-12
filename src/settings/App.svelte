@@ -87,6 +87,16 @@
         $disableForm = true
       }
     }
+    if (e.data.type === EventTypesFromExtension.EnableForm) {
+      log({
+        action: 'Received "enable-form" command',
+        source: Sources.SettingsWebview,
+        info: e.data.payload,
+      })
+      if ($RunName === e.data.payload) {
+        $disableForm = false
+      }
+    }
     if (e.data.type === EventTypesFromExtension.FileChosen) {
       log({
         action: 'Received "file-chosen" command',

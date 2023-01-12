@@ -159,6 +159,18 @@ export class SettingsPanel {
     }
   }
 
+  public static enableForm(name: string): void {
+    const panelToDisable = SettingsPanel.allPanels.find(
+      panel => panel.curConfFileDisplayName === name,
+    )
+    if (panelToDisable !== undefined) {
+      panelToDisable._panel.webview.postMessage({
+        type: 'enable-form',
+        payload: panelToDisable.curConfFileDisplayName,
+      })
+    }
+  }
+
   /**
    * opens a new settings panel in a new tab
    * @param extensionUri uri of the extension folder
