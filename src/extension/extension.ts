@@ -18,6 +18,7 @@ import {
 import { createConfFile } from './utils/createConfFile'
 import { confFileToFormData } from './utils/confFileToInputForm'
 import { checkDir } from './utils/checkDir'
+import { extensions } from 'vscode'
 
 export function activate(context: vscode.ExtensionContext): void {
   /**
@@ -80,9 +81,17 @@ export function activate(context: vscode.ExtensionContext): void {
     if (staging) {
       branch = vscode.workspace.getConfiguration().get('Branch') || 'master'
     }
+    const runType = {
+      type: 'vscode',
+      version:
+        extensions.getExtension('Certora.vscode-certora-prover')?.packageJSON
+          ?.version || '0',
+    }
     const confFileDefault: ConfFile = {
       solc: solcPath + solc,
       staging: branch,
+      send_only: true, // invisible flag added when creating new conf file
+      run_type: JSON.stringify(runType), // invisible flag added when creating new conf file
     }
     if (solcArgs !== '{}') {
       // from object '{'flag': '', 'flag2': 'value2'}' to array of strings ['--flag', '--flag2', 'value2']
@@ -381,6 +390,19 @@ export function activate(context: vscode.ExtensionContext): void {
       ) {
         fileObj.allowRun = 1
       }
+      // adding invisible flags when creating jobs from existing files
+      content.send_only = true
+      content.run_type = JSON.parse(
+        JSON.stringify({
+          type: 'vscode',
+          version:
+            extensions.getExtension('Certora.vscode-certora-prover')
+              ?.packageJSON?.version || '0',
+        }),
+      )
+      const encoder = new TextEncoder()
+      const encodedContent = encoder.encode(JSON.stringify(content, null, 2))
+      await vscode.workspace.fs.writeFile(file, encodedContent)
     } catch (e) {
       // listen to file changes
     }

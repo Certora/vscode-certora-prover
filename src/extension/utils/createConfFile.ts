@@ -2,7 +2,7 @@
  *  Creates a conf file from an inputFormData type.
  *-------------------------------------------------------------------------------------------- */
 
-import { workspace, Uri, window } from 'vscode'
+import { workspace, Uri, window, extensions } from 'vscode'
 import { log, Sources } from './log'
 import {
   CONF_DIRECTORY_NAME,
@@ -376,6 +376,15 @@ export function processForm(
     (newForm.specObj.sendOnly as boolean).toString(),
     form,
   )
+
+  const runType = {
+    type: 'vscode',
+    version:
+      extensions.getExtension('Certora.vscode-certora-prover')?.packageJSON
+        ?.version || '0',
+  }
+
+  addAdditionalSetting('run_type', JSON.stringify(runType), form)
 
   addAdditionalSetting('smt_timeout', newForm.specObj.duration, form)
 

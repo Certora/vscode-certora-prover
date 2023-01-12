@@ -39,6 +39,7 @@ const newForm: NewForm = {
     localTypeChecking: false,
     multiAssert: false,
     sendOnly: true,
+    runType: { type: 'vscode', version: '0' },
   },
   verificationMessage: '',
   checkMyInputs: false,
@@ -65,6 +66,7 @@ const stableFields = [
   'solc_map',
   'rule_sanity',
   'send_only',
+  'run_type',
 ]
 
 function getAdditionalSettings(confFile: ConfFile) {
@@ -211,6 +213,9 @@ function processSpecAttributes(confFile: ConfFile, specObj: SpecObj) {
     }
     if (confFile.send_only) {
       specObj.sendOnly = true
+    }
+    if (confFile.run_type) {
+      specObj.runType = JSON.parse(JSON.stringify(confFile.run_type))
     }
   }
 
