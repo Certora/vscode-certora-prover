@@ -15,6 +15,7 @@
     verification_message,
     solAdditionalContracts,
     isReset,
+    disableForm,
   } from './stores/store.js'
   import { log, Sources } from './utils/log'
 
@@ -53,7 +54,7 @@
   }
 </script>
 
-<div class="main_wrapper">
+<div class={'main_wrapper '}>
   <div class="left_wrapper media"><RunSideNav /></div>
   <div class="right_wrapper">
     <div class="top_nav"><RunSideNav /></div>
@@ -85,6 +86,7 @@
     height: 100vh;
     overflow: hidden;
   }
+
   .feedback {
     position: fixed;
     width: 100%;

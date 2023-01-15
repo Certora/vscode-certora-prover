@@ -49,48 +49,42 @@
     (filteredFiles = manageFiles(filter, filterCountObj, $solFilesArr))
   // push new linking/directory
   function pushNewObj(arr, obj) {
-    if (!$disableForm) {
-      arr.push(obj)
-      $solAdditionalContracts[index] = $solAdditionalContracts[index]
-    }
+    arr.push(obj)
+    $solAdditionalContracts[index] = $solAdditionalContracts[index]
   }
   // remove from linking/directory
   function removeObj(arr, i) {
-    if (!$disableForm) {
-      arr.splice(i, 1)
-      $solAdditionalContracts[index] = $solAdditionalContracts[index]
-    }
+    arr.splice(i, 1)
+    $solAdditionalContracts[index] = $solAdditionalContracts[index]
   }
 
   // remove solidity file by index
   function removeSolFile(index) {
-    if (!$disableForm) {
-      $solAdditionalContracts.splice(index, 1)
-      $solAdditionalContracts = $solAdditionalContracts
-    }
+    $solAdditionalContracts.splice(index, 1)
+    $solAdditionalContracts = $solAdditionalContracts
   }
 
   function handleSelectSol(event, index) {
-    if (!$disableForm) {
-      if (event.detail.value === 'Browse...') {
-        loadFilesFolder('sol', index)
-        return
-      }
-      $solAdditionalContracts[index].mainFile = event.detail
-      if ($solAdditionalContracts[index].mainFile) {
-        $solAdditionalContracts[index].mainContract = $solAdditionalContracts[
-          index
-        ].mainFile.label
-          .toString()
-          .split('/')
-          .reverse()[0]
-          .replace('.sol', '')
-      }
+    if (event.detail.value === 'Browse...') {
+      loadFilesFolder('sol', index)
+      return
+    }
+    $solAdditionalContracts[index].mainFile = event.detail
+    if ($solAdditionalContracts[index].mainFile) {
+      $solAdditionalContracts[index].mainContract = $solAdditionalContracts[
+        index
+      ].mainFile.label
+        .toString()
+        .split('/')
+        .reverse()[0]
+        .replace('.sol', '')
     }
   }
 </script>
 
-<div class="bg_light border-rd mt-8px">
+<div
+  class={'bg_light border-rd mt-8px ' + ($disableForm ? 'disable_main' : '')}
+>
   <CollapseCard chevron="padding-right:12px;">
     <div
       slot="header"
@@ -110,7 +104,7 @@
         on:click|stopPropagation={() => removeSolFile(index)}
       />
     </div>
-    <div slot="body" class="p-12 pt-0">
+    <div slot="body" class="p-12 pt-0 ">
       <div class="input_wrapper">
         <div class="dark_input">
           <h3>Solidity File<span>*</span></h3>
@@ -123,7 +117,6 @@
             iconProps={solidityIconsObj}
             items={filteredFiles}
             Item={CustomItem}
-            isDisabled={$disableForm}
             {Icon}
             {ClearIcon}
             on:select={e => handleSelectSol(e, index)}
@@ -138,7 +131,6 @@
           <CustomInput
             infoObj={infoObjArr.contractName}
             placeholder="Contract"
-            disabledState={$disableForm}
             bind:bindValue={$solAdditionalContracts[index].mainContract}
           />
         </div>
@@ -161,7 +153,6 @@
                 <CustomInput
                   infoObj={infoObjArr.solCompiler}
                   placeholder="example: solc7.6"
-                  disabledState={$disableForm}
                   bind:bindValue={$solAdditionalContracts[index].compiler.ver}
                 />
               </div>
@@ -170,7 +161,6 @@
                 <CustomInput
                   infoObj={infoObjArr.solPackages}
                   placeholder="CVT-Executables-Mac"
-                  disabledState={$disableForm}
                   bind:bindValue={$solAdditionalContracts[index].compiler.exe}
                 />
               </div>
@@ -192,7 +182,6 @@
                   <CustomInput
                     infoObj={infoObjArr.linkVar}
                     placeholder="Variable"
-                    disabledState={$disableForm}
                     bind:bindValue={obj.variable}
                   />
                 </div>
@@ -200,7 +189,6 @@
                   <CustomInput
                     infoObj={infoObjArr.linkContract}
                     placeholder="Other Contract"
-                    disabledState={$disableForm}
                     bind:bindValue={obj.contractName}
                   />
                 </div>
@@ -226,3 +214,14 @@
     </div>
   </CollapseCard>
 </div>
+
+<style>
+  .disable_main {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .disable_main *:hover {
+    all: unset !important;
+  }
+</style>

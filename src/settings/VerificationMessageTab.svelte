@@ -16,7 +16,11 @@
   }
 </script>
 
-<div class="card_parent_wrapper bg_dark border-rd" style="margin-bottom:25px;">
+<div
+  class={'card_parent_wrapper bg_dark border-rd ' +
+    ($disableForm ? 'disable_main' : '')}
+  style="margin-bottom:25px;"
+>
   <div class="header header_contracts">
     <i class="codicon codicon-comment" />
     <h3>Verification Message</h3>
@@ -26,7 +30,6 @@
       <div class="dark_input">
         <CustomInput
           placeholder="Text message"
-          disabledState={$disableForm}
           bind:bindValue={$verification_message}
           infoObj={infoObjArr.msg}
         />
@@ -34,3 +37,14 @@
     </div>
   </div>
 </div>
+
+<style>
+  .disable_main {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .disable_main *:hover {
+    all: unset !important;
+  }
+</style>
