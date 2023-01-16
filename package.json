@@ -5,10 +5,7 @@
   "publisher": "Certora",
   "version": "0.1.0",
   "license": "SEE LICENSE IN LICENSE",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Certora/vscode-certora-prover"
-  },
+  "repository": "https://github.com/Certora/vscode-certora-prover",
   "homepage": "https://github.com/Certora/vscode-certora-prover/blob/main/README.md",
   "icon": "media/icon.png",
   "engines": {
@@ -175,6 +172,7 @@
     "@vscode/codicons": "^0.0.26",
     "@vscode/webview-ui-toolkit": "^1.0.0",
     "axios": "^0.24.0",
+    "form-data": "^4.0.0",
     "lodash.uniqby": "^4.7.0",
     "nanoid": "^3.1.30",
     "node-fetch": "2",
@@ -305,5 +303,6 @@
   },
   "simple-git-hooks": {
     "pre-commit": "npx lint-staged"
-  }
+  },
+  "author": "<you@example.com>"
 }

@@ -214,6 +214,15 @@ export class ScriptRunner {
         }
       }
       const vrLink = this.getRuleReportLink(str)
+      if (str.includes('Uploading files...')) {
+        console.log('Uploading files...')
+        this.runningScripts = this.runningScripts.map(rs => {
+          if (rs.pid === pid) {
+            rs.uploaded = true
+          }
+          return rs
+        })
+      }
       if (vrLink) {
         this.runningScripts = this.runningScripts.map(rs => {
           if (rs.pid === pid) {
@@ -258,7 +267,7 @@ export class ScriptRunner {
       let vrLink
       this.runningScripts = this.runningScripts.map(rs => {
         if (rs.pid === pid) {
-          rs.uploaded = true
+          // rs.uploaded = true
           vrLink = rs.vrLink
         }
         return rs
@@ -279,44 +288,56 @@ export class ScriptRunner {
     })
   }
 
-  // public stop = (pid: number): void => {
-  //   const command =
-  //     os.platform() === 'win32'
-  //       ? `taskkill -F -T -PID ${pid}`
-  //       : `kill -15 ${pid}`
+  private stopUploadedScript(scriptToStop: RunningScript) {
+    try {
+      const certoraKey = process.env.CERTORAKEY?.toString() || ''
 
-  //   exec(command)
-  //
-  //   this.removeRunningScript(pid)
-  //   this.resultsWebviewProvider.postMessage({
-  //     type: 'script-stopped',
-  //     payload: pid,
-  //   })
-  // }
-
-  public stop = (pid: number): void => {
-    this.runningScripts.forEach(async rs => {
-      if (rs.vrLink !== undefined) {
-        try {
-          // send api request to the cloud
-          // need to send certora key - need to solve this
-          const data = await fetch(
-            'https://prover.certora.com/cancel/' + rs.jobId,
-            { method: 'GET' },
-          )
-          // console.log('data from fetch:', await data.json())
-        } catch (e) {
-          console.log(e, '[INNER ERROR FROM API CALL]')
-        }
-      } else {
-        const command =
-          os.platform() === 'win32'
-            ? `taskkill -F -T -PID ${pid}`
-            : `kill -15 ${pid}`
-
-        exec(command)
+      const myHeaders = {
+        Cookie: 'certoraKey=' + certoraKey,
       }
+
+      const requestOptions: any = {
+        method: 'POST',
+        headers: myHeaders,
+        body: JSON.stringify({
+          certoraKey: certoraKey,
+        }),
+        redirect: 'follow',
+      }
+
+      fetch(
+        scriptToStop.vrLink?.split('/output/')[0] +
+          '/cancel/' +
+          scriptToStop.jobId,
+        requestOptions,
+      )
+        .then(response => response.text())
+        .then(result => console.log(result))
+        .catch(error => console.log('error', error))
+    } catch (e) {
+      console.log(e, '[INNER ERROR FROM API CALL]')
+    }
+  }
+
+  public stop = async (pid: number): Promise<void> => {
+    const scriptToStop = this.runningScripts.find(rs => {
+      return rs.pid === pid
     })
+    if (scriptToStop === undefined) return
+
+    if (scriptToStop.jobId !== undefined && scriptToStop.vrLink !== undefined) {
+      this.stopUploadedScript(scriptToStop)
+    } else if (!scriptToStop.uploaded) {
+      console.log('script is not uploaded:', scriptToStop)
+      const command =
+        os.platform() === 'win32'
+          ? `taskkill -F -T -PID ${pid}`
+          : `kill -15 ${pid}`
+
+      exec(command)
+    } else {
+      // todo: timeout and try again
+    }
     this.resultsWebviewProvider.postMessage({
       type: 'script-stopped',
       payload: pid,
