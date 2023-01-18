@@ -26,11 +26,14 @@
     save()
 
   function save() {
-    let inputs = document.querySelectorAll('.simple_txt_input')
-    inputs = Array.from(inputs)
-    $checkMyInputs = inputs.some(el => {
-      return el.classList.contains('field-danger')
+    setTimeout(() => {
+      let inputs = document.querySelectorAll('.simple_txt_input')
+      inputs = Array.from(inputs)
+      $checkMyInputs = inputs.some(el => {
+        return el.classList.contains('field-danger')
+      })
     })
+
     let form = {
       solidityObj: $solidityObj,
       specObj: $specObj,
