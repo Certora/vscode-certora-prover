@@ -33,7 +33,7 @@
       infoText: 'type contract name',
       infoLink:
         'https://docs.certora.com/en/latest/docs/prover/cli/options.html',
-      validator: 'alphaNum',
+      validator: 'contractValidator',
     },
     solCompiler: {
       infoText: 'type solidity compiler \n example: solc8.1',
