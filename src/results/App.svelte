@@ -40,6 +40,8 @@
   import NewRun from './components/NewRun.svelte'
 
   import { writable } from 'svelte/store'
+  import { expendables } from './store/store'
+
   export const hide = writable([])
   export const pos = writable({ x: 0, y: 0 })
 
@@ -288,8 +290,8 @@
               name: file.fileName,
               status: curStatus || Status.missingSettings,
             }
-            createRun(newRun)
             namesMap.set(newRun.name, newRun.name.replaceAll('_', ' '))
+            createRun(newRun)
           }
         })
         break
@@ -406,6 +408,17 @@
     }
   }
 
+  function addNewExpendable(title: string) {
+    $expendables = [
+      ...$expendables,
+      {
+        title: title,
+        isExpanded: false,
+        tree: {},
+      },
+    ]
+  }
+
   /**
    * adds a new run to runs array and increase the counter
    * @param run new run. if doest exists - creates a new run object
@@ -417,6 +430,9 @@
         run.status = Status.missingSettings
       }
       runsCounter = runs.push(run)
+      console.log(run.name)
+      console.log(namesMap.get(run.name))
+      addNewExpendable(namesMap.get(run.name))
     } else {
       // don't create more than one new run while in rename state
       if (runs.find(r => r.name === '')) return
@@ -425,6 +441,7 @@
         name: '',
         status: Status.missingSettings,
       })
+      addNewExpendable('')
     }
   }
 
@@ -724,6 +741,9 @@
                 expandedState={verificationResults.find(
                   vr => vr.name === runs[index].name,
                 ) !== undefined}
+                initialExpandedState={$expendables.find(element => {
+                  return element.title === namesMap.get(runs[index].name)
+                })?.isExpanded}
                 pendingStopFunc={() => {
                   pendingStopFunc(runs[index])
                 }}

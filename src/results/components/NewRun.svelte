@@ -21,6 +21,7 @@
   import { log, Sources } from '../utils/log'
   import Pane from './Pane.svelte'
   import Tree from './Tree.svelte'
+  import { expendables } from '../store/store'
 
   export let doRename: boolean = true
   export let editFunc: () => void
@@ -43,6 +44,7 @@
   ) => void
 
   export let expandedState = false
+  export let initialExpandedState = false
   export let nowRunning = false
 
   export let isPending = false
@@ -90,6 +92,7 @@
 
   onMount(() => {
     window.addEventListener('message', listener)
+    console.log('expandable', $expendables)
   })
 
   onDestroy(() => {
@@ -454,7 +457,7 @@
       <div class="results" on:click={onClick}>
         <Pane
           title={namesMap.get(runName)}
-          initialExpandedState={expandedState}
+          {initialExpandedState}
           actions={createActions()}
           fixedActions={createFixedActions()}
           showExpendIcon={expandedState}

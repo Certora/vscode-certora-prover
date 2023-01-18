@@ -7,11 +7,13 @@
   import { Action, Status } from '../types'
   import { getIconPath } from '../utils/getIconPath'
   import { writable } from 'svelte/store'
+  import { expendables } from '../store/store'
+  import { element } from 'svelte/internal'
 
   export let title: string
   export let actions: Action[] = []
   export let fixedActions: Action[] = []
-  export let initialExpandedState: boolean = false
+  export let initialExpandedState: boolean
   export let showExpendIcon: boolean = true
   export let status: Status | string = ''
   export let inactiveSelected: boolean = false
@@ -71,6 +73,17 @@
 
   function toggleExpand() {
     $isExpanded = !$isExpanded
+    $expendables = $expendables.map(element => {
+      if (element.title === title) {
+        console.log('expand from update:', $isExpanded)
+        element.isExpanded = $isExpanded
+      }
+      return element
+    })
+    console.log('new expended state: ', $isExpanded)
+    console.log('expandable', $expendables)
+    $expendables = $expendables
+    console.log('expandable2:', $expendables)
   }
 </script>
 
