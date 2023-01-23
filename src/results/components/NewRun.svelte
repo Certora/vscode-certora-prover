@@ -21,7 +21,8 @@
   import { log, Sources } from '../utils/log'
   import Pane from './Pane.svelte'
   import Tree from './Tree.svelte'
-  import { expandables } from '../store/store'
+  import { expandables, verificationResults } from '../store/store'
+  import type { Writable } from 'svelte/store'
 
   export let doRename: boolean = true
   export let editFunc: () => void
@@ -37,14 +38,12 @@
     rule?: string,
   ) => void
   export let runFunc: () => void
-  export let verificationResults: Verification[]
   export let newFetchOutput: (
     e: CustomEvent<Assert | Rule>,
     vr: Verification,
   ) => void
 
   export let expandedState = false
-  export let initialExpandedState = true
   export let nowRunning = false
 
   export let isPending = false
@@ -92,7 +91,6 @@
 
   onMount(() => {
     window.addEventListener('message', listener)
-    console.log('expandable', $expandables)
   })
 
   onDestroy(() => {
@@ -379,7 +377,7 @@
    * checks if a run has results
    */
   function hasResults(): boolean {
-    const result = verificationResults.find(vr => {
+    const result = $verificationResults.find(vr => {
       return vr.name === runName
     })
     if (
@@ -402,7 +400,7 @@
    * checks if there exists complete results for this job
    */
   function hasCompleteResults(): boolean {
-    const result = verificationResults.find(vr => {
+    const result = $verificationResults.find(vr => {
       return vr.name === runName
     })
     return result.jobs.find(job => job.jobStatus === 'SUCCEEDED') !== undefined
@@ -457,7 +455,6 @@
       <div class="results" on:click={onClick}>
         <Pane
           title={namesMap.get(runName)}
-          {initialExpandedState}
           actions={createActions()}
           fixedActions={createFixedActions()}
           showExpendIcon={expandedState}
@@ -469,7 +466,7 @@
             ? runFunc
             : null}
         >
-          {#each verificationResults as vr, index (index)}
+          {#each $verificationResults as vr, index (index)}
             {#if vr.name === runName}
               <li class="tree">
                 <Tree
@@ -492,7 +489,6 @@
       <div class="running">
         <Pane
           title={namesMap.get(runName)}
-          initialExpandedState={false}
           actions={createActionsForRunningScript()}
           status={getRunStatus()}
           showExpendIcon={false}

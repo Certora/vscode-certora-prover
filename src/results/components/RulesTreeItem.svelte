@@ -35,7 +35,6 @@
     ? `${assert.status}-assert-message.svg`
     : `unknown-assert-message.svg`
 
-  // let isExpanded = false
   let isExpanded = writable(initialExpandedState)
 
   function duplicateRule() {
@@ -75,11 +74,8 @@
     $isExpanded = !$isExpanded
     $expandables = $expandables.map(element => {
       if (element.title === runDisplayName && element.tree.length > 0) {
-        console.log('is there a title?', element.title)
         element.tree = element.tree.map(treeItem => {
-          console.log('is treeItem ok?', treeItem)
           if (treeItem.title === rule.name) {
-            console.log('expand from update:', $isExpanded)
             treeItem.isExpanded = $isExpanded
           }
           return treeItem
@@ -87,10 +83,6 @@
       }
       return element
     })
-    console.log('new expended state: ', $isExpanded)
-    console.log('expandable', $expandables)
-    $expandables = $expandables
-    console.log('expandable2:', $expandables)
   }}
 >
   <TreeIcon

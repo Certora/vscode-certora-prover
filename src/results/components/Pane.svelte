@@ -6,19 +6,15 @@
   import Toolbar from './Toolbar.svelte'
   import { Action, Status } from '../types'
   import { getIconPath } from '../utils/getIconPath'
-  import { writable } from 'svelte/store'
   import { expandables } from '../store/store'
 
   export let title: string
   export let actions: Action[] = []
   export let fixedActions: Action[] = []
-  export let initialExpandedState: boolean
   export let showExpendIcon: boolean = true
   export let status: Status | string = ''
   export let inactiveSelected: boolean = false
   export let runFunc: () => void = null
-
-  let isExpanded = writable(initialExpandedState)
 
   const statusIcons = {
     missingSettings: 'finish-setup.svg',
@@ -46,7 +42,9 @@
   function getPaneClassName(): string {
     let className = 'pane-header'
     if (
-      $isExpanded ||
+      $expandables.find(element => {
+        return element.title === title
+      })?.isExpanded ||
       (status !== Status.pending && status !== Status.running)
     ) {
       className += ' pointer-cursor'
@@ -71,33 +69,39 @@
   }
 
   function toggleExpand() {
-    $isExpanded = !$isExpanded
     $expandables = $expandables.map(element => {
       if (element.title === title) {
-        console.log('expand from update:', $isExpanded)
-        element.isExpanded = $isExpanded
+        element.isExpanded = !element.isExpanded
       }
       return element
     })
-    console.log('new expended state: ', $isExpanded)
-    console.log('expandable', $expandables)
-    $expandables = $expandables
-    console.log('expandable2:', $expandables)
   }
 </script>
 
-<div class="pane" class:expanded={$isExpanded} id={title}>
+<div
+  class="pane"
+  class:expanded={$expandables.find(element => {
+    return element.title === title
+  })?.isExpanded}
+  id={title}
+>
   <div
     class={getPaneClassName()}
     on:click={toggleExpand}
     tabindex="0"
     role="button"
     aria-label={`${title} section`}
-    aria-expanded={$isExpanded}
+    aria-expanded={$expandables.find(element => {
+      return element.title === title
+    })?.isExpanded}
   >
     {#if showExpendIcon}
       <div
-        class="arrow-icon codicon codicon-chevron-{$isExpanded
+        class="arrow-icon codicon codicon-chevron-{$expandables.find(
+          element => {
+            return element.title === title
+          },
+        )?.isExpanded
           ? 'down'
           : 'right'}"
       />
@@ -126,7 +130,9 @@
       <Toolbar actions={fixedActions} />
     </div>
   </div>
-  {#if $isExpanded}
+  {#if $expandables.find(element => {
+    return element.title === title
+  })?.isExpanded}
     <div class="pane-body">
       <slot />
     </div>

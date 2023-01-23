@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
 
 * Job list item view update: moved and emphasize rule report button, removed "rename" button and added a context menu, removed hover from JOB LIST buttons ([#84](https://github.com/Certora/vscode-certora-prover/pull/84))
 * Stopping a running job cancels the job in the cloud ([#84](https://github.com/Certora/vscode-certora-prover/pull/84))
-
+* New "Expand All" / "Collapse All" buttons ([#84](https://github.com/Certora/vscode-certora-prover/pull/84))
 
 ## Bug Fixes
 * Jobs results stay opened / closed on reopening the JOB LIST tab ([#84](https://github.com/Certora/vscode-certora-prover/pull/84))

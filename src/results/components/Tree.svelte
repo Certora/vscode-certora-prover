@@ -27,7 +27,6 @@
       if (element.title === runDisplayName && element.tree.length > 0) {
         const initExpandedStateArr = element.tree.map(treeItem => {
           if (treeItem.title === rule.name) {
-            console.log('init from update:', treeItem.isExpanded)
             return treeItem.isExpanded
           }
         })
@@ -41,7 +40,6 @@
         }
       }
     })
-    console.log('init returned', initExpandedState)
     return initExpandedState
   }
 </script>
