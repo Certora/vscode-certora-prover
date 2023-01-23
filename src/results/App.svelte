@@ -36,11 +36,17 @@
     Status,
     CONF_DIRECTORY,
   } from './types'
-  import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
+  import {
+    TreeType,
+    CallTraceFunction,
+    EventTypesFromExtension,
+    Expandable,
+  } from './types'
   import NewRun from './components/NewRun.svelte'
 
   import { writable } from 'svelte/store'
-  import { expendables } from './store/store'
+  import { expandables } from './store/store'
+  import { element } from 'svelte/internal'
 
   export const hide = writable([])
   export const pos = writable({ x: 0, y: 0 })
@@ -122,6 +128,43 @@
           e.data.payload.runName,
         )
         verificationResults = verificationResults
+
+        verificationResults.forEach(vr => {
+          return vr.jobs.forEach(job => {
+            const temp = job.verificationProgress.rules.map(rule => {
+              return {
+                title: rule.name,
+                isExpanded: false,
+                tree: [],
+              }
+            })
+            $expandables = $expandables.map(element => {
+              if (
+                element.title === namesMap.get(job.runName) &&
+                element.tree.length === 0
+              ) {
+                element.tree = temp
+              }
+              return element
+            })
+          })
+        })
+
+        // console.log('testttt:', ruleObjArr)
+
+        // $expandables = $expandables.map(function(part, index, arr) {
+        //   for (let i = 0; i < ruleObjArr.length; i++) {
+        //     for (let j = 0; j < ruleObjArr[i].length; j++){
+        //       if (ruleObjArr[i][j].inherit === part.title) {
+        //         arr[index].tree = ruleObjArr[i][j].treeArr
+        //       }
+        //     }
+        //   }
+        //   return arr[index]
+        // });
+
+        console.log('expandanles from verification update:', $expandables)
+
         if (e.data.payload.jobStatus === 'SUCCEEDED') {
           if (e.data.payload.runName) {
             removeScript(e.data.payload.runName)
@@ -409,12 +452,12 @@
   }
 
   function addNewExpendable(title: string) {
-    $expendables = [
-      ...$expendables,
+    $expandables = [
+      ...$expandables,
       {
         title: title,
-        isExpanded: false,
-        tree: {},
+        isExpanded: true,
+        tree: [],
       },
     ]
   }
@@ -741,7 +784,7 @@
                 expandedState={verificationResults.find(
                   vr => vr.name === runs[index].name,
                 ) !== undefined}
-                initialExpandedState={$expendables.find(element => {
+                initialExpandedState={$expandables.find(element => {
                   return element.title === namesMap.get(runs[index].name)
                 })?.isExpanded}
                 pendingStopFunc={() => {
@@ -788,6 +831,7 @@
   {#if output.callTrace && Object.keys(output.callTrace).length > 0}
     <Pane title={`CALL TRACE`} initialExpandedState={true}>
       <Tree
+        runDisplayName=""
         data={{
           type: TreeType.Calltrace,
           tree: [output.callTrace],

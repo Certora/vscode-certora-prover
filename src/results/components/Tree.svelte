@@ -8,7 +8,8 @@
   import { navigateToCode } from '../extension-actions'
   import type { Rule, CallTraceFunction } from '../types'
   import { TreeType } from '../types'
-
+  import { expandables } from '../store/store'
+  export let runDisplayName
   export let data:
     | {
         type: TreeType.Rules
@@ -19,6 +20,30 @@
         type: TreeType.Calltrace
         tree: CallTraceFunction[]
       }
+
+  function getInitialExpandedState(rule: Rule): boolean {
+    let initExpandedState: boolean = false
+    $expandables.forEach(element => {
+      if (element.title === runDisplayName && element.tree.length > 0) {
+        const initExpandedStateArr = element.tree.map(treeItem => {
+          if (treeItem.title === rule.name) {
+            console.log('init from update:', treeItem.isExpanded)
+            return treeItem.isExpanded
+          }
+        })
+        const tempState = initExpandedStateArr.find(item => {
+          {
+            return typeof item === 'boolean'
+          }
+        })
+        if (tempState !== undefined) {
+          initExpandedState = tempState
+        }
+      }
+    })
+    console.log('init returned', initExpandedState)
+    return initExpandedState
+  }
 </script>
 
 <div class="tree">
@@ -26,6 +51,8 @@
     {#each data.tree as rule, i}
       <RulesTreeItem
         {rule}
+        initialExpandedState={getInitialExpandedState(rule)}
+        {runDisplayName}
         setSize={data.tree.length}
         posInset={i + 1}
         actions={rule.jumpToDefinition.length > 0

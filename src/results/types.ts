@@ -262,3 +262,10 @@ export type Run = {
   status: Status
   vrLink?: string
 }
+
+export type Expandable = {
+  title: string
+  isExpandable: boolean
+  tree: Expandable[]
+  inherit?: string
+}

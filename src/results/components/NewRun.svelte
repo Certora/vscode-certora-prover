@@ -21,7 +21,7 @@
   import { log, Sources } from '../utils/log'
   import Pane from './Pane.svelte'
   import Tree from './Tree.svelte'
-  import { expendables } from '../store/store'
+  import { expandables } from '../store/store'
 
   export let doRename: boolean = true
   export let editFunc: () => void
@@ -44,7 +44,7 @@
   ) => void
 
   export let expandedState = false
-  export let initialExpandedState = false
+  export let initialExpandedState = true
   export let nowRunning = false
 
   export let isPending = false
@@ -92,7 +92,7 @@
 
   onMount(() => {
     window.addEventListener('message', listener)
-    console.log('expandable', $expendables)
+    console.log('expandable', $expandables)
   })
 
   onDestroy(() => {
@@ -473,6 +473,7 @@
             {#if vr.name === runName}
               <li class="tree">
                 <Tree
+                  runDisplayName={namesMap.get(runName)}
                   data={{
                     type: TreeType.Rules,
                     tree: retrieveRules(vr.jobs),

@@ -4,4 +4,4 @@
 
 import { writable } from 'svelte/store'
 
-export const expendables = writable([])
+export const expandables = writable([])

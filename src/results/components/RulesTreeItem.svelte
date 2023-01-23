@@ -8,6 +8,8 @@
   import TreeIcon from './TreeIcon.svelte'
   import { navigateToCode } from '../extension-actions'
   import { Action, Rule, Assert, RuleStatuses } from '../types'
+  import { writable } from 'svelte/store'
+  import { expandables } from '../store/store'
 
   export let rule: Rule = null
   export let assert: Assert = null
@@ -16,6 +18,8 @@
   export let actions: Action[] = []
   export let level = 1
   export let duplicateFunc = null
+  export let initialExpandedState: boolean = false
+  export let runDisplayName
 
   const dispatch = createEventDispatcher<{ fetchOutput: Assert | Rule }>()
   $: allowDuplicate =
@@ -31,7 +35,8 @@
     ? `${assert.status}-assert-message.svg`
     : `unknown-assert-message.svg`
 
-  let isExpanded = false
+  // let isExpanded = false
+  let isExpanded = writable(initialExpandedState)
 
   function duplicateRule() {
     if (allowDuplicate) {
@@ -56,18 +61,36 @@
   {level}
   {actions}
   hasChildren={rule?.children.length > 0 || rule?.asserts.length > 0}
-  bind:isExpanded
+  bind:isExpanded={$isExpanded}
   on:click={() => {
     if (assert) {
       dispatch('fetchOutput', assert)
       return
     }
 
-    if (!isExpanded && rule) {
+    if (!$isExpanded && rule) {
       dispatch('fetchOutput', rule)
     }
 
-    isExpanded = !isExpanded
+    $isExpanded = !$isExpanded
+    $expandables = $expandables.map(element => {
+      if (element.title === runDisplayName && element.tree.length > 0) {
+        console.log('is there a title?', element.title)
+        element.tree = element.tree.map(treeItem => {
+          console.log('is treeItem ok?', treeItem)
+          if (treeItem.title === rule.name) {
+            console.log('expand from update:', $isExpanded)
+            treeItem.isExpanded = $isExpanded
+          }
+          return treeItem
+        })
+      }
+      return element
+    })
+    console.log('new expended state: ', $isExpanded)
+    console.log('expandable', $expandables)
+    $expandables = $expandables
+    console.log('expandable2:', $expandables)
   }}
 >
   <TreeIcon
@@ -93,7 +116,7 @@
   </div>
 </BaseTreeItem>
 
-{#if isExpanded && rule?.children.length > 0}
+{#if $isExpanded && rule?.children.length > 0}
   {#each rule.children as child, i}
     <svelte:self
       rule={child}
@@ -115,7 +138,7 @@
     />
   {/each}
 {/if}
-{#if isExpanded && rule?.asserts.length > 0}
+{#if $isExpanded && rule?.asserts.length > 0}
   {#each rule.asserts as child, i}
     <svelte:self
       assert={child}
