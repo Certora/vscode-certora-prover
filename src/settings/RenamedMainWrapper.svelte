@@ -70,7 +70,7 @@
         class="feedback-button"
         title="Feedback"
         href="https://forms.gle/zTadNeJZ7g1vmqFg6"
-        >Feedback
+        >Support
         <div class="action-label codicon codicon-action codicon-feedback" />
       </a>
     </div>
