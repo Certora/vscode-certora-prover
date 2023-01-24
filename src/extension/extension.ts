@@ -14,6 +14,11 @@ import {
   CONF_DIRECTORY_NAME,
   InputFormData,
   JobNameMap,
+  SH_DIRECTORY,
+  SH_DIRECTORY_NAME,
+  CERTORA_INNER_DIR_BUILD,
+  CERTORA_INNER_DIR,
+  LAST_CONFS,
 } from './types'
 import { createConfFile } from './utils/createConfFile'
 import { confFileToFormData } from './utils/confFileToInputForm'
@@ -171,6 +176,16 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   /**
+   * reads a file and returns it's content - in json format
+   * @param shFileUri uri of file to read
+   * @returns content of a file
+   */
+  async function readShFile(shFileUri: vscode.Uri): Promise<string> {
+    const decoder = new TextDecoder()
+    return decoder.decode(await vscode.workspace.fs.readFile(shFileUri))
+  }
+
+  /**
    * duplicates a run's conf file, and opens the settings webview of the new run that was created
    * @param toDuplicate the name of a run to duplicate, in a type that holds both conf file name
    * and display name of the run
@@ -230,8 +245,8 @@ export function activate(context: vscode.ExtensionContext): void {
     return CONF_DIRECTORY + name + '.conf'
   }
 
-  function getConfFileName(path: string): string {
-    return path.replace(CONF_DIRECTORY, '').replace('.conf', '')
+  function getFileName(path: string, exe = '.conf'): string {
+    return path.split('/').reverse()[0].replace(exe, '')
   }
 
   async function runScript(name: JobNameMap) {
@@ -302,12 +317,111 @@ export function activate(context: vscode.ExtensionContext): void {
     scriptRunner.removeRunningScriptByName(name)
   }
 
+  async function convertShToConf(file: vscode.Uri) {
+    const path = vscode.workspace.workspaceFolders?.[0]
+    if (!path) return
+    // write build_only to sh
+    let strContent = await readShFile(file)
+    const commandIndex = strContent.indexOf('\n--verify')
+    if (commandIndex !== undefined) {
+      // we look for the next command after "verify"
+      let index = strContent.indexOf('--', commandIndex + 3)
+      if (index === undefined) {
+        index = strContent.indexOf('\\', commandIndex)
+      }
+      strContent =
+        strContent.slice(0, index) +
+        '--build_only \\\n' +
+        strContent.slice(index)
+    }
+    const encoder = new TextEncoder()
+    const content = encoder.encode(strContent)
+    const newPath =
+      path?.uri.path + CERTORA_INNER_DIR_BUILD + getFileName(file.path, '.sh')
+    const newPathUri = vscode.Uri.parse(newPath)
+    await vscode.workspace.fs.writeFile(newPathUri, content)
+    if (await scriptRunner.build(newPath)) {
+      // read conf from .certora_internal into conf type
+      const dir = await scriptRunner.getInnerDir()
+      if (dir) {
+        const logFilePath = vscode.Uri.joinPath(
+          path.uri,
+          CERTORA_INNER_DIR,
+          dir[1],
+          LAST_CONFS,
+        )
+        // get the first file from this dir
+        // remove build only from conf
+        // copy conf to certora/conf dir
+      }
+    }
+
+    // at the end - delete the file?
+  }
+
+  async function createInitialJobsFromSh(): Promise<void> {
+    const path = vscode.workspace.workspaceFolders?.[0]
+    if (path) {
+      const shDirectoryPath = path.uri.path + '/' + SH_DIRECTORY
+      const shDirectoryUri = vscode.Uri.parse(shDirectoryPath)
+      const checked = await checkDir(shDirectoryUri)
+      if (checked) {
+        const shFiles = vscode.workspace.fs.readDirectory(shDirectoryUri)
+        shFiles.then(async f => {
+          const shList = f.map(async file => {
+            return await createFileObject(
+              vscode.Uri.parse(shDirectoryPath + file[0]),
+            )
+          })
+          // const awaitedList = await Promise.all(shList)
+          // sendFilesToCreateJobs(awaitedList)
+        })
+      }
+    }
+    // users can copy conf files to the conf folder and it will create a job!
+    // const path = vscode.workspace.workspaceFolders?.[0]
+    // CONVERT TO CONF AND THAT'S IT
+    if (path) {
+      const directoryToWatch = vscode.Uri.joinPath(path.uri, SH_DIRECTORY_NAME)
+      try {
+        const fileSystemWatcher = vscode.workspace.createFileSystemWatcher(
+          new vscode.RelativePattern(directoryToWatch, '**/*.sh'),
+        )
+        fileSystemWatcher.onDidCreate(async file => {
+          const fileObj: ConfToCreate = await createFileObject(file)
+          sendFilesToCreateJobs([fileObj])
+        })
+        // vscode asks to delete a conf file before is it deleted to avoid mistakes,
+        // so I think deleting the job with it is a good idea
+        //  ===== DOESN'T MATTER =====
+        // fileSystemWatcher.onDidDelete(file => {
+        //   const nameToRemove = getConfFileName(
+        //     vscode.workspace.asRelativePath(file.path),
+        //   )
+        //   resultsWebviewProvider.postMessage<string>({
+        //     type: 'delete-job',
+        //     payload: nameToRemove,
+        //   })
+        // })
+      } catch (e) {
+        console.log(
+          'ERROR:',
+          e,
+          '[internal error from  the file system watcher]',
+        )
+      }
+    }
+  }
+
   /**
    * all conf files in the conf folder will become jobs!
    */
   async function createInitialJobs(): Promise<void> {
     const path = vscode.workspace.workspaceFolders?.[0]
     if (path) {
+      convertShToConf(
+        vscode.Uri.parse(path.uri.path + '/certora/scripts/run.sh'),
+      )
       const confDirectoryPath = path.uri.path + '/' + CONF_DIRECTORY
       const confDirectoryUri = vscode.Uri.parse(confDirectoryPath)
       const checked = await checkDir(confDirectoryUri)
@@ -342,7 +456,7 @@ export function activate(context: vscode.ExtensionContext): void {
         // vscode asks to delete a conf file before is it deleted to avoid mistakes,
         // so I think deleting the job with it is a good idea
         fileSystemWatcher.onDidDelete(file => {
-          const nameToRemove = getConfFileName(
+          const nameToRemove = getFileName(
             vscode.workspace.asRelativePath(file.path),
           )
           resultsWebviewProvider.postMessage<string>({
@@ -367,7 +481,7 @@ export function activate(context: vscode.ExtensionContext): void {
    */
   async function createFileObject(file: vscode.Uri): Promise<ConfToCreate> {
     const fileObj: ConfToCreate = {
-      fileName: getConfFileName(vscode.workspace.asRelativePath(file)),
+      fileName: getFileName(vscode.workspace.asRelativePath(file)),
       allowRun: 0,
     }
     try {

@@ -58,7 +58,7 @@ export class ScriptRunner {
    * @param ts the time the file was created
    * @returns the full path to the conf.log file or null
    */
-  private async getLogFilePath(pathToConfFile: string, ts: number) {
+  public async getLogFilePath(pathToConfFile: string, ts: number) {
     const path = workspace.workspaceFolders?.[0]
     if (!path) return
 
@@ -108,6 +108,39 @@ export class ScriptRunner {
     return logFilePath
   }
 
+  public async getInnerDir() {
+    const path = workspace.workspaceFolders?.[0]
+    if (!path) return
+
+    const internalUri = Uri.parse(path.uri.path + CERTORA_INNER_DIR)
+    const checked = await checkDir(internalUri)
+    if (checked) {
+      const innerDirs = await workspace.fs.readDirectory(internalUri)
+      const dates = innerDirs.map(dir => {
+        if (dir[1] === 2) {
+          return this.getDateFormat(dir[0])
+        }
+        return null
+      })
+      // filter out null values
+      const datesNew = dates.filter(date => {
+        return date && date[0]
+      })
+
+      // sort by date
+      const sortedDates = datesNew.sort(function (a, b) {
+        if (a !== null && b !== null) {
+          return a[0] > b[0] ? -1 : 1
+        }
+        return 0
+      })
+
+      // get the most recent date / dir
+      const curDate = sortedDates[0]
+      return curDate
+    }
+  }
+
   private async log(
     str: string,
     pathToConfFile: string,
@@ -137,6 +170,34 @@ export class ScriptRunner {
         await workspace.fs.writeFile(logFilePath, content)
       }
     }
+  }
+
+  public async build(shFile: string): Promise<boolean> {
+    const path = workspace.workspaceFolders?.[0]
+    if (!path) {
+      await window.showErrorMessage(
+        'Failed to build ' + shFile + ' into a configuration file',
+      )
+      return false
+    }
+    this.script = spawn(`sh`, [shFile], {
+      cwd: path.uri.fsPath,
+    })
+    if (!this.script) {
+      await window.showErrorMessage(
+        'Failed to build ' + shFile + ' into a configuration file',
+      )
+      return false
+    }
+    this.script.stderr.on('data', async (data: any) => {
+      const str = data.toString() as string
+      if (str) {
+        await window.showErrorMessage(
+          'Failed to build ' + shFile + ' into a configuration file: ' + str,
+        )
+      }
+    })
+    return true
   }
 
   /**
