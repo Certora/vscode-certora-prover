@@ -349,8 +349,10 @@ function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
           const solcArr = confFile.solc.split('/')
           tempForm.compiler.ver = solcArr.reverse()[0]
           tempForm.compiler.exe = solcArr
-            .join('')
+            .reverse()
+            .join('/')
             .replace(tempForm.compiler.ver, '')
+            .replace('/', '')
         } else {
           tempForm.compiler.ver = confFile.solc
         }
