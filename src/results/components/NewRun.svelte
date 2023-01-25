@@ -21,8 +21,7 @@
   import { log, Sources } from '../utils/log'
   import Pane from './Pane.svelte'
   import Tree from './Tree.svelte'
-  import { expandables, verificationResults } from '../store/store'
-  import type { Writable } from 'svelte/store'
+  import { verificationResults } from '../store/store'
 
   export let doRename: boolean = true
   export let editFunc: () => void
@@ -272,6 +271,7 @@
       goToRuleReportAction.disabled = false
     }
     actions.push(goToRuleReportAction)
+    hasResults()
     return actions
   }
 
