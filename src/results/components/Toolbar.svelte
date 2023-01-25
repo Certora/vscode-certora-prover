@@ -17,6 +17,7 @@
           title={action.title}
           icon={action.icon}
           link={action.link}
+          disabled={action.disabled}
           on:click={action.onClick}
         />
       {/each}

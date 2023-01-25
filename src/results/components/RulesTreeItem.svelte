@@ -8,6 +8,8 @@
   import TreeIcon from './TreeIcon.svelte'
   import { navigateToCode } from '../extension-actions'
   import { Action, Rule, Assert, RuleStatuses } from '../types'
+  import { writable } from 'svelte/store'
+  import { expandables } from '../store/store'
 
   export let rule: Rule = null
   export let assert: Assert = null
@@ -16,6 +18,8 @@
   export let actions: Action[] = []
   export let level = 1
   export let duplicateFunc = null
+  export let initialExpandedState: boolean = false
+  export let runDisplayName
 
   const dispatch = createEventDispatcher<{ fetchOutput: Assert | Rule }>()
   $: allowDuplicate =
@@ -31,7 +35,7 @@
     ? `${assert.status}-assert-message.svg`
     : `unknown-assert-message.svg`
 
-  let isExpanded = false
+  let isExpanded = writable(initialExpandedState)
 
   function duplicateRule() {
     if (allowDuplicate) {
@@ -56,18 +60,29 @@
   {level}
   {actions}
   hasChildren={rule?.children.length > 0 || rule?.asserts.length > 0}
-  bind:isExpanded
+  bind:isExpanded={$isExpanded}
   on:click={() => {
     if (assert) {
       dispatch('fetchOutput', assert)
       return
     }
 
-    if (!isExpanded && rule) {
+    if (!$isExpanded && rule) {
       dispatch('fetchOutput', rule)
     }
 
-    isExpanded = !isExpanded
+    $isExpanded = !$isExpanded
+    $expandables = $expandables.map(element => {
+      if (element.title === runDisplayName && element.tree.length > 0) {
+        element.tree = element.tree.map(treeItem => {
+          if (treeItem.title === rule.name) {
+            treeItem.isExpanded = $isExpanded
+          }
+          return treeItem
+        })
+      }
+      return element
+    })
   }}
 >
   <TreeIcon
@@ -93,7 +108,7 @@
   </div>
 </BaseTreeItem>
 
-{#if isExpanded && rule?.children.length > 0}
+{#if $isExpanded && rule?.children.length > 0}
   {#each rule.children as child, i}
     <svelte:self
       rule={child}
@@ -115,7 +130,7 @@
     />
   {/each}
 {/if}
-{#if isExpanded && rule?.asserts.length > 0}
+{#if $isExpanded && rule?.asserts.length > 0}
   {#each rule.asserts as child, i}
     <svelte:self
       assert={child}

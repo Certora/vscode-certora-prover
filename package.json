@@ -3,12 +3,9 @@
   "displayName": "Certora IDE",
   "description": "Check and validate smart contracts in VS Code",
   "publisher": "Certora",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "SEE LICENSE IN LICENSE",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Certora/vscode-certora-prover"
-  },
+  "repository": "https://github.com/Certora/vscode-certora-prover",
   "homepage": "https://github.com/Certora/vscode-certora-prover/blob/main/README.md",
   "icon": "media/icon.png",
   "engines": {
@@ -182,11 +179,14 @@
     "typecheck:svelte": "svelte-check --tsconfig ./src/results/tsconfig.json"
   },
   "dependencies": {
+    "@types/node-fetch": "^2.6.2",
     "@vscode/codicons": "^0.0.26",
     "@vscode/webview-ui-toolkit": "^1.0.0",
     "axios": "^0.24.0",
+    "form-data": "^4.0.0",
     "lodash.uniqby": "^4.7.0",
     "nanoid": "^3.1.30",
+    "node-fetch": "2",
     "svelte-collapse": "^0.1.1",
     "svelte-select": "^4.4.7"
   },
@@ -314,5 +314,6 @@
   },
   "simple-git-hooks": {
     "pre-commit": "npx lint-staged"
-  }
+  },
+  "author": "<you@example.com>"
 }

@@ -9,6 +9,7 @@ export type Action = {
   onClick?: () => void
   icon: string
   link?: string
+  disabled?: boolean
 }
 
 export type JumpToDefinition = {
@@ -226,7 +227,7 @@ export type EventsFromExtension =
     }
   | {
       type: EventTypesFromExtension.UploadingFiles
-      payload: number
+      payload: { pid: number; vrLink: string }
     }
   | {
       type: EventTypesFromExtension.ScriptStopped

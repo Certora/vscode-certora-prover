@@ -2,10 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
-### 0.1.1 (2023-01-03)
+### 0.1.1 (2023-01-25)
+
+## Features
+
+* Job list item view update: moved and emphasize rule report button, removed "rename" button and added a context menu, removed hover from JOB LIST buttons ([#84](https://github.com/Certora/vscode-certora-prover/pull/84))
+* Stopping a running job cancels the job in the cloud ([#84](https://github.com/Certora/vscode-certora-prover/pull/84))
+* New "Expand All" / "Collapse All" buttons ([#84](https://github.com/Certora/vscode-certora-prover/pull/84))
 
 ## Bug Fixes
-
+* Jobs results stay opened / closed on reopening the JOB LIST tab ([#84](https://github.com/Certora/vscode-certora-prover/pull/84))
 * Send_only flag is automatically added to every conf file added to certora/conf directory ([#81](https://github.com/Certora/vscode-certora-prover/pull/81))
 * additional files that don't explicitly mention the main contract in the .conf file "file" section are now handled correctly ([#81](https://github.com/Certora/vscode-certora-prover/pull/81))
 * Wrong input in "Additional Flag" would'nt crush the extension ([#81](https://github.com/Certora/vscode-certora-prover/pull/81))
