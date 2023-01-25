@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-### 0.1.1 ()
+### 0.1.1 (2023-01-25)
 
 ## Features
 
@@ -12,6 +12,12 @@ All notable changes to this project will be documented in this file.
 
 ## Bug Fixes
 * Jobs results stay opened / closed on reopening the JOB LIST tab ([#84](https://github.com/Certora/vscode-certora-prover/pull/84))
+* Send_only flag is automatically added to every conf file added to certora/conf directory ([#81](https://github.com/Certora/vscode-certora-prover/pull/81))
+* additional files that don't explicitly mention the main contract in the .conf file "file" section are now handled correctly ([#81](https://github.com/Certora/vscode-certora-prover/pull/81))
+* Wrong input in "Additional Flag" would'nt crush the extension ([#81](https://github.com/Certora/vscode-certora-prover/pull/81))
+* Enforce using contracts with different names ([#81](https://github.com/Certora/vscode-certora-prover/pull/81))
+* Can now add the "--settings" flag in "Additional Flags" under "Spec Settings" ([#81](https://github.com/Certora/vscode-certora-prover/pull/81))
+* Validation error in an additional contract is deleted when the additional contract is deleted ([#81](https://github.com/Certora/vscode-certora-prover/pull/81))
 
 ### 0.1.0 (2023-01-03)
 
