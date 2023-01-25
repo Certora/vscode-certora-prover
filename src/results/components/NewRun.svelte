@@ -486,7 +486,10 @@
     {/key}
   {:else}
     {#key [vrLink]}
-      <div class="running">
+      <div
+        class="running"
+        on:contextmenu|stopPropagation|preventDefault={() => null}
+      >
         <Pane
           title={namesMap.get(runName)}
           actions={createActionsForRunningScript()}

@@ -69,6 +69,17 @@
   }
 
   function toggleExpand() {
+    if (
+      $expandables.find(element => {
+        return element.title === title
+      }) === undefined
+    ) {
+      $expandables.push({
+        title: title,
+        isExpanded: false,
+        tree: [],
+      })
+    }
     $expandables = $expandables.map(element => {
       if (element.title === title) {
         element.isExpanded = !element.isExpanded
