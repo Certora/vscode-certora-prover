@@ -83,6 +83,7 @@ function getAdditionalSettings(confFile: ConfFile) {
  * @param solidityObj solidity object
  */
 function processCompiler(solc: string, solidityObj: SolidityObj) {
+  // todo: remove try catch
   try {
     if (solc.includes('/')) {
       const index = solc.lastIndexOf('/')
@@ -102,6 +103,7 @@ function processCompiler(solc: string, solidityObj: SolidityObj) {
  * @param solidityObj solidity object
  */
 function processPackages(packages: string[], solidityObj: SolidityObj) {
+  // todo: remove try catch?
   try {
     packages.forEach(packageStr => {
       const re = /"/gi
@@ -156,6 +158,7 @@ function processSolidityAttributes(
   }
 
   if (confFile.solc_args) {
+    // todo: check if I can get an array of strings in confFile.solc_args
     try {
       const solcArgsArr = confFile.solc_args
         .toString()
@@ -172,7 +175,7 @@ function processSolidityAttributes(
         }
       })
     } catch (e) {
-      console.log(e, '[INNER ERROR]')
+      console.log(e, '[INNER ERROR - solc_args]')
     }
   } else {
     solidityObj.solidityArgs.push({ key: '', value: '' })
@@ -318,14 +321,15 @@ function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
 
       tempForm.mainFile = contractStr as string
       if (tempForm.mainFile.includes(':')) {
-        tempForm.mainFile = contractStr.split(':')[0]
-        tempForm.mainContract = contractStr.split(':')[1]
+        const contractArr = contractStr.split(':')
+        tempForm.mainFile = contractArr[0]
+        tempForm.mainContract = contractArr[1]
       }
       // maybe main contract isn't explicitly mentioned
       if (!tempForm.mainContract) {
-        console.log('no main contract for', tempForm.mainFile)
+        // console.log('no main contract for', tempForm.mainFile)
         const splittedPathToFile = tempForm.mainFile.split('/')
-        console.log(splittedPathToFile, 'splitted file')
+        // console.log(splittedPathToFile, 'splitted file')
         tempForm.mainContract = splittedPathToFile[
           splittedPathToFile.length - 1
         ].replace('.sol', '')
@@ -345,6 +349,7 @@ function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
           }
         })
       } else if (confFile.solc) {
+        // todo: reverse? pop?
         if (confFile.solc.includes('/')) {
           const solcArr = confFile.solc.split('/')
           tempForm.compiler.ver = solcArr.reverse()[0]

@@ -377,7 +377,7 @@ export function activate(context: vscode.ExtensionContext): void {
         try {
           confFile.send_only = true
           const encoder = new TextEncoder()
-          const content = encoder.encode(JSON.stringify(confFile, null, 2))
+          const content = encoder.encode(JSON.stringify(confFile))
           await vscode.workspace.fs.writeFile(file, content)
         } catch (e) {}
       }
