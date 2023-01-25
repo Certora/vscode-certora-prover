@@ -446,6 +446,13 @@ export function activate(context: vscode.ExtensionContext): void {
     )
   }
 
+  function gotoSupportFeedbackForm() {
+    vscode.commands.executeCommand(
+      'vscode.open',
+      'https://forms.gle/zTadNeJZ7g1vmqFg6',
+    )
+  }
+
   const resultsWebviewProvider = new ResultsWebviewProvider(
     context.extensionUri,
   )
@@ -466,6 +473,10 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand(
       'certora.openSettings',
       openExtensionSettings,
+    ),
+    vscode.commands.registerCommand(
+      'certora.SupportFeedback',
+      gotoSupportFeedbackForm,
     ),
     vscode.window.registerWebviewViewProvider(
       resultsWebviewProvider.viewType,

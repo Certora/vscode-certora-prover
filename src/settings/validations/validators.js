@@ -1,6 +1,6 @@
 /* ---------------------------------------------------------------------------------------------
  *  All validators functions. A validator is for checking if an input is valid,
- *  consists of the relvant charecters.
+ *  consists of the relevant characters.
  *-------------------------------------------------------------------------------------------- */
 
 import { solAdditionalContracts, solidityObj } from '../stores/store'

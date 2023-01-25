@@ -63,17 +63,18 @@
     <SolSettingsTab />
     <SpecSettingsTab />
     <VerificationMessageTab />
-    <div class="feedback_space" />
+    <!-- <div class="feedback_space" />
     <div class="feedback">
       <a
         id="feedback-button"
         class="feedback-button"
         title="Feedback"
+        hover="Support & Feedback"
         href="https://forms.gle/zTadNeJZ7g1vmqFg6"
-        >Support
+        >
         <div class="action-label codicon codicon-action codicon-feedback" />
       </a>
-    </div>
+    </div> -->
   </div>
 </div>
 
@@ -88,7 +89,7 @@
     height: 100vh;
     overflow: hidden;
   }
-  .feedback {
+  /* .feedback {
     position: fixed;
     width: 100%;
     height: 60px;
@@ -106,10 +107,11 @@
   }
   .feedback-button {
     position: fixed;
-    width: 100px;
-    height: 22px;
+    width: 30px;
+    height: 20px;
     bottom: 15px;
     right: 15px;
+    font-size: 11px;
     background-color: var(--vscode-button-foreground);
     color: var(--vscode-button-background);
     border-radius: 30px;
@@ -118,14 +120,14 @@
     border-color: transparent;
     text-decoration: none;
     cursor: pointer;
-  }
-  .action-label {
+  } */
+  /* .action-label {
     position: relative;
     display: inline-block;
     overflow: hidden;
     float: right;
     padding-right: 15px;
-  }
+  } */
   .left_wrapper {
     box-sizing: border-box;
     width: 30%;
