@@ -83,12 +83,17 @@ function getAdditionalSettings(confFile: ConfFile) {
  * @param solidityObj solidity object
  */
 function processCompiler(solc: string, solidityObj: SolidityObj) {
-  if (solc.includes('/')) {
-    const index = solc.lastIndexOf('/')
-    solidityObj.compiler.exe = solc.slice(1, index)
-    solidityObj.compiler.ver = solc.slice(index + 1, solc.length)
-  } else {
-    solidityObj.compiler.ver = solc
+  // todo: remove try catch
+  try {
+    if (solc.includes('/')) {
+      const index = solc.lastIndexOf('/')
+      solidityObj.compiler.exe = solc.slice(1, index)
+      solidityObj.compiler.ver = solc.slice(index + 1, solc.length)
+    } else {
+      solidityObj.compiler.ver = solc
+    }
+  } catch (e) {
+    console.log(e, 'INNER ERROR')
   }
 }
 
@@ -98,28 +103,37 @@ function processCompiler(solc: string, solidityObj: SolidityObj) {
  * @param solidityObj solidity object
  */
 function processPackages(packages: string[], solidityObj: SolidityObj) {
-  packages.forEach(packageStr => {
-    const re = /"/gi
-    const packageArray = packageStr.replace(re, '').split(/[:|=]/)
-    const tempPackage: SolidityPackageDir = {
-      packageName: packageArray[0],
-      path: packageArray[1],
-    }
-    solidityObj.solidityPackageDir.push(tempPackage)
-  })
+  // todo: remove try catch?
+  try {
+    packages.forEach(packageStr => {
+      const re = /"/gi
+      const packageArray = packageStr.replace(re, '').split(/[:|=]/)
+      const tempPackage: SolidityPackageDir = {
+        packageName: packageArray[0],
+        path: packageArray[1],
+      }
+      solidityObj.solidityPackageDir.push(tempPackage)
+    })
+  } catch (e) {
+    console.log(e, '[INNER ERROR]')
+  }
 }
 
 function processLink(linkArr: string[], solidityObj: SolidityObj) {
-  linkArr.forEach(link => {
-    // looking for linking format [CurrentContract : Variable = OtherContract]
-    const linkArr = link.split(/[:=]/)
-    if (linkArr.length === 3 && linkArr[0] === solidityObj.mainContract) {
-      solidityObj.linking.push({
-        variable: linkArr[1],
-        contractName: linkArr[2],
-      })
-    }
-  })
+  try {
+    linkArr.forEach(link => {
+      // looking for linking format [CurrentContract : Variable = OtherContract]
+      const linkArr = link.split(/[:=]/)
+      if (linkArr.length === 3 && linkArr[0] === solidityObj.mainContract) {
+        solidityObj.linking.push({
+          variable: linkArr[1],
+          contractName: linkArr[2],
+        })
+      }
+    })
+  } catch (e) {
+    console.log(e, '[INNER ERROR]')
+  }
 }
 
 /**
@@ -144,20 +158,25 @@ function processSolidityAttributes(
   }
 
   if (confFile.solc_args) {
-    const solcArgsArr = confFile.solc_args
-      .toString()
-      .replace(/[[]']/, '')
-      .split(',')
-    solcArgsArr.forEach(arg => {
-      const tempArg = { key: '', value: '' }
-      if (arg.includes('--')) {
-        tempArg.key = arg.replace('--', '')
-        solidityObj.solidityArgs.push(tempArg)
-      } else {
-        const index = solidityObj.solidityArgs.length - 1
-        solidityObj.solidityArgs[index].value = arg
-      }
-    })
+    // todo: check if I can get an array of strings in confFile.solc_args
+    try {
+      const solcArgsArr = confFile.solc_args
+        .toString()
+        .replace(/[[]']/, '')
+        .split(',')
+      solcArgsArr.forEach(arg => {
+        const tempArg = { key: '', value: '' }
+        if (arg.includes('--')) {
+          tempArg.key = arg.replace('--', '')
+          solidityObj.solidityArgs.push(tempArg)
+        } else {
+          const index = solidityObj.solidityArgs.length - 1
+          solidityObj.solidityArgs[index].value = arg
+        }
+      })
+    } catch (e) {
+      console.log(e, '[INNER ERROR - solc_args]')
+    }
   } else {
     solidityObj.solidityArgs.push({ key: '', value: '' })
   }
@@ -198,20 +217,24 @@ function processSpecAttributes(confFile: ConfFile, specObj: SpecObj) {
 
   if (confFile.staging) {
     specObj.runOnStg = true
-    specObj.branchName = (confFile.staging as string) || 'master'
+    if (confFile.staging.toString() === 'true') {
+      confFile.staging = 'master'
+    }
+    specObj.branchName = confFile.staging.toString() || 'master'
   }
 
   if (confFile.rule_sanity) {
-    if (confFile.rule_sanity === 'basic') {
+    if (
+      confFile.rule_sanity === 'basic' ||
+      confFile.rule_sanity.toString() === 'true'
+    ) {
       specObj.ruleSanity = true
     }
     if (confFile.rule_sanity === 'advanced') {
       specObj.ruleSanity = true
       specObj.advancedSanity = true
     }
-    if (confFile.send_only) {
-      specObj.sendOnly = true
-    }
+    specObj.sendOnly = true
   }
 
   const additionalSettings = getAdditionalSettings(confFile)
@@ -280,8 +303,7 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
 function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
   const tempFormArr: SolidityObj[] = []
   confFile.files.forEach((contractStr, index) => {
-    const solArr = contractStr.split(':') || []
-    if (solArr.length === 2 && index !== 0) {
+    if (index !== 0) {
       // create contract
       const tempForm: SolidityObj = {
         mainFile: '',
@@ -296,9 +318,22 @@ function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
         solidityPackageDefaultPath: '',
         solidityPackageDir: [],
       }
-      tempForm.mainFile = solArr[0] || ''
-      tempForm.mainContract = solArr[1] || ''
 
+      tempForm.mainFile = contractStr as string
+      if (tempForm.mainFile.includes(':')) {
+        const contractArr = contractStr.split(':')
+        tempForm.mainFile = contractArr[0]
+        tempForm.mainContract = contractArr[1]
+      }
+      // maybe main contract isn't explicitly mentioned
+      if (!tempForm.mainContract) {
+        // console.log('no main contract for', tempForm.mainFile)
+        const splittedPathToFile = tempForm.mainFile.split('/')
+        // console.log(splittedPathToFile, 'splitted file')
+        tempForm.mainContract = splittedPathToFile[
+          splittedPathToFile.length - 1
+        ].replace('.sol', '')
+      }
       // link
       if (confFile.link && confFile.link.length > 0) {
         processLink(confFile.link, tempForm)
@@ -314,12 +349,15 @@ function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
           }
         })
       } else if (confFile.solc) {
+        // todo: reverse? pop?
         if (confFile.solc.includes('/')) {
           const solcArr = confFile.solc.split('/')
           tempForm.compiler.ver = solcArr.reverse()[0]
           tempForm.compiler.exe = solcArr
-            .join('')
+            .reverse()
+            .join('/')
             .replace(tempForm.compiler.ver, '')
+            .replace('/', '')
         } else {
           tempForm.compiler.ver = confFile.solc
         }

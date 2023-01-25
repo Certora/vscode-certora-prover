@@ -145,6 +145,12 @@
     },
     "commands": [
       {
+        "command": "certora.SupportFeedback",
+        "title": "Support & Feedback",
+        "category": "VSCode",
+        "icon": "$(feedback)"
+      },
+      {
         "command": "certora.openSettings",
         "title": "Open Settings",
         "category": "VSCode",
@@ -153,6 +159,11 @@
     ],
     "menus": {
       "view/title": [
+        {
+          "command": "certora.SupportFeedback",
+          "when": "view == results",
+          "group": "navigation"
+        },
         {
           "command": "certora.openSettings",
           "when": "view == results",
