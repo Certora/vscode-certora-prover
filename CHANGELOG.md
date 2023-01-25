@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+
+### 0.1.2 (2023-01-25)
+## Bug Fixes
+
+* Results panes opens and closes ([#86](https://github.com/Certora/vscode-certora-prover/pull/86))
+* Context menu is disabled white job is running ([#86](https://github.com/Certora/vscode-certora-prover/pull/86))
+
 ### 0.1.1 (2023-01-25)
 
 ## Features
