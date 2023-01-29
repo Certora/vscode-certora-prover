@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+### 0.1.3 ()
+
+## Features
+* Added option to choose branch in production ([#87](https://github.com/Certora/vscode-certora-prover/pull/87))
+
 
 ### 0.1.2 (2023-01-25)
 ## Bug Fixes

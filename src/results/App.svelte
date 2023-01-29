@@ -48,6 +48,7 @@
 
   export const hide = writable([])
   export const pos = writable({ x: 0, y: 0 })
+  export const focusedRun = writable('')
 
   let output: Output
   let outputRunName: string
@@ -60,7 +61,7 @@
   let pendingQueueCounter = 0
   let namesMap: Map<string, string> = new Map()
   let runsCounter = 0
-  let focusedRun: string = ''
+  // let focusedRun: string = ''
 
   // listen to the results array to see if there are results or not
   $: $verificationResults.length > 0
@@ -305,7 +306,7 @@
           source: Sources.ResultsWebview,
           info: e.data.payload,
         })
-        focusedRun = e.data.payload
+        $focusedRun = e.data.payload
         break
       }
 
@@ -441,7 +442,7 @@
     duplicate(confNameMapToDuplicate, confNameMapDuplicated, rule)
     createRun(duplicated)
     if (!rule) {
-      focusedRun = duplicatedName
+      $focusedRun = duplicatedName
     }
   }
 
@@ -592,7 +593,7 @@
       }
       openSettings(JobNameMap)
     }
-    focusedRun = newName
+    $focusedRun = newName
   }
 
   /**
@@ -776,58 +777,57 @@
       <ul class="running-scripts">
         {#each Array(runsCounter) as _, index (index)}
           <!-- removing the keys in hope the one refreshed job won't refresh everything -->
-          {#key [focusedRun]}
-            <li
-              on:contextmenu|stopPropagation|preventDefault={e => {
-                showMenu(e, index)
+          <!-- {#key [focusedRun]} -->
+          <li
+            on:contextmenu|stopPropagation|preventDefault={e => {
+              showMenu(e, index)
+            }}
+          >
+            <NewRun
+              editFunc={() => editRun(runs[index])}
+              deleteFunc={() => askToDeleteThis(runs[index])}
+              deleteRun={() => deleteRun(runs[index])}
+              {namesMap}
+              {renameRun}
+              duplicateFunc={duplicateRun}
+              runFunc={() => run(runs[index])}
+              status={runs[index].status}
+              {newFetchOutput}
+              nowRunning={(runningScripts.find(
+                rs => getFilename(rs.confFile) === runs[index].name,
+              ) !== undefined ||
+                (pendingQueue.find(rs => rs.fileName === runs[index].name) !==
+                  undefined &&
+                  pendingQueueCounter > 0)) &&
+                $verificationResults.find(
+                  vr => runs[index].name === vr.name,
+                ) === undefined}
+              isPending={pendingQueue.find(
+                rs => rs.fileName === runs[index].name,
+              ) !== undefined && pendingQueueCounter > 0}
+              expandedState={$verificationResults.find(
+                vr => vr.name === runs[index].name,
+              ) !== undefined}
+              pendingStopFunc={() => {
+                pendingStopFunc(runs[index])
               }}
-            >
-              <NewRun
-                doRename={runs[index].name === ''}
-                editFunc={() => editRun(runs[index])}
-                deleteFunc={() => askToDeleteThis(runs[index])}
-                deleteRun={() => deleteRun(runs[index])}
-                {namesMap}
-                {renameRun}
-                duplicateFunc={duplicateRun}
-                runFunc={() => run(runs[index])}
-                status={runs[index].status}
-                {newFetchOutput}
-                nowRunning={(runningScripts.find(
-                  rs => getFilename(rs.confFile) === runs[index].name,
-                ) !== undefined ||
-                  (pendingQueue.find(rs => rs.fileName === runs[index].name) !==
-                    undefined &&
-                    pendingQueueCounter > 0)) &&
-                  $verificationResults.find(
-                    vr => runs[index].name === vr.name,
-                  ) === undefined}
-                isPending={pendingQueue.find(
-                  rs => rs.fileName === runs[index].name,
-                ) !== undefined && pendingQueueCounter > 0}
-                expandedState={$verificationResults.find(
-                  vr => vr.name === runs[index].name,
-                ) !== undefined}
-                pendingStopFunc={() => {
-                  pendingStopFunc(runs[index])
-                }}
-                runningStopFunc={() => {
-                  $verificationResults = $verificationResults.filter(vr => {
-                    return vr.name !== runs[index].name
-                  })
-                  runs = setStatus(runs[index].name, Status.ready)
-                  runs[index].vrLink = ''
-                  stopScript(runs[index].id)
-                }}
-                inactiveSelected={focusedRun}
-                {setStatus}
-                vrLink={runs[index].vrLink}
-                hide={$hide[index]}
-                pos={$pos}
-                bind:runName={runs[index].name}
-              />
-            </li>
-          {/key}
+              runningStopFunc={() => {
+                $verificationResults = $verificationResults.filter(vr => {
+                  return vr.name !== runs[index].name
+                })
+                runs = setStatus(runs[index].name, Status.ready)
+                runs[index].vrLink = ''
+                stopScript(runs[index].id)
+              }}
+              inactiveSelected={$focusedRun}
+              {setStatus}
+              vrLink={runs[index].vrLink}
+              hide={$hide[index]}
+              pos={$pos}
+              bind:runName={runs[index].name}
+            />
+          </li>
+          <!-- {/key} -->
         {/each}
       </ul>
     </Pane>
