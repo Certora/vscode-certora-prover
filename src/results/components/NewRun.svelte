@@ -452,7 +452,7 @@
       />
     </div>
   {:else if !nowRunning}
-    {#key [inactiveSelected]}
+    {#key [status, inactiveSelected]}
       <div class="results" on:click={onClick}>
         <Pane
           title={namesMap.get(runName)}

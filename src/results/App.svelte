@@ -147,6 +147,7 @@
             name: e.data.payload.runName,
           },
         })
+        //todo: make sure after rename, the results go to the right place
         setVerificationReportLink(
           e.data.payload.runName,
           e.data.payload.verificationReportLink,
