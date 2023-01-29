@@ -91,7 +91,6 @@ export const specObj = writable({
     },
   ],
   runOnStg: false,
-  runOnBranch: false,
   branchName: '',
   ruleSanity: false,
   advancedSanity: false,

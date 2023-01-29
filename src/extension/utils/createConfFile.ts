@@ -134,6 +134,9 @@ function convertSourceFormDataToConfFileJSON(
   if (inputFormData.useStaging) {
     config.staging = inputFormData.branch || 'master'
   }
+  if (inputFormData.branch && !inputFormData.useStaging) {
+    config.cloud = inputFormData.branch
+  }
 
   if (inputFormData.cacheName) {
     config.cache = inputFormData.cacheName
@@ -341,7 +344,7 @@ export function processForm(
     link: [],
     extendedSettings: [],
     useStaging: newForm.specObj.runOnStg,
-    branch: newForm.specObj.branchName || 'master',
+    branch: '',
     cacheName: '',
     message: confFileName,
     additionalSettings: [],
@@ -390,6 +393,10 @@ export function processForm(
   if (newForm.specObj.runOnStg) {
     form.useStaging = true
     form.branch = newForm.specObj.branchName || 'master'
+  }
+
+  if (newForm.specObj.branchName && !newForm.specObj.runOnStg) {
+    form.branch = newForm.specObj.branchName || 'production'
   }
 
   addAdditionalSetting(

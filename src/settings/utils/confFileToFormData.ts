@@ -65,6 +65,7 @@ const stableFields = [
   'solc_map',
   'rule_sanity',
   'send_only',
+  'cloud',
 ]
 
 function getAdditionalSettings(confFile: ConfFile) {
@@ -221,6 +222,10 @@ function processSpecAttributes(confFile: ConfFile, specObj: SpecObj) {
       confFile.staging = ''
     }
     specObj.branchName = confFile.staging.toString() || ''
+  }
+
+  if (confFile.cloud) {
+    specObj.branchName = confFile.cloud.toString() || ''
   }
 
   if (confFile.rule_sanity) {

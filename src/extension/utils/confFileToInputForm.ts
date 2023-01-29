@@ -132,6 +132,10 @@ export function confFileToFormData(
     form.branch = (confFile.staging as string) || 'master'
   }
 
+  if (confFile.cloud) {
+    form.branch = (confFile.cloud as string) || 'production'
+  }
+
   if (confFile.cache) {
     form.cacheName = confFile.cache as string
   }
