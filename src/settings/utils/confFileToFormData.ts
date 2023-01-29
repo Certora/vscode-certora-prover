@@ -33,7 +33,7 @@ const newForm: NewForm = {
     loopUnroll: '',
     properties: [],
     runOnStg: false,
-    branchName: 'master',
+    branchName: '',
     ruleSanity: false,
     advancedSanity: false,
     localTypeChecking: false,
@@ -218,9 +218,9 @@ function processSpecAttributes(confFile: ConfFile, specObj: SpecObj) {
   if (confFile.staging) {
     specObj.runOnStg = true
     if (confFile.staging.toString() === 'true') {
-      confFile.staging = 'master'
+      confFile.staging = ''
     }
-    specObj.branchName = confFile.staging.toString() || 'master'
+    specObj.branchName = confFile.staging.toString() || ''
   }
 
   if (confFile.rule_sanity) {

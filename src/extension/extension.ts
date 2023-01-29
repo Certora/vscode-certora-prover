@@ -66,7 +66,7 @@ export function activate(context: vscode.ExtensionContext): void {
     const loopUnroll: number =
       vscode.workspace.getConfiguration().get('LoopUnroll') || 1
     const duration: number =
-      vscode.workspace.getConfiguration().get('Duration') || 600
+      vscode.workspace.getConfiguration().get('Duration') || 300
     const additionalFlags: string =
       JSON.stringify(
         vscode.workspace.getConfiguration().get('AdditionalFlags'),
@@ -109,10 +109,10 @@ export function activate(context: vscode.ExtensionContext): void {
     if (optimisticLoop) {
       confFileDefault.optimistic_loop = true
     }
-    if (loopUnroll) {
+    if (loopUnroll && loopUnroll !== 1) {
       confFileDefault.loop_iter = loopUnroll
     }
-    if (duration) {
+    if (duration && duration !== 300) {
       confFileDefault.smt_timeout = duration
     }
     if (additionalFlags !== '{}') {

@@ -70,7 +70,6 @@
 
   const [validity, validate] = createFieldValidator(validator)
 
-  let mouse_is_on_input = false
   let icon_wrapper = false
   let showInfo = false
   let mouse_is_on_show_info = false
@@ -83,7 +82,6 @@
   function checkMouseLeaveInput() {
     setTimeout(() => {
       if (icon_wrapper) return
-      mouse_is_on_input = false
       icon_wrapper = false
     }, 100)
   }
@@ -113,7 +111,6 @@
     maxlength="255"
     bind:value={bindValue}
     {placeholder}
-    on:mouseenter={() => (mouse_is_on_input = true)}
     on:mouseleave={checkMouseLeaveInput}
     class:field-danger={!$validity.valid}
     use:validate={bindValue}
@@ -129,7 +126,7 @@
   <div
     class="icon_wrapper"
     on:mouseenter={() => (icon_wrapper = true)}
-    on:mouseleave={() => ((mouse_is_on_input = false), (icon_wrapper = false))}
+    on:mouseleave={() => (icon_wrapper = false)}
   >
     {#if bindValue !== ''}
       <i
@@ -145,7 +142,6 @@
         class="codicon codicon-info"
         on:mouseenter={() => (showInfo = true)}
         on:mouseleave={checkMouseLeave}
-        style={mouse_is_on_input ? '' : 'display:none;'}
       />
     {/if}
   </div>
