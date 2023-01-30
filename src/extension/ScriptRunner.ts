@@ -32,8 +32,6 @@ export class ScriptRunner {
   constructor(resultsWebviewProvider: ResultsWebviewProvider) {
     this.polling = new ScriptProgressLongPolling()
     this.resultsWebviewProvider = resultsWebviewProvider
-
-    // TODO: Find better solution
     this.resultsWebviewProvider.stopScript = this.stop
   }
 
@@ -172,15 +170,17 @@ export class ScriptRunner {
         }
       }
       const vrLink = this.getRuleReportLink(str)
-      if (str.includes('Uploading files...')) {
-        console.log('Uploading files...')
-        this.runningScripts = this.runningScripts.map(rs => {
-          if (rs.pid === pid) {
-            rs.uploaded = true
-          }
-          return rs
-        })
-      }
+
+      // if (str.includes('Uploading files...')) {
+      //   console.log('Uploading files...')
+      //   this.runningScripts = this.runningScripts.map(rs => {
+      //     if (rs.pid === pid) {
+      //       rs.uploaded = true
+      //     }
+      //     return rs
+      //   })
+      // }
+
       if (vrLink) {
         this.runningScripts = this.runningScripts.map(rs => {
           if (rs.pid === pid) {
@@ -293,7 +293,14 @@ export class ScriptRunner {
 
       exec(command)
     } else {
-      // todo: timeout and try again
+      // TODO: cover this possibility
+      console.log('twilight zone')
+      this.resultsWebviewProvider.postMessage({
+        type: 'script-stopped',
+        payload: pid,
+      })
+      this.removeRunningScript(pid)
+      return
     }
     this.resultsWebviewProvider.postMessage({
       type: 'script-stopped',
