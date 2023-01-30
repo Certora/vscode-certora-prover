@@ -43,12 +43,18 @@ export abstract class PostProblems {
     if (path) {
       const resourceErrorsFile = Uri.joinPath(path, 'resource_errors.json')
       if (resourceErrorsFile) {
-        const data: Uint8Array = await workspace.fs.readFile(resourceErrorsFile)
-        if (!data) return
-        const decoder = new TextDecoder()
-        const content = decoder.decode(data)
-        const resource_error = this.getResourceError(content)
-        this.createAndPostDiagnostics(resource_error, confFile)
+        try {
+          const data: Uint8Array = await workspace.fs.readFile(
+            resourceErrorsFile,
+          )
+          if (!data) return
+          const decoder = new TextDecoder()
+          const content = decoder.decode(data)
+          const resource_error = this.getResourceError(content)
+          this.createAndPostDiagnostics(resource_error, confFile)
+        } catch (e) {
+          console.log('unable to read resource errors file: ', e)
+        }
       }
     }
   }

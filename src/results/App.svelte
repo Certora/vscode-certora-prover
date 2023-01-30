@@ -22,6 +22,7 @@
     askToDeleteJob,
     initResults,
     uploadConf,
+    rename,
   } from './extension-actions'
   import { smartMergeVerificationResult } from './utils/mergeResults'
   import { log, Sources } from './utils/log'
@@ -145,27 +146,30 @@
             currentverificationResults: $verificationResults,
             newResult: e.data.payload,
             name: e.data.payload.runName,
+            pid: e.data.payload.pid,
           },
         })
         //todo: make sure after rename, the results go to the right place
-        setVerificationReportLink(
-          e.data.payload.runName,
-          e.data.payload.verificationReportLink,
-        )
+        const pid = e.data.payload.pid
+        const runName = runs.find(run => {
+          return run.id === pid
+        })?.name
+        if (!runName) return
+        setVerificationReportLink(pid, e.data.payload.verificationReportLink)
         smartMergeVerificationResult(
           $verificationResults,
           e.data.payload,
-          e.data.payload.runName,
+          runName,
         )
         $verificationResults = $verificationResults
 
         updateExpendablesFromResults()
 
         if (e.data.payload.jobStatus === 'SUCCEEDED') {
-          if (e.data.payload.runName) {
-            removeScript(e.data.payload.runName)
+          if (runName) {
+            removeScript(runName)
+            runs = setStatus(runName, Status.success)
           }
-          runs = setStatus(e.data.payload.runName, Status.success)
         }
         log({
           action: 'After Smart merge current results with new result',
@@ -184,10 +188,11 @@
         })
         const curPid = e.data.payload.pid
         const vrLink = e.data.payload.vrLink
-        runningScripts.forEach(rs => {
+        runningScripts = runningScripts.map(rs => {
           if (rs.pid === curPid) {
             rs.uploaded = true
           }
+          return rs
         })
         runningScripts = runningScripts
         runs = runs.map(run => {
@@ -382,9 +387,9 @@
    * @param runName name of the run to update
    * @param link to verification report of run [runName]
    */
-  function setVerificationReportLink(runName: string, link: string) {
+  function setVerificationReportLink(pid: number, link: string) {
     runs.forEach(run => {
-      if (run.name === runName) {
+      if (run.id === pid) {
         run.vrLink = link
       }
     })
@@ -526,6 +531,7 @@
    * @param index if 0 - run, else: add to pending queue
    */
   function run(run: Run, index = 0): void {
+    console.log('run: ', run)
     run.vrLink = ''
     const JobNameMap: JobNameMap = {
       fileName: run.name,
@@ -543,9 +549,10 @@
     const shouldRunNext = runningScripts.every(rs => {
       return rs.uploaded === true
     })
-
+    console.log('should run next:', shouldRunNext)
     //if there are no running scripts => runNext
     if ((runningScripts.length === 0 || shouldRunNext) && index === 0) {
+      console.log('run next')
       runNext()
     }
   }
@@ -581,9 +588,9 @@
         fileName: newName,
         displayName: namesMap.get(newName),
       }
-
-      duplicate(oldConfNameMap, newConfNameMap)
-      deleteConf(oldConfNameMap)
+      rename(oldConfNameMap, newConfNameMap)
+      // duplicate(oldConfNameMap, newConfNameMap)
+      // deleteConf(oldConfNameMap)
       namesMap.delete(oldName)
     }
     // rename new run

@@ -137,6 +137,7 @@ export type Job = {
   progressUrl: string
   creationTime: string
   runName?: string
+  pid?: number
   verificationReportLink?: string
 }
 

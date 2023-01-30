@@ -194,11 +194,11 @@ export class ScriptRunner {
 
       const progressUrl = getProgressUrl(str)
 
-      const confFileName = this.getConfFileName(confFile).replace('.conf', '')
+      // const confFileName = this.getConfFileName(confFile).replace('.conf', '')
 
       if (progressUrl) {
         await this.polling.run(progressUrl, async data => {
-          data.runName = confFileName
+          data.pid = pid
           this.runningScripts.forEach(rs => {
             if (rs.pid === pid && rs.vrLink) {
               data.verificationReportLink = rs.vrLink
@@ -225,7 +225,7 @@ export class ScriptRunner {
       let vrLink
       this.runningScripts = this.runningScripts.map(rs => {
         if (rs.pid === pid) {
-          // rs.uploaded = true
+          rs.uploaded = true
           vrLink = rs.vrLink
         }
         return rs
@@ -286,7 +286,6 @@ export class ScriptRunner {
     if (scriptToStop.jobId !== undefined && scriptToStop.vrLink !== undefined) {
       this.stopUploadedScript(scriptToStop)
     } else if (!scriptToStop.uploaded) {
-      console.log('script is not uploaded:', scriptToStop)
       const command =
         os.platform() === 'win32'
           ? `taskkill -F -T -PID ${pid}`
@@ -308,6 +307,16 @@ export class ScriptRunner {
       confFile,
       pid,
       uploaded: false,
+    })
+    this.sendRunningScriptsToWebview()
+  }
+
+  public renameRunningScript(oldConf: string, newConf: string) {
+    this.runningScripts = this.runningScripts.map(rs => {
+      if (rs.confFile.includes(oldConf) || oldConf.includes(rs.confFile)) {
+        rs.confFile = newConf
+      }
+      return rs
     })
     this.sendRunningScriptsToWebview()
   }

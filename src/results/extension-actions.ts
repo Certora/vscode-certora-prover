@@ -20,6 +20,7 @@ enum Commands {
   AskToDeleteJob = 'ask-to-delete-job',
   InitResults = 'init-results',
   UploadConf = 'upload-conf',
+  Rename = 'rename',
 }
 
 export function uploadConf(): void {
@@ -137,6 +138,21 @@ export function duplicate(
       toDuplicate: toDuplicate,
       duplicatedName: duplicated,
       rule: rule,
+    },
+  })
+}
+
+export function rename(oldName: JobNameMap, newName: JobNameMap): void {
+  log({
+    action: 'Send "rename" command',
+    source: Sources.ResultsWebview,
+    info: [oldName, newName],
+  })
+  vscode.postMessage({
+    command: Commands.Rename,
+    payload: {
+      oldName: oldName,
+      newName: newName,
     },
   })
 }
