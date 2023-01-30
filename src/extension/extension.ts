@@ -179,7 +179,6 @@ export function activate(context: vscode.ExtensionContext): void {
     oldName: JobNameMap,
     newName: JobNameMap,
   ): Promise<void> {
-    console.log(oldName, newName, 'test')
     const path = vscode.workspace.workspaceFolders?.[0]
     if (!path) return
     const oldConf = vscode.Uri.joinPath(
@@ -190,7 +189,6 @@ export function activate(context: vscode.ExtensionContext): void {
       path.uri,
       getConfFilePath(newName.fileName),
     )
-    console.log(oldConf, newConf)
     try {
       await vscode.workspace.fs.rename(
         vscode.Uri.parse(oldConf.path),

@@ -531,7 +531,6 @@
    * @param index if 0 - run, else: add to pending queue
    */
   function run(run: Run, index = 0): void {
-    console.log('run: ', run)
     run.vrLink = ''
     const JobNameMap: JobNameMap = {
       fileName: run.name,
@@ -549,10 +548,8 @@
     const shouldRunNext = runningScripts.every(rs => {
       return rs.uploaded === true
     })
-    console.log('should run next:', shouldRunNext)
     //if there are no running scripts => runNext
     if ((runningScripts.length === 0 || shouldRunNext) && index === 0) {
-      console.log('run next')
       runNext()
     }
   }
@@ -629,14 +626,18 @@
    * run all the runs that are allowed to run
    */
   function runAll(): void {
+    let counter = 0
     runs.forEach((singleRun, index) => {
       // runs with these statuses should not run automatically
       if (
         singleRun.status === Status.missingSettings ||
         singleRun.status === Status.pending ||
         singleRun.status === Status.running ||
-        singleRun.status === Status.unableToRun
+        singleRun.status === Status.unableToRun ||
+        singleRun.status === Status.incompleteResults ||
+        singleRun.status === Status.success
       ) {
+        counter++
         return
       }
       const nowRunning = runningScripts.find(script => {
@@ -647,7 +648,7 @@
       })
       //make sure runs aren't ran in parallel to themselves
       if (inQueue === undefined && nowRunning === undefined) {
-        run(singleRun, index)
+        run(singleRun, index - counter)
       }
     })
   }

@@ -332,9 +332,7 @@ function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
       }
       // maybe main contract isn't explicitly mentioned
       if (!tempForm.mainContract) {
-        // console.log('no main contract for', tempForm.mainFile)
         const splittedPathToFile = tempForm.mainFile.split('/')
-        // console.log(splittedPathToFile, 'splitted file')
         tempForm.mainContract = splittedPathToFile[
           splittedPathToFile.length - 1
         ].replace('.sol', '')
