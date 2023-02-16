@@ -172,11 +172,13 @@ export class ScriptRunner {
     }
   }
 
-  public async build(shFile: string): Promise<boolean> {
+  public async buildSh(shFile: string): Promise<boolean> {
     const path = workspace.workspaceFolders?.[0]
     if (!path) {
       await window.showErrorMessage(
-        'Failed to build ' + shFile + ' into a configuration file',
+        'Failed to build ' +
+          this.getConfFileName(shFile) +
+          ' into a configuration file',
       )
       return false
     }
@@ -185,7 +187,9 @@ export class ScriptRunner {
     })
     if (!this.script) {
       await window.showErrorMessage(
-        'Failed to build ' + shFile + ' into a configuration file',
+        'Failed to build ' +
+          this.getConfFileName(shFile) +
+          ' into a configuration file',
       )
       return false
     }
@@ -193,10 +197,21 @@ export class ScriptRunner {
       const str = data.toString() as string
       if (str) {
         await window.showErrorMessage(
-          'Failed to build ' + shFile + ' into a configuration file: ' + str,
+          'Failed to build ' +
+            this.getConfFileName(shFile) +
+            ' into a configuration file: ' +
+            str,
         )
       }
+      return false
     })
+    // this.script.on('close', async code => {
+    //   console.log(shFile, 'closed with code: ', code)
+    //   if (code === 0) {
+    //     return true
+    //   }
+    //   return false
+    // })
     return true
   }
 

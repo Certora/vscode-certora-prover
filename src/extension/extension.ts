@@ -317,7 +317,11 @@ export function activate(context: vscode.ExtensionContext): void {
     scriptRunner.removeRunningScriptByName(name)
   }
 
-  async function convertShToConf(file: vscode.Uri) {
+  /**
+   * run the shell script in [file] with --build_only flag
+   * @param file shell script file
+   */
+  async function convertShToConf(file: vscode.Uri): Promise<void> {
     const path = vscode.workspace.workspaceFolders?.[0]
     if (!path) return
     // write build_only to sh
@@ -340,76 +344,40 @@ export function activate(context: vscode.ExtensionContext): void {
       path?.uri.path + CERTORA_INNER_DIR_BUILD + getFileName(file.path, '.sh')
     const newPathUri = vscode.Uri.parse(newPath)
     await vscode.workspace.fs.writeFile(newPathUri, content)
-    if (await scriptRunner.build(newPath)) {
-      // read conf from .certora_internal into conf type
-      const dir = await scriptRunner.getInnerDir()
-      if (dir) {
-        const logFilePath = vscode.Uri.joinPath(
-          path.uri,
-          CERTORA_INNER_DIR,
-          dir[1],
-          LAST_CONFS,
-        )
-        // get the first file from this dir
-        // remove build only from conf
-        // copy conf to certora/conf dir
-      }
-    }
-
-    // at the end - delete the file?
+    await scriptRunner.buildSh(newPath)
+    await vscode.workspace.fs.delete(newPathUri)
   }
 
-  async function createInitialJobsFromSh(): Promise<void> {
+  /**
+   * watch the .certora_internal directory to look for conf that were only build not ran
+   * than create conf files for them
+   */
+  function watchForBuilds(): void {
     const path = vscode.workspace.workspaceFolders?.[0]
-    if (path) {
-      const shDirectoryPath = path.uri.path + '/' + SH_DIRECTORY
-      const shDirectoryUri = vscode.Uri.parse(shDirectoryPath)
-      const checked = await checkDir(shDirectoryUri)
-      if (checked) {
-        const shFiles = vscode.workspace.fs.readDirectory(shDirectoryUri)
-        shFiles.then(async f => {
-          const shList = f.map(async file => {
-            return await createFileObject(
-              vscode.Uri.parse(shDirectoryPath + file[0]),
-            )
-          })
-          // const awaitedList = await Promise.all(shList)
-          // sendFilesToCreateJobs(awaitedList)
-        })
-      }
-    }
-    // users can copy conf files to the conf folder and it will create a job!
-    // const path = vscode.workspace.workspaceFolders?.[0]
-    // CONVERT TO CONF AND THAT'S IT
-    if (path) {
-      const directoryToWatch = vscode.Uri.joinPath(path.uri, SH_DIRECTORY_NAME)
-      try {
-        const fileSystemWatcher = vscode.workspace.createFileSystemWatcher(
-          new vscode.RelativePattern(directoryToWatch, '**/*.sh'),
-        )
-        fileSystemWatcher.onDidCreate(async file => {
-          const fileObj: ConfToCreate = await createFileObject(file)
-          sendFilesToCreateJobs([fileObj])
-        })
-        // vscode asks to delete a conf file before is it deleted to avoid mistakes,
-        // so I think deleting the job with it is a good idea
-        //  ===== DOESN'T MATTER =====
-        // fileSystemWatcher.onDidDelete(file => {
-        //   const nameToRemove = getConfFileName(
-        //     vscode.workspace.asRelativePath(file.path),
-        //   )
-        //   resultsWebviewProvider.postMessage<string>({
-        //     type: 'delete-job',
-        //     payload: nameToRemove,
-        //   })
-        // })
-      } catch (e) {
-        console.log(
-          'ERROR:',
-          e,
-          '[internal error from  the file system watcher]',
-        )
-      }
+    if (!path) return
+    try {
+      const internalUri = vscode.Uri.parse(path.uri.path + CERTORA_INNER_DIR)
+      const fileSystemWatcher = vscode.workspace.createFileSystemWatcher(
+        new vscode.RelativePattern(internalUri, '**/.last_confs**/*.conf'),
+      )
+      fileSystemWatcher.onDidCreate(async file => {
+        const strContent = await readShFile(file)
+        const jsonContent = JSON.parse(strContent)
+        if (jsonContent && jsonContent.build_only) {
+          delete jsonContent.build_only
+          const newConfFileUri = getConfUri(
+            jsonContent.verify[0].split(':')[0] +
+              getFileName(file.path).replace('last_conf', ''),
+          )
+          if (newConfFileUri) {
+            const encoder = new TextEncoder()
+            const content = encoder.encode(JSON.stringify(jsonContent, null, 2))
+            await vscode.workspace.fs.writeFile(newConfFileUri, content)
+          }
+        }
+      })
+    } catch (e) {
+      console.log('ERROR:', e, '[internal error from  the file system watcher]')
     }
   }
 
@@ -419,9 +387,15 @@ export function activate(context: vscode.ExtensionContext): void {
   async function createInitialJobs(): Promise<void> {
     const path = vscode.workspace.workspaceFolders?.[0]
     if (path) {
-      convertShToConf(
-        vscode.Uri.parse(path.uri.path + '/certora/scripts/run.sh'),
-      )
+      // shell scripts:
+      const shDirectoryPath = path.uri.path + '/' + SH_DIRECTORY
+      const shDirectoryUri = vscode.Uri.parse(shDirectoryPath)
+      const shFiles = await vscode.workspace.fs.readDirectory(shDirectoryUri)
+      for (let i = 0; i < shFiles.length; i++) {
+        await convertShToConf(vscode.Uri.parse(shDirectoryPath + shFiles[i][0]))
+      }
+      watchForBuilds()
+      // conf files:
       const confDirectoryPath = path.uri.path + '/' + CONF_DIRECTORY
       const confDirectoryUri = vscode.Uri.parse(confDirectoryPath)
       const checked = await checkDir(confDirectoryUri)
@@ -439,38 +413,56 @@ export function activate(context: vscode.ExtensionContext): void {
       }
     }
     // users can copy conf files to the conf folder and it will create a job!
-    // const path = vscode.workspace.workspaceFolders?.[0]
+    // they can also copy files to the script directory and create conf files from them!
     if (path) {
-      const directoryToWatch = vscode.Uri.joinPath(
+      const confDirectoryToWatch = vscode.Uri.joinPath(
         path.uri,
         CONF_DIRECTORY_NAME,
       )
-      try {
-        const fileSystemWatcher = vscode.workspace.createFileSystemWatcher(
-          new vscode.RelativePattern(directoryToWatch, '**/*.conf'),
+      createConfWatcher(confDirectoryToWatch)
+      const shDirectoryToWatch = vscode.Uri.joinPath(
+        path.uri,
+        SH_DIRECTORY_NAME,
+      )
+      createShWatcher(shDirectoryToWatch)
+    }
+  }
+
+  function createShWatcher(directoryToWatch: vscode.Uri) {
+    try {
+      const fileSystemWatcher = vscode.workspace.createFileSystemWatcher(
+        new vscode.RelativePattern(directoryToWatch, '**/*.sh'),
+      )
+      fileSystemWatcher.onDidCreate(async file => {
+        await convertShToConf(file)
+      })
+    } catch (e) {
+      console.log('ERROR:', e, '[internal error from  the file system watcher]')
+    }
+  }
+
+  function createConfWatcher(directoryToWatch: vscode.Uri) {
+    try {
+      const fileSystemWatcher = vscode.workspace.createFileSystemWatcher(
+        new vscode.RelativePattern(directoryToWatch, '**/*.conf'),
+      )
+      fileSystemWatcher.onDidCreate(async file => {
+        const fileObj: ConfToCreate = await createFileObject(file)
+        sendFilesToCreateJobs([fileObj])
+      })
+      // vscode asks to delete a conf file before is it deleted to avoid mistakes,
+      // so I think deleting the job with it is a good idea
+      fileSystemWatcher.onDidDelete(file => {
+        const nameToRemove = getFileName(
+          vscode.workspace.asRelativePath(file.path),
         )
-        fileSystemWatcher.onDidCreate(async file => {
-          const fileObj: ConfToCreate = await createFileObject(file)
-          sendFilesToCreateJobs([fileObj])
+        resultsWebviewProvider.postMessage<string>({
+          type: 'delete-job',
+          payload: nameToRemove,
         })
-        // vscode asks to delete a conf file before is it deleted to avoid mistakes,
-        // so I think deleting the job with it is a good idea
-        fileSystemWatcher.onDidDelete(file => {
-          const nameToRemove = getFileName(
-            vscode.workspace.asRelativePath(file.path),
-          )
-          resultsWebviewProvider.postMessage<string>({
-            type: 'delete-job',
-            payload: nameToRemove,
-          })
-        })
-      } catch (e) {
-        console.log(
-          'ERROR:',
-          e,
-          '[internal error from  the file system watcher]',
-        )
-      }
+      })
+    } catch (e) {
+      console.log('ERROR:', e, '[internal error from  the file system watcher]')
     }
   }
 
@@ -524,19 +516,20 @@ export function activate(context: vscode.ExtensionContext): void {
       openLabel: 'Open',
       defaultUri: path.uri,
       filters: {
-        'File type': ['conf'],
+        'File type': ['conf', 'sh'],
       },
     }
-    const confFiles = await vscode.window.showOpenDialog(options)
-    confFiles?.map(async fileUri => {
+    const files = await vscode.window.showOpenDialog(options)
+    files?.map(async fileUri => {
       try {
         const fileArr = fileUri.path.split('/')
         const fileName = fileArr.reverse()[0]
-        const target = vscode.Uri.joinPath(
-          path.uri,
-          CONF_DIRECTORY_NAME,
-          fileName,
-        )
+        let target
+        if (fileName.endsWith('.conf')) {
+          target = vscode.Uri.joinPath(path.uri, CONF_DIRECTORY_NAME, fileName)
+        } else {
+          target = vscode.Uri.joinPath(path.uri, SH_DIRECTORY_NAME, fileName)
+        }
         await vscode.workspace.fs.copy(fileUri, target, { overwrite: true })
       } catch (e) {
         console.log("Could'nt copy file", fileUri.path, '\nERROR:', e)
