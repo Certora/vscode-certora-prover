@@ -108,38 +108,38 @@ export class ScriptRunner {
     return logFilePath
   }
 
-  public async getInnerDir() {
-    const path = workspace.workspaceFolders?.[0]
-    if (!path) return
+  // public async getInnerDir() {
+  //   const path = workspace.workspaceFolders?.[0]
+  //   if (!path) return
 
-    const internalUri = Uri.parse(path.uri.path + CERTORA_INNER_DIR)
-    const checked = await checkDir(internalUri)
-    if (checked) {
-      const innerDirs = await workspace.fs.readDirectory(internalUri)
-      const dates = innerDirs.map(dir => {
-        if (dir[1] === 2) {
-          return this.getDateFormat(dir[0])
-        }
-        return null
-      })
-      // filter out null values
-      const datesNew = dates.filter(date => {
-        return date && date[0]
-      })
+  //   const internalUri = Uri.parse(path.uri.path + CERTORA_INNER_DIR)
+  //   const checked = await checkDir(internalUri)
+  //   if (checked) {
+  //     const innerDirs = await workspace.fs.readDirectory(internalUri)
+  //     const dates = innerDirs.map(dir => {
+  //       if (dir[1] === 2) {
+  //         return this.getDateFormat(dir[0])
+  //       }
+  //       return null
+  //     })
+  //     // filter out null values
+  //     const datesNew = dates.filter(date => {
+  //       return date && date[0]
+  //     })
 
-      // sort by date
-      const sortedDates = datesNew.sort(function (a, b) {
-        if (a !== null && b !== null) {
-          return a[0] > b[0] ? -1 : 1
-        }
-        return 0
-      })
+  //     // sort by date
+  //     const sortedDates = datesNew.sort(function (a, b) {
+  //       if (a !== null && b !== null) {
+  //         return a[0] > b[0] ? -1 : 1
+  //       }
+  //       return 0
+  //     })
 
-      // get the most recent date / dir
-      const curDate = sortedDates[0]
-      return curDate
-    }
-  }
+  //     // get the most recent date / dir
+  //     const curDate = sortedDates[0]
+  //     return curDate
+  //   }
+  // }
 
   private async log(
     str: string,
