@@ -36,6 +36,7 @@
     JobNameMap,
     Status,
     CONF_DIRECTORY,
+    RuleStatuses,
   } from './types'
   import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
   import NewRun from './components/NewRun.svelte'
@@ -156,6 +157,11 @@
         })?.name
         if (!runName) return
         setVerificationReportLink(pid, e.data.payload.verificationReportLink)
+        if (e.data.payload.jobStatus === 'FAILED') {
+          console.log('fail!!!!')
+          setStoppedJobStatus(runName)
+          return
+        }
         smartMergeVerificationResult(
           $verificationResults,
           e.data.payload,
@@ -166,6 +172,7 @@
         updateExpendablesFromResults()
 
         if (e.data.payload.jobStatus === 'SUCCEEDED') {
+          console.log('success!!!!!!')
           if (runName) {
             removeScript(runName)
             runs = setStatus(runName, Status.success)
@@ -234,16 +241,23 @@
         })
         const pid = e.data.payload
         const curRun = runs.find(run => run.id === pid)
+
         if (curRun !== undefined) {
-          if (
-            $verificationResults.find(vr => vr.name === curRun.name) !==
-            undefined
-          ) {
-            runs = setStatus(curRun.name, Status.unableToRun)
-          } else {
-            runs = setStatus(curRun.name, Status.ready)
-          }
+          const runName = curRun.name
+          setStoppedJobStatus(runName)
         }
+
+        // if (curRun !== undefined) {
+        //   console.log('stopped cur run', curRun)
+        //   if (
+        //     $verificationResults.find(vr => vr.name === curRun.name) !==
+        //     undefined
+        //   ) {
+        //     runs = setStatus(curRun.name, Status.success)
+        //   } else {
+        //     runs = setStatus(curRun.name, Status.ready)
+        //   }
+        // }
         runningScripts = runningScripts.filter(rs => {
           return rs.pid !== pid
         })
@@ -461,6 +475,33 @@
         tree: [],
       },
     ]
+  }
+
+  function setStoppedJobStatus(jobName: string): void {
+    if (jobName) {
+      removeScript(jobName)
+      if ($verificationResults.length === 0) {
+        runs = setStatus(jobName, Status.ready)
+        return
+      }
+      $verificationResults.forEach(vr => {
+        if (vr.name === jobName) {
+          runs = setStatus(jobName, Status.success)
+          vr.jobs.forEach(job => {
+            job.verificationProgress.rules.forEach(rule => {
+              if (rule.status === RuleStatuses.Running) {
+                rule.status = RuleStatuses.Unknown
+              }
+            })
+          })
+        } else {
+          console.log('else')
+          runs = setStatus(jobName, Status.ready)
+        }
+      })
+      $verificationResults = $verificationResults
+      return
+    }
   }
 
   /**
@@ -821,10 +862,16 @@
                 pendingStopFunc(runs[index])
               }}
               runningStopFunc={() => {
-                $verificationResults = $verificationResults.filter(vr => {
-                  return vr.name !== runs[index].name
-                })
-                runs = setStatus(runs[index].name, Status.ready)
+                // $verificationResults = $verificationResults.filter(vr => {
+                //   return vr.name !== runs[index].name
+                // })
+                // if ($verificationResults.length > 0 && $verificationResults.find(
+                //   vr => runs[index].name === vr.name,
+                // ) === undefined) {
+                //   runs = setStatus(runs[index].name, Status.ready)
+                // } else {
+                //   runs = setStatus(runs[index].name, Status.success)
+                // }
                 runs[index].vrLink = ''
                 stopScript(runs[index].id)
               }}

@@ -200,7 +200,7 @@ export class ScriptRunner {
         await this.polling.run(progressUrl, async data => {
           data.pid = pid
           this.runningScripts.forEach(rs => {
-            if (rs.pid === pid && rs.vrLink) {
+            if (rs && rs.pid === pid && rs.vrLink) {
               data.verificationReportLink = rs.vrLink
               this.resultsWebviewProvider.postMessage<Job>({
                 type: 'receive-new-job-result',

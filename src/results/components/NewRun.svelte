@@ -305,6 +305,13 @@
         },
       },
     ]
+    if (status === Status.incompleteResults) {
+      actions.push({
+        title: 'Stop',
+        icon: 'stop-circle',
+        onClick: runningStop,
+      })
+    }
     return actions
   }
 
@@ -502,7 +509,13 @@
     {/key}
   {/if}
 </div>
-<ContextMenu {hide} actions={createActionsForContextMenu()} {pos} />
+<ContextMenu
+  {hide}
+  actions={status
+    ? createActionsForContextMenu()
+    : createActionsForContextMenu()}
+  {pos}
+/>
 
 <style lang="postcss">
   .body {
