@@ -756,7 +756,7 @@
           onClick: runAll,
         },
         {
-          title: 'Create New Job From Conf File',
+          title: 'Create New Job From Existing File',
           icon: 'new-file',
           onClick: uploadConf,
         },

@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+### 0.1.3 ()
+
+## Features
+
+* Create a job from a shell script file ([#88](https://github.com/Certora/vscode-certora-prover/pull/88))
 
 ### 0.1.2 (2023-01-25)
 ## Bug Fixes

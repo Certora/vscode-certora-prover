@@ -14,11 +14,8 @@ import {
   CONF_DIRECTORY_NAME,
   InputFormData,
   JobNameMap,
-  SH_DIRECTORY,
-  SH_DIRECTORY_NAME,
   CERTORA_INNER_DIR_BUILD,
   CERTORA_INNER_DIR,
-  LAST_CONFS,
 } from './types'
 import { createConfFile } from './utils/createConfFile'
 import { confFileToFormData } from './utils/confFileToInputForm'
@@ -345,7 +342,6 @@ export function activate(context: vscode.ExtensionContext): void {
     const newPathUri = vscode.Uri.parse(newPath)
     await vscode.workspace.fs.writeFile(newPathUri, content)
     await scriptRunner.buildSh(newPath)
-    await vscode.workspace.fs.delete(newPathUri)
   }
 
   /**
@@ -374,6 +370,7 @@ export function activate(context: vscode.ExtensionContext): void {
             const content = encoder.encode(JSON.stringify(jsonContent, null, 2))
             await vscode.workspace.fs.writeFile(newConfFileUri, content)
           }
+          await vscode.workspace.fs.delete(file)
         }
       })
     } catch (e) {
@@ -387,14 +384,8 @@ export function activate(context: vscode.ExtensionContext): void {
   async function createInitialJobs(): Promise<void> {
     const path = vscode.workspace.workspaceFolders?.[0]
     if (path) {
-      // shell scripts:
-      const shDirectoryPath = path.uri.path + '/' + SH_DIRECTORY
-      const shDirectoryUri = vscode.Uri.parse(shDirectoryPath)
-      const shFiles = await vscode.workspace.fs.readDirectory(shDirectoryUri)
-      for (let i = 0; i < shFiles.length; i++) {
-        await convertShToConf(vscode.Uri.parse(shDirectoryPath + shFiles[i][0]))
-      }
       watchForBuilds()
+
       // conf files:
       const confDirectoryPath = path.uri.path + '/' + CONF_DIRECTORY
       const confDirectoryUri = vscode.Uri.parse(confDirectoryPath)
@@ -420,24 +411,6 @@ export function activate(context: vscode.ExtensionContext): void {
         CONF_DIRECTORY_NAME,
       )
       createConfWatcher(confDirectoryToWatch)
-      const shDirectoryToWatch = vscode.Uri.joinPath(
-        path.uri,
-        SH_DIRECTORY_NAME,
-      )
-      createShWatcher(shDirectoryToWatch)
-    }
-  }
-
-  function createShWatcher(directoryToWatch: vscode.Uri) {
-    try {
-      const fileSystemWatcher = vscode.workspace.createFileSystemWatcher(
-        new vscode.RelativePattern(directoryToWatch, '**/*.sh'),
-      )
-      fileSystemWatcher.onDidCreate(async file => {
-        await convertShToConf(file)
-      })
-    } catch (e) {
-      console.log('ERROR:', e, '[internal error from  the file system watcher]')
     }
   }
 
@@ -533,13 +506,18 @@ export function activate(context: vscode.ExtensionContext): void {
       try {
         const fileArr = fileUri.path.split('/')
         const fileName = fileArr.reverse()[0]
-        let target
+        // let target
         if (fileName.endsWith('.conf')) {
-          target = vscode.Uri.joinPath(path.uri, CONF_DIRECTORY_NAME, fileName)
+          const target = vscode.Uri.joinPath(
+            path.uri,
+            CONF_DIRECTORY_NAME,
+            fileName,
+          )
+          await vscode.workspace.fs.copy(fileUri, target, { overwrite: true })
+          // else if file endswith .sh
         } else {
-          target = vscode.Uri.joinPath(path.uri, SH_DIRECTORY_NAME, fileName)
+          await convertShToConf(fileUri)
         }
-        await vscode.workspace.fs.copy(fileUri, target, { overwrite: true })
       } catch (e) {
         console.log("Could'nt copy file", fileUri.path, '\nERROR:', e)
       }
