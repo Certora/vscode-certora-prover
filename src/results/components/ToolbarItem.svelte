@@ -6,19 +6,25 @@
   export let title: string
   export let icon: string
   export let link: string = ''
+  export let disabled = false
 </script>
 
 <li class="action-item menu-entry" role="presentation">
   {#if link}
     <a
-      class="action-label codicon codicon-action codicon-{icon}"
+      class="action-label {disabled
+        ? 'disabled'
+        : 'active-link'} codicon codicon-action codicon-{icon}"
       {title}
+      role="button"
       href={link}
       tabindex="0"
     />
   {:else}
     <div
-      class="action-label codicon codicon-action codicon-{icon}"
+      class="action-label {disabled
+        ? 'disabled'
+        : 'active'} codicon codicon-action codicon-{icon} "
       role="button"
       {title}
       tabindex="0"
@@ -34,7 +40,6 @@
     align-items: center;
     justify-content: center;
     margin-right: 4px;
-    cursor: pointer;
   }
 
   .action-label {
@@ -54,9 +59,25 @@
     &:active {
       outline: 0 !important;
     }
+  }
 
+  .active {
+    cursor: pointer;
     &:hover {
       background-color: rgb(184 184 184 / 31%);
     }
+  }
+
+  .active-link {
+    cursor: pointer;
+    color: #1abcfe;
+    &:hover {
+      background-color: rgb(184 184 184 / 31%);
+    }
+  }
+
+  .disabled {
+    color: var(--vscode-disabledForeground) !important;
+    cursor: default !important;
   }
 </style>

@@ -58,6 +58,13 @@
       validator = contractValidators()
       return
     }
+
+    if ((infoObj.validator = 'valueValidator')) {
+      validator = value => {
+        return true
+      }
+      return
+    }
     validator = compilerValidator()
   }
   setValidator()

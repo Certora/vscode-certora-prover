@@ -23,7 +23,7 @@ Content
 - Call trace & variables view
 - Check multiple contracts in parallel
 - Checking progress status
-- Support multiple jobs in parallel
+- Support multiple job runs in parallel
 - New and extended settings form
 
 ## Prerequisites

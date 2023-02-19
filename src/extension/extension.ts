@@ -372,13 +372,22 @@ export function activate(context: vscode.ExtensionContext): void {
       allowRun: 0,
     }
     try {
-      const content: ConfFile = await readConf(file)
+      const confFile: ConfFile = await readConf(file)
+      // add send_only flag to conf file, if it doesn't exist
+      if (!confFile.send_only) {
+        try {
+          confFile.send_only = true
+          const encoder = new TextEncoder()
+          const content = encoder.encode(JSON.stringify(confFile))
+          await vscode.workspace.fs.writeFile(file, content)
+        } catch (e) {}
+      }
       if (
-        content.files !== undefined &&
-        content.verify !== undefined &&
-        content.files.length > 0 &&
-        content.verify?.length > 0 &&
-        content.solc
+        confFile.files !== undefined &&
+        confFile.verify !== undefined &&
+        confFile.files.length > 0 &&
+        confFile.verify?.length > 0 &&
+        confFile.solc
       ) {
         fileObj.allowRun = 1
       }
@@ -442,6 +451,13 @@ export function activate(context: vscode.ExtensionContext): void {
     SettingsPanel.enableForm(name.displayName)
   }
 
+  function gotoSupportFeedbackForm() {
+    vscode.commands.executeCommand(
+      'vscode.open',
+      'https://forms.gle/zTadNeJZ7g1vmqFg6',
+    )
+  }
+
   const resultsWebviewProvider = new ResultsWebviewProvider(
     context.extensionUri,
   )
@@ -463,6 +479,10 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand(
       'certora.openSettings',
       openExtensionSettings,
+    ),
+    vscode.commands.registerCommand(
+      'certora.SupportFeedback',
+      gotoSupportFeedbackForm,
     ),
     vscode.window.registerWebviewViewProvider(
       resultsWebviewProvider.viewType,

@@ -5,6 +5,7 @@
 
   import { onDestroy, onMount } from 'svelte'
   import { getIconPath } from '../utils/getIconPath'
+  import ContextMenu from '../components/ContextMenu.svelte'
 
   import {
     Verification,
@@ -20,6 +21,7 @@
   import { log, Sources } from '../utils/log'
   import Pane from './Pane.svelte'
   import Tree from './Tree.svelte'
+  import { verificationResults } from '../store/store'
 
   export let doRename: boolean = true
   export let editFunc: () => void
@@ -35,7 +37,6 @@
     rule?: string,
   ) => void
   export let runFunc: () => void
-  export let verificationResults: Verification[]
   export let newFetchOutput: (
     e: CustomEvent<Assert | Rule>,
     vr: Verification,
@@ -56,6 +57,10 @@
   export let status: Status
 
   export let vrLink = ''
+
+  export let hide = true
+
+  export let pos
 
   let beforeRename = ''
 
@@ -223,6 +228,59 @@
    */
   function createActions(): Action[] {
     let actions: Action[] = [
+      // {
+      //   title: 'Rename',
+      //   icon: 'edit',
+      //   onClick: setRename,
+      // },
+      {
+        title: 'Edit',
+        icon: 'gear',
+        onClick: editFunc,
+      },
+      {
+        title: 'Delete',
+        icon: 'trash',
+        onClick: deleteFunc,
+      },
+      {
+        title: 'Duplicate',
+        icon: 'files',
+        onClick: () => {
+          duplicate()
+        },
+      },
+    ]
+    return actions
+  }
+
+  /**
+   * creates actions for the missingSettings, ready and unableToRun statuses.
+   * the actions are: rename, edit, delete, duplicate, and if possible: run
+   */
+  function createFixedActions(): Action[] {
+    let actions: Action[] = []
+    let goToRuleReportAction = {
+      title: 'Go To Rule Report',
+      icon: 'file-symlink-file',
+      link: vrLink,
+      disabled: true,
+    }
+    if (vrLink) {
+      goToRuleReportAction.link = vrLink
+      goToRuleReportAction.disabled = false
+    }
+    actions.push(goToRuleReportAction)
+    hasResults()
+    return actions
+  }
+
+  /**
+   * creates actions for the missingSettings, ready and unableToRun statuses.
+   * the actions are: rename, edit, delete, duplicate, and if possible: run
+   */
+  function createActionsForContextMenu(): Action[] {
+    let actions: Action[] = [
       {
         title: 'Rename',
         icon: 'edit',
@@ -246,13 +304,6 @@
         },
       },
     ]
-    if (hasResults() && vrLink) {
-      actions.unshift({
-        title: 'Go To Rule Report',
-        icon: 'file-symlink-file',
-        link: vrLink,
-      })
-    }
     return actions
   }
 
@@ -326,7 +377,7 @@
    * checks if a run has results
    */
   function hasResults(): boolean {
-    const result = verificationResults.find(vr => {
+    const result = $verificationResults.find(vr => {
       return vr.name === runName
     })
     if (
@@ -349,7 +400,7 @@
    * checks if there exists complete results for this job
    */
   function hasCompleteResults(): boolean {
-    const result = verificationResults.find(vr => {
+    const result = $verificationResults.find(vr => {
       return vr.name === runName
     })
     return result.jobs.find(job => job.jobStatus === 'SUCCEEDED') !== undefined
@@ -367,6 +418,12 @@
   /** focus on this element */
   function focusOnThis(element) {
     element.focus()
+  }
+
+  function onClick(e) {
+    if (!expandedState) {
+      editFunc()
+    }
   }
 </script>
 
@@ -395,11 +452,11 @@
     </div>
   {:else if !nowRunning}
     {#key [status]}
-      <div class="results" on:click={expandedState ? null : editFunc}>
+      <div class="results" on:click={onClick}>
         <Pane
           title={namesMap.get(runName)}
-          initialExpandedState={expandedState}
           actions={createActions()}
+          fixedActions={createFixedActions()}
           showExpendIcon={expandedState}
           {status}
           inactiveSelected={runName === inactiveSelected}
@@ -409,10 +466,11 @@
             ? runFunc
             : null}
         >
-          {#each verificationResults as vr, index (index)}
+          {#each $verificationResults as vr, index (index)}
             {#if vr.name === runName}
               <li class="tree">
                 <Tree
+                  runDisplayName={namesMap.get(runName)}
                   data={{
                     type: TreeType.Rules,
                     tree: retrieveRules(vr.jobs),
@@ -427,22 +485,28 @@
       </div>
     {/key}
   {:else}
-    <div class="running">
-      <Pane
-        title={namesMap.get(runName)}
-        initialExpandedState={false}
-        actions={createActionsForRunningScript()}
-        status={getRunStatus()}
-        showExpendIcon={false}
-      />
-    </div>
+    {#key [vrLink]}
+      <div
+        class="running"
+        on:contextmenu|stopPropagation|preventDefault={() => null}
+      >
+        <Pane
+          title={namesMap.get(runName)}
+          actions={createActionsForRunningScript()}
+          status={getRunStatus()}
+          showExpendIcon={false}
+          fixedActions={createFixedActions()}
+        />
+      </div>
+    {/key}
   {/if}
 </div>
+<ContextMenu {hide} actions={createActionsForContextMenu()} {pos} />
 
 <style lang="postcss">
   .body {
     *:focus {
-      background-color: var(--vscode-list-activeSelectionBackground);
+      /* background-color: var(--vscode-list-activeSelectionBackground); */
       outline-color: var(--vscode-list-focusHighlightForeground);
     }
 

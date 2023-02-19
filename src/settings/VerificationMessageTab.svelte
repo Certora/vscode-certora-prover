@@ -11,7 +11,7 @@
       infoText: 'Message describing the job.',
       infoLink:
         'https://docs.certora.com/en/latest/docs/prover/cli/options.html#msg',
-      validator: 'spaceAndDash',
+      validator: 'filePathValidator',
     },
   }
 </script>
