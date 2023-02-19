@@ -478,8 +478,12 @@
             job.verificationProgress.rules.forEach(rule => {
               if (rule.status === RuleStatuses.Running) {
                 rule.status = RuleStatuses.Killed
-                rule.children = []
               }
+              rule.children.forEach(child => {
+                if ((child.status = RuleStatuses.Running)) {
+                  child.status = RuleStatuses.Killed
+                }
+              })
             })
           })
         } else {
