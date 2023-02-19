@@ -55,10 +55,7 @@ export class ScriptProgressLongPolling {
       const dataToUI = await this.prepareDataToUI(data, url)
 
       if (data.jobStatus === 'FAILED' && dataToUI) {
-        console.log('=========JOB FAILED========')
-        console.log(dataToUI)
         callback(dataToUI)
-        // window.showErrorMessage(data.cloudErrorMessages.join('. '))
         return
       }
 

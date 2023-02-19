@@ -158,7 +158,6 @@
         if (!runName) return
         setVerificationReportLink(pid, e.data.payload.verificationReportLink)
         if (e.data.payload.jobStatus === 'FAILED') {
-          console.log('fail!!!!')
           setStoppedJobStatus(runName)
           return
         }
@@ -172,7 +171,6 @@
         updateExpendablesFromResults()
 
         if (e.data.payload.jobStatus === 'SUCCEEDED') {
-          console.log('success!!!!!!')
           if (runName) {
             removeScript(runName)
             runs = setStatus(runName, Status.success)
@@ -247,17 +245,6 @@
           setStoppedJobStatus(runName)
         }
 
-        // if (curRun !== undefined) {
-        //   console.log('stopped cur run', curRun)
-        //   if (
-        //     $verificationResults.find(vr => vr.name === curRun.name) !==
-        //     undefined
-        //   ) {
-        //     runs = setStatus(curRun.name, Status.success)
-        //   } else {
-        //     runs = setStatus(curRun.name, Status.ready)
-        //   }
-        // }
         runningScripts = runningScripts.filter(rs => {
           return rs.pid !== pid
         })
@@ -490,12 +477,12 @@
           vr.jobs.forEach(job => {
             job.verificationProgress.rules.forEach(rule => {
               if (rule.status === RuleStatuses.Running) {
-                rule.status = RuleStatuses.Unknown
+                rule.status = RuleStatuses.Killed
+                rule.children = []
               }
             })
           })
         } else {
-          console.log('else')
           runs = setStatus(jobName, Status.ready)
         }
       })

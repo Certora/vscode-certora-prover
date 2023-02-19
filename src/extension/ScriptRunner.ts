@@ -171,16 +171,6 @@ export class ScriptRunner {
       }
       const vrLink = this.getRuleReportLink(str)
 
-      // if (str.includes('Uploading files...')) {
-      //   console.log('Uploading files...')
-      //   this.runningScripts = this.runningScripts.map(rs => {
-      //     if (rs.pid === pid) {
-      //       rs.uploaded = true
-      //     }
-      //     return rs
-      //   })
-      // }
-
       if (vrLink) {
         this.runningScripts = this.runningScripts.map(rs => {
           if (rs.pid === pid) {
