@@ -3,18 +3,21 @@
  *-------------------------------------------------------------------------------------------- */
 import { workspace, window, Uri } from 'vscode'
 import { spawn, exec, ChildProcessWithoutNullStreams } from 'child_process'
-import * as os from 'os'
 import { ScriptProgressLongPolling } from './ScriptProgressLongPolling'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { getProgressUrl } from './utils/getProgressUrl'
 import { Job, CERTORA_INNER_DIR, LOG_DIRECTORY_DEFAULT } from './types'
 import { PostProblems } from './PostProblems'
 import { checkDir } from './utils/checkDir'
+import fetch from 'node-fetch'
+import * as os from 'os'
 
 type RunningScript = {
   pid: number
   confFile: string
   uploaded: boolean
+  jobId?: string
+  vrLink?: string
 }
 
 const re = /(\033)|(\[33m)|(\[32m)|(\[31m)|(\[0m)/g
@@ -215,6 +218,25 @@ export class ScriptRunner {
     return true
   }
 
+  private getRuleReportLink(str: string) {
+    const pattern =
+      'https://(prover|vaas-stg).certora.com/output/[a-zA-Z0-9/?=]+'
+    const vrLinkRegExp = new RegExp(pattern)
+    const vrLink = vrLinkRegExp.exec(str)
+    return vrLink
+  }
+
+  /**
+   * get the job id from the link to the verification report
+   * @param link link to the verification report (string)
+   * @returns job id (string)
+   */
+  private getJobId(link: string): string {
+    const pattern = 'https://(prover|vaas-stg).certora.com/output/'
+    const regExp = new RegExp(pattern)
+    return link.split('?anonymousKey')[0].replace(regExp, '').split('/')[1]
+  }
+
   /**
    * runs certoraRun command with the content of the [confFile]
    * @param confFile path to conf file
@@ -267,6 +289,25 @@ export class ScriptRunner {
           }
         }
       }
+      const vrLink = this.getRuleReportLink(str)
+      if (str.includes('Uploading files...')) {
+        console.log('Uploading files...')
+        this.runningScripts = this.runningScripts.map(rs => {
+          if (rs.pid === pid) {
+            rs.uploaded = true
+          }
+          return rs
+        })
+      }
+      if (vrLink) {
+        this.runningScripts = this.runningScripts.map(rs => {
+          if (rs.pid === pid) {
+            rs.vrLink = vrLink[0]
+            rs.jobId = this.getJobId(vrLink[0])
+          }
+          return rs
+        })
+      }
       channel.appendLine(str)
 
       const progressUrl = getProgressUrl(str)
@@ -276,46 +317,15 @@ export class ScriptRunner {
       if (progressUrl) {
         await this.polling.run(progressUrl, async data => {
           data.runName = confFileName
-          const curLogFiles = this.logFiles
-            .filter(
-              lf =>
-                lf.path.split('/').reverse()[0].split('.conf')[0] ===
-                data.runName,
-            )
-            .sort()
-            .reverse()
-          if (curLogFiles !== undefined && curLogFiles.length > 0) {
-            try {
-              await workspace.fs.readFile(curLogFiles[0]).then(content => {
-                const decoder = new TextDecoder()
-                const strContent: string = decoder.decode(content)
-                const pattern =
-                  'https://(prover|vaas-stg).certora.com/output/[a-zA-Z0-9/?=]+'
-                const vrLinkRegExp = new RegExp(pattern)
-                const vrLink = vrLinkRegExp.exec(strContent)
-                if (
-                  this.runningScripts.find(rs => rs.pid === pid) !== undefined
-                ) {
-                  data.verificationReportLink = ''
-                  if (vrLink) {
-                    data.verificationReportLink = vrLink[0] as string
-                  }
-                  this.resultsWebviewProvider.postMessage<Job>({
-                    type: 'receive-new-job-result',
-                    payload: data,
-                  })
-                }
+          this.runningScripts.forEach(rs => {
+            if (rs.pid === pid && rs.vrLink) {
+              data.verificationReportLink = rs.vrLink
+              this.resultsWebviewProvider.postMessage<Job>({
+                type: 'receive-new-job-result',
+                payload: data,
               })
-            } catch (e) {
-              // internal error message for problem reading log file
-              console.log(
-                'There was an error reading the log file for:',
-                confFile,
-                '[internal error message]',
-                e,
-              )
             }
-          }
+          })
         })
       }
     })
@@ -330,14 +340,17 @@ export class ScriptRunner {
     })
 
     this.script.on('close', async code => {
-      this.runningScripts.forEach(rs => {
+      let vrLink
+      this.runningScripts = this.runningScripts.map(rs => {
         if (rs.pid === pid) {
-          rs.uploaded = true
+          // rs.uploaded = true
+          vrLink = rs.vrLink
         }
+        return rs
       })
-      this.resultsWebviewProvider.postMessage<number>({
+      this.resultsWebviewProvider.postMessage<{ pid: number; vrLink: string }>({
         type: 'run-next',
-        payload: pid,
+        payload: { pid: pid, vrLink: vrLink !== undefined ? vrLink : '' },
       })
       if (code !== 0) {
         this.removeRunningScript(pid)
@@ -351,18 +364,61 @@ export class ScriptRunner {
     })
   }
 
-  public stop = (pid: number): void => {
-    const command =
-      os.platform() === 'win32'
-        ? `taskkill -F -T -PID ${pid}`
-        : `kill -15 ${pid}`
+  private stopUploadedScript(scriptToStop: RunningScript) {
+    try {
+      const certoraKey = process.env.CERTORAKEY?.toString() || ''
 
-    exec(command)
-    this.removeRunningScript(pid)
+      const myHeaders = {
+        Cookie: 'certoraKey=' + certoraKey,
+      }
+
+      const requestOptions: any = {
+        method: 'POST',
+        headers: myHeaders,
+        body: JSON.stringify({
+          certoraKey: certoraKey,
+        }),
+        redirect: 'follow',
+      }
+
+      fetch(
+        scriptToStop.vrLink?.split('/output/')[0] +
+          '/cancel/' +
+          scriptToStop.jobId,
+        requestOptions,
+      )
+        .then(response => response.text())
+        .then(result => console.log(result))
+        .catch(error => console.log('error', error))
+    } catch (e) {
+      console.log(e, '[INNER ERROR FROM API CALL]')
+    }
+  }
+
+  public stop = async (pid: number): Promise<void> => {
+    const scriptToStop = this.runningScripts.find(rs => {
+      return rs.pid === pid
+    })
+    if (scriptToStop === undefined) return
+
+    if (scriptToStop.jobId !== undefined && scriptToStop.vrLink !== undefined) {
+      this.stopUploadedScript(scriptToStop)
+    } else if (!scriptToStop.uploaded) {
+      console.log('script is not uploaded:', scriptToStop)
+      const command =
+        os.platform() === 'win32'
+          ? `taskkill -F -T -PID ${pid}`
+          : `kill -15 ${pid}`
+
+      exec(command)
+    } else {
+      // todo: timeout and try again
+    }
     this.resultsWebviewProvider.postMessage({
       type: 'script-stopped',
       payload: pid,
     })
+    this.removeRunningScript(pid)
   }
 
   private addRunningScript(confFile: string, pid: number): void {

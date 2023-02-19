@@ -1,7 +1,33 @@
 /* ---------------------------------------------------------------------------------------------
  *  All validators functions. A validator is for checking if an input is valid,
- *  consists of the relvant charecters.
+ *  consists of the relevant characters.
  *-------------------------------------------------------------------------------------------- */
+
+import { solAdditionalContracts, solidityObj } from '../stores/store'
+
+function contractValidators() {
+  return function email(value) {
+    let objArr = []
+    solAdditionalContracts.subscribe(obj => (objArr = obj))
+    const contracts = objArr.map(contractObj => {
+      return contractObj.mainContract
+    })
+    contracts.push(solidityObj.mainContract)
+    let counter = 0
+    contracts.forEach(contractName => {
+      if (contractName === value) {
+        counter++
+      }
+    })
+    if (counter > 1) {
+      return 'Contract name ' + value + ' already exists'
+    }
+    return (
+      !!value.match('^[a-zA-Z0-9_]*$') ||
+      'Accepting only alphanumeric characters (including the underscore)*'
+    )
+  }
+}
 
 function emailValidator() {
   return function email(value) {
@@ -57,5 +83,6 @@ export {
   compilerValidator,
   filePathValidator,
   messageAndNameValidator,
+  contractValidators,
 }
 // export { emailValidator, requiredValidator }

@@ -39,11 +39,20 @@
   import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
   import NewRun from './components/NewRun.svelte'
 
+  import { writable } from 'svelte/store'
+  import {
+    expandables,
+    expandCollapse,
+    verificationResults,
+  } from './store/store'
+
+  export const hide = writable([])
+  export const pos = writable({ x: 0, y: 0 })
+
   let output: Output
   let outputRunName: string
   let selectedCalltraceFunction: CallTraceFunction
 
-  let verificationResults: Verification[] = []
   let runningScripts: { pid: number; confFile: string; uploaded: boolean }[] =
     []
   let runs: Run[] = []
@@ -52,6 +61,11 @@
   let namesMap: Map<string, string> = new Map()
   let runsCounter = 0
   let focusedRun: string = ''
+
+  // listen to the results array to see if there are results or not
+  $: $verificationResults.length > 0
+    ? ($expandCollapse.hasResults = true)
+    : ($expandCollapse.hasResults = false)
 
   function newFetchOutput(e: CustomEvent<Assert | Rule>, vr: Verification) {
     let clickedRuleOrAssert = e.detail
@@ -94,6 +108,32 @@
     if (selectedCalltraceFunction) selectedCalltraceFunction = undefined
   }
 
+  /**
+   * updated the results tree expand values according to results
+   */
+  function updateExpendablesFromResults() {
+    $verificationResults.forEach(vr => {
+      return vr.jobs.forEach(job => {
+        const temp = job.verificationProgress.rules.map(rule => {
+          return {
+            title: rule.name,
+            isExpanded: false,
+            tree: [],
+          }
+        })
+        $expandables = $expandables.map(element => {
+          if (
+            element.title === namesMap.get(job.runName) &&
+            element.tree.length === 0
+          ) {
+            element.tree = temp
+          }
+          return element
+        })
+      })
+    })
+  }
+
   const listener = (e: MessageEvent<EventsFromExtension>) => {
     switch (e.data.type) {
       case EventTypesFromExtension.ReceiveNewJobResult: {
@@ -101,7 +141,7 @@
           action: 'Smart merge current results with new result',
           source: Sources.ResultsWebview,
           info: {
-            currentVerificationResults: verificationResults,
+            currentverificationResults: $verificationResults,
             newResult: e.data.payload,
             name: e.data.payload.runName,
           },
@@ -111,11 +151,14 @@
           e.data.payload.verificationReportLink,
         )
         smartMergeVerificationResult(
-          verificationResults,
+          $verificationResults,
           e.data.payload,
           e.data.payload.runName,
         )
-        verificationResults = verificationResults
+        $verificationResults = $verificationResults
+
+        updateExpendablesFromResults()
+
         if (e.data.payload.jobStatus === 'SUCCEEDED') {
           if (e.data.payload.runName) {
             removeScript(e.data.payload.runName)
@@ -126,7 +169,7 @@
           action: 'After Smart merge current results with new result',
           source: Sources.ResultsWebview,
           info: {
-            updatedVerificationResults: verificationResults,
+            updated$verificationResults: $verificationResults,
           },
         })
         break
@@ -137,13 +180,20 @@
           source: Sources.ResultsWebview,
           info: e.data.payload,
         })
-        const curPid = e.data.payload
+        const curPid = e.data.payload.pid
+        const vrLink = e.data.payload.vrLink
         runningScripts.forEach(rs => {
           if (rs.pid === curPid) {
             rs.uploaded = true
           }
         })
         runningScripts = runningScripts
+        runs = runs.map(run => {
+          if (run.id === curPid) {
+            run.vrLink = vrLink
+          }
+          return run
+        })
         // when we receive the results of the last run, we run the next job!
         runNext()
         break
@@ -155,14 +205,14 @@
           info: e.data.payload,
         })
         runningScripts = e.data.payload
-        runs.forEach(r => {
+        runs = runs.map(r => {
           runningScripts.forEach(rs => {
             if (r.name === getFilename(rs.confFile)) {
               r.id = rs.pid
             }
           })
+          return r
         })
-
         // if there is no running script - run next
         if (e.data.payload.length === 0) {
           runNext()
@@ -178,7 +228,14 @@
         const pid = e.data.payload
         const curRun = runs.find(run => run.id === pid)
         if (curRun !== undefined) {
-          runs = setStatus(curRun.name, Status.ready)
+          if (
+            $verificationResults.find(vr => vr.name === curRun.name) !==
+            undefined
+          ) {
+            runs = setStatus(curRun.name, Status.unableToRun)
+          } else {
+            runs = setStatus(curRun.name, Status.ready)
+          }
         }
         runningScripts = runningScripts.filter(rs => {
           return rs.pid !== pid
@@ -227,10 +284,10 @@
           action: 'Received "clear-all-jobs" command',
           source: Sources.ResultsWebview,
           info: {
-            currentVerificationResults: verificationResults,
+            current$verificationResults: $verificationResults,
           },
         })
-        if (verificationResults.length > 0) verificationResults = []
+        if ($verificationResults.length > 0) $verificationResults = []
         clearOutput()
         break
       }
@@ -268,10 +325,10 @@
             const newRun = {
               id: runs.length,
               name: file.fileName,
-              status: curStatus,
+              status: curStatus || Status.missingSettings,
             }
-            createRun(newRun)
             namesMap.set(newRun.name, newRun.name.replaceAll('_', ' '))
+            createRun(newRun)
           }
         })
         break
@@ -388,16 +445,29 @@
     }
   }
 
+  function addNewExpendable(title: string) {
+    $expandables = [
+      ...$expandables,
+      {
+        title: title,
+        isExpanded: true,
+        tree: [],
+      },
+    ]
+  }
+
   /**
    * adds a new run to runs array and increase the counter
    * @param run new run. if doest exists - creates a new run object
    */
   function createRun(run?: Run): void {
+    $hide.push(true)
     if (run) {
       if (!run.status) {
         run.status = Status.missingSettings
       }
       runsCounter = runs.push(run)
+      addNewExpendable(namesMap.get(run.name))
     } else {
       // don't create more than one new run while in rename state
       if (runs.find(r => r.name === '')) return
@@ -406,6 +476,7 @@
         name: '',
         status: Status.missingSettings,
       })
+      addNewExpendable('')
     }
   }
 
@@ -425,7 +496,7 @@
     const name = runToDelete.name
 
     //delete results
-    verificationResults = verificationResults.filter(vr => {
+    $verificationResults = $verificationResults.filter(vr => {
       return vr.name !== name
     })
 
@@ -453,6 +524,7 @@
    * @param index if 0 - run, else: add to pending queue
    */
   function run(run: Run, index = 0): void {
+    run.vrLink = ''
     const JobNameMap: JobNameMap = {
       fileName: run.name,
       displayName: namesMap.get(run.name),
@@ -485,7 +557,7 @@
     // rename existing run
     if (oldName !== '') {
       // the renamed run should have the same verification results, if they exist
-      let oldResult = verificationResults.find(vr => vr.name === oldName)
+      let oldResult = $verificationResults.find(vr => vr.name === oldName)
       if (oldResult !== undefined) {
         let newResult: Verification = {
           name: newName,
@@ -493,10 +565,10 @@
           spec: oldResult.spec,
           jobs: oldResult.jobs,
         }
-        verificationResults = verificationResults.filter(vr => {
+        $verificationResults = $verificationResults.filter(vr => {
           return vr.name !== oldName
         })
-        verificationResults.push(newResult)
+        $verificationResults.push(newResult)
       }
 
       const oldConfNameMap: JobNameMap = {
@@ -530,7 +602,7 @@
     if (pendingQueue.length > 0) {
       let curRun = pendingQueue.shift()
       pendingQueueCounter--
-      verificationResults = verificationResults.filter(vr => {
+      $verificationResults = $verificationResults.filter(vr => {
         return vr.name !== curRun.fileName
       })
       runScript(curRun)
@@ -578,7 +650,7 @@
     pendingQueue = pendingQueue.filter(rq => {
       return rq.fileName !== run.name
     })
-    verificationResults = verificationResults.filter(vr => {
+    $verificationResults = $verificationResults.filter(vr => {
       return vr.name !== run.name
     })
     pendingQueueCounter--
@@ -597,8 +669,36 @@
     askToDeleteJob(jobNameMap)
   }
 
+  /**
+   * operates the expand / collapse functionality
+   */
+  function expandCollapseAll() {
+    if ($expandCollapse.hasResults) {
+      $expandables = $expandables.map(element => {
+        if (element.title !== 'JOB LIST') {
+          element.isExpanded = $expandCollapse.var
+        }
+        element.tree = element.tree.map(treeItem => {
+          treeItem.isExpanded = $expandCollapse.var
+          return treeItem
+        })
+        return element
+      })
+      $expandCollapse.title = $expandCollapse.var
+        ? 'Collapse All'
+        : 'Expand All'
+      $expandCollapse.icon = $expandCollapse.var ? 'collapse-all' : 'expand-all'
+      $expandCollapse.var = !$expandCollapse.var
+    }
+  }
+
   onMount(() => {
     window.addEventListener('message', listener)
+    $expandables.push({
+      title: 'JOB LIST',
+      isExpanded: true,
+      tree: [],
+    })
     if (runs.length === 0) {
       initResults()
     }
@@ -607,6 +707,22 @@
   onDestroy(() => {
     window.removeEventListener('message', listener)
   })
+
+  function resentHide() {
+    $hide = $hide.map(item => {
+      return (item = true)
+    })
+  }
+
+  function showMenu(e, index) {
+    $pos = { x: e.clientX, y: e.clientY }
+    resentHide()
+    $hide[index] = false
+  }
+
+  window.onclick = function (event) {
+    resentHide()
+  }
 </script>
 
 {#if runsCounter === 0}
@@ -633,8 +749,7 @@
   <div>
     <Pane
       title="JOB LIST"
-      initialExpandedState={true}
-      actions={[
+      fixedActions={[
         {
           title: 'Run All',
           icon: 'run-all',
@@ -650,13 +765,23 @@
           icon: 'diff-added',
           onClick: createRun,
         },
+        {
+          title: $expandCollapse.title,
+          icon: $expandCollapse.icon,
+          onClick: expandCollapseAll,
+          disabled: !$expandCollapse.hasResults,
+        },
       ]}
     >
       <ul class="running-scripts">
         {#each Array(runsCounter) as _, index (index)}
           <!-- removing the keys in hope the one refreshed job won't refresh everything -->
           {#key [focusedRun]}
-            <li>
+            <li
+              on:contextmenu|stopPropagation|preventDefault={e => {
+                showMenu(e, index)
+              }}
+            >
               <NewRun
                 doRename={runs[index].name === ''}
                 editFunc={() => editRun(runs[index])}
@@ -667,7 +792,6 @@
                 duplicateFunc={duplicateRun}
                 runFunc={() => run(runs[index])}
                 status={runs[index].status}
-                {verificationResults}
                 {newFetchOutput}
                 nowRunning={(runningScripts.find(
                   rs => getFilename(rs.confFile) === runs[index].name,
@@ -675,28 +799,31 @@
                   (pendingQueue.find(rs => rs.fileName === runs[index].name) !==
                     undefined &&
                     pendingQueueCounter > 0)) &&
-                  verificationResults.find(
+                  $verificationResults.find(
                     vr => runs[index].name === vr.name,
                   ) === undefined}
                 isPending={pendingQueue.find(
                   rs => rs.fileName === runs[index].name,
                 ) !== undefined && pendingQueueCounter > 0}
-                expandedState={verificationResults.find(
+                expandedState={$verificationResults.find(
                   vr => vr.name === runs[index].name,
                 ) !== undefined}
                 pendingStopFunc={() => {
                   pendingStopFunc(runs[index])
                 }}
                 runningStopFunc={() => {
-                  verificationResults = verificationResults.filter(vr => {
+                  $verificationResults = $verificationResults.filter(vr => {
                     return vr.name !== runs[index].name
                   })
                   runs = setStatus(runs[index].name, Status.ready)
+                  runs[index].vrLink = ''
                   stopScript(runs[index].id)
                 }}
                 inactiveSelected={focusedRun}
                 {setStatus}
                 vrLink={runs[index].vrLink}
+                hide={$hide[index]}
+                pos={$pos}
                 bind:runName={runs[index].name}
               />
             </li>
@@ -710,7 +837,6 @@
   {#if output.variables && output.variables.length > 0}
     <Pane
       title={`${output.treeViewPath.ruleName} variables`}
-      initialExpandedState={true}
       actions={[
         {
           title: 'Close Output',
@@ -723,8 +849,9 @@
     </Pane>
   {/if}
   {#if output.callTrace && Object.keys(output.callTrace).length > 0}
-    <Pane title={`CALL TRACE`} initialExpandedState={true}>
+    <Pane title={`CALL TRACE`}>
       <Tree
+        runDisplayName=""
         data={{
           type: TreeType.Calltrace,
           tree: [output.callTrace],
@@ -734,25 +861,19 @@
     </Pane>
   {/if}
   {#if selectedCalltraceFunction && selectedCalltraceFunction.variables && selectedCalltraceFunction.variables.length > 0}
-    <Pane
-      title={`${selectedCalltraceFunction.name} variables`}
-      initialExpandedState={true}
-    >
+    <Pane title={`${selectedCalltraceFunction.name} variables`}>
       <CodeItemList codeItems={selectedCalltraceFunction.variables} />
     </Pane>
   {/if}
   {#if output.callResolutionWarnings && output.callResolutionWarnings.length > 0}
-    <Pane
-      title={`Contract call resolution warnings`}
-      initialExpandedState={true}
-    >
+    <Pane title={`Contract call resolution warnings`}>
       {#each output.callResolutionWarnings as resolution}
         <ContractCallResolution contractCallResolution={resolution} />
       {/each}
     </Pane>
   {/if}
   {#if output.callResolution && output.callResolution.length > 0}
-    <Pane title={`Contract call resolution`} initialExpandedState={true}>
+    <Pane title={`Contract call resolution`}>
       {#each output.callResolution as resolution}
         <ContractCallResolution contractCallResolution={resolution} />
       {/each}

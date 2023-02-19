@@ -69,7 +69,7 @@
     value: {
       infoText: '',
       infoLink: '',
-      validator: 'alphaNum',
+      validator: 'valueValidator',
     },
     stg: {
       infoText:
