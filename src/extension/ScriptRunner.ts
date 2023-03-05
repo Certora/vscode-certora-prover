@@ -184,11 +184,12 @@ export class ScriptRunner {
 
       const progressUrl = getProgressUrl(str)
 
-      // const confFileName = this.getConfFileName(confFile).replace('.conf', '')
+      const confFileName = this.getConfFileName(confFile).replace('.conf', '')
 
       if (progressUrl) {
         await this.polling.run(progressUrl, async data => {
           data.pid = pid
+          data.runName = confFileName
           this.runningScripts.forEach(rs => {
             if (rs && rs.pid === pid && rs.vrLink) {
               data.verificationReportLink = rs.vrLink
