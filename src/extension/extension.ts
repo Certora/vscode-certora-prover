@@ -323,7 +323,10 @@ export function activate(context: vscode.ExtensionContext): void {
     if (!path) return
     // write build_only to sh
     let strContent = await readShFile(file)
-    const commandIndex = strContent.indexOf('\n--verify')
+    let commandIndex = strContent.indexOf('\n--verify')
+    if (commandIndex < 0) {
+      commandIndex = strContent.indexOf('--verify')
+    }
     if (commandIndex !== undefined) {
       // we look for the next command after "verify"
       let index = strContent.indexOf('--', commandIndex + 3)
