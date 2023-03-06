@@ -335,25 +335,30 @@ export function activate(context: vscode.ExtensionContext): void {
       })
       .filter(n => n)
     strContent = cleanArr.join('\n')
-    const commandIndex = strContent.indexOf('--verify')
+    const searchRegex = /((--verify)|(--assert)|(--bytecode))/g
+    const searchMatches = searchRegex.exec(strContent)
+    const commandIndex = searchMatches?.index
     if (commandIndex !== undefined) {
       // we look for the next command after "verify"
-      let index = strContent.indexOf('--', commandIndex + 3)
-      if (index === undefined) {
-        index = strContent.indexOf('\\', commandIndex)
+      const index = strContent.indexOf('--', commandIndex + 3)
+      if (index < 0) {
+        vscode.window.showErrorMessage(
+          `You must use either --assert or --verify or --bytecode when running the Certora Prover`,
+        )
+        return
       }
       strContent =
         strContent.slice(0, index) +
         '--build_only \\\n' +
         strContent.slice(index)
+      const encoder = new TextEncoder()
+      const content = encoder.encode(strContent)
+      const newPath =
+        path?.uri.path + CERTORA_INNER_DIR_BUILD + getFileName(file.path, '.sh')
+      const newPathUri = vscode.Uri.parse(newPath)
+      await vscode.workspace.fs.writeFile(newPathUri, content)
+      await scriptRunner.buildSh(newPath)
     }
-    const encoder = new TextEncoder()
-    const content = encoder.encode(strContent)
-    const newPath =
-      path?.uri.path + CERTORA_INNER_DIR_BUILD + getFileName(file.path, '.sh')
-    const newPathUri = vscode.Uri.parse(newPath)
-    await vscode.workspace.fs.writeFile(newPathUri, content)
-    await scriptRunner.buildSh(newPath)
   }
 
   /**
