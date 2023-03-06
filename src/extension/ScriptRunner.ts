@@ -149,12 +149,9 @@ export class ScriptRunner {
       this.log(str, confFile, ts)
       // parse errors are shown in an error message.
       if (str.includes('CRITICAL')) {
-        // remove irrelevant --debug suggestion
-        const shortMsg = str.split('consider running the script again')[0]
-
         // the use of [action] is necessary to add the button that opens the log file
         const action = await window.showErrorMessage(
-          shortMsg,
+          str.slice(0, 300) + '...',
           'Open Execution Log File',
         )
         if (action === 'Open Execution Log File') {
