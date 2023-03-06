@@ -341,24 +341,26 @@ export function activate(context: vscode.ExtensionContext): void {
     if (commandIndex !== undefined) {
       // we look for the next command after "verify"
       const index = strContent.indexOf('--', commandIndex + 3)
-      if (index < 0) {
-        vscode.window.showErrorMessage(
-          `You must use either --assert or --verify or --bytecode when running the Certora Prover`,
-        )
+      if (index >= 0) {
+        strContent =
+          strContent.slice(0, index) +
+          '--build_only \\\n' +
+          strContent.slice(index)
+        const encoder = new TextEncoder()
+        const content = encoder.encode(strContent)
+        const newPath =
+          path?.uri.path +
+          CERTORA_INNER_DIR_BUILD +
+          getFileName(file.path, '.sh')
+        const newPathUri = vscode.Uri.parse(newPath)
+        await vscode.workspace.fs.writeFile(newPathUri, content)
+        await scriptRunner.buildSh(newPath)
         return
       }
-      strContent =
-        strContent.slice(0, index) +
-        '--build_only \\\n' +
-        strContent.slice(index)
-      const encoder = new TextEncoder()
-      const content = encoder.encode(strContent)
-      const newPath =
-        path?.uri.path + CERTORA_INNER_DIR_BUILD + getFileName(file.path, '.sh')
-      const newPathUri = vscode.Uri.parse(newPath)
-      await vscode.workspace.fs.writeFile(newPathUri, content)
-      await scriptRunner.buildSh(newPath)
     }
+    vscode.window.showErrorMessage(
+      `You must use either --assert or --verify or --bytecode when running the Certora Prover`,
+    )
   }
 
   /**
