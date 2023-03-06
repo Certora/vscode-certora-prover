@@ -376,27 +376,31 @@ export function activate(context: vscode.ExtensionContext): void {
         new vscode.RelativePattern(internalUri, '**/.last_confs**/*.conf'),
       )
       fileSystemWatcher.onDidCreate(async file => {
-        const strContent = await readShFile(file)
-        const jsonContent = JSON.parse(strContent)
-        if (jsonContent && jsonContent.build_only) {
-          delete jsonContent.build_only
-          const newConfFileUri = getConfUri(
-            jsonContent.verify[0].split(':')[0] +
-              getFileName(file.path).replace('last_conf', ''),
-          )
-          if ('staging' in jsonContent && jsonContent.staging === '') {
-            jsonContent.staging = 'master'
-          }
-          if (newConfFileUri) {
-            const encoder = new TextEncoder()
-            const content = encoder.encode(JSON.stringify(jsonContent, null, 2))
-            await vscode.workspace.fs.writeFile(newConfFileUri, content)
-          }
-          await vscode.workspace.fs.delete(file)
-        }
+        await copyCreatedConf(file)
       })
     } catch (e) {
       console.log('ERROR:', e, '[internal error from  the file system watcher]')
+    }
+  }
+
+  async function copyCreatedConf(file: vscode.Uri): Promise<void> {
+    const strContent = await readShFile(file)
+    const jsonContent = JSON.parse(strContent)
+    if (jsonContent && jsonContent.build_only) {
+      delete jsonContent.build_only
+      const newConfFileUri = getConfUri(
+        jsonContent.verify[0].split(':')[0] +
+          getFileName(file.path).replace('last_conf', ''),
+      )
+      if ('staging' in jsonContent && jsonContent.staging === '') {
+        jsonContent.staging = 'master'
+      }
+      if (newConfFileUri) {
+        const encoder = new TextEncoder()
+        const content = encoder.encode(JSON.stringify(jsonContent, null, 2))
+        await vscode.workspace.fs.writeFile(newConfFileUri, content)
+      }
+      // await vscode.workspace.fs.delete(file)
     }
   }
 
@@ -514,8 +518,9 @@ export function activate(context: vscode.ExtensionContext): void {
   async function uploadConf(): Promise<void> {
     const path = vscode.workspace.workspaceFolders?.[0]
     if (!path) return
+    // cannot select many because .sh files handling is an asynchronous build
     const options: vscode.OpenDialogOptions = {
-      canSelectMany: true,
+      canSelectMany: false,
       canSelectFolders: false,
       openLabel: 'Open',
       defaultUri: path.uri,
