@@ -384,6 +384,9 @@ export function activate(context: vscode.ExtensionContext): void {
             jsonContent.verify[0].split(':')[0] +
               getFileName(file.path).replace('last_conf', ''),
           )
+          if ('staging' in jsonContent && jsonContent.staging === '') {
+            jsonContent.staging = 'master'
+          }
           if (newConfFileUri) {
             const encoder = new TextEncoder()
             const content = encoder.encode(JSON.stringify(jsonContent, null, 2))
