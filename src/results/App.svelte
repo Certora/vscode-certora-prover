@@ -63,7 +63,6 @@
   let pendingQueueCounter = 0
   let namesMap: Map<string, string> = new Map()
   let runsCounter = 0
-  // let focusedRun: string = ''
 
   // listen to the results array to see if there are results or not
   $: $verificationResults.length > 0
@@ -150,7 +149,6 @@
             pid: e.data.payload.pid,
           },
         })
-        //todo: make sure after rename, the results go to the right place
         const pid = e.data.payload.pid
         const runName = runs.find(run => {
           return run.id === pid
@@ -618,8 +616,6 @@
         displayName: namesMap.get(newName),
       }
       rename(oldConfNameMap, newConfNameMap)
-      // duplicate(oldConfNameMap, newConfNameMap)
-      // deleteConf(oldConfNameMap)
       namesMap.delete(oldName)
     }
     // rename new run
@@ -658,30 +654,11 @@
    * run all the runs that are allowed to run
    */
   function runAll(): void {
-    let counter = 0
-    runs.forEach((singleRun, index) => {
-      // runs with these statuses should not run automatically
-      if (
-        singleRun.status === Status.missingSettings ||
-        singleRun.status === Status.pending ||
-        singleRun.status === Status.running ||
-        singleRun.status === Status.unableToRun ||
-        singleRun.status === Status.incompleteResults ||
-        singleRun.status === Status.success
-      ) {
-        counter++
-        return
-      }
-      const nowRunning = runningScripts.find(script => {
-        return getFilename(script.confFile) === singleRun.name
-      })
-      const inQueue = pendingQueue.find(pendingRun => {
-        return pendingRun.fileName === singleRun.name
-      })
-      //make sure runs aren't ran in parallel to themselves
-      if (inQueue === undefined && nowRunning === undefined) {
-        run(singleRun, index - counter)
-      }
+    const jobsToRun = runs.filter(singleRun => {
+      return singleRun.status === Status.ready
+    })
+    jobsToRun.forEach((job, index) => {
+      run(job, index)
     })
   }
 
@@ -817,8 +794,6 @@
     >
       <ul class="running-scripts">
         {#each Array(runsCounter) as _, index (index)}
-          <!-- removing the keys in hope the one refreshed job won't refresh everything -->
-          <!-- {#key [focusedRun]} -->
           <li
             on:contextmenu|stopPropagation|preventDefault={e => {
               showMenu(e, index)
@@ -853,16 +828,6 @@
                 pendingStopFunc(runs[index])
               }}
               runningStopFunc={() => {
-                // $verificationResults = $verificationResults.filter(vr => {
-                //   return vr.name !== runs[index].name
-                // })
-                // if ($verificationResults.length > 0 && $verificationResults.find(
-                //   vr => runs[index].name === vr.name,
-                // ) === undefined) {
-                //   runs = setStatus(runs[index].name, Status.ready)
-                // } else {
-                //   runs = setStatus(runs[index].name, Status.success)
-                // }
                 runs[index].vrLink = ''
                 stopScript(runs[index].id)
               }}
@@ -874,7 +839,6 @@
               bind:runName={runs[index].name}
             />
           </li>
-          <!-- {/key} -->
         {/each}
       </ul>
     </Pane>
