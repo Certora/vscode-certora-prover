@@ -100,31 +100,31 @@
       $checkMyInputs = inputs.some(el => {
         if (el.classList.contains('field-danger')) return true
       })
+
       if ($validity.dirty && !$validity.valid) {
-        console.log('problem from', source)
-        if (source === Source.Sol) {
-          $badInputs.sol = true
+        if (source === Source.Sol && !flag) {
+          $badInputs.sol += 1
           flag = true
         }
-        if (source === Source.Spec) {
-          $badInputs.spec = true
+        if (source === Source.Spec && !flag) {
+          $badInputs.spec += 1
           flag = true
         }
-        if (source === Source.Msg) {
-          $badInputs.msg = true
+        if (source === Source.Msg && !flag) {
+          $badInputs.msg += 1
           flag = true
         }
       } else {
         if (source === Source.Sol && flag) {
-          $badInputs.sol = false
+          $badInputs.sol -= 1
           flag = false
         }
         if (source === Source.Spec && flag) {
-          $badInputs.spec = false
+          $badInputs.spec -= 1
           flag = false
         }
         if (source === Source.Msg && flag) {
-          $badInputs.msg = false
+          $badInputs.msg -= 1
           flag = false
         }
       }

@@ -72,6 +72,7 @@
     <i class="codicon codicon-comment " />
     <h3>Verification Message</h3>
     <i class="codicon codicon-check" />
+    <i class="codicon codicon-close" />
   </button>
 </div>
 

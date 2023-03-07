@@ -5,7 +5,7 @@
 import { writable } from 'svelte/store'
 export const checkMyInputs = writable(false)
 
-export const badInputs = writable({ sol: false, spec: false, msg: false })
+export const badInputs = writable({ sol: 0, spec: 0, msg: 0 })
 
 export const RunName = writable('')
 
