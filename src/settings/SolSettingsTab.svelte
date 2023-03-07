@@ -12,6 +12,7 @@
   import SolidityFiles from './SolidityFiles.svelte'
   import { openBrowser } from './utils/openBrowser'
   import { manageFiles } from './utils/refreshFiles'
+  import { Source } from './types'
   import {
     solFilesArr,
     navState,
@@ -224,6 +225,7 @@
                 <CustomInput
                   infoObj={infoObjArr.contractName}
                   placeholder="Contract"
+                  source={Source.Sol}
                   bind:bindValue={$solidityObj.mainContract}
                 />
               </div>
@@ -245,6 +247,7 @@
                       <CustomInput
                         infoObj={infoObjArr.solCompiler}
                         placeholder="example: solc7.6"
+                        source={Source.Sol}
                         bind:bindValue={$solidityObj.compiler.ver}
                       />
                     </div>
@@ -253,6 +256,7 @@
                       <CustomInput
                         infoObj={infoObjArr.solPackages}
                         placeholder="CVT-Executables-Mac"
+                        source={Source.Sol}
                         bind:bindValue={$solidityObj.compiler.exe}
                       />
                     </div>
@@ -279,6 +283,7 @@
                                 <CustomInput
                                   infoObj={infoObjArr.solc_args}
                                   placeholder="example: optimize-runs"
+                                  source={Source.Sol}
                                   bind:bindValue={obj.key}
                                 />
                               </div>
@@ -286,6 +291,7 @@
                                 <CustomInput
                                   infoObj={infoObjArr.solc_args}
                                   placeholder="value (optional)"
+                                  source={Source.Sol}
                                   bind:bindValue={obj.value}
                                 />
                               </div>
@@ -324,6 +330,7 @@
                                 <CustomInput
                                   infoObj={infoObjArr.package}
                                   placeholder="Package name"
+                                  source={Source.Sol}
                                   bind:bindValue={obj.packageName}
                                 />
                               </div>
@@ -331,6 +338,7 @@
                                 <CustomInput
                                   infoObj={infoObjArr.package}
                                   placeholder=".../path"
+                                  source={Source.Sol}
                                   bind:bindValue={obj.path}
                                 />
                               </div>
@@ -373,6 +381,7 @@
                         <CustomInput
                           infoObj={infoObjArr.linkVar}
                           placeholder="Variable"
+                          source={Source.Sol}
                           bind:bindValue={$solidityObj.linking[index].variable}
                         />
                       </div>
@@ -380,6 +389,7 @@
                         <CustomInput
                           infoObj={infoObjArr.linkContract}
                           placeholder="Other Contract"
+                          source={Source.Sol}
                           bind:bindValue={$solidityObj.linking[index]
                             .contractName}
                         />

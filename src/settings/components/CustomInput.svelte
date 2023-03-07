@@ -13,11 +13,14 @@
     contractValidators,
   } from '../validations/validators.js'
   import { createFieldValidator } from '../validations/validation.js'
+  import { Source } from '../types'
 
-  import { checkMyInputs } from '../stores/store'
+  import { badInputs, checkMyInputs } from '../stores/store'
   export let placeholder = 'placeholder'
   export let bindValue
   export let disabledState = false
+  export let source
+  let flag = false
 
   export let infoObj = {
     infoText: 'some text...',
@@ -97,6 +100,34 @@
       $checkMyInputs = inputs.some(el => {
         if (el.classList.contains('field-danger')) return true
       })
+      if ($validity.dirty && !$validity.valid) {
+        console.log('problem from', source)
+        if (source === Source.Sol) {
+          $badInputs.sol = true
+          flag = true
+        }
+        if (source === Source.Spec) {
+          $badInputs.spec = true
+          flag = true
+        }
+        if (source === Source.Msg) {
+          $badInputs.msg = true
+          flag = true
+        }
+      } else {
+        if (source === Source.Sol && flag) {
+          $badInputs.sol = false
+          flag = false
+        }
+        if (source === Source.Spec && flag) {
+          $badInputs.spec = false
+          flag = false
+        }
+        if (source === Source.Msg && flag) {
+          $badInputs.msg = false
+          flag = false
+        }
+      }
     })
   }
 </script>

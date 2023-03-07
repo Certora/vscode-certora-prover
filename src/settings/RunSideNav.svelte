@@ -12,6 +12,7 @@
     specObj,
     verification_message,
     RunName,
+    badInputs,
   } from './stores/store.js'
   $: solDisabledState =
     $solidityObj.mainFile !== '' &&
@@ -24,7 +25,8 @@
   <button
     class="nav_settings_child "
     on:click={() => selectNavMenu('solCheck')}
-    class:checked={solDisabledState}
+    class:error={$badInputs.sol}
+    class:checked={solDisabledState && !$badInputs.sol}
     class:active={$navState.solCheck.active}
   >
     <i>
@@ -44,22 +46,26 @@
 
     <h3>Solidity Contracts</h3>
     <i class="codicon codicon-check" />
+    <i class="codicon codicon-close" />
   </button>
   <button
     class="nav_settings_child"
     on:click={() => selectNavMenu('specCheck')}
-    class:checked={$specObj.specFile !== ''}
+    class:error={$badInputs.spec}
+    class:checked={$specObj.specFile !== '' && !$badInputs.spec}
     class:active={$navState.specCheck.active}
     disabled={false}
   >
     <i class="codicon codicon-symbol-method" />
     <h3>Certora Spec</h3>
     <i class="codicon codicon-check" />
+    <i class="codicon codicon-close" />
   </button>
   <button
     class="nav_settings_child"
     on:click={() => selectNavMenu('msgCheck')}
-    class:checked={$verification_message !== ''}
+    class:error={$badInputs.msg}
+    class:checked={$verification_message !== '' && !$badInputs.msg}
     class:active={$navState.msgCheck.active}
     disabled={false}
   >
@@ -95,8 +101,16 @@
     /* transition: color 0.2s ease-in-out; */
     margin: auto 0 auto auto;
   }
+  .codicon-close {
+    color: transparent;
+    /* transition: color 0.2s ease-in-out; */
+    margin: auto 0 auto auto;
+  }
   .checked .codicon-check {
     color: var(--vscode-testing-iconPassed);
+  }
+  .error .codicon-close {
+    color: var(--vscode-editorError-foreground);
   }
   .nav_settings_child i:nth-child(3),
   .nav_settings_child i:nth-child(1) {

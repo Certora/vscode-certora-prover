@@ -112,6 +112,12 @@ export enum EventTypesFromExtension {
   notifyWebviewAboutUpdates = 'minor-files-change',
 }
 
+export enum Source {
+  Sol = 'sol',
+  Spec = 'spec',
+  Msg = 'msg',
+}
+
 export type ConfFile = {
   files?: string[]
   verify?: [string]
