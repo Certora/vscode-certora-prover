@@ -16,6 +16,7 @@
   import { Source } from '../types'
 
   import { badInputs, checkMyInputs } from '../stores/store'
+
   export let placeholder = 'placeholder'
   export let bindValue
   export let disabledState = false
@@ -100,8 +101,7 @@
       $checkMyInputs = inputs.some(el => {
         if (el.classList.contains('field-danger')) return true
       })
-
-      if ($validity.dirty && !$validity.valid) {
+      if (!$validity.valid) {
         if (source === Source.Sol && !flag) {
           $badInputs.sol += 1
           flag = true
@@ -147,7 +147,7 @@
     use:validate={bindValue}
   />
 
-  {#if $validity.dirty && !$validity.valid}
+  {#if !$validity.valid}
     <!-- validation message -->
     <div class="input_error_message mt-8px">
       <i class="codicon codicon-warning" />
