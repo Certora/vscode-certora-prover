@@ -260,7 +260,7 @@ export type EventFromResultsWebview =
     }
   | {
       command: CommandFromResultsWebview.StopScript
-      payload: number
+      payload: { pid: number; modal: boolean }
     }
   | {
       command: CommandFromResultsWebview.RunScript

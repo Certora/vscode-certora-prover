@@ -265,11 +265,46 @@ export class ScriptRunner {
     }
   }
 
-  public stop = async (pid: number): Promise<void> => {
+  /**
+   * modal that asks the user if they are sure they want to stop a running script
+   * @param name string name of the script
+   * @returns boolean according to answer
+   */
+  private async askToStopJob(name: string): Promise<boolean> {
+    const stopAction = "Stop '" + name + "'"
+    const result = await window
+      .showInformationMessage(
+        "Are you sure you want to stop '" + name + "' from running?",
+        {
+          modal: true,
+          // detail: 'Job configuration will be lost',
+        },
+        ...[stopAction],
+      )
+      .then(items => {
+        if (items === stopAction) {
+          return true
+        } else {
+          return false
+        }
+      })
+    return result
+  }
+
+  public stop = async (pid: number, modal: boolean): Promise<void> => {
+    console.log('pid, modal:2', pid, modal)
     const scriptToStop = this.runningScripts.find(rs => {
       return rs.pid === pid
     })
     if (scriptToStop === undefined) return
+
+    let doStop = true
+    if (modal) {
+      doStop = await this.askToStopJob(
+        this.getConfFileName(scriptToStop.confFile),
+      )
+    }
+    if (!doStop) return
 
     if (scriptToStop.jobId !== undefined && scriptToStop.vrLink !== undefined) {
       this.stopUploadedScript(scriptToStop)
