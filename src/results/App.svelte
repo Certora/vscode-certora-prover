@@ -485,7 +485,7 @@
             })
           })
         } else {
-          runs = setStatus(jobName, Status.ready)
+          runs = setStatus(jobName, Status.success)
         }
       })
       $verificationResults = $verificationResults

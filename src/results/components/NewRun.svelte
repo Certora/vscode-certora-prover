@@ -397,7 +397,8 @@
     } else if (
       result !== undefined &&
       status !== Status.incompleteResults &&
-      status !== Status.success
+      status !== Status.success &&
+      status !== Status.ready
     ) {
       statusChange(Status.incompleteResults)
     }
