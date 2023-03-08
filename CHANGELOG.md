@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ## Features
 
 * Added option to choose branch in production ([#87](https://github.com/Certora/vscode-certora-prover/pull/87))
+* Change icon in navigator when there is a validation error ([#87](https://github.com/Certora/vscode-certora-prover/pull/87))
 
 ## Bug Fixes
 
