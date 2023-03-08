@@ -168,6 +168,16 @@
         $verificationResults = $verificationResults
 
         updateExpendablesFromResults()
+        const thisRun = $verificationResults.find(vr => {
+          return vr.name === runName
+        })
+        if (
+          thisRun?.jobs.find(job => {
+            return !job.jobEnded
+          }) !== undefined
+        ) {
+          runs = setStatus(runName, Status.incompleteResults)
+        }
 
         if (e.data.payload.jobStatus === 'SUCCEEDED') {
           if (runName) {
@@ -430,7 +440,10 @@
    */
   function setStatus(runName: string, value: Status): Run[] {
     runs.forEach(run => {
-      if (run.name === runName) {
+      if (
+        run.name === runName &&
+        !(run.status === Status.success && value === Status.ready)
+      ) {
         run.status = value
       }
     })
@@ -512,7 +525,7 @@
             })
           })
         } else {
-          runs = setStatus(jobName, Status.ready)
+          runs = setStatus(jobName, Status.success)
         }
       })
       $verificationResults = $verificationResults

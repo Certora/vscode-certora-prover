@@ -274,7 +274,6 @@
       goToRuleReportAction.disabled = false
     }
     actions.push(goToRuleReportAction)
-    hasResults()
     return actions
   }
 
@@ -381,29 +380,6 @@
     if (activeElement !== myElement) {
       $renameJob = false
     }
-  }
-
-  /**
-   * checks if a run has results
-   */
-  function hasResults(): boolean {
-    const result = $verificationResults.find(vr => {
-      return vr.name === runName
-    })
-    if (
-      result !== undefined &&
-      hasCompleteResults() &&
-      status !== Status.success
-    ) {
-      statusChange(Status.success)
-    } else if (
-      result !== undefined &&
-      status !== Status.incompleteResults &&
-      status !== Status.success
-    ) {
-      statusChange(Status.incompleteResults)
-    }
-    return result !== undefined
   }
 
   /**
