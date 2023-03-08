@@ -21,6 +21,10 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   private _panel: vscode.Webview | null = null
   public stopScript: null | ((pid: number) => void) = null
   public editConfFile: null | ((name: JobNameMap) => Promise<void>) = null
+  public rename:
+    | null
+    | ((oldName: JobNameMap, newName: JobNameMap) => Promise<void>) = null
+
   public openSettings: null | ((name: JobNameMap) => void) = null
   public deleteConf: null | ((name: JobNameMap) => void) = null
   public askToDeleteJob: null | ((name: JobNameMap) => void) = null
@@ -89,6 +93,16 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
             })
             if (typeof this.runScript === 'function') {
               this.runScript(e.payload)
+            }
+            break
+          case CommandFromResultsWebview.Rename:
+            log({
+              action: 'Received "rename" command',
+              source: Sources.Extension,
+              info: e.payload,
+            })
+            if (typeof this.rename === 'function') {
+              this.rename(e.payload.oldName, e.payload.newName)
             }
             break
           case CommandFromResultsWebview.OpenSettings:

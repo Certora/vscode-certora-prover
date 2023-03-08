@@ -33,7 +33,7 @@ const newForm: NewForm = {
     loopUnroll: '',
     properties: [],
     runOnStg: false,
-    branchName: 'master',
+    branchName: '',
     ruleSanity: false,
     advancedSanity: false,
     localTypeChecking: false,
@@ -65,6 +65,7 @@ const stableFields = [
   'solc_map',
   'rule_sanity',
   'send_only',
+  'cloud',
 ]
 
 function getAdditionalSettings(confFile: ConfFile) {
@@ -218,9 +219,13 @@ function processSpecAttributes(confFile: ConfFile, specObj: SpecObj) {
   if (confFile.staging) {
     specObj.runOnStg = true
     if (confFile.staging.toString() === 'true') {
-      confFile.staging = 'master'
+      confFile.staging = ''
     }
-    specObj.branchName = confFile.staging.toString() || 'master'
+    specObj.branchName = confFile.staging.toString() || ''
+  }
+
+  if (confFile.cloud) {
+    specObj.branchName = confFile.cloud.toString() || ''
   }
 
   if (confFile.rule_sanity) {
@@ -327,9 +332,7 @@ function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
       }
       // maybe main contract isn't explicitly mentioned
       if (!tempForm.mainContract) {
-        // console.log('no main contract for', tempForm.mainFile)
         const splittedPathToFile = tempForm.mainFile.split('/')
-        // console.log(splittedPathToFile, 'splitted file')
         tempForm.mainContract = splittedPathToFile[
           splittedPathToFile.length - 1
         ].replace('.sol', '')

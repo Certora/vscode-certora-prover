@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+### 0.1.3 ()
+
+## Features
+
+* Added option to choose branch in production ([#87](https://github.com/Certora/vscode-certora-prover/pull/87))
+* Change icon in navigator when there is a validation error ([#87](https://github.com/Certora/vscode-certora-prover/pull/87))
+
+## Bug Fixes
+
+* Rename glitch when other jobs are running, rename when there are incomplete results will not stop receiving results ([#87](https://github.com/Certora/vscode-certora-prover/pull/87))
+* Run-all statuses bug fixed ([#87](https://github.com/Certora/vscode-certora-prover/pull/87))
+* Jobs that were stopped from the web stops in the extension as well ([#87](https://github.com/Certora/vscode-certora-prover/pull/87))
+
 
 ### 0.1.2 (2023-01-25)
 ## Bug Fixes

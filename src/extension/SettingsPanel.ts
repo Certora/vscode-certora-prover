@@ -83,32 +83,33 @@ export class SettingsPanel {
             })
             // [e.payload.checkMyInputs] is true when the frontend validator found a format error in the input
             // therefore it is not valid
-            if (!e.payload.checkMyInputs) {
-              const form: InputFormData = processForm(e.payload, confFileName)
-              createConfFile(form)
-              if (
-                form.mainContractName &&
-                form.mainSolidityFile &&
-                form.solidityCompiler &&
-                form.specFile
-              ) {
-                // if all mandatory fields are filled - allow running
-                SettingsPanel.resultsWebviewProvider.postMessage({
-                  type: 'allow-run',
-                  payload: confFileName,
-                })
-              } else {
-                SettingsPanel.resultsWebviewProvider.postMessage({
-                  type: 'block-run',
-                  payload: confFileName,
-                })
-              }
+            // if (!e.payload.checkMyInputs) {
+            const form: InputFormData = processForm(e.payload, confFileName)
+            createConfFile(form)
+            if (
+              form.mainContractName &&
+              form.mainSolidityFile &&
+              form.solidityCompiler &&
+              form.specFile &&
+              !e.payload.checkMyInputs
+            ) {
+              // if all mandatory fields are filled - allow running
+              SettingsPanel.resultsWebviewProvider.postMessage({
+                type: 'allow-run',
+                payload: confFileName,
+              })
             } else {
               SettingsPanel.resultsWebviewProvider.postMessage({
                 type: 'block-run',
                 payload: confFileName,
               })
             }
+            // } else {
+            //   SettingsPanel.resultsWebviewProvider.postMessage({
+            //     type: 'block-run',
+            //     payload: confFileName,
+            //   })
+            // }
             break
           }
           case CommandFromSettingsWebview.OpenBrowser: {

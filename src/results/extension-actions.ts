@@ -21,6 +21,7 @@ enum Commands {
   InitResults = 'init-results',
   UploadConf = 'upload-conf',
   EnableEdit = 'enable-edit',
+  Rename = 'rename',
 }
 
 export function enableEdit(name: JobNameMap): void {
@@ -149,6 +150,21 @@ export function duplicate(
       toDuplicate: toDuplicate,
       duplicatedName: duplicated,
       rule: rule,
+    },
+  })
+}
+
+export function rename(oldName: JobNameMap, newName: JobNameMap): void {
+  log({
+    action: 'Send "rename" command',
+    source: Sources.ResultsWebview,
+    info: [oldName, newName],
+  })
+  vscode.postMessage({
+    command: Commands.Rename,
+    payload: {
+      oldName: oldName,
+      newName: newName,
     },
   })
 }

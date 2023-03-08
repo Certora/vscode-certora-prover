@@ -22,13 +22,14 @@
   import Pane from './Pane.svelte'
   import Tree from './Tree.svelte'
   import { verificationResults } from '../store/store'
+  import { writable } from 'svelte/store'
 
-  export let doRename: boolean = true
   export let editFunc: () => void
   export let deleteFunc: () => void
   export let deleteRun: () => void
   export let namesMap: Map<string, string>
   export let runName: string = ''
+  const renameJob = writable(runName === '')
   // this creates the new conf file
   export let renameRun: (oldName: string, newName: string) => void
   export let duplicateFunc: (
@@ -99,7 +100,7 @@
   function onKeyPress(e: any): void {
     // get out of 'rename' mode when enter is pressed
     if (e.key === 'Enter') {
-      doRename = false
+      $renameJob = false
 
       // we use untitled as default name, when creating a new run
       if (e.currentTarget.value === createInitialName()) {
@@ -194,7 +195,7 @@
    * get into rename mode
    */
   function setRename(): void {
-    doRename = true
+    $renameJob = true
     beforeRename = runName
   }
 
@@ -304,6 +305,13 @@
         },
       },
     ]
+    if (status === Status.incompleteResults) {
+      actions.push({
+        title: 'Stop',
+        icon: 'stop-circle',
+        onClick: runningStop,
+      })
+    }
     return actions
   }
 
@@ -369,7 +377,7 @@
     var activeElement = document.activeElement
     var myElement = document.getElementById('rename_input ' + runName)
     if (activeElement !== myElement) {
-      doRename = false
+      $renameJob = false
     }
   }
 
@@ -428,7 +436,7 @@
 </script>
 
 <div class="body">
-  {#if doRename}
+  {#if $renameJob}
     <div class="renameInput">
       <img
         class="icon"
@@ -451,7 +459,7 @@
       />
     </div>
   {:else if !nowRunning}
-    {#key [status]}
+    {#key [status, inactiveSelected]}
       <div class="results" on:click={onClick}>
         <Pane
           title={namesMap.get(runName)}
@@ -501,7 +509,13 @@
     {/key}
   {/if}
 </div>
-<ContextMenu {hide} actions={createActionsForContextMenu()} {pos} />
+<ContextMenu
+  {hide}
+  actions={status
+    ? createActionsForContextMenu()
+    : createActionsForContextMenu()}
+  {pos}
+/>
 
 <style lang="postcss">
   .body {

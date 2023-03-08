@@ -17,6 +17,7 @@
   } from './stores/store.js'
   import { manageFiles } from './utils/refreshFiles'
   import CustomList from './components/CustomList.svelte'
+  import { Source } from './types'
 
   //   slots
   export let index
@@ -131,6 +132,7 @@
           <CustomInput
             infoObj={infoObjArr.contractName}
             placeholder="Contract"
+            source={Source.Sol}
             bind:bindValue={$solAdditionalContracts[index].mainContract}
           />
         </div>
@@ -153,6 +155,7 @@
                 <CustomInput
                   infoObj={infoObjArr.solCompiler}
                   placeholder="example: solc7.6"
+                  source={Source.Sol}
                   bind:bindValue={$solAdditionalContracts[index].compiler.ver}
                 />
               </div>
@@ -161,6 +164,7 @@
                 <CustomInput
                   infoObj={infoObjArr.solPackages}
                   placeholder="CVT-Executables-Mac"
+                  source={Source.Sol}
                   bind:bindValue={$solAdditionalContracts[index].compiler.exe}
                 />
               </div>
@@ -182,6 +186,7 @@
                   <CustomInput
                     infoObj={infoObjArr.linkVar}
                     placeholder="Variable"
+                    source={Source.Sol}
                     bind:bindValue={obj.variable}
                   />
                 </div>
@@ -189,6 +194,7 @@
                   <CustomInput
                     infoObj={infoObjArr.linkContract}
                     placeholder="Other Contract"
+                    source={Source.Sol}
                     bind:bindValue={obj.contractName}
                   />
                 </div>

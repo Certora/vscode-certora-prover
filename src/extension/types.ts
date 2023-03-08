@@ -57,6 +57,7 @@ export type Job = {
   progressUrl: string
   creationTime: string
   runName?: string
+  pid?: number
   verificationReportLink?: string
 }
 
@@ -244,6 +245,7 @@ export enum CommandFromResultsWebview {
   InitResults = 'init-results',
   UploadConf = 'upload-conf',
   EnableEdit = 'enable-edit',
+  Rename = 'rename',
 }
 
 export enum CommandFromSettingsWebview {
@@ -306,6 +308,10 @@ export type EventFromResultsWebview =
     }
   | {
       command: CommandFromResultsWebview.UploadConf
+    }
+  | {
+      command: CommandFromResultsWebview.Rename
+      payload: { oldName: JobNameMap; newName: JobNameMap }
     }
 
 export type EventFromSettingsWebview =

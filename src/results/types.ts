@@ -27,6 +27,7 @@ export enum RuleStatuses {
   Running = 'RUNNING',
   Timeout = 'TIMEOUT',
   Sanity = 'SANITY_FAILED',
+  Killed = 'KILLED',
 }
 
 // output can be either a string of a path or array of strings of path
@@ -137,6 +138,7 @@ export type Job = {
   progressUrl: string
   creationTime: string
   runName?: string
+  pid?: number
   verificationReportLink?: string
 }
 
