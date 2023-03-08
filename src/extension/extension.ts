@@ -141,6 +141,10 @@ export function activate(context: vscode.ExtensionContext): void {
         const confFileContent = await readConf(confFileUri)
         renderSettingsPanel(name, confFileContent)
       } catch (e) {
+        resultsWebviewProvider.postMessage({
+          type: 'settings-error',
+          payload: name.fileName,
+        })
         vscode.window.showErrorMessage(
           `Can't read conf file: ${confFileUri.path}. Error: ${e}`,
         )

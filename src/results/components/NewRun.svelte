@@ -65,37 +65,39 @@
 
   let beforeRename = ''
 
-  let stop = false
+  // let stop = false
 
   const UNTITLED = 'untitled'
 
-  const listener = (e: MessageEvent<EventsFromExtension>) => {
-    switch (e.data.type) {
-      case EventTypesFromExtension.ParseError: {
-        log({
-          action: 'Received "parse-error" command',
-          source: Sources.ResultsWebview,
-          info: e.data.payload,
-        })
-        if (e.data.payload === runName) {
-          // change status to 'unableToRun' only if run wasn't stopped manually / intentionally
-          if (!stop) {
-            statusChange(Status.unableToRun)
-            stop = false
-          }
-        }
-        break
-      }
-    }
-  }
+  // const listener = (e: MessageEvent<EventsFromExtension>) => {
+  //   switch (e.data.type) {
+  //     case EventTypesFromExtension.ParseError: {
+  //       log({
+  //         action: 'Received "parse-error" command',
+  //         source: Sources.ResultsWebview,
+  //         info: e.data.payload,
+  //       })
+  //       if (e.data.payload === runName) {
+  //         // change status to 'unableToRun' only if run wasn't stopped manually / intentionally
+  //         if (!stop) {
 
-  onMount(() => {
-    window.addEventListener('message', listener)
-  })
+  //           editFunc()
+  //           statusChange(Status.unableToRun)
+  //           stop = false
+  //         }
+  //       }
+  //       break
+  //     }
+  //   }
+  // }
 
-  onDestroy(() => {
-    window.removeEventListener('message', listener)
-  })
+  // onMount(() => {
+  //   window.addEventListener('message', listener)
+  // })
+
+  // onDestroy(() => {
+  //   window.removeEventListener('message', listener)
+  // })
 
   function onKeyPress(e: any): void {
     // get out of 'rename' mode when enter is pressed
@@ -339,7 +341,7 @@
   function runningStop(): void {
     statusChange(Status.ready)
     runningStopFunc()
-    stop = true
+    // stop = true
   }
 
   /**

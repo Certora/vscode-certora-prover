@@ -23,6 +23,7 @@
     pending: 'pending.svg',
     success: 'rerun-success.svg',
     unableToRun: 'unable-to-run.svg',
+    settingsError: 'error-rule-status.svg',
   }
 
   // maps status to icon
@@ -34,6 +35,7 @@
     [Status.success, statusIcons.success],
     [Status.unableToRun, statusIcons.unableToRun],
     [Status.incompleteResults, statusIcons.running],
+    [Status.settingsError, statusIcons.settingsError],
   ])
 
   /**

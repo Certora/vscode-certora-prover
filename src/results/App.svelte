@@ -293,6 +293,16 @@
         runs = setStatus(e.data.payload, Status.missingSettings)
         break
       }
+      case EventTypesFromExtension.SettingsError: {
+        log({
+          action: 'Received "settings-error" command',
+          source: Sources.ResultsWebview,
+          info: e.data.payload,
+        })
+        // status is changed to 'finish setup' when job isn't allowed to run
+        runs = setStatus(e.data.payload, Status.settingsError)
+        break
+      }
       case EventTypesFromExtension.ClearAllJobs: {
         log({
           action: 'Received "clear-all-jobs" command',
@@ -322,7 +332,16 @@
         $focusedRun = e.data.payload
         break
       }
-
+      case EventTypesFromExtension.ParseError: {
+        log({
+          action: 'Received "parse-error" command',
+          source: Sources.ResultsWebview,
+          info: e.data.payload,
+        })
+        const runName = e.data.payload
+        runs = setStatus(runName, Status.unableToRun)
+        break
+      }
       case EventTypesFromExtension.InitialJobs: {
         log({
           action: 'Received "initial-jobs" command',
