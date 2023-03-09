@@ -290,7 +290,16 @@
           info: e.data.payload,
         })
         // status is changed to 'ready' when job is allowed to run
-        runs = setStatus(e.data.payload, Status.ready)
+        const runName = e.data.payload
+        let newStatus = Status.ready
+        if (
+          $verificationResults.find(vr => {
+            return vr.name === runName
+          })
+        ) {
+          newStatus = Status.success
+        }
+        runs = setStatus(runName, newStatus)
         break
       }
       case EventTypesFromExtension.BlockRun: {
@@ -509,6 +518,14 @@
         runs = setStatus(jobName, Status.ready)
         return
       }
+      if (
+        !$verificationResults.map(vr => {
+          return vr.name === jobName
+        })
+      ) {
+        runs = setStatus(jobName, Status.ready)
+        return
+      }
       $verificationResults.forEach(vr => {
         if (vr.name === jobName) {
           runs = setStatus(jobName, Status.success)
@@ -524,8 +541,12 @@
               })
             })
           })
-        } else {
-          runs = setStatus(jobName, Status.success)
+        } else if (
+          runs.find(run => {
+            return run.name === jobName
+          })?.status === Status.running
+        ) {
+          runs = setStatus(jobName, Status.ready)
         }
       })
       $verificationResults = $verificationResults
@@ -873,7 +894,9 @@
                   displayName: namesMap.get(runs[index].name),
                 })
                 runs[index].vrLink = ''
-                stopScript(runs[index].id)
+                const modal = runs[index].status !== Status.running
+                console.log('modal!!!', modal, runs[index].status)
+                stopScript(runs[index].id, modal)
               }}
               inactiveSelected={$focusedRun}
               {setStatus}

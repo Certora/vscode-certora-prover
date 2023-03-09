@@ -67,15 +67,15 @@ export function removeScript(name: string): void {
   })
 }
 
-export function stopScript(pid: number): void {
+export function stopScript(pid: number, modal: boolean): void {
   log({
     action: 'Send "stop-script" command',
     source: Sources.ResultsWebview,
-    info: pid,
+    info: { pid, modal },
   })
   vscode.postMessage({
     command: Commands.StopScript,
-    payload: pid,
+    payload: { pid: pid, modal: modal },
   })
 }
 

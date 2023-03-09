@@ -338,7 +338,7 @@
    * stops a running run
    */
   function runningStop(): void {
-    statusChange(Status.ready)
+    // statusChange(Status.ready)
     runningStopFunc()
     // stop = true
   }
@@ -454,7 +454,10 @@
         >
           {#each $verificationResults as vr, index (index)}
             {#if vr.name === runName}
-              <li class="tree">
+              <li
+                class="tree"
+                on:contextmenu|stopPropagation|preventDefault={null}
+              >
                 <Tree
                   runDisplayName={namesMap.get(runName)}
                   data={{

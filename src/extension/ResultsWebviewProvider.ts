@@ -19,7 +19,7 @@ import {
 export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   public viewType = 'results'
   private _panel: vscode.Webview | null = null
-  public stopScript: null | ((pid: number) => void) = null
+  public stopScript: null | ((pid: number, modal: boolean) => void) = null
   public editConfFile: null | ((name: JobNameMap) => Promise<void>) = null
   public rename:
     | null
@@ -82,7 +82,8 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
             })
             // this.stopScript is set in ScriptRunner.ts constructor
             if (typeof this.stopScript === 'function') {
-              this.stopScript(e.payload)
+              console.log('pid, modal:', e.payload.pid, e.payload.modal)
+              this.stopScript(e.payload.pid, e.payload.modal)
             }
             break
           case CommandFromResultsWebview.RunScript:

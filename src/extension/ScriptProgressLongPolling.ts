@@ -68,6 +68,10 @@ export class ScriptProgressLongPolling {
         return
       }
 
+      if (data.jobEnded) {
+        console.log('JOB ENDED!!!!!', data.jobId)
+      }
+
       if (
         data.verificationProgress &&
         data.verificationProgress !== '{}' &&
