@@ -350,6 +350,11 @@
     if (isPending) {
       return [
         {
+          title: 'Edit',
+          icon: 'gear',
+          onClick: editFunc,
+        },
+        {
           title: 'Stop',
           icon: 'stop-circle',
           onClick: pendingRunStop,
@@ -358,6 +363,11 @@
     }
     if (nowRunning) {
       return [
+        {
+          title: 'Edit',
+          icon: 'gear',
+          onClick: editFunc,
+        },
         {
           title: 'Stop',
           icon: 'stop-circle',
