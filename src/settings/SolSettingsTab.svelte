@@ -19,6 +19,7 @@
     solidityObj,
     solAdditionalContracts,
     isReset,
+    disableForm,
   } from './stores/store.js'
   import CustomList from './components/CustomList.svelte'
 
@@ -163,7 +164,10 @@
   }
 </script>
 
-<div class="card_parent_wrapper bg_dark border-rd">
+<div
+  class={'card_parent_wrapper bg_dark border-rd ' +
+    ($disableForm ? 'disable_main' : '')}
+>
   <CollapseCard
     chevron="padding-right:16px;"
     bind:open={$navState.solCheck.active}
@@ -429,3 +433,14 @@
     </div>
   </CollapseCard>
 </div>
+
+<style>
+  .disable_main {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .disable_main *:hover {
+    all: unset !important;
+  }
+</style>

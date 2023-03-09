@@ -15,6 +15,7 @@
     navState,
     specObj,
     solidityObj,
+    disableForm,
     specFilesArr,
   } from './stores/store.js'
   import CheckBoxInfo from './components/CheckBoxInfo.svelte'
@@ -167,7 +168,10 @@
   }
 </script>
 
-<div class="card_parent_wrapper bg_dark border-rd">
+<div
+  class={'card_parent_wrapper bg_dark border-rd ' +
+    ($disableForm ? 'disable_main' : '')}
+>
   <CollapseCard
     chevron="padding-right:16px;"
     bind:open={$navState.specCheck.active}
@@ -521,5 +525,13 @@
       width: 100%;
       max-width: 100%;
     }
+  }
+  .disable_main {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .disable_main *:hover {
+    all: unset !important;
   }
 </style>

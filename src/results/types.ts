@@ -186,6 +186,7 @@ export enum EventTypesFromExtension {
   InitialJobs = 'initial-jobs',
   DeleteJob = 'delete-job',
   RunJob = 'run-job',
+  SettingsError = 'settings-error',
 }
 
 export type EventsFromExtension =
@@ -224,6 +225,10 @@ export type EventsFromExtension =
       payload: string
     }
   | {
+      type: EventTypesFromExtension.SettingsError
+      payload: string
+    }
+  | {
       type: EventTypesFromExtension.FocusChanged
       payload: string
     }
@@ -256,6 +261,7 @@ export enum Status {
   success = 'Ready Success',
   unableToRun = 'Unable To Run',
   incompleteResults = 'Incomplete Results',
+  settingsError = 'Settings Error',
 }
 
 export type Run = {

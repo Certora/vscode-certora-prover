@@ -81,9 +81,6 @@ export class SettingsPanel {
               source: Sources.Extension,
               info: e.payload,
             })
-            // [e.payload.checkMyInputs] is true when the frontend validator found a format error in the input
-            // therefore it is not valid
-            // if (!e.payload.checkMyInputs) {
             const form: InputFormData = processForm(e.payload, confFileName)
             createConfFile(form)
             if (
@@ -98,18 +95,17 @@ export class SettingsPanel {
                 type: 'allow-run',
                 payload: confFileName,
               })
-            } else {
+            } else if (!e.payload.checkMyInputs) {
               SettingsPanel.resultsWebviewProvider.postMessage({
                 type: 'block-run',
                 payload: confFileName,
               })
+            } else {
+              SettingsPanel.resultsWebviewProvider.postMessage({
+                type: 'settings-error',
+                payload: confFileName,
+              })
             }
-            // } else {
-            //   SettingsPanel.resultsWebviewProvider.postMessage({
-            //     type: 'block-run',
-            //     payload: confFileName,
-            //   })
-            // }
             break
           }
           case CommandFromSettingsWebview.OpenBrowser: {
@@ -146,6 +142,30 @@ export class SettingsPanel {
       }
     }
     this.dispose()
+  }
+
+  public static disableForm(name: string): void {
+    const panelToDisable = SettingsPanel.allPanels.find(
+      panel => panel.curConfFileDisplayName === name,
+    )
+    if (panelToDisable !== undefined) {
+      panelToDisable._panel.webview.postMessage({
+        type: 'disable-form',
+        payload: panelToDisable.curConfFileDisplayName,
+      })
+    }
+  }
+
+  public static enableForm(name: string): void {
+    const panelToDisable = SettingsPanel.allPanels.find(
+      panel => panel.curConfFileDisplayName === name,
+    )
+    if (panelToDisable !== undefined) {
+      panelToDisable._panel.webview.postMessage({
+        type: 'enable-form',
+        payload: panelToDisable.curConfFileDisplayName,
+      })
+    }
   }
 
   /**
