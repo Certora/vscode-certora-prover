@@ -603,7 +603,11 @@
 
     //add to pending queue
     pendingQueue.push(JobNameMap)
+    runs = setStatus(JobNameMap.fileName, Status.pending)
     pendingQueueCounter++
+    $verificationResults = $verificationResults.filter(vr => {
+      return vr.name !== JobNameMap.fileName
+    })
 
     if (output && output.runName === run.name) {
       clearOutput()
@@ -768,7 +772,7 @@
   }
 
   function showMenu(e, index) {
-    $pos = { x: e.clientX, y: e.clientY }
+    $pos = { x: e.clientX, y: e.pageY }
     resentHide()
     $hide[index] = false
   }

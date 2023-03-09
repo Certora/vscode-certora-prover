@@ -454,7 +454,7 @@
             {#if vr.name === runName}
               <li
                 class="tree"
-                on:contextmenu|stopPropagation|preventDefault={null}
+                on:contextmenu|stopPropagation|preventDefault={() => null}
               >
                 <Tree
                   runDisplayName={namesMap.get(runName)}
