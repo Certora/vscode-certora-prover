@@ -23,8 +23,9 @@
     position: absolute;
     background-color: #f1f1f1;
     width: 90px;
-    height: 90px;
-    overflow: auto;
+    /* height: 90px; */
+    display: table;
+    overflow: visible;
     box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
     z-index: 1;
     left: 10px;
@@ -49,7 +50,7 @@
     /* margin-top: 5px; */
     margin-left: 5px;
     text-decoration: none;
-    display: block;
+    display: table-row;
     border: none;
     border-radius: 5px;
     background-color: var(--vscode-menu-foreground);

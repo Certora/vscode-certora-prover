@@ -61,6 +61,7 @@ export type Job = {
   progressUrl: string
   creationTime: string
   runName?: string
+  pid?: number
   verificationReportLink?: string
 }
 
@@ -247,6 +248,7 @@ export enum CommandFromResultsWebview {
   AskToDeleteJob = 'ask-to-delete-job',
   InitResults = 'init-results',
   UploadConf = 'upload-conf',
+  Rename = 'rename',
 }
 
 export enum CommandFromSettingsWebview {
@@ -262,7 +264,7 @@ export type EventFromResultsWebview =
     }
   | {
       command: CommandFromResultsWebview.StopScript
-      payload: number
+      payload: { pid: number; modal: boolean }
     }
   | {
       command: CommandFromResultsWebview.RunScript
@@ -305,6 +307,10 @@ export type EventFromResultsWebview =
     }
   | {
       command: CommandFromResultsWebview.UploadConf
+    }
+  | {
+      command: CommandFromResultsWebview.Rename
+      payload: { oldName: JobNameMap; newName: JobNameMap }
     }
 
 export type EventFromSettingsWebview =

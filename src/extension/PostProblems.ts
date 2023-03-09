@@ -9,12 +9,12 @@ import {
   Position,
   Range,
   DiagnosticCollection,
-  window,
   RelativePattern,
   languages,
   FileSystemWatcher,
 } from 'vscode'
-import type { ResourceError } from './types'
+import { ResourceError } from './types'
+import { getInternalDirPath } from './utils/getRunInternalInfo'
 
 export abstract class PostProblems {
   private static diagnosticCollection: DiagnosticCollection =
@@ -39,39 +39,24 @@ export abstract class PostProblems {
    * @returns an empty promise
    */
   public static async postProblems(confFile: string): Promise<void> {
-    const resourceErrorsFile = 'resource_errors.json'
-    const fileUri = this.getFullFilePath(resourceErrorsFile)
-    if (!fileUri) {
-      return
+    const path = await getInternalDirPath()
+    if (path) {
+      const resourceErrorsFile = Uri.joinPath(path, 'resource_errors.json')
+      if (resourceErrorsFile) {
+        try {
+          const data: Uint8Array = await workspace.fs.readFile(
+            resourceErrorsFile,
+          )
+          if (!data) return
+          const decoder = new TextDecoder()
+          const content = decoder.decode(data)
+          const resource_error = this.getResourceError(content)
+          this.createAndPostDiagnostics(resource_error, confFile)
+        } catch (e) {
+          console.log('unable to read resource errors file: ', e)
+        }
+      }
     }
-
-    let data: Uint8Array
-
-    try {
-      data = await workspace.fs.readFile(fileUri)
-    } catch (e) {
-      // TODO: decide if we even want this message - probably not
-
-      // window.showErrorMessage(
-      //   "Could't find the " +
-      //     resourceErrorsFile +
-      //     ' file. Please contact Certora team',
-      // )
-      return
-    }
-
-    if (!data) {
-      window.showErrorMessage(
-        "Couldn't locate the error logs. Please contact Certora team",
-      )
-      return
-    }
-
-    const decoder = new TextDecoder()
-    const content = decoder.decode(data)
-    const resource_error = this.getResourceError(content)
-
-    this.createAndPostDiagnostics(resource_error, confFile)
   }
 
   /** private methods: */

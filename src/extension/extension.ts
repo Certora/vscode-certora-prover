@@ -68,7 +68,7 @@ export function activate(context: vscode.ExtensionContext): void {
     const loopUnroll: number =
       vscode.workspace.getConfiguration().get('LoopUnroll') || 1
     const duration: number =
-      vscode.workspace.getConfiguration().get('Duration') || 600
+      vscode.workspace.getConfiguration().get('Duration') || 300
     const additionalFlags: string =
       JSON.stringify(
         vscode.workspace.getConfiguration().get('AdditionalFlags'),
@@ -111,10 +111,10 @@ export function activate(context: vscode.ExtensionContext): void {
     if (optimisticLoop) {
       confFileDefault.optimistic_loop = true
     }
-    if (loopUnroll) {
+    if (loopUnroll && loopUnroll !== 1) {
       confFileDefault.loop_iter = loopUnroll
     }
-    if (duration) {
+    if (duration && duration !== 300) {
       confFileDefault.smt_timeout = duration
     }
     if (additionalFlags !== '{}') {
@@ -180,6 +180,41 @@ export function activate(context: vscode.ExtensionContext): void {
   async function readShFile(shFileUri: vscode.Uri): Promise<string> {
     const decoder = new TextDecoder()
     return decoder.decode(await vscode.workspace.fs.readFile(shFileUri))
+  }
+
+  /**
+   * rename a job
+   * @param oldName old job name
+   * @param newName new job name
+   */
+  async function rename(
+    oldName: JobNameMap,
+    newName: JobNameMap,
+  ): Promise<void> {
+    const path = vscode.workspace.workspaceFolders?.[0]
+    if (!path) return
+    const oldConf = vscode.Uri.joinPath(
+      path.uri,
+      getConfFilePath(oldName.fileName),
+    )
+    const newConf = vscode.Uri.joinPath(
+      path.uri,
+      getConfFilePath(newName.fileName),
+    )
+    try {
+      await vscode.workspace.fs.rename(
+        vscode.Uri.parse(oldConf.path),
+        vscode.Uri.parse(newConf.path),
+      )
+      scriptRunner.renameRunningScript(
+        getConfFilePath(oldName.fileName),
+        getConfFilePath(newName.fileName),
+      )
+      SettingsPanel.removePanel(oldName.displayName)
+      await editConf(newName)
+    } catch (e) {
+      console.log('Cannot rename:', e)
+    }
   }
 
   /**
@@ -578,6 +613,7 @@ export function activate(context: vscode.ExtensionContext): void {
   resultsWebviewProvider.askToDeleteJob = askToDeleteJob
   resultsWebviewProvider.createInitialJobs = createInitialJobs
   resultsWebviewProvider.uploadConf = uploadConf
+  resultsWebviewProvider.rename = rename
 
   const scriptRunner = new ScriptRunner(resultsWebviewProvider)
 

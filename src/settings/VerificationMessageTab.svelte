@@ -5,6 +5,7 @@
 
   import CustomInput from './components/CustomInput.svelte'
   import { verification_message } from './stores/store.js'
+  import { Source } from './types'
 
   let infoObjArr = {
     msg: {
@@ -28,6 +29,7 @@
           placeholder="Text message"
           bind:bindValue={$verification_message}
           infoObj={infoObjArr.msg}
+          source={Source.Msg}
         />
       </div>
     </div>

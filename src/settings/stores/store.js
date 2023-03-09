@@ -5,6 +5,8 @@
 import { writable } from 'svelte/store'
 export const checkMyInputs = writable(false)
 
+export const badInputs = writable({ sol: 0, spec: 0, msg: 0 })
+
 export const RunName = writable('')
 
 export const solAdditionalContracts = writable([])
@@ -91,7 +93,7 @@ export const specObj = writable({
     },
   ],
   runOnStg: false,
-  branchName: 'master',
+  branchName: '',
   ruleSanity: false,
   advancedSanity: false,
   localTypeChecking: true,

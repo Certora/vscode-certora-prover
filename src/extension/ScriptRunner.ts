@@ -8,9 +8,9 @@ import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { getProgressUrl } from './utils/getProgressUrl'
 import { Job, CERTORA_INNER_DIR, LOG_DIRECTORY_DEFAULT } from './types'
 import { PostProblems } from './PostProblems'
-import { checkDir } from './utils/checkDir'
 import fetch from 'node-fetch'
 import * as os from 'os'
+import { getInternalDirPath } from './utils/getRunInternalInfo'
 
 type RunningScript = {
   pid: number
@@ -32,8 +32,6 @@ export class ScriptRunner {
   constructor(resultsWebviewProvider: ResultsWebviewProvider) {
     this.polling = new ScriptProgressLongPolling()
     this.resultsWebviewProvider = resultsWebviewProvider
-
-    // TODO: Find better solution
     this.resultsWebviewProvider.stopScript = this.stop
   }
 
@@ -43,67 +41,67 @@ export class ScriptRunner {
   }
 
   /**
-   * returns a Date if possible, null if not possible
-   * @param dir string in the format of 22_12_05_14_22_09_BLA
-   * @returns date object
-   */
-  private getDateFormat(dir: string): [Date, string] {
-    const arr = dir.split('_').slice(0, 6)
-    const dateStr = '20' + arr.slice(0, 3).join('-') + 'T'
-    const timeStr = arr.slice(3, 6).join(':') + 'Z'
-    const str = dateStr + timeStr
-    return [new Date(str), dir]
-  }
-
-  /**
    * returns a uri of the conf.log file if the workspace path exists, null otherwise
    * @param pathToConfFile path to the .conf file (relative)
    * @param ts the time the file was created
    * @returns the full path to the conf.log file or null
    */
-  public async getLogFilePath(pathToConfFile: string, ts: number) {
-    const path = workspace.workspaceFolders?.[0]
-    if (!path) return
+  // public async getLogFilePath(pathToConfFile: string, ts: number) {
+  //   const path = workspace.workspaceFolders?.[0]
+  //   if (!path) return
 
-    const internalUri = Uri.parse(path.uri.path + CERTORA_INNER_DIR)
-    const checked = await checkDir(internalUri)
-    if (checked) {
-      const innerDirs = await workspace.fs.readDirectory(internalUri)
-      const dates = innerDirs.map(dir => {
-        if (dir[1] === 2) {
-          return this.getDateFormat(dir[0])
-        }
-        return null
-      })
-      // filter out null values
-      const datesNew = dates.filter(date => {
-        return date && date[0]
-      })
+  //   const internalUri = Uri.parse(path.uri.path + CERTORA_INNER_DIR)
+  //   const checked = await checkDir(internalUri)
+  //   if (checked) {
+  //     const innerDirs = await workspace.fs.readDirectory(internalUri)
+  //     const dates = innerDirs.map(dir => {
+  //       if (dir[1] === 2) {
+  //         return this.getDateFormat(dir[0])
+  //       }
+  //       return null
+  //     })
+  //     // filter out null values
+  //     const datesNew = dates.filter(date => {
+  //       return date && date[0]
+  //     })
 
-      // sort by date
-      const sortedDates = datesNew.sort(function (a, b) {
-        if (a !== null && b !== null) {
-          return a[0] > b[0] ? -1 : 1
-        }
-        return 0
-      })
+  //     // sort by date
+  //     const sortedDates = datesNew.sort(function (a, b) {
+  //       if (a !== null && b !== null) {
+  //         return a[0] > b[0] ? -1 : 1
+  //       }
+  //       return 0
+  //     })
 
-      // get the most recent date / dir
-      const curDate = sortedDates[0]
+  //     // get the most recent date / dir
+  //     const curDate = sortedDates[0]
 
-      if (curDate) {
-        const logFilePath = Uri.joinPath(
-          path.uri,
-          CERTORA_INNER_DIR,
-          curDate[1],
-          `${this.getConfFileName(pathToConfFile)}.log`,
-        )
-        return logFilePath
-      }
+  //     if (curDate) {
+  //       const logFilePath = Uri.joinPath(
+  //         path.uri,
+  //         CERTORA_INNER_DIR,
+  //         curDate[1],
+  //         `${this.getConfFileName(pathToConfFile)}.log`,
+  //       )
+  //       return logFilePath
+  //     }
+  //   }
+  // }
+
+  private async getLogFilePath(pathToConfFile: string, ts: number) {
+    let path = await getInternalDirPath()
+    if (path) {
+      const logFilePath = Uri.joinPath(
+        path,
+        `${this.getConfFileName(pathToConfFile)}.log`,
+      )
+      return logFilePath
     }
     // if we can't find the relevant directory in [CERTORA_INNER_DIR] --> create log file in another directory named [LOG_DIRECTORY_DEFAULT] inside it. in this case we need timestamps to be not run over older log files
+    path = workspace.workspaceFolders?.[0]?.uri
+    if (!path) return
     const logFilePath = Uri.joinPath(
-      path.uri,
+      path,
       CERTORA_INNER_DIR,
       LOG_DIRECTORY_DEFAULT,
       `${this.getConfFileName(pathToConfFile)}-${ts}.log`,
@@ -269,12 +267,9 @@ export class ScriptRunner {
       this.log(str, confFile, ts)
       // parse errors are shown in an error message.
       if (str.includes('CRITICAL')) {
-        // remove irrelevant --debug suggestion
-        const shortMsg = str.split('consider running the script again')[0]
-
         // the use of [action] is necessary to add the button that opens the log file
         const action = await window.showErrorMessage(
-          shortMsg,
+          str.slice(0, 300) + '...',
           'Open Execution Log File',
         )
         if (action === 'Open Execution Log File') {
@@ -290,15 +285,7 @@ export class ScriptRunner {
         }
       }
       const vrLink = this.getRuleReportLink(str)
-      if (str.includes('Uploading files...')) {
-        console.log('Uploading files...')
-        this.runningScripts = this.runningScripts.map(rs => {
-          if (rs.pid === pid) {
-            rs.uploaded = true
-          }
-          return rs
-        })
-      }
+
       if (vrLink) {
         this.runningScripts = this.runningScripts.map(rs => {
           if (rs.pid === pid) {
@@ -316,9 +303,10 @@ export class ScriptRunner {
 
       if (progressUrl) {
         await this.polling.run(progressUrl, async data => {
+          data.pid = pid
           data.runName = confFileName
           this.runningScripts.forEach(rs => {
-            if (rs.pid === pid && rs.vrLink) {
+            if (rs && rs.pid === pid && rs.vrLink) {
               data.verificationReportLink = rs.vrLink
               this.resultsWebviewProvider.postMessage<Job>({
                 type: 'receive-new-job-result',
@@ -343,7 +331,7 @@ export class ScriptRunner {
       let vrLink
       this.runningScripts = this.runningScripts.map(rs => {
         if (rs.pid === pid) {
-          // rs.uploaded = true
+          rs.uploaded = true
           vrLink = rs.vrLink
         }
         return rs
@@ -395,16 +383,50 @@ export class ScriptRunner {
     }
   }
 
-  public stop = async (pid: number): Promise<void> => {
+  /**
+   * modal that asks the user if they are sure they want to stop a running script
+   * @param name string name of the script
+   * @returns boolean according to answer
+   */
+  private async askToStopJob(name: string): Promise<boolean> {
+    const stopAction = "Stop '" + name + "'"
+    const result = await window
+      .showInformationMessage(
+        "Are you sure you want to stop '" + name + "' from running?",
+        {
+          modal: true,
+          // detail: 'Job configuration will be lost',
+        },
+        ...[stopAction],
+      )
+      .then(items => {
+        if (items === stopAction) {
+          return true
+        } else {
+          return false
+        }
+      })
+    return result
+  }
+
+  public stop = async (pid: number, modal: boolean): Promise<void> => {
+    console.log('pid, modal:2', pid, modal)
     const scriptToStop = this.runningScripts.find(rs => {
       return rs.pid === pid
     })
     if (scriptToStop === undefined) return
 
+    let doStop = true
+    if (modal) {
+      doStop = await this.askToStopJob(
+        this.getConfFileName(scriptToStop.confFile),
+      )
+    }
+    if (!doStop) return
+
     if (scriptToStop.jobId !== undefined && scriptToStop.vrLink !== undefined) {
       this.stopUploadedScript(scriptToStop)
     } else if (!scriptToStop.uploaded) {
-      console.log('script is not uploaded:', scriptToStop)
       const command =
         os.platform() === 'win32'
           ? `taskkill -F -T -PID ${pid}`
@@ -412,7 +434,14 @@ export class ScriptRunner {
 
       exec(command)
     } else {
-      // todo: timeout and try again
+      // TODO: cover this possibility
+      console.log('twilight zone')
+      this.resultsWebviewProvider.postMessage({
+        type: 'script-stopped',
+        payload: pid,
+      })
+      this.removeRunningScript(pid)
+      return
     }
     this.resultsWebviewProvider.postMessage({
       type: 'script-stopped',
@@ -426,6 +455,16 @@ export class ScriptRunner {
       confFile,
       pid,
       uploaded: false,
+    })
+    this.sendRunningScriptsToWebview()
+  }
+
+  public renameRunningScript(oldConf: string, newConf: string) {
+    this.runningScripts = this.runningScripts.map(rs => {
+      if (rs.confFile.includes(oldConf) || oldConf.includes(rs.confFile)) {
+        rs.confFile = newConf
+      }
+      return rs
     })
     this.sendRunningScriptsToWebview()
   }
