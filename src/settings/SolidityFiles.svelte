@@ -10,7 +10,11 @@
   import Icon from './components/Icon.svelte'
   import CustomItem from './components/CustomItem.svelte'
   import CustomInput from './components/CustomInput.svelte'
-  import { solAdditionalContracts, solFilesArr } from './stores/store.js'
+  import {
+    solAdditionalContracts,
+    solFilesArr,
+    disableForm,
+  } from './stores/store.js'
   import { manageFiles } from './utils/refreshFiles'
   import CustomList from './components/CustomList.svelte'
   import { Source } from './types'
@@ -79,7 +83,9 @@
   }
 </script>
 
-<div class="bg_light border-rd mt-8px">
+<div
+  class={'bg_light border-rd mt-8px ' + ($disableForm ? 'disable_main' : '')}
+>
   <CollapseCard chevron="padding-right:12px;">
     <div
       slot="header"
@@ -99,7 +105,7 @@
         on:click|stopPropagation={() => removeSolFile(index)}
       />
     </div>
-    <div slot="body" class="p-12 pt-0">
+    <div slot="body" class="p-12 pt-0 ">
       <div class="input_wrapper">
         <div class="dark_input">
           <h3>Solidity File<span>*</span></h3>
@@ -214,3 +220,14 @@
     </div>
   </CollapseCard>
 </div>
+
+<style>
+  .disable_main {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .disable_main *:hover {
+    all: unset !important;
+  }
+</style>

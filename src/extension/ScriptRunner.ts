@@ -222,7 +222,7 @@ export class ScriptRunner {
         type: 'run-next',
         payload: { pid: pid, vrLink: vrLink !== undefined ? vrLink : '' },
       })
-      if (code !== 0) {
+      if (code === 1) {
         this.removeRunningScript(pid)
         // when there is a parse error, post it to PROBLEMS and send 'parse-error' to results
         PostProblems.postProblems(confFile)

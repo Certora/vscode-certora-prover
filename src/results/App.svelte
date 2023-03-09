@@ -22,6 +22,7 @@
     askToDeleteJob,
     initResults,
     uploadConf,
+    enableEdit,
     rename,
   } from './extension-actions'
   import { smartMergeVerificationResult } from './utils/mergeResults'
@@ -199,11 +200,18 @@
           source: Sources.ResultsWebview,
           info: e.data.payload,
         })
+        let confToEnable: JobNameMap = {
+          displayName: '',
+          fileName: '',
+        }
         const curPid = e.data.payload.pid
         const vrLink = e.data.payload.vrLink
         runningScripts = runningScripts.map(rs => {
           if (rs.pid === curPid) {
             rs.uploaded = true
+            confToEnable.fileName = getFileName(rs.confFile)
+            confToEnable.displayName = namesMap.get(confToEnable.fileName)
+            enableEdit(confToEnable)
           }
           return rs
         })
@@ -227,7 +235,7 @@
         runningScripts = e.data.payload
         runs = runs.map(r => {
           runningScripts.forEach(rs => {
-            if (r.name === getFilename(rs.confFile)) {
+            if (r.name === getFileName(rs.confFile)) {
               r.id = rs.pid
             }
           })
@@ -304,6 +312,16 @@
         runs = setStatus(e.data.payload, Status.missingSettings)
         break
       }
+      case EventTypesFromExtension.SettingsError: {
+        log({
+          action: 'Received "settings-error" command',
+          source: Sources.ResultsWebview,
+          info: e.data.payload,
+        })
+        // status is changed to 'finish setup' when job isn't allowed to run
+        runs = setStatus(e.data.payload, Status.settingsError)
+        break
+      }
       case EventTypesFromExtension.ClearAllJobs: {
         log({
           action: 'Received "clear-all-jobs" command',
@@ -333,7 +351,16 @@
         $focusedRun = e.data.payload
         break
       }
-
+      case EventTypesFromExtension.ParseError: {
+        log({
+          action: 'Received "parse-error" command',
+          source: Sources.ResultsWebview,
+          info: e.data.payload,
+        })
+        const runName = e.data.payload
+        runs = setStatus(runName, Status.unableToRun)
+        break
+      }
       case EventTypesFromExtension.InitialJobs: {
         log({
           action: 'Received "initial-jobs" command',
@@ -684,7 +711,7 @@
   /**
    * from conf file uri to only the file name
    */
-  function getFilename(confFile: string): string {
+  function getFileName(confFile: string): string {
     return confFile.replace(CONF_DIRECTORY, '').replace('.conf', '')
   }
 
@@ -848,7 +875,7 @@
               status={runs[index].status}
               {newFetchOutput}
               nowRunning={(runningScripts.find(
-                rs => getFilename(rs.confFile) === runs[index].name,
+                rs => getFileName(rs.confFile) === runs[index].name,
               ) !== undefined ||
                 (pendingQueue.find(rs => rs.fileName === runs[index].name) !==
                   undefined &&
@@ -866,6 +893,10 @@
                 pendingStopFunc(runs[index])
               }}
               runningStopFunc={() => {
+                enableEdit({
+                  fileName: runs[index].name,
+                  displayName: namesMap.get(runs[index].name),
+                })
                 runs[index].vrLink = ''
                 const modal = runs[index].status !== Status.running
                 console.log('modal!!!', modal, runs[index].status)

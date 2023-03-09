@@ -62,6 +62,7 @@
       validator = contractValidators()
       return
     }
+
     if ((infoObj.validator = 'valueValidator')) {
       validator = value => {
         return true
@@ -163,8 +164,10 @@
       <i
         class="codicon codicon-close"
         on:click={() => {
-          bindValue = ''
-          icon_wrapper = false
+          if (!disabledState) {
+            bindValue = ''
+            icon_wrapper = false
+          }
         }}
       />
     {/if}

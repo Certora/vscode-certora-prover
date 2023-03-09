@@ -141,6 +141,10 @@ export function activate(context: vscode.ExtensionContext): void {
         const confFileContent = await readConf(confFileUri)
         renderSettingsPanel(name, confFileContent)
       } catch (e) {
+        resultsWebviewProvider.postMessage({
+          type: 'settings-error',
+          payload: name.fileName,
+        })
         vscode.window.showErrorMessage(
           `Can't read conf file: ${confFileUri.path}. Error: ${e}`,
         )
@@ -269,8 +273,9 @@ export function activate(context: vscode.ExtensionContext): void {
     return path.replace(CONF_DIRECTORY, '').replace('.conf', '')
   }
 
-  async function runScript(name: JobNameMap) {
-    SettingsPanel.removePanel(name.displayName)
+  function runScript(name: JobNameMap): void {
+    // SettingsPanel.removePanel(name.displayName)
+    SettingsPanel.disableForm(name.displayName)
     const confFile = getConfFilePath(name.fileName)
     scriptRunner.run(confFile)
   }
@@ -481,6 +486,10 @@ export function activate(context: vscode.ExtensionContext): void {
     )
   }
 
+  function enableEdit(name: JobNameMap) {
+    SettingsPanel.enableForm(name.displayName)
+  }
+
   function gotoSupportFeedbackForm() {
     vscode.commands.executeCommand(
       'vscode.open',
@@ -501,6 +510,7 @@ export function activate(context: vscode.ExtensionContext): void {
   resultsWebviewProvider.askToDeleteJob = askToDeleteJob
   resultsWebviewProvider.createInitialJobs = createInitialJobs
   resultsWebviewProvider.uploadConf = uploadConf
+  resultsWebviewProvider.enableEdit = enableEdit
   resultsWebviewProvider.rename = rename
 
   const scriptRunner = new ScriptRunner(resultsWebviewProvider)

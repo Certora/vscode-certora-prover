@@ -9,6 +9,8 @@ export const badInputs = writable({ sol: 0, spec: 0, msg: 0 })
 
 export const RunName = writable('')
 
+export const disableForm = writable(false)
+
 export const solAdditionalContracts = writable([])
 // verification message
 export const verification_message = writable('')

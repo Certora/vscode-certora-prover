@@ -244,6 +244,7 @@ export enum CommandFromResultsWebview {
   AskToDeleteJob = 'ask-to-delete-job',
   InitResults = 'init-results',
   UploadConf = 'upload-conf',
+  EnableEdit = 'enable-edit',
   Rename = 'rename',
 }
 
@@ -276,6 +277,10 @@ export type EventFromResultsWebview =
     }
   | {
       command: CommandFromResultsWebview.EditConfFile
+      payload: JobNameMap
+    }
+  | {
+      command: CommandFromResultsWebview.EnableEdit
       payload: JobNameMap
     }
   | {

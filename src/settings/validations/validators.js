@@ -3,7 +3,7 @@
  *  consists of the relevant characters.
  *-------------------------------------------------------------------------------------------- */
 
-import { solAdditionalContracts, solidityObj } from '../stores/store'
+import { solidityObj, solAdditionalContracts } from '../stores/store'
 
 function contractValidators() {
   return function email(value) {
