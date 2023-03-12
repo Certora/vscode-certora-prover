@@ -157,6 +157,7 @@
         if (!runName) return
         setVerificationReportLink(pid, e.data.payload.verificationReportLink)
         if (e.data.payload.jobStatus === 'FAILED') {
+          console.log('FAIL ======')
           setStoppedJobStatus(runName)
           return
         }
@@ -258,6 +259,7 @@
 
         if (curRun !== undefined) {
           const runName = curRun.name
+          console.log('script stopped ====')
           setStoppedJobStatus(runName)
         }
 
@@ -511,14 +513,15 @@
     ]
   }
 
+  /**
+   * when a job was cancel from outside sources
+   * @param jobName the name of the job that was canceled
+   */
   function setStoppedJobStatus(jobName: string): void {
     if (jobName) {
       removeScript(jobName)
-      if ($verificationResults.length === 0) {
-        runs = setStatus(jobName, Status.ready)
-        return
-      }
       if (
+        $verificationResults.length === 0 ||
         !$verificationResults.map(vr => {
           return vr.name === jobName
         })
@@ -529,18 +532,6 @@
       $verificationResults.forEach(vr => {
         if (vr.name === jobName) {
           runs = setStatus(jobName, Status.success)
-          vr.jobs.forEach(job => {
-            job.verificationProgress.rules.forEach(rule => {
-              if (rule.status === RuleStatuses.Running) {
-                rule.status = RuleStatuses.Killed
-              }
-              rule.children.forEach(child => {
-                if ((child.status = RuleStatuses.Running)) {
-                  child.status = RuleStatuses.Killed
-                }
-              })
-            })
-          })
         } else if (
           runs.find(run => {
             return run.name === jobName

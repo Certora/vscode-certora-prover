@@ -1,4 +1,4 @@
-import { Uri, workspace } from 'vscode'
+import { FileType, Uri, workspace } from 'vscode'
 import { CERTORA_INNER_DIR } from '../types'
 import { checkDir } from './checkDir'
 
@@ -17,24 +17,26 @@ export function getDateFormat(dir: string): [Date, string] {
 
 /**
  * returns a uri of the conf.log file if the workspace path exists, null otherwise
- * @param pathToConfFile path to the .conf file (relative)
- * @param ts the time the file was created
  * @returns the full path to the conf.log file or null
  */
-export async function getInternalDirPath() {
+export async function getInternalDirPath(): Promise<Uri | undefined> {
   const path = workspace.workspaceFolders?.[0]
   if (!path) return
 
   const internalUri = Uri.parse(path.uri.path + CERTORA_INNER_DIR)
   const checked = await checkDir(internalUri)
   if (checked) {
-    const innerDirs = await workspace.fs.readDirectory(internalUri)
-    const dates = innerDirs.map(dir => {
-      if (dir[1] === 2) {
-        return getDateFormat(dir[0])
-      }
-      return null
-    })
+    const innerDirs: [string, FileType][] = await workspace.fs.readDirectory(
+      internalUri,
+    )
+    const dates: ([Date, string] | null)[] = innerDirs.map(
+      (dir: [string, FileType]) => {
+        if (dir[1] === 2) {
+          return getDateFormat(dir[0])
+        }
+        return null
+      },
+    )
     // filter out null values
     const datesNew = dates.filter(date => {
       return date && date[0]

@@ -437,10 +437,9 @@ export function activate(context: vscode.ExtensionContext): void {
       }
       if (newConfFileUri) {
         const encoder = new TextEncoder()
-        const content = encoder.encode(JSON.stringify(jsonContent, null, 2))
+        const content = encoder.encode(JSON.stringify(jsonContent))
         await vscode.workspace.fs.writeFile(newConfFileUri, content)
       }
-      // await vscode.workspace.fs.delete(file)
     }
   }
 

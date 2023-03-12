@@ -23,6 +23,7 @@
   import Tree from './Tree.svelte'
   import { verificationResults } from '../store/store'
   import { writable } from 'svelte/store'
+  import { stat } from 'fs'
 
   export let editFunc: () => void
   export let deleteFunc: () => void
@@ -65,39 +66,7 @@
 
   let beforeRename = ''
 
-  // let stop = false
-
   const UNTITLED = 'untitled'
-
-  // const listener = (e: MessageEvent<EventsFromExtension>) => {
-  //   switch (e.data.type) {
-  //     case EventTypesFromExtension.ParseError: {
-  //       log({
-  //         action: 'Received "parse-error" command',
-  //         source: Sources.ResultsWebview,
-  //         info: e.data.payload,
-  //       })
-  //       if (e.data.payload === runName) {
-  //         // change status to 'unableToRun' only if run wasn't stopped manually / intentionally
-  //         if (!stop) {
-
-  //           editFunc()
-  //           statusChange(Status.unableToRun)
-  //           stop = false
-  //         }
-  //       }
-  //       break
-  //     }
-  //   }
-  // }
-
-  // onMount(() => {
-  //   window.addEventListener('message', listener)
-  // })
-
-  // onDestroy(() => {
-  //   window.removeEventListener('message', listener)
-  // })
 
   function onKeyPress(e: any): void {
     // get out of 'rename' mode when enter is pressed
@@ -475,6 +444,8 @@
                     tree: retrieveRules(vr.jobs),
                     duplicateFunc: duplicate,
                   }}
+                  jobEnded={status === Status.success ||
+                    status === Status.unableToRun}
                   on:fetchOutput={e => newFetchOutput(e, vr)}
                 />
               </li>

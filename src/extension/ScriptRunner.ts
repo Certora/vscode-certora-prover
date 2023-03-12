@@ -40,54 +40,6 @@ export class ScriptRunner {
     return splittedPathToConfFile[splittedPathToConfFile.length - 1]
   }
 
-  /**
-   * returns a uri of the conf.log file if the workspace path exists, null otherwise
-   * @param pathToConfFile path to the .conf file (relative)
-   * @param ts the time the file was created
-   * @returns the full path to the conf.log file or null
-   */
-  // public async getLogFilePath(pathToConfFile: string, ts: number) {
-  //   const path = workspace.workspaceFolders?.[0]
-  //   if (!path) return
-
-  //   const internalUri = Uri.parse(path.uri.path + CERTORA_INNER_DIR)
-  //   const checked = await checkDir(internalUri)
-  //   if (checked) {
-  //     const innerDirs = await workspace.fs.readDirectory(internalUri)
-  //     const dates = innerDirs.map(dir => {
-  //       if (dir[1] === 2) {
-  //         return this.getDateFormat(dir[0])
-  //       }
-  //       return null
-  //     })
-  //     // filter out null values
-  //     const datesNew = dates.filter(date => {
-  //       return date && date[0]
-  //     })
-
-  //     // sort by date
-  //     const sortedDates = datesNew.sort(function (a, b) {
-  //       if (a !== null && b !== null) {
-  //         return a[0] > b[0] ? -1 : 1
-  //       }
-  //       return 0
-  //     })
-
-  //     // get the most recent date / dir
-  //     const curDate = sortedDates[0]
-
-  //     if (curDate) {
-  //       const logFilePath = Uri.joinPath(
-  //         path.uri,
-  //         CERTORA_INNER_DIR,
-  //         curDate[1],
-  //         `${this.getConfFileName(pathToConfFile)}.log`,
-  //       )
-  //       return logFilePath
-  //     }
-  //   }
-  // }
-
   private async getLogFilePath(pathToConfFile: string, ts: number) {
     let path = await getInternalDirPath()
     if (path) {
@@ -108,39 +60,6 @@ export class ScriptRunner {
     )
     return logFilePath
   }
-
-  // public async getInnerDir() {
-  //   const path = workspace.workspaceFolders?.[0]
-  //   if (!path) return
-
-  //   const internalUri = Uri.parse(path.uri.path + CERTORA_INNER_DIR)
-  //   const checked = await checkDir(internalUri)
-  //   if (checked) {
-  //     const innerDirs = await workspace.fs.readDirectory(internalUri)
-  //     const dates = innerDirs.map(dir => {
-  //       if (dir[1] === 2) {
-  //         return this.getDateFormat(dir[0])
-  //       }
-  //       return null
-  //     })
-  //     // filter out null values
-  //     const datesNew = dates.filter(date => {
-  //       return date && date[0]
-  //     })
-
-  //     // sort by date
-  //     const sortedDates = datesNew.sort(function (a, b) {
-  //       if (a !== null && b !== null) {
-  //         return a[0] > b[0] ? -1 : 1
-  //       }
-  //       return 0
-  //     })
-
-  //     // get the most recent date / dir
-  //     const curDate = sortedDates[0]
-  //     return curDate
-  //   }
-  // }
 
   private async log(
     str: string,
@@ -206,13 +125,6 @@ export class ScriptRunner {
       }
       return false
     })
-    // this.script.on('close', async code => {
-    //   console.log(shFile, 'closed with code: ', code)
-    //   if (code === 0) {
-    //     return true
-    //   }
-    //   return false
-    // })
     return true
   }
 
@@ -318,10 +230,6 @@ export class ScriptRunner {
       }
     })
 
-    // this.script.stderr.on('data', async data => {
-    //   // this.removeRunningScript(pid)
-    // })
-
     this.script.on('error', async err => {
       console.error(err, 'this is an error from the script')
       this.removeRunningScript(pid)
@@ -389,15 +297,14 @@ export class ScriptRunner {
    * @returns boolean according to answer
    */
   private async askToStopJob(name: string): Promise<boolean> {
-    const stopAction = "Stop '" + name + "'"
+    const stopAction = `Stop '${name}'`
     const result = await window
       .showInformationMessage(
-        "Are you sure you want to stop '" + name + "' from running?",
+        `Are you sure you want to stop '${name}' from running?`,
         {
           modal: true,
-          // detail: 'Job configuration will be lost',
         },
-        ...[stopAction],
+        stopAction,
       )
       .then(items => {
         if (items === stopAction) {
@@ -410,7 +317,6 @@ export class ScriptRunner {
   }
 
   public stop = async (pid: number, modal: boolean): Promise<void> => {
-    console.log('pid, modal:2', pid, modal)
     const scriptToStop = this.runningScripts.find(rs => {
       return rs.pid === pid
     })
@@ -459,7 +365,7 @@ export class ScriptRunner {
     this.sendRunningScriptsToWebview()
   }
 
-  public renameRunningScript(oldConf: string, newConf: string) {
+  public renameRunningScript(oldConf: string, newConf: string): void {
     this.runningScripts = this.runningScripts.map(rs => {
       if (rs.confFile.includes(oldConf) || oldConf.includes(rs.confFile)) {
         rs.confFile = newConf
