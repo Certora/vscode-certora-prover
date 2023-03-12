@@ -9,13 +9,16 @@ import { SettingsPanel } from './SettingsPanel'
 import { ScriptRunner } from './ScriptRunner'
 import {
   ConfFile,
-  ConfToCreate,
+  // ConfToCreate,
   CONF_DIRECTORY,
   CONF_DIRECTORY_NAME,
   InputFormData,
   JobNameMap,
   CERTORA_INNER_DIR_BUILD,
   CERTORA_INNER_DIR,
+  JobList,
+  Run,
+  Status,
 } from './types'
 import { createConfFile } from './utils/createConfFile'
 import { confFileToFormData } from './utils/confFileToInputForm'
@@ -447,13 +450,16 @@ export function activate(context: vscode.ExtensionContext): void {
   /**
    * all conf files in the conf folder will become jobs!
    */
-  async function createInitialJobs(): Promise<void> {
+  async function createInitialJobs(dirPath?: string): Promise<void> {
     const path = vscode.workspace.workspaceFolders?.[0]
-    if (path) {
+    if (path && !dirPath) {
       watchForBuilds()
 
       // conf files:
-      const confDirectoryPath = path.uri.path + '/' + CONF_DIRECTORY
+      let confDirectoryPath = path.uri.path + '/' + CONF_DIRECTORY
+      if (dirPath) {
+        confDirectoryPath = dirPath + '/' + CONF_DIRECTORY
+      }
       const confDirectoryUri = vscode.Uri.parse(confDirectoryPath)
       const checked = await checkDir(confDirectoryUri)
       if (checked) {
@@ -465,7 +471,7 @@ export function activate(context: vscode.ExtensionContext): void {
             )
           })
           const awaitedList = await Promise.all(confList)
-          sendFilesToCreateJobs(awaitedList)
+          sendFilesToCreateJobs(awaitedList, confDirectoryUri)
         })
       }
     }
@@ -486,8 +492,8 @@ export function activate(context: vscode.ExtensionContext): void {
         new vscode.RelativePattern(directoryToWatch, '**/*.conf'),
       )
       fileSystemWatcher.onDidCreate(async file => {
-        const fileObj: ConfToCreate = await createFileObject(file)
-        sendFilesToCreateJobs([fileObj])
+        const fileObj: Run = await createFileObject(file)
+        sendFilesToCreateJobs([fileObj], directoryToWatch)
       })
       // vscode asks to delete a conf file before is it deleted to avoid mistakes,
       // so I think deleting the job with it is a good idea
@@ -510,10 +516,11 @@ export function activate(context: vscode.ExtensionContext): void {
    * @param file uri
    * @returns Promise<ConfToCreate>
    */
-  async function createFileObject(file: vscode.Uri): Promise<ConfToCreate> {
-    const fileObj: ConfToCreate = {
-      fileName: getFileName(vscode.workspace.asRelativePath(file)),
-      allowRun: 0,
+  async function createFileObject(file: vscode.Uri): Promise<Run> {
+    const fileObj: Run = {
+      id: 0,
+      name: getFileName(vscode.workspace.asRelativePath(file)),
+      status: Status.missingSettings,
     }
     try {
       const confFile: ConfFile = await readConf(file)
@@ -533,7 +540,7 @@ export function activate(context: vscode.ExtensionContext): void {
         confFile.verify?.length > 0 &&
         confFile.solc
       ) {
-        fileObj.allowRun = 1
+        fileObj.status = Status.ready
       }
     } catch (e) {
       // listen to file changes
@@ -545,10 +552,54 @@ export function activate(context: vscode.ExtensionContext): void {
    * post message with type: 'initial-jobs'
    * @param files files in the format of {name, allowRun}
    */
-  async function sendFilesToCreateJobs(files: ConfToCreate[]) {
-    resultsWebviewProvider.postMessage<ConfToCreate[]>({
+  async function sendFilesToCreateJobs(
+    files: Run[],
+    dirPath: vscode.Uri,
+    title = 'JOB LIST',
+  ) {
+    resultsWebviewProvider.postMessage<JobList>({
       type: 'initial-jobs',
-      payload: files,
+      payload: {
+        title: title,
+        dirPath: dirPath,
+        jobList: files,
+      },
+    })
+  }
+
+  /**
+   * creates a job list item and some jobs for it and sends it all to the results part
+   * listens to the directory [uri] for changes to the job list
+   * @param uri directory to get the confs from
+   */
+  function addDirJobList(uri: vscode.Uri) {
+    // create a directory watcher for [uri]
+    // create object for the job list
+    // send the object with the list of jobs from the directory [uri]
+    console.log(uri, 'from choose dir')
+    createInitialJobs(uri.path)
+  }
+
+  /**
+   * Choose a directory for a job list
+   */
+  async function chooseDir(): Promise<void> {
+    // choose a dir to get the conf files from
+    const path = vscode.workspace.workspaceFolders?.[0]
+    if (!path) return
+    // cannot select many because .sh files handling is an asynchronous build
+    const options: vscode.OpenDialogOptions = {
+      canSelectMany: false,
+      canSelectFolders: true,
+      openLabel: 'Open',
+      defaultUri: path.uri,
+      filters: {
+        'File type': [''], // choose only directories
+      },
+    }
+    const files = await vscode.window.showOpenDialog(options)
+    files?.map(async fileUri => {
+      addDirJobList(fileUri)
     })
   }
 
@@ -628,6 +679,7 @@ export function activate(context: vscode.ExtensionContext): void {
   const scriptRunner = new ScriptRunner(resultsWebviewProvider)
 
   context.subscriptions.push(
+    vscode.commands.registerCommand('certora.createJobList', chooseDir),
     vscode.commands.registerCommand(
       'certora.openSettings',
       openExtensionSettings,

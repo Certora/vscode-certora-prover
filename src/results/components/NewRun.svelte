@@ -3,7 +3,7 @@
    *  Shows all the information of a run: run name, status, action buttons etc.
    *-------------------------------------------------------------------------------------------- */
 
-  import { onDestroy, onMount } from 'svelte'
+  // import { onDestroy, onMount } from 'svelte'
   import { getIconPath } from '../utils/getIconPath'
   import ContextMenu from '../components/ContextMenu.svelte'
 
@@ -15,10 +15,10 @@
     Assert,
     Action,
     Status,
-    EventsFromExtension,
-    EventTypesFromExtension,
+    // EventsFromExtension,
+    // EventTypesFromExtension,
   } from '../types'
-  import { log, Sources } from '../utils/log'
+  // import { log, Sources } from '../utils/log'
   import Pane from './Pane.svelte'
   import Tree from './Tree.svelte'
   import { verificationResults } from '../store/store'
@@ -92,7 +92,8 @@
   // }
 
   // onMount(() => {
-  //   window.addEventListener('message', listener)
+  //   // window.addEventListener('message', listener)
+  //   console.log('elemnt created')
   // })
 
   // onDestroy(() => {

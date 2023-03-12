@@ -2,6 +2,8 @@
  *  Here we declare types and enums
  *-------------------------------------------------------------------------------------------- */
 
+import type { Uri } from 'vscode'
+
 export const CONF_DIRECTORY = 'certora/conf/'
 
 export type Action = {
@@ -170,6 +172,31 @@ export type JobNameMap = {
   fileName: string
 }
 
+export enum Status {
+  missingSettings = 'Missing Settings',
+  ready = 'Ready',
+  running = 'Running',
+  pending = 'Pending',
+  success = 'Ready Success',
+  unableToRun = 'Unable To Run',
+  incompleteResults = 'Incomplete Results',
+  settingsError = 'Settings Error',
+}
+
+export type Run = {
+  id: number
+  name: string
+  status: Status
+  vrLink?: string
+}
+
+export type JobList = {
+  title: string
+  fixedActions?: Action[]
+  dirPath?: Uri
+  jobList?: Run[]
+}
+
 export enum EventTypesFromExtension {
   ReceiveNewJobResult = 'receive-new-job-result',
   RunningScriptChanged = 'running-scripts-changed',
@@ -242,7 +269,7 @@ export type EventsFromExtension =
     }
   | {
       type: EventTypesFromExtension.InitialJobs
-      payload: ConfToCreate[]
+      payload: JobList
     }
   | {
       type: EventTypesFromExtension.DeleteJob
@@ -252,21 +279,3 @@ export type EventsFromExtension =
       type: EventTypesFromExtension.RunJob
       payload: string
     }
-
-export enum Status {
-  missingSettings = 'Missing Settings',
-  ready = 'Ready',
-  running = 'Running',
-  pending = 'Pending',
-  success = 'Ready Success',
-  unableToRun = 'Unable To Run',
-  incompleteResults = 'Incomplete Results',
-  settingsError = 'Settings Error',
-}
-
-export type Run = {
-  id: number
-  name: string
-  status: Status
-  vrLink?: string
-}
