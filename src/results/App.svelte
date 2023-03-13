@@ -526,7 +526,7 @@
           return vr.name === jobName
         })
       ) {
-        runs = setStatus(jobName, Status.ready)
+        runs = setStatus(jobName, Status.unableToRun)
         return
       }
       $verificationResults.forEach(vr => {
@@ -537,7 +537,7 @@
             return run.name === jobName
           })?.status === Status.running
         ) {
-          runs = setStatus(jobName, Status.ready)
+          runs = setStatus(jobName, Status.unableToRun)
         }
       })
       $verificationResults = $verificationResults
