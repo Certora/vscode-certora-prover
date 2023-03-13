@@ -183,7 +183,8 @@
         if (e.data.payload.jobStatus === 'SUCCEEDED') {
           if (runName) {
             removeScript(runName)
-            runs = setStatus(runName, Status.success)
+            // runs = setStatus(runName, Status.success)
+            setStoppedJobStatus(runName)
           }
         }
         log({
