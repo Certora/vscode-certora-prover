@@ -259,8 +259,14 @@
 
         if (curRun !== undefined) {
           const runName = curRun.name
-          console.log('script stopped ====')
-          setStoppedJobStatus(runName)
+          if (
+            curRun.status === Status.running ||
+            curRun.status === Status.pending
+          ) {
+            runs = setStatus(runName, Status.ready)
+          } else if (curRun.status === Status.incompleteResults) {
+            setStoppedJobStatus(runName)
+          }
         }
 
         runningScripts = runningScripts.filter(rs => {

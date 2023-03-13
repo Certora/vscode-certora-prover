@@ -340,7 +340,8 @@
         {
           title: 'Stop',
           icon: 'stop-circle',
-          onClick: runningStop,
+          disabled: vrLink ? false : true,
+          onClick: vrLink ? runningStop : null,
         },
       ]
     }
@@ -364,12 +365,12 @@
   /**
    * checks if there exists complete results for this job
    */
-  function hasCompleteResults(): boolean {
-    const result = $verificationResults.find(vr => {
-      return vr.name === runName
-    })
-    return result.jobs.find(job => job.jobStatus === 'SUCCEEDED') !== undefined
-  }
+  // function hasCompleteResults(): boolean {
+  //   const result = $verificationResults.find(vr => {
+  //     return vr.name === runName
+  //   })
+  //   return result.jobs.find(job => job.jobStatus === 'SUCCEEDED') !== undefined
+  // }
 
   // was copied from App.svelte
   function retrieveRules(jobs: Job[]): Rule[] {

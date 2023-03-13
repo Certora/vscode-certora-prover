@@ -339,15 +339,6 @@ export class ScriptRunner {
           : `kill -15 ${pid}`
 
       exec(command)
-    } else {
-      // TODO: cover this possibility
-      console.log('twilight zone')
-      this.resultsWebviewProvider.postMessage({
-        type: 'script-stopped',
-        payload: pid,
-      })
-      this.removeRunningScript(pid)
-      return
     }
     this.resultsWebviewProvider.postMessage({
       type: 'script-stopped',
