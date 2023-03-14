@@ -16,6 +16,7 @@
     solAdditionalContracts,
     isReset,
     disableForm,
+    RunName,
   } from './stores/store.js'
   import { log, Sources } from './utils/log'
 
@@ -47,11 +48,11 @@
       log({
         action: 'Send "create-conf-file" command',
         source: Sources.SettingsWebview,
-        info: form,
+        info: { form, $RunName },
       })
       vscode.postMessage({
         command: 'create-conf-file',
-        payload: form,
+        payload: { form: form, runName: $RunName },
       })
     }
   }

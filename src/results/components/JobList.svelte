@@ -20,7 +20,7 @@
     duplicate,
     removeScript,
     askToDeleteJob,
-    // initResults,
+    initResults,
     uploadConf,
     enableEdit,
     rename,
@@ -51,13 +51,15 @@
   import {
     expandables,
     expandCollapse,
+    jobLists,
     verificationResults,
   } from '../store/store'
+  import type { Uri } from 'vscode'
 
   export const hide = writable([])
   export const pos = writable({ x: 0, y: 0 })
-  export const focusedRun = writable('')
   export let jobList: JobList
+  export const focusedRun = writable({ name: '', path: jobList.dirPath })
 
   $: jobList ? updateJobList() : null
 
@@ -80,17 +82,21 @@
 
   function updateJobList() {
     console.log('update job list')
-    jobList.jobList.forEach(file => {
-      if (!namesMap.has(file.name)) {
-        const newRun = {
-          id: runs.length,
-          name: file.name,
-          status: file.status || Status.missingSettings,
+    if (jobList.jobs.length > 0) {
+      jobList.jobs.forEach(file => {
+        if (!namesMap.has(file.name)) {
+          const newRun = {
+            id: runs.length,
+            name: file.name,
+            status: file.status || Status.missingSettings,
+          }
+          namesMap.set(newRun.name, newRun.name.replaceAll('_', ' '))
+          createRun(newRun)
         }
-        namesMap.set(newRun.name, newRun.name.replaceAll('_', ' '))
-        createRun(newRun)
-      }
-    })
+      })
+      // runs = jobList.jobs
+    }
+
     $expandables.push({
       title: jobList.title,
       isExpanded: true,
@@ -231,6 +237,7 @@
         let confToEnable: JobNameMap = {
           displayName: '',
           fileName: '',
+          jobListPath: jobList.dirPath,
         }
         const curPid = e.data.payload.pid
         const vrLink = e.data.payload.vrLink
@@ -318,16 +325,19 @@
           info: e.data.payload,
         })
         // status is changed to 'ready' when job is allowed to run
-        const runName = e.data.payload
+        const runName = e.data.payload.fileName
         let newStatus = Status.ready
-        if (
-          $verificationResults.find(vr => {
-            return vr.name === runName
-          })
-        ) {
-          newStatus = Status.success
+        const jobListPath = e.data.payload.jobListPath
+        if (jobListPath.path === jobList.dirPath.path) {
+          if (
+            $verificationResults.find(vr => {
+              return vr.name === runName
+            })
+          ) {
+            newStatus = Status.success
+          }
+          runs = setStatus(runName, newStatus)
         }
-        runs = setStatus(runName, newStatus)
         break
       }
       case EventTypesFromExtension.BlockRun: {
@@ -337,7 +347,11 @@
           info: e.data.payload,
         })
         // status is changed to 'finish setup' when job isn't allowed to run
-        runs = setStatus(e.data.payload, Status.missingSettings)
+        const name = e.data.payload.fileName
+        const uri = e.data.payload.jobListPath
+        if (uri.path === jobList.dirPath.path) {
+          runs = setStatus(name, Status.missingSettings)
+        }
         break
       }
       case EventTypesFromExtension.SettingsError: {
@@ -347,7 +361,11 @@
           info: e.data.payload,
         })
         // status is changed to 'finish setup' when job isn't allowed to run
-        runs = setStatus(e.data.payload, Status.settingsError)
+        const name = e.data.payload.fileName
+        const uri = e.data.payload.jobListPath
+        if (uri.path === jobList.dirPath.path) {
+          runs = setStatus(name, Status.settingsError)
+        }
         break
       }
       case EventTypesFromExtension.ClearAllJobs: {
@@ -362,21 +380,21 @@
         clearOutput()
         break
       }
-      case EventTypesFromExtension.CreateJob: {
-        log({
-          action: 'Received "create-new-job" command',
-          source: Sources.ResultsWebview,
-        })
-        createRun()
-        break
-      }
+      // case EventTypesFromExtension.CreateJob: {
+      //   log({
+      //     action: 'Received "create-new-job" command',
+      //     source: Sources.ResultsWebview,
+      //   })
+      //   createRun()
+      //   break
+      // }
       case EventTypesFromExtension.FocusChanged: {
         log({
           action: 'Received "focus-changed" command',
           source: Sources.ResultsWebview,
           info: e.data.payload,
         })
-        $focusedRun = e.data.payload
+        $focusedRun = { name: e.data.payload.name, path: e.data.payload.path }
         break
       }
       case EventTypesFromExtension.ParseError: {
@@ -389,30 +407,7 @@
         runs = setStatus(runName, Status.unableToRun)
         break
       }
-      // case EventTypesFromExtension.InitialJobs: {
-      //   log({
-      //     action: 'Received "initial-jobs" command',
-      //     source: Sources.ResultsWebview,
-      //     info: e.data.payload,
-      //   })
-      //   const confList = e.data.payload
-      //   confList.forEach(file => {
-      //     if (!namesMap.has(file.fileName)) {
-      //       let curStatus = Status.missingSettings
-      //       if (file.allowRun) {
-      //         curStatus = Status.ready
-      //       }
-      //       const newRun = {
-      //         id: runs.length,
-      //         name: file.fileName,
-      //         status: curStatus || Status.missingSettings,
-      //       }
-      //       namesMap.set(newRun.name, newRun.name.replaceAll('_', ' '))
-      //       createRun(newRun)
-      //     }
-      //   })
-      //   break
-      // }
+
       case EventTypesFromExtension.RunJob: {
         log({
           action: 'Received "run-job" command',
@@ -436,17 +431,21 @@
           info: e.data.payload,
         })
 
-        const nameToDelete: string = e.data.payload
-        const runToDelete: Run = runs.find(r => {
-          return r.name === nameToDelete
-        })
-        if (runToDelete !== undefined) {
-          const jobNameMap: JobNameMap = {
-            fileName: nameToDelete,
-            displayName: namesMap.get(nameToDelete),
+        const nameToDelete: string = e.data.payload.name
+        const pathOfJobList: Uri = e.data.payload.path
+        if (jobList.dirPath.path === pathOfJobList.path) {
+          const runToDelete: Run = runs.find(r => {
+            return r.name === nameToDelete
+          })
+          if (runToDelete !== undefined) {
+            const jobNameMap: JobNameMap = {
+              fileName: nameToDelete,
+              displayName: namesMap.get(nameToDelete),
+              jobListPath: jobList.dirPath,
+            }
+            deleteRun(runToDelete)
+            deleteConf(jobNameMap)
           }
-          deleteRun(runToDelete)
-          deleteConf(jobNameMap)
         }
         break
       }
@@ -515,16 +514,18 @@
     const confNameMapDuplicated: JobNameMap = {
       fileName: duplicated.name,
       displayName: namesMap.get(duplicated.name),
+      jobListPath: jobList.dirPath,
     }
 
     const confNameMapToDuplicate: JobNameMap = {
       fileName: toDuplicate.name,
       displayName: namesMap.get(toDuplicate.name),
+      jobListPath: jobList.dirPath,
     }
     duplicate(confNameMapToDuplicate, confNameMapDuplicated, rule)
     createRun(duplicated)
     if (!rule) {
-      $focusedRun = duplicatedName
+      $focusedRun = { name: duplicatedName, path: jobList.dirPath }
     }
   }
 
@@ -597,11 +598,14 @@
     } else {
       // don't create more than one new run while in rename state
       if (runs.find(r => r.name === '')) return
+
       runsCounter = runs.push({
         id: runs.length,
         name: '',
         status: Status.missingSettings,
       })
+      jobList.jobs = runs
+      runsCounter = runsCounter
       addNewExpendable('')
     }
   }
@@ -610,6 +614,7 @@
     const JobNameMap: JobNameMap = {
       fileName: run.name,
       displayName: namesMap.get(run.name),
+      jobListPath: jobList.dirPath,
     }
     editConfFile(JobNameMap)
   }
@@ -635,6 +640,7 @@
     runs = runs.filter(run => {
       return run !== runToDelete
     })
+    jobList.jobs = runs
     namesMap.delete(name)
 
     if (output && output.runName === name) {
@@ -654,6 +660,7 @@
     const JobNameMap: JobNameMap = {
       fileName: run.name,
       displayName: namesMap.get(run.name),
+      jobListPath: jobList.dirPath,
     }
 
     //add to pending queue
@@ -703,10 +710,12 @@
       const oldConfNameMap: JobNameMap = {
         fileName: oldName,
         displayName: namesMap.get(oldName),
+        jobListPath: jobList.dirPath,
       }
       const newConfNameMap: JobNameMap = {
         fileName: newName,
         displayName: namesMap.get(newName),
+        jobListPath: jobList.dirPath,
       }
       rename(oldConfNameMap, newConfNameMap)
       namesMap.delete(oldName)
@@ -716,10 +725,11 @@
       const JobNameMap: JobNameMap = {
         fileName: newName,
         displayName: namesMap.get(newName),
+        jobListPath: jobList.dirPath,
       }
       openSettings(JobNameMap)
     }
-    $focusedRun = newName
+    $focusedRun = { name: newName, path: jobList.dirPath }
   }
 
   /**
@@ -777,6 +787,7 @@
     const jobNameMap: JobNameMap = {
       fileName: run.name,
       displayName: namesMap.get(run.name),
+      jobListPath: jobList.dirPath,
     }
     askToDeleteJob(jobNameMap)
   }
@@ -822,6 +833,11 @@
     })
   }
 
+  function deleteJobList() {
+    console.log('DELETE')
+    $jobLists = $jobLists.filter(jl => jl !== jobList)
+  }
+
   function showMenu(e, index) {
     $pos = { x: e.clientX, y: e.pageY }
     resentHide()
@@ -835,7 +851,7 @@
 
 <div>
   <Pane
-    title="JOB LIST"
+    title={jobList.title}
     fixedActions={[
       {
         title: 'Run All',
@@ -851,6 +867,11 @@
         title: 'Create New Job',
         icon: 'diff-added',
         onClick: createRun,
+      },
+      {
+        title: 'Delete Job List',
+        icon: 'trash',
+        onClick: deleteJobList,
       },
       {
         title: $expandCollapse.title,
@@ -898,13 +919,16 @@
               enableEdit({
                 fileName: runs[index].name,
                 displayName: namesMap.get(runs[index].name),
+                jobListPath: jobList.dirPath,
               })
               runs[index].vrLink = ''
               const modal = runs[index].status !== Status.running
               console.log('modal!!!', modal, runs[index].status)
               stopScript(runs[index].id, modal)
             }}
-            inactiveSelected={$focusedRun}
+            inactiveSelected={$focusedRun.path.path === jobList.dirPath.path
+              ? $focusedRun.name
+              : ''}
             {setStatus}
             vrLink={runs[index].vrLink}
             hide={$hide[index]}

@@ -170,6 +170,7 @@ export type ConfToCreate = {
 export type JobNameMap = {
   displayName: string
   fileName: string
+  jobListPath: Uri
 }
 
 export enum Status {
@@ -194,7 +195,7 @@ export type JobList = {
   title: string
   fixedActions?: Action[]
   dirPath?: Uri
-  jobList?: Run[]
+  jobs?: Run[]
 }
 
 export enum EventTypesFromExtension {
@@ -245,19 +246,19 @@ export type EventsFromExtension =
     }
   | {
       type: EventTypesFromExtension.AllowRun
-      payload: string
+      payload: JobNameMap
     }
   | {
       type: EventTypesFromExtension.BlockRun
-      payload: string
+      payload: JobNameMap
     }
   | {
       type: EventTypesFromExtension.SettingsError
-      payload: string
+      payload: JobNameMap
     }
   | {
       type: EventTypesFromExtension.FocusChanged
-      payload: string
+      payload: { name: string; path: Uri }
     }
   | {
       type: EventTypesFromExtension.UploadingFiles
@@ -273,7 +274,7 @@ export type EventsFromExtension =
     }
   | {
       type: EventTypesFromExtension.DeleteJob
-      payload: string
+      payload: { name: string; path: Uri }
     }
   | {
       type: EventTypesFromExtension.RunJob

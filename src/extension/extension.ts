@@ -39,7 +39,7 @@ export function activate(context: vscode.ExtensionContext): void {
       confFileDefault,
       name.fileName,
     )
-    createConfFile(emptyForm)
+    createConfFile(emptyForm, name.jobListPath)
     renderSettingsPanel(name, confFileDefault)
   }
 
@@ -140,7 +140,7 @@ export function activate(context: vscode.ExtensionContext): void {
    * @returns Promise<void>
    */
   async function editConf(name: JobNameMap): Promise<void> {
-    const confFileUri = getConfUri(name.fileName)
+    const confFileUri = getConfUri(name.fileName, name.jobListPath)
     if (confFileUri) {
       try {
         const confFileContent = await readConf(confFileUri)
@@ -198,29 +198,22 @@ export function activate(context: vscode.ExtensionContext): void {
     oldName: JobNameMap,
     newName: JobNameMap,
   ): Promise<void> {
-    const path = vscode.workspace.workspaceFolders?.[0]
-    if (!path) return
-    const oldConf = vscode.Uri.joinPath(
-      path.uri,
-      getConfFilePath(oldName.fileName),
-    )
-    const newConf = vscode.Uri.joinPath(
-      path.uri,
-      getConfFilePath(newName.fileName),
-    )
-    try {
-      await vscode.workspace.fs.rename(
-        vscode.Uri.parse(oldConf.path),
-        vscode.Uri.parse(newConf.path),
-      )
-      scriptRunner.renameRunningScript(
-        getConfFilePath(oldName.fileName),
-        getConfFilePath(newName.fileName),
-      )
-      SettingsPanel.removePanel(oldName.displayName)
-      await editConf(newName)
-    } catch (e) {
-      console.log('Cannot rename:', e)
+    // const path = vscode.workspace.workspaceFolders?.[0]
+    // if (!path) return
+    const oldConf = getConfUri(oldName.fileName, oldName.jobListPath)
+    const newConf = getConfUri(newName.fileName, newName.jobListPath)
+    if (oldConf && newConf) {
+      try {
+        await vscode.workspace.fs.rename(oldConf, newConf)
+        scriptRunner.renameRunningScript(
+          getConfFilePath(oldName.fileName),
+          getConfFilePath(newName.fileName),
+        )
+        SettingsPanel.removePanel(oldName.displayName)
+        await editConf(newName)
+      } catch (e) {
+        console.log('Cannot rename:', e)
+      }
     }
   }
 
@@ -239,7 +232,10 @@ export function activate(context: vscode.ExtensionContext): void {
   ): Promise<void> {
     // get the content of the conf to duplicate
     // create a new conf file with the name of "duplicated", content of "to duplicate", and open it with settings view
-    const confFileUri = getConfUri(toDuplicate.fileName)
+    const confFileUri = getConfUri(
+      toDuplicate.fileName,
+      toDuplicate.jobListPath,
+    )
     if (confFileUri) {
       try {
         const confFileContent = await readConf(confFileUri)
@@ -253,7 +249,10 @@ export function activate(context: vscode.ExtensionContext): void {
         }
 
         try {
-          const newConfFileUri = getConfUri(duplicated.fileName)
+          const newConfFileUri = getConfUri(
+            duplicated.fileName,
+            duplicated.jobListPath,
+          )
           if (newConfFileUri) {
             const encoder = new TextEncoder()
             const content = encoder.encode(
@@ -295,11 +294,18 @@ export function activate(context: vscode.ExtensionContext): void {
     scriptRunner.run(confFile)
   }
 
-  function getConfUri(name: string): vscode.Uri | void {
-    const path = vscode.workspace.workspaceFolders?.[0]
-    if (!path) return
+  function getConfUri(name: string, path: vscode.Uri): vscode.Uri | void {
+    if (!path) {
+      const tempPath = vscode.workspace.workspaceFolders?.[0]?.uri
+      if (!tempPath) return
+      path = tempPath
+    }
     const confFile = getConfFilePath(name)
-    const confFileUri = vscode.Uri.joinPath(path.uri, confFile)
+    console.log('conf file:', confFile, 'path:', path)
+    const confFileUri = vscode.Uri.parse(
+      path.path.replace('certora/conf/', '') + confFile,
+    )
+    console.log('=======', confFile, '===========')
     return confFileUri
   }
 
@@ -322,17 +328,17 @@ export function activate(context: vscode.ExtensionContext): void {
       )
       .then(items => {
         if (items === deleteAction) {
-          resultsWebviewProvider.postMessage<string>({
-            type: 'delete-job',
-            payload: name.fileName,
-          })
+          deleteJob(name.fileName, name.jobListPath)
           deleteConfFile(name)
         }
       })
   }
 
   async function deleteConfFile(name: JobNameMap): Promise<void> {
-    const confFileUri: vscode.Uri | void = getConfUri(name.fileName)
+    const confFileUri: vscode.Uri | void = getConfUri(
+      name.fileName,
+      name.jobListPath,
+    )
     if (confFileUri) {
       try {
         await vscode.workspace.fs.delete(confFileUri)
@@ -434,6 +440,7 @@ export function activate(context: vscode.ExtensionContext): void {
       const newConfFileUri = getConfUri(
         jsonContent.verify[0].split(':')[0] +
           getFileName(file.path).replace('last_conf', ''),
+        file,
       )
       if ('staging' in jsonContent && jsonContent.staging === '') {
         jsonContent.staging = 'master'
@@ -451,18 +458,21 @@ export function activate(context: vscode.ExtensionContext): void {
    * all conf files in the conf folder will become jobs!
    */
   async function createInitialJobs(dirPath?: string): Promise<void> {
+    console.log('dir path::', dirPath)
     const path = vscode.workspace.workspaceFolders?.[0]
-    if (path && !dirPath) {
+    if (path) {
       watchForBuilds()
 
       // conf files:
       let confDirectoryPath = path.uri.path + '/' + CONF_DIRECTORY
       if (dirPath) {
         confDirectoryPath = dirPath + '/' + CONF_DIRECTORY
+        console.log('conf directory path', confDirectoryPath)
       }
       const confDirectoryUri = vscode.Uri.parse(confDirectoryPath)
       const checked = await checkDir(confDirectoryUri)
       if (checked) {
+        console.log('is checked')
         const confFiles = vscode.workspace.fs.readDirectory(confDirectoryUri)
         confFiles.then(async f => {
           const confList = f.map(async file => {
@@ -470,19 +480,12 @@ export function activate(context: vscode.ExtensionContext): void {
               vscode.Uri.parse(confDirectoryPath + file[0]),
             )
           })
+          console.log('read dir')
           const awaitedList = await Promise.all(confList)
           sendFilesToCreateJobs(awaitedList, confDirectoryUri)
         })
       }
-    }
-    // users can copy conf files to the conf folder and it will create a job!
-    // they can also copy files to the script directory and create conf files from them!
-    if (path) {
-      const confDirectoryToWatch = vscode.Uri.joinPath(
-        path.uri,
-        CONF_DIRECTORY_NAME,
-      )
-      createConfWatcher(confDirectoryToWatch)
+      createConfWatcher(confDirectoryUri)
     }
   }
 
@@ -501,14 +504,23 @@ export function activate(context: vscode.ExtensionContext): void {
         const nameToRemove = getFileName(
           vscode.workspace.asRelativePath(file.path),
         )
-        resultsWebviewProvider.postMessage<string>({
-          type: 'delete-job',
-          payload: nameToRemove,
-        })
+        deleteJob(nameToRemove, directoryToWatch)
       })
     } catch (e) {
       console.log('ERROR:', e, '[internal error from  the file system watcher]')
     }
+  }
+
+  /**
+   * send "delete job" message to the results webview
+   * @param name name of the job to delete
+   * @param path path of the directory the job is in
+   */
+  function deleteJob(name: string, path: vscode.Uri): void {
+    resultsWebviewProvider.postMessage<{ name: string; path: vscode.Uri }>({
+      type: 'delete-job',
+      payload: { name: name, path: path },
+    })
   }
 
   /**
@@ -557,12 +569,13 @@ export function activate(context: vscode.ExtensionContext): void {
     dirPath: vscode.Uri,
     title = 'JOB LIST',
   ) {
+    console.log('dir path ==', dirPath)
     resultsWebviewProvider.postMessage<JobList>({
       type: 'initial-jobs',
       payload: {
-        title: title,
+        title: title + dirPath?.path,
         dirPath: dirPath,
-        jobList: files,
+        jobs: files,
       },
     })
   }

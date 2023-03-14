@@ -174,6 +174,7 @@ export type InputFormData = {
 export type JobNameMap = {
   displayName: string
   fileName: string
+  jobListPath: Uri
 }
 
 export type Compiler = {
@@ -337,7 +338,7 @@ export type EventFromSettingsWebview =
     }
   | {
       command: CommandFromSettingsWebview.CreateConfFile
-      payload: NewForm
+      payload: { form: NewForm; runName: JobNameMap }
     }
   | {
       command: CommandFromSettingsWebview.OpenBrowser
@@ -385,5 +386,5 @@ export type Run = {
 export type JobList = {
   title: string
   dirPath?: Uri
-  jobList?: Run[]
+  jobs?: Run[]
 }
