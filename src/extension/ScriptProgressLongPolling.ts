@@ -86,7 +86,7 @@ export class ScriptProgressLongPolling {
       }
     } catch (e) {
       window.showErrorMessage(
-        `Certora verification service is currently unavailable. Please, try again later.`,
+        `Certora verification service is currently unavailable. Please, try again later. ${e}`,
       )
     }
   }
