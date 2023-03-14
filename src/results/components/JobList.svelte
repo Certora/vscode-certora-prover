@@ -47,7 +47,7 @@
   } from '../types'
   import NewRun from '../components/NewRun.svelte'
 
-  import { writable } from 'svelte/store'
+  import { Writable, writable } from 'svelte/store'
   import {
     expandables,
     expandCollapse,
@@ -56,9 +56,12 @@
   } from '../store/store'
   import type { Uri } from 'vscode'
 
-  export const hide = writable([])
-  export const pos = writable({ x: 0, y: 0 })
   export let jobList: JobList
+  export const hide: Writable<{ names: boolean[]; uri: Uri }> = writable({
+    names: [],
+    uri: jobList.dirPath,
+  })
+  export const pos = writable({ x: 0, y: 0 })
   export const focusedRun = writable({ name: '', path: jobList.dirPath })
 
   $: jobList ? updateJobList() : null
@@ -588,7 +591,9 @@
    * @param run new run. if doest exists - creates a new run object
    */
   function createRun(run?: Run): void {
-    $hide.push(true)
+    if ($hide.uri.path === jobList.dirPath.path) {
+      $hide.names.push(true)
+    }
     if (run) {
       if (!run.status) {
         run.status = Status.missingSettings
@@ -817,7 +822,7 @@
 
   onMount(() => {
     window.addEventListener('message', listener)
-
+    // resentHide()
     // if (runs.length === 0) {
     //   initResults()
     // }
@@ -828,9 +833,10 @@
   })
 
   function resentHide() {
-    $hide = $hide.map(item => {
+    $hide.names = $hide.names.map(item => {
       return (item = true)
     })
+    console.log($hide)
   }
 
   function deleteJobList() {
@@ -839,12 +845,15 @@
   }
 
   function showMenu(e, index) {
-    $pos = { x: e.clientX, y: e.pageY }
-    resentHide()
-    $hide[index] = false
+    if ($hide.uri.path === jobList.dirPath.path) {
+      $pos = { x: e.clientX, y: e.pageY }
+      resentHide()
+      $hide.names[index] = false
+    }
   }
 
   window.onclick = function (event) {
+    console.log('window !!!!!!!')
     resentHide()
   }
 </script>
@@ -931,7 +940,7 @@
               : ''}
             {setStatus}
             vrLink={runs[index].vrLink}
-            hide={$hide[index]}
+            hide={$hide.uri.path === jobList.dirPath.path && $hide.names[index]}
             pos={$pos}
             bind:runName={runs[index].name}
           />
