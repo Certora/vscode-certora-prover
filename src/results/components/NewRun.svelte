@@ -15,15 +15,11 @@
     Assert,
     Action,
     Status,
-    EventsFromExtension,
-    EventTypesFromExtension,
   } from '../types'
-  import { log, Sources } from '../utils/log'
   import Pane from './Pane.svelte'
   import Tree from './Tree.svelte'
   import { verificationResults } from '../store/store'
   import { writable } from 'svelte/store'
-  import { stat } from 'fs'
 
   export let editFunc: () => void
   export let deleteFunc: () => void
@@ -200,11 +196,6 @@
    */
   function createActions(): Action[] {
     let actions: Action[] = [
-      // {
-      //   title: 'Rename',
-      //   icon: 'edit',
-      //   onClick: setRename,
-      // },
       {
         title: 'Edit',
         icon: 'gear',
@@ -279,7 +270,7 @@
       actions.push({
         title: 'Stop',
         icon: 'stop-circle',
-        onClick: runningStop,
+        onClick: runningStopFunc,
       })
     }
     return actions
@@ -301,15 +292,6 @@
     statusChange(Status.ready)
     pendingStopFunc()
     isPending = false
-  }
-
-  /**
-   * stops a running run
-   */
-  function runningStop(): void {
-    // statusChange(Status.ready)
-    runningStopFunc()
-    // stop = true
   }
 
   /**
@@ -341,7 +323,7 @@
           title: 'Stop',
           icon: 'stop-circle',
           disabled: vrLink ? false : true,
-          onClick: vrLink ? runningStop : null,
+          onClick: vrLink ? runningStopFunc : null,
         },
       ]
     }
@@ -361,16 +343,6 @@
       $renameJob = false
     }
   }
-
-  /**
-   * checks if there exists complete results for this job
-   */
-  // function hasCompleteResults(): boolean {
-  //   const result = $verificationResults.find(vr => {
-  //     return vr.name === runName
-  //   })
-  //   return result.jobs.find(job => job.jobStatus === 'SUCCEEDED') !== undefined
-  // }
 
   // was copied from App.svelte
   function retrieveRules(jobs: Job[]): Rule[] {

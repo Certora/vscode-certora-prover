@@ -37,7 +37,6 @@
     JobNameMap,
     Status,
     CONF_DIRECTORY,
-    RuleStatuses,
   } from './types'
   import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
   import NewRun from './components/NewRun.svelte'
@@ -157,7 +156,6 @@
         if (!runName) return
         setVerificationReportLink(pid, e.data.payload.verificationReportLink)
         if (e.data.payload.jobStatus === 'FAILED') {
-          console.log('FAIL ======')
           setStoppedJobStatus(runName)
           return
         }
@@ -897,7 +895,6 @@
                 })
                 runs[index].vrLink = ''
                 const modal = runs[index].status !== Status.running
-                console.log('modal!!!', modal, runs[index].status)
                 stopScript(runs[index].id, modal)
               }}
               inactiveSelected={$focusedRun}

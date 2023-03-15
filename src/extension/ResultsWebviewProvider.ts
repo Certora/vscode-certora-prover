@@ -82,7 +82,6 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
             })
             // this.stopScript is set in ScriptRunner.ts constructor
             if (typeof this.stopScript === 'function') {
-              console.log('pid, modal:', e.payload.pid, e.payload.modal)
               this.stopScript(e.payload.pid, e.payload.modal)
             }
             break
