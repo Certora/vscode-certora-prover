@@ -88,15 +88,22 @@
         })
         console.log('payload:', e.data.payload)
         const confList = e.data.payload
-
-        if (
-          !$jobLists.find(jl => {
-            return jl.dirPath.path === confList.dirPath.path
-          })
-        ) {
+        const curJobList = $jobLists.find(jl => {
+          return jl.dirPath.path === confList.dirPath.path
+        })
+        if (!curJobList) {
           $jobLists.push(confList)
           $jobLists = $jobLists
           jobListCounter++
+        } else {
+          $jobLists = $jobLists.map(jl => {
+            if (jl.dirPath === curJobList.dirPath) {
+              confList.jobs.forEach(job => {
+                jl.jobs.push(job)
+              })
+            }
+            return jl
+          })
         }
         break
       }
@@ -137,7 +144,11 @@
       jobs: [
         {
           id: runs.length,
-          name: '',
+          name: {
+            fileName: '',
+            displayName: '',
+            jobListPath: null,
+          },
           status: Status.missingSettings,
         },
       ],

@@ -290,8 +290,10 @@ export function activate(context: vscode.ExtensionContext): void {
   function runScript(name: JobNameMap): void {
     // SettingsPanel.removePanel(name.displayName)
     SettingsPanel.disableForm(name.displayName)
-    const confFile = getConfFilePath(name.fileName)
-    scriptRunner.run(confFile)
+    const confFile = getConfUri(name.fileName, name.jobListPath)
+    if (confFile) {
+      scriptRunner.run(confFile.path)
+    }
   }
 
   function getConfUri(name: string, path: vscode.Uri): vscode.Uri | void {
@@ -416,7 +418,7 @@ export function activate(context: vscode.ExtensionContext): void {
    * watch the .certora_internal directory to look for conf that were only build not ran
    * than create conf files for them
    */
-  function watchForBuilds(): void {
+  function watchForBuilds(jobListUri: vscode.Uri): void {
     const path = vscode.workspace.workspaceFolders?.[0]
     if (!path) return
     try {
@@ -425,29 +427,33 @@ export function activate(context: vscode.ExtensionContext): void {
         new vscode.RelativePattern(internalUri, '**/.last_confs**/*.conf'),
       )
       fileSystemWatcher.onDidCreate(async file => {
-        await copyCreatedConf(file)
+        console.log(file, 'this is a file')
+        await copyCreatedConf(file, jobListUri)
       })
     } catch (e) {
       console.log('ERROR:', e, '[internal error from  the file system watcher]')
     }
   }
 
-  async function copyCreatedConf(file: vscode.Uri): Promise<void> {
+  async function copyCreatedConf(
+    file: vscode.Uri,
+    jobListUri: vscode.Uri,
+  ): Promise<void> {
     const strContent = await readShFile(file)
     const jsonContent = JSON.parse(strContent)
     if (jsonContent && jsonContent.build_only) {
       delete jsonContent.build_only
-      const newConfFileUri = getConfUri(
+      const fileName =
         jsonContent.verify[0].split(':')[0] +
-          getFileName(file.path).replace('last_conf', ''),
-        file,
-      )
+        getFileName(file.path).replace('last_conf', '')
+      const newConfFileUri = getConfUri(fileName, jobListUri)
       if ('staging' in jsonContent && jsonContent.staging === '') {
         jsonContent.staging = 'master'
       }
       if (newConfFileUri) {
         const encoder = new TextEncoder()
         const content = encoder.encode(JSON.stringify(jsonContent, null, 2))
+        console.log(newConfFileUri, 'new conf uri')
         await vscode.workspace.fs.writeFile(newConfFileUri, content)
       }
       // await vscode.workspace.fs.delete(file)
@@ -457,36 +463,36 @@ export function activate(context: vscode.ExtensionContext): void {
   /**
    * all conf files in the conf folder will become jobs!
    */
-  async function createInitialJobs(dirPath?: string): Promise<void> {
-    console.log('dir path::', dirPath)
-    const path = vscode.workspace.workspaceFolders?.[0]
-    if (path) {
-      watchForBuilds()
-
-      // conf files:
-      let confDirectoryPath = path.uri.path + '/' + CONF_DIRECTORY
-      if (dirPath) {
-        confDirectoryPath = dirPath + '/' + CONF_DIRECTORY
-        console.log('conf directory path', confDirectoryPath)
-      }
-      const confDirectoryUri = vscode.Uri.parse(confDirectoryPath)
-      const checked = await checkDir(confDirectoryUri)
-      if (checked) {
-        console.log('is checked')
-        const confFiles = vscode.workspace.fs.readDirectory(confDirectoryUri)
-        confFiles.then(async f => {
-          const confList = f.map(async file => {
-            return await createFileObject(
-              vscode.Uri.parse(confDirectoryPath + file[0]),
-            )
-          })
-          console.log('read dir')
-          const awaitedList = await Promise.all(confList)
-          sendFilesToCreateJobs(awaitedList, confDirectoryUri)
-        })
-      }
-      createConfWatcher(confDirectoryUri)
+  async function createInitialJobs(dirPath?: vscode.Uri): Promise<void> {
+    let uriToUse = dirPath
+    if (!uriToUse) {
+      uriToUse = vscode.workspace.workspaceFolders?.[0]?.uri
+      if (!uriToUse) return
     }
+    // conf files:
+    const confDirectoryPath = uriToUse.path + '/' + CONF_DIRECTORY
+    // confDirectoryPath = dirPath + '/' + CONF_DIRECTORY
+    console.log('conf directory path', confDirectoryPath)
+    const confDirectoryUri = vscode.Uri.parse(confDirectoryPath)
+    watchForBuilds(confDirectoryUri)
+    console.log('dir path::', confDirectoryUri)
+    const checked = await checkDir(confDirectoryUri)
+    if (checked) {
+      console.log('is checked')
+      const confFiles = vscode.workspace.fs.readDirectory(confDirectoryUri)
+      confFiles.then(async f => {
+        const confList = f.map(async file => {
+          return await createFileObject(
+            vscode.Uri.parse(confDirectoryPath + file[0]),
+            confDirectoryUri,
+          )
+        })
+        console.log('read dir')
+        const awaitedList = await Promise.all(confList)
+        sendFilesToCreateJobs(awaitedList, confDirectoryUri)
+      })
+    }
+    createConfWatcher(confDirectoryUri)
   }
 
   function createConfWatcher(directoryToWatch: vscode.Uri) {
@@ -495,7 +501,7 @@ export function activate(context: vscode.ExtensionContext): void {
         new vscode.RelativePattern(directoryToWatch, '**/*.conf'),
       )
       fileSystemWatcher.onDidCreate(async file => {
-        const fileObj: Run = await createFileObject(file)
+        const fileObj: Run = await createFileObject(file, directoryToWatch)
         sendFilesToCreateJobs([fileObj], directoryToWatch)
       })
       // vscode asks to delete a conf file before is it deleted to avoid mistakes,
@@ -528,10 +534,18 @@ export function activate(context: vscode.ExtensionContext): void {
    * @param file uri
    * @returns Promise<ConfToCreate>
    */
-  async function createFileObject(file: vscode.Uri): Promise<Run> {
+  async function createFileObject(
+    file: vscode.Uri,
+    jobListPath: vscode.Uri,
+  ): Promise<Run> {
+    const name = getFileName(vscode.workspace.asRelativePath(file))
     const fileObj: Run = {
       id: 0,
-      name: getFileName(vscode.workspace.asRelativePath(file)),
+      name: {
+        fileName: name,
+        displayName: name,
+        jobListPath: jobListPath,
+      },
       status: Status.missingSettings,
     }
     try {
@@ -569,14 +583,14 @@ export function activate(context: vscode.ExtensionContext): void {
     dirPath: vscode.Uri,
     title = 'JOB LIST',
   ) {
-    console.log('dir path ==', dirPath)
+    const jobList = {
+      title: title + dirPath?.path,
+      dirPath: dirPath,
+      jobs: files,
+    }
     resultsWebviewProvider.postMessage<JobList>({
       type: 'initial-jobs',
-      payload: {
-        title: title + dirPath?.path,
-        dirPath: dirPath,
-        jobs: files,
-      },
+      payload: jobList,
     })
   }
 
@@ -590,7 +604,7 @@ export function activate(context: vscode.ExtensionContext): void {
     // create object for the job list
     // send the object with the list of jobs from the directory [uri]
     console.log(uri, 'from choose dir')
-    createInitialJobs(uri.path)
+    createInitialJobs(uri)
   }
 
   /**
@@ -611,23 +625,55 @@ export function activate(context: vscode.ExtensionContext): void {
       },
     }
     const files = await vscode.window.showOpenDialog(options)
-    files?.map(async fileUri => {
+    const jobLists = files?.map(async fileUri => {
       addDirJobList(fileUri)
+      // return {
+      //   title: 'JOB LIST ' + fileUri,
+      //   dirPath: fileUri,
+      // }
     })
+    // if (jobLists) {
+    //   const awaitedLists = await Promise.all(jobLists)
+    //   saveJobListsToInternalData(awaitedLists)
+    // }
   }
+
+  /**
+   * Save job lists to internal data so they will automatically open when vscode is opened
+   * @param jobLists job lists to save
+   */
+  // async function saveJobListsToInternalData(jobLists: JobList[]) {
+  //   const path = vscode.workspace.workspaceFolders?.[0]
+  //   if (!path) return
+  //   const pathToSaveTo = vscode.Uri.joinPath(
+  //     path.uri,
+  //     CERTORA_INNER_DIR,
+  //     '.certora_extension_settings',
+  //     'job_lists.json',
+  //   )
+  //   const encoder = new TextEncoder()
+  //   const content = encoder.encode(JSON.stringify(jobLists))
+  //   await vscode.workspace.fs.writeFile(pathToSaveTo, content)
+  // }
 
   /**
    * browse for conf files, and than copy these files into [CONF_DIRECTORY]
    */
-  async function uploadConf(): Promise<void> {
-    const path = vscode.workspace.workspaceFolders?.[0]
-    if (!path) return
+  async function uploadConf(jobListUri: vscode.Uri): Promise<void> {
     // cannot select many because .sh files handling is an asynchronous build
+    console.log(jobListUri, '====')
+    let uriToUse = jobListUri
+    if (!uriToUse) {
+      const path = vscode.workspace.workspaceFolders?.[0]?.uri
+      if (!path) return
+      uriToUse = path
+    }
+    console.log('===', jobListUri)
     const options: vscode.OpenDialogOptions = {
       canSelectMany: false,
       canSelectFolders: false,
       openLabel: 'Open',
-      defaultUri: path.uri,
+      defaultUri: uriToUse,
       filters: {
         'File type': ['conf', 'sh'],
       },
@@ -639,11 +685,8 @@ export function activate(context: vscode.ExtensionContext): void {
         const fileName = fileArr.reverse()[0]
         // let target
         if (fileName.endsWith('.conf')) {
-          const target = vscode.Uri.joinPath(
-            path.uri,
-            CONF_DIRECTORY_NAME,
-            fileName,
-          )
+          const target = vscode.Uri.parse(uriToUse.path + fileName)
+          console.log(target.path, 'TARGET===')
           await vscode.workspace.fs.copy(fileUri, target, { overwrite: true })
           // else if file endswith .sh
         } else {

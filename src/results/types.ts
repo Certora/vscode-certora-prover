@@ -186,7 +186,7 @@ export enum Status {
 
 export type Run = {
   id: number
-  name: string
+  name: JobNameMap
   status: Status
   vrLink?: string
 }

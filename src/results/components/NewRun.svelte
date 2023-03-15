@@ -15,6 +15,7 @@
     Assert,
     Action,
     Status,
+    JobNameMap,
     // EventsFromExtension,
     // EventTypesFromExtension,
   } from '../types'
@@ -29,6 +30,7 @@
   export let deleteRun: () => void
   export let namesMap: Map<string, string>
   export let runName: string = ''
+
   const renameJob = writable(runName === '')
   // this creates the new conf file
   export let renameRun: (oldName: string, newName: string) => void
@@ -44,9 +46,9 @@
   ) => void
 
   export let expandedState = false
-  export let nowRunning = false
+  // export let nowRunning = false
 
-  export let isPending = false
+  // export let isPending = false
 
   export let pendingStopFunc: () => void
   export let runningStopFunc: () => void
@@ -205,14 +207,14 @@
   /**
    * returns the status for a run that was just ran
    */
-  function getRunStatus(): Status {
-    if (isPending) {
-      statusChange(Status.pending)
-    } else if (nowRunning) {
-      statusChange(Status.running)
-    }
-    return status
-  }
+  // function getRunStatus(): Status {
+  //   if (isPending) {
+  //     statusChange(Status.pending)
+  //   } else if (nowRunning) {
+  //     statusChange(Status.running)
+  //   }
+  //   return status
+  // }
 
   /**
    * duplicate this run
@@ -332,7 +334,7 @@
   function pendingRunStop(): void {
     statusChange(Status.ready)
     pendingStopFunc()
-    isPending = false
+    // isPending = false
   }
 
   /**
@@ -348,7 +350,7 @@
    * creates 'stop' action according to run status
    */
   function createActionsForRunningScript(): Action[] {
-    if (isPending) {
+    if (status === Status.pending) {
       return [
         {
           title: 'Edit',
@@ -362,7 +364,7 @@
         },
       ]
     }
-    if (nowRunning) {
+    if (status === Status.running) {
       return [
         {
           title: 'Edit',
@@ -447,7 +449,7 @@
         on:change={onChange}
       />
     </div>
-  {:else if !nowRunning}
+  {:else if !(status === Status.pending || status === Status.running)}
     {#key [status, inactiveSelected]}
       <div class="results" on:click={onClick}>
         <Pane
@@ -493,7 +495,7 @@
         <Pane
           title={namesMap.get(runName)}
           actions={createActionsForRunningScript()}
-          status={getRunStatus()}
+          {status}
           showExpendIcon={false}
           fixedActions={createFixedActions()}
         />

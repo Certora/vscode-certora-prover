@@ -85,19 +85,26 @@
 
   function updateJobList() {
     console.log('update job list')
-    if (jobList.jobs.length > 0) {
+    // runs = jobList.jobs
+    // runsCounter = runs.length
+    if (jobList.jobs?.length > 0) {
       jobList.jobs.forEach(file => {
-        if (!namesMap.has(file.name)) {
-          const newRun = {
-            id: runs.length,
-            name: file.name,
-            status: file.status || Status.missingSettings,
-          }
-          namesMap.set(newRun.name, newRun.name.replaceAll('_', ' '))
-          createRun(newRun)
+        if (!namesMap.has(file.name.fileName)) {
+          // const newRun: Run = {
+          //   id: runs.length,
+          //   name: file.name,
+          //   status: file.status || Status.missingSettings,
+          // }
+          console.log(file.name, file)
+          namesMap.set(
+            file.name.fileName,
+            file.name.fileName.replaceAll('_', ' '),
+          )
+          // createRun(newRun)
         }
       })
-      // runs = jobList.jobs
+      runs = jobList.jobs
+      runsCounter = runs.length
     }
 
     $expandables.push({
@@ -194,32 +201,32 @@
         if (!runName) return
         setVerificationReportLink(pid, e.data.payload.verificationReportLink)
         if (e.data.payload.jobStatus === 'FAILED') {
-          setStoppedJobStatus(runName)
+          setStoppedJobStatus(runName.fileName)
           return
         }
         smartMergeVerificationResult(
           $verificationResults,
           e.data.payload,
-          runName,
+          runName.fileName,
         )
         $verificationResults = $verificationResults
 
         updateExpendablesFromResults()
         const thisRun = $verificationResults.find(vr => {
-          return vr.name === runName
+          return vr.name === runName.fileName
         })
         if (
           thisRun?.jobs.find(job => {
             return !job.jobEnded
           }) !== undefined
         ) {
-          runs = setStatus(runName, Status.incompleteResults)
+          runs = setStatus(runName.fileName, Status.incompleteResults)
         }
 
         if (e.data.payload.jobStatus === 'SUCCEEDED') {
           if (runName) {
-            removeScript(runName)
-            runs = setStatus(runName, Status.success)
+            removeScript(runName.fileName)
+            runs = setStatus(runName.fileName, Status.success)
           }
         }
         log({
@@ -273,7 +280,7 @@
         runningScripts = e.data.payload
         runs = runs.map(r => {
           runningScripts.forEach(rs => {
-            if (r.name === getFileName(rs.confFile)) {
+            if (r.name.fileName === getFileName(rs.confFile)) {
               r.id = rs.pid
             }
           })
@@ -296,7 +303,7 @@
 
         if (curRun !== undefined) {
           const runName = curRun.name
-          setStoppedJobStatus(runName)
+          setStoppedJobStatus(runName.fileName)
         }
 
         runningScripts = runningScripts.filter(rs => {
@@ -420,7 +427,7 @@
 
         const name: string = e.data.payload
         const runToRun: Run = runs.find(r => {
-          return r.name === name
+          return r.name.fileName === name
         })
         if (runToRun !== undefined) {
           run(runToRun)
@@ -438,12 +445,12 @@
         const pathOfJobList: Uri = e.data.payload.path
         if (jobList.dirPath.path === pathOfJobList.path) {
           const runToDelete: Run = runs.find(r => {
-            return r.name === nameToDelete
+            return r.name.fileName === nameToDelete
           })
           if (runToDelete !== undefined) {
             const jobNameMap: JobNameMap = {
               fileName: nameToDelete,
-              displayName: namesMap.get(nameToDelete),
+              displayName: runToDelete.name.displayName,
               jobListPath: jobList.dirPath,
             }
             deleteRun(runToDelete)
@@ -480,7 +487,7 @@
   function setStatus(runName: string, value: Status): Run[] {
     runs.forEach(run => {
       if (
-        run.name === runName &&
+        run.name.fileName === runName &&
         !(run.status === Status.success && value === Status.ready)
       ) {
         run.status = value
@@ -500,7 +507,9 @@
     duplicatedName: string,
     rule?: string,
   ): void {
-    const toDuplicate: Run = runs.find(run => run.name === nameToDuplicate)
+    const toDuplicate: Run = runs.find(
+      run => run.name.fileName === nameToDuplicate,
+    )
 
     // the status of the new run cannot be 'success' (haven't run yet => no results)
     let newStatus = toDuplicate.status
@@ -510,21 +519,17 @@
 
     const duplicated: Run = {
       id: runs.length,
-      name: duplicatedName,
+      name: {
+        fileName: duplicatedName,
+        displayName: namesMap.get(duplicatedName),
+        jobListPath: jobList.dirPath,
+      },
       status: newStatus,
     }
 
-    const confNameMapDuplicated: JobNameMap = {
-      fileName: duplicated.name,
-      displayName: namesMap.get(duplicated.name),
-      jobListPath: jobList.dirPath,
-    }
+    const confNameMapDuplicated: JobNameMap = duplicated.name
+    const confNameMapToDuplicate: JobNameMap = toDuplicate.name
 
-    const confNameMapToDuplicate: JobNameMap = {
-      fileName: toDuplicate.name,
-      displayName: namesMap.get(toDuplicate.name),
-      jobListPath: jobList.dirPath,
-    }
     duplicate(confNameMapToDuplicate, confNameMapDuplicated, rule)
     createRun(duplicated)
     if (!rule) {
@@ -575,7 +580,7 @@
           })
         } else if (
           runs.find(run => {
-            return run.name === jobName
+            return run.name.fileName === jobName
           })?.status === Status.running
         ) {
           runs = setStatus(jobName, Status.ready)
@@ -595,32 +600,41 @@
       $hide.names.push(true)
     }
     if (run) {
+      console.log(run, 'this is the run')
       if (!run.status) {
         run.status = Status.missingSettings
       }
       runsCounter = runs.push(run)
-      addNewExpendable(namesMap.get(run.name))
+      addNewExpendable(run.name.displayName)
     } else {
       // don't create more than one new run while in rename state
-      if (runs.find(r => r.name === '')) return
+      if (
+        runs.find(r => {
+          return r.name.displayName === ''
+        })
+      )
+        return
 
-      runsCounter = runs.push({
+      jobList.jobs.push({
         id: runs.length,
-        name: '',
+        name: {
+          fileName: '',
+          displayName: '',
+          jobListPath: jobList.dirPath,
+        },
         status: Status.missingSettings,
       })
-      jobList.jobs = runs
-      runsCounter = runsCounter
+      console.log(jobList.jobs)
+
+      jobList = jobList
+
+      // runsCounter = runsCounter
       addNewExpendable('')
     }
   }
 
   function editRun(run: Run): void {
-    const JobNameMap: JobNameMap = {
-      fileName: run.name,
-      displayName: namesMap.get(run.name),
-      jobListPath: jobList.dirPath,
-    }
+    const JobNameMap: JobNameMap = run.name
     editConfFile(JobNameMap)
   }
 
@@ -633,22 +647,22 @@
 
     //delete results
     $verificationResults = $verificationResults.filter(vr => {
-      return vr.name !== name
+      return vr.name !== name.fileName
     })
 
     //delete from running scripts
     runningScripts = runningScripts.filter(rs => {
-      return rs.confFile !== name
+      return rs.confFile !== name.fileName
     })
 
     //delete run
-    runs = runs.filter(run => {
+    jobList.jobs = jobList.jobs.filter(run => {
       return run !== runToDelete
     })
-    jobList.jobs = runs
-    namesMap.delete(name)
-
-    if (output && output.runName === name) {
+    // jobList.jobs = runs
+    jobList = jobList
+    namesMap.delete(name.fileName)
+    if (output && output.runName === name.fileName) {
       clearOutput()
     }
 
@@ -662,21 +676,18 @@
    */
   function run(run: Run, index = 0): void {
     run.vrLink = ''
-    const JobNameMap: JobNameMap = {
-      fileName: run.name,
-      displayName: namesMap.get(run.name),
-      jobListPath: jobList.dirPath,
-    }
+    const JobNameMap: JobNameMap = run.name
 
     //add to pending queue
     pendingQueue.push(JobNameMap)
     runs = setStatus(JobNameMap.fileName, Status.pending)
+    jobList.jobs = runs
     pendingQueueCounter++
     $verificationResults = $verificationResults.filter(vr => {
       return vr.name !== JobNameMap.fileName
     })
 
-    if (output && output.runName === run.name) {
+    if (output && output.runName === run.name.fileName) {
       clearOutput()
     }
 
@@ -722,8 +733,11 @@
         displayName: namesMap.get(newName),
         jobListPath: jobList.dirPath,
       }
+      jobList.jobs = jobList.jobs.filter(job => {
+        return job.name.displayName === oldName
+      })
       rename(oldConfNameMap, newConfNameMap)
-      namesMap.delete(oldName)
+      // namesMap.delete(oldName)
     }
     // rename new run
     else {
@@ -747,6 +761,8 @@
       $verificationResults = $verificationResults.filter(vr => {
         return vr.name !== curRun.fileName
       })
+      runs = setStatus(curRun.fileName, Status.running)
+      jobList.jobs = runs
       runScript(curRun)
     }
   }
@@ -775,27 +791,22 @@
    */
   function pendingStopFunc(run: Run): void {
     pendingQueue = pendingQueue.filter(rq => {
-      return rq.fileName !== run.name
+      return rq.fileName !== run.name.fileName
     })
     $verificationResults = $verificationResults.filter(vr => {
-      return vr.name !== run.name
+      return vr.name !== run.name.fileName
     })
     pendingQueueCounter--
-    runs = setStatus(run.name, Status.ready)
+    runs = setStatus(run.name.fileName, Status.ready)
   }
 
   /**
    * ask to delete the job "run"
    * @param run the job to delete
    */
-  function askToDeleteThis(run: Run): void {
-    const jobNameMap: JobNameMap = {
-      fileName: run.name,
-      displayName: namesMap.get(run.name),
-      jobListPath: jobList.dirPath,
-    }
-    askToDeleteJob(jobNameMap)
-  }
+  // function askToDeleteThis(run: Run): void {
+  //   askToDeleteJob(run.name)
+  // }
 
   /**
    * operates the expand / collapse functionality
@@ -870,12 +881,12 @@
       {
         title: 'Create New Job From Existing File',
         icon: 'new-file',
-        onClick: uploadConf,
+        onClick: () => uploadConf(jobList.dirPath),
       },
       {
         title: 'Create New Job',
         icon: 'diff-added',
-        onClick: createRun,
+        onClick: () => createRun(),
       },
       {
         title: 'Delete Job List',
@@ -899,7 +910,7 @@
         >
           <NewRun
             editFunc={() => editRun(runs[index])}
-            deleteFunc={() => askToDeleteThis(runs[index])}
+            deleteFunc={() => askToDeleteJob(runs[index].name)}
             deleteRun={() => deleteRun(runs[index])}
             {namesMap}
             {renameRun}
@@ -907,29 +918,11 @@
             runFunc={() => run(runs[index])}
             status={runs[index].status}
             {newFetchOutput}
-            nowRunning={(runningScripts.find(
-              rs => getFileName(rs.confFile) === runs[index].name,
-            ) !== undefined ||
-              (pendingQueue.find(rs => rs.fileName === runs[index].name) !==
-                undefined &&
-                pendingQueueCounter > 0)) &&
-              $verificationResults.find(vr => runs[index].name === vr.name) ===
-                undefined}
-            isPending={pendingQueue.find(
-              rs => rs.fileName === runs[index].name,
-            ) !== undefined && pendingQueueCounter > 0}
-            expandedState={$verificationResults.find(
-              vr => vr.name === runs[index].name,
-            ) !== undefined}
             pendingStopFunc={() => {
               pendingStopFunc(runs[index])
             }}
             runningStopFunc={() => {
-              enableEdit({
-                fileName: runs[index].name,
-                displayName: namesMap.get(runs[index].name),
-                jobListPath: jobList.dirPath,
-              })
+              enableEdit(runs[index].name)
               runs[index].vrLink = ''
               const modal = runs[index].status !== Status.running
               console.log('modal!!!', modal, runs[index].status)
@@ -942,7 +935,7 @@
             vrLink={runs[index].vrLink}
             hide={$hide.uri.path === jobList.dirPath.path && $hide.names[index]}
             pos={$pos}
-            bind:runName={runs[index].name}
+            bind:runName={runs[index].name.displayName}
           />
         </li>
       {/each}

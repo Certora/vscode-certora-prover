@@ -6,6 +6,7 @@
 
 import { log, Sources } from './utils/log'
 import type { JobNameMap, JumpToDefinition } from './types'
+import type { Uri } from 'vscode'
 
 enum Commands {
   StopScript = 'stop-script',
@@ -35,13 +36,15 @@ export function enableEdit(name: JobNameMap): void {
   })
 }
 
-export function uploadConf(): void {
+export function uploadConf(jobListUri?: Uri): void {
   log({
     action: 'Send "upload-conf" command',
     source: Sources.ResultsWebview,
+    info: jobListUri,
   })
   vscode.postMessage({
     command: Commands.UploadConf,
+    payload: jobListUri,
   })
 }
 

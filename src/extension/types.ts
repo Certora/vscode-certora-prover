@@ -326,6 +326,7 @@ export type EventFromResultsWebview =
     }
   | {
       command: CommandFromResultsWebview.UploadConf
+      payload: Uri
     }
   | {
       command: CommandFromResultsWebview.Rename
@@ -378,7 +379,7 @@ export type ResourceError = {
 
 export type Run = {
   id: number
-  name: string
+  name: JobNameMap
   status: Status
   vrLink?: string
 }
