@@ -30,7 +30,7 @@
   import { log, Sources } from './utils/log'
   import {
     // Assert,
-    Output,
+    // Output,
     EventsFromExtension,
     // Rule,
     // Verification,

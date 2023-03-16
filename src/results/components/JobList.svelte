@@ -7,9 +7,7 @@
 
   import { onMount, onDestroy } from 'svelte'
   import Pane from '../components/Pane.svelte'
-  import CodeItemList from '../components/CodeItemList.svelte'
-  import Tree from '../components/Tree.svelte'
-  import ContractCallResolution from '../components/ContractCallResolution.svelte'
+  import OutputView from './OutputView.svelte'
   import {
     runScript,
     stopScript,
@@ -149,9 +147,9 @@
     }
   }
 
-  function selectCalltraceFunction(e: CustomEvent<CallTraceFunction>) {
-    selectedCalltraceFunction = e.detail
-  }
+  // function selectCalltraceFunction(e: CustomEvent<CallTraceFunction>) {
+  //   selectedCalltraceFunction = e.detail
+  // }
 
   function clearOutput() {
     if (output) output = undefined
@@ -216,7 +214,6 @@
           pid,
         )
         $verificationResults = $verificationResults
-        // todo: should only receive results that match the current job list!!!
         updateExpendablesFromResults()
         const thisRun = $verificationResults.find(vr => {
           return vr.name === runName.displayName
@@ -911,60 +908,7 @@
     </ul>
   </Pane>
 </div>
-{#if output}
-  {#if output.variables && output.variables.length > 0}
-    <Pane
-      title={`${output.treeViewPath.ruleName} variables`}
-      jobListPath={jobList.dirPath}
-      actions={[
-        {
-          title: 'Close Output',
-          icon: 'close',
-          onClick: clearOutput,
-        },
-      ]}
-    >
-      <CodeItemList codeItems={output.variables} />
-    </Pane>
-  {/if}
-  {#if output.callTrace && Object.keys(output.callTrace).length > 0}
-    <Pane title={`CALL TRACE`} jobListPath={jobList.dirPath}>
-      <Tree
-        runDisplayName=""
-        data={{
-          type: TreeType.Calltrace,
-          tree: [output.callTrace],
-        }}
-        on:selectCalltraceFunction={selectCalltraceFunction}
-      />
-    </Pane>
-  {/if}
-  {#if selectedCalltraceFunction && selectedCalltraceFunction.variables && selectedCalltraceFunction.variables.length > 0}
-    <Pane
-      title={`${selectedCalltraceFunction.name} variables`}
-      jobListPath={jobList.dirPath}
-    >
-      <CodeItemList codeItems={selectedCalltraceFunction.variables} />
-    </Pane>
-  {/if}
-  {#if output.callResolutionWarnings && output.callResolutionWarnings.length > 0}
-    <Pane
-      title={`Contract call resolution warnings`}
-      jobListPath={jobList.dirPath}
-    >
-      {#each output.callResolutionWarnings as resolution}
-        <ContractCallResolution contractCallResolution={resolution} />
-      {/each}
-    </Pane>
-  {/if}
-  {#if output.callResolution && output.callResolution.length > 0}
-    <Pane title={`Contract call resolution`} jobListPath={jobList.dirPath}>
-      {#each output.callResolution as resolution}
-        <ContractCallResolution contractCallResolution={resolution} />
-      {/each}
-    </Pane>
-  {/if}
-{/if}
+<OutputView {jobList} bind:output bind:selectedCalltraceFunction />
 
 <style lang="postcss">
   :global(body) {

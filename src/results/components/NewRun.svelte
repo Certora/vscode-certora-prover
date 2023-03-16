@@ -24,7 +24,6 @@
   import Tree from './Tree.svelte'
   import { jobLists, verificationResults } from '../store/store'
   import { writable } from 'svelte/store'
-  import JobList from './JobList.svelte'
   import type { Uri } from 'vscode'
 
   export let editFunc: () => void

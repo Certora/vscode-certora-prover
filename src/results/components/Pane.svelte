@@ -43,16 +43,16 @@
   /**
    * panel class can change the panels cursor and show if its selected
    */
-  function getPaneClassName(): string {
-    let className = 'pane-header'
-    if (status !== Status.pending && status !== Status.running) {
-      className += ' pointer-cursor'
-    }
-    if (inactiveSelected) {
-      className += ' inactive-selected'
-    }
-    return className
-  }
+  // function getPaneClassName(): string {
+  //   let className = 'pane-header'
+  //   if (status !== Status.pending && status !== Status.running) {
+  //     className += ' pointer-cursor'
+  //   }
+  //   if (inactiveSelected) {
+  //     className += ' inactive-selected'
+  //   }
+  //   return className
+  // }
 
   /**
    * icon class can either have normal / pointer cursor
@@ -97,8 +97,14 @@
   })?.isExpanded}
   id={title}
 >
+  <!-- {#if (!status)}
+    <div style="border-bottom: 0.2px solid var(--pane-border-color);"/>
+{/if} -->
   <div
-    class={getPaneClassName()}
+    class="pane-header"
+    class:pointer-cursor={status !== Status.pending &&
+      status !== Status.running}
+    class:inactive-selected={inactiveSelected}
     on:click={toggleExpand}
     tabindex="0"
     role="button"
@@ -142,6 +148,9 @@
       <Toolbar actions={fixedActions} />
     </div>
   </div>
+  {#if !status}
+    <div style="border-bottom: 0.2px solid var(--pane-border-color);" />
+  {/if}
   {#if $expandables.find(element => {
     return element.title === title
   })?.isExpanded}
@@ -159,7 +168,7 @@
     height: var(--height);
     box-sizing: border-box;
     align-items: center;
-    border-top: 1px solid var(--pane-border-color);
+    /* border-top: 1px solid var(--pane-border-color); */
     cursor: default;
     font-size: var(--font-size);
     font-weight: 700;
@@ -250,10 +259,14 @@
     flex-direction: column;
     user-select: none;
 
-    &:first-of-type .pane-header {
+    /* &:first-of-type .pane-header {
       border-top: none;
-    }
+    } */
   }
+
+  /* .pane-header:first-of-type {
+    border-top: none;
+  } */
 
   .pane-body {
     overflow: hidden;
