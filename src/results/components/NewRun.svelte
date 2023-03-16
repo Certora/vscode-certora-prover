@@ -22,14 +22,18 @@
   // import { log, Sources } from '../utils/log'
   import Pane from './Pane.svelte'
   import Tree from './Tree.svelte'
-  import { verificationResults } from '../store/store'
+  import { jobLists, verificationResults } from '../store/store'
   import { writable } from 'svelte/store'
+  import JobList from './JobList.svelte'
+  import type { Uri } from 'vscode'
 
   export let editFunc: () => void
   export let deleteFunc: () => void
   export let deleteRun: () => void
   export let namesMap: Map<string, string>
   export let runName: string = ''
+  export let jobListUri: Uri
+  export let pid: number
 
   const renameJob = writable(runName === '')
   // this creates the new conf file
@@ -45,7 +49,7 @@
     vr: Verification,
   ) => void
 
-  export let expandedState = false
+  // export let expandedState = false
   // export let nowRunning = false
 
   // export let isPending = false
@@ -55,7 +59,7 @@
 
   export let inactiveSelected: string = ''
 
-  export let setStatus: (name: string, status: Status) => void
+  // export let setStatus: (name: string, status: Status) => void
 
   export let status: Status
 
@@ -323,16 +327,16 @@
    * change run status
    * @param newStatus status to change to
    */
-  function statusChange(newStatus: Status): void {
-    status = newStatus
-    setStatus(runName, newStatus)
-  }
+  // function statusChange(newStatus: Status): void {
+  //   status = newStatus
+  //   setStatus(runName, newStatus)
+  // }
 
   /**
    * stops a pending run
    */
   function pendingRunStop(): void {
-    statusChange(Status.ready)
+    // statusChange(Status.ready)
     pendingStopFunc()
     // isPending = false
   }
@@ -398,12 +402,12 @@
   /**
    * checks if there exists complete results for this job
    */
-  function hasCompleteResults(): boolean {
-    const result = $verificationResults.find(vr => {
-      return vr.name === runName
-    })
-    return result.jobs.find(job => job.jobStatus === 'SUCCEEDED') !== undefined
-  }
+  // function hasCompleteResults(): boolean {
+  //   const result = $verificationResults.find(vr => {
+  //     return vr.name === runName
+  //   })
+  //   return result.jobs.find(job => job.jobStatus === 'SUCCEEDED') !== undefined
+  // }
 
   // was copied from App.svelte
   function retrieveRules(jobs: Job[]): Rule[] {
@@ -420,7 +424,7 @@
   }
 
   function onClick(e) {
-    if (!expandedState) {
+    if (!(status === Status.incompleteResults || status === Status.success)) {
       editFunc()
     }
   }
@@ -454,9 +458,11 @@
       <div class="results" on:click={onClick}>
         <Pane
           title={namesMap.get(runName)}
+          jobListPath={jobListUri}
           actions={createActions()}
           fixedActions={createFixedActions()}
-          showExpendIcon={expandedState}
+          showExpendIcon={status === Status.incompleteResults ||
+            status === Status.success}
           {status}
           inactiveSelected={runName === inactiveSelected}
           runFunc={status === Status.ready ||
@@ -466,7 +472,7 @@
             : null}
         >
           {#each $verificationResults as vr, index (index)}
-            {#if vr.name === runName}
+            {#if vr.name === runName && vr.pid === pid}
               <li
                 class="tree"
                 on:contextmenu|stopPropagation|preventDefault={() => null}
@@ -494,6 +500,7 @@
       >
         <Pane
           title={namesMap.get(runName)}
+          jobListPath={jobListUri}
           actions={createActionsForRunningScript()}
           {status}
           showExpendIcon={false}

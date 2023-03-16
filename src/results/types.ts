@@ -154,6 +154,7 @@ export type ProgressResponse = {
 
 export type Verification = {
   name: string
+  pid: number
   spec: string
   contract: string
   jobs: Job[]

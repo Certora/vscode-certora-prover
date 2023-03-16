@@ -7,6 +7,7 @@
   import { Action, Status } from '../types'
   import { getIconPath } from '../utils/getIconPath'
   import { expandables } from '../store/store'
+  import type { Uri } from 'vscode'
 
   export let title: string
   export let actions: Action[] = []
@@ -15,6 +16,7 @@
   export let status: Status | string = ''
   export let inactiveSelected: boolean = false
   export let runFunc: () => void = null
+  export let jobListPath: Uri
 
   const statusIcons = {
     missingSettings: 'finish-setup.svg',
@@ -73,8 +75,10 @@
     ) {
       $expandables.push({
         title: title,
+        jobListPath: jobListPath,
         isExpanded: false,
         tree: [],
+        isJobList: false,
       })
     }
     $expandables = $expandables.map(element => {

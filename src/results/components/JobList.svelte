@@ -57,6 +57,15 @@
   import type { Uri } from 'vscode'
 
   export let jobList: JobList
+
+  export let pendingQueue: JobNameMap[]
+  export let runningScripts: {
+    pid: number
+    confFile: string
+    uploaded: boolean
+  }[]
+  export let runNext
+
   export const hide: Writable<{ names: boolean[]; uri: Uri }> = writable({
     names: [],
     uri: jobList.dirPath,
@@ -70,11 +79,9 @@
   let outputRunName: string
   let selectedCalltraceFunction: CallTraceFunction
 
-  let runningScripts: { pid: number; confFile: string; uploaded: boolean }[] =
-    []
   let runs: Run[] = []
-  let pendingQueue: JobNameMap[] = []
-  let pendingQueueCounter = 0
+  // let pendingQueue: JobNameMap[] = []
+  // let pendingQueueCounter = 0
   let namesMap: Map<string, string> = new Map()
   let runsCounter = 0
 
@@ -85,16 +92,10 @@
 
   function updateJobList() {
     console.log('update job list')
-    // runs = jobList.jobs
-    // runsCounter = runs.length
+
     if (jobList.jobs?.length > 0) {
       jobList.jobs.forEach(file => {
         if (!namesMap.has(file.name.fileName)) {
-          // const newRun: Run = {
-          //   id: runs.length,
-          //   name: file.name,
-          //   status: file.status || Status.missingSettings,
-          // }
           console.log(file.name, file)
           namesMap.set(
             file.name.fileName,
@@ -109,8 +110,10 @@
 
     $expandables.push({
       title: jobList.title,
+      jobListPath: jobList.dirPath,
       isExpanded: true,
       tree: [],
+      isJobList: false,
     })
   }
 
@@ -164,8 +167,10 @@
         const temp = job.verificationProgress.rules.map(rule => {
           return {
             title: rule.name,
+            jobListPath: jobList.dirPath,
             isExpanded: false,
             tree: [],
+            isJobList: false,
           }
         })
         $expandables = $expandables.map(element => {
@@ -195,11 +200,11 @@
           },
         })
         const pid = e.data.payload.pid
-        const runName = runs.find(run => {
+        const runName = jobList.jobs.find(run => {
           return run.id === pid
         })?.name
         if (!runName) return
-        setVerificationReportLink(pid, e.data.payload.verificationReportLink)
+        // setVerificationReportLink(pid, e.data.payload.verificationReportLink)
         if (e.data.payload.jobStatus === 'FAILED') {
           setStoppedJobStatus(runName.fileName)
           return
@@ -207,26 +212,27 @@
         smartMergeVerificationResult(
           $verificationResults,
           e.data.payload,
-          runName.fileName,
+          runName.displayName,
+          pid,
         )
         $verificationResults = $verificationResults
-
+        // todo: should only receive results that match the current job list!!!
         updateExpendablesFromResults()
         const thisRun = $verificationResults.find(vr => {
-          return vr.name === runName.fileName
+          return vr.name === runName.displayName
         })
         if (
           thisRun?.jobs.find(job => {
             return !job.jobEnded
           }) !== undefined
         ) {
-          runs = setStatus(runName.fileName, Status.incompleteResults)
+          jobList = setStatus(runName.fileName, Status.incompleteResults)
         }
 
         if (e.data.payload.jobStatus === 'SUCCEEDED') {
           if (runName) {
             removeScript(runName.fileName)
-            runs = setStatus(runName.fileName, Status.success)
+            jobList = setStatus(runName.fileName, Status.success)
           }
         }
         log({
@@ -238,60 +244,7 @@
         })
         break
       }
-      case EventTypesFromExtension.UploadingFiles: {
-        log({
-          action: 'Received "run-next" command',
-          source: Sources.ResultsWebview,
-          info: e.data.payload,
-        })
-        let confToEnable: JobNameMap = {
-          displayName: '',
-          fileName: '',
-          jobListPath: jobList.dirPath,
-        }
-        const curPid = e.data.payload.pid
-        const vrLink = e.data.payload.vrLink
-        runningScripts = runningScripts.map(rs => {
-          if (rs.pid === curPid) {
-            rs.uploaded = true
-            confToEnable.fileName = getFileName(rs.confFile)
-            confToEnable.displayName = namesMap.get(confToEnable.fileName)
-            enableEdit(confToEnable)
-          }
-          return rs
-        })
-        runningScripts = runningScripts
-        runs = runs.map(run => {
-          if (run.id === curPid) {
-            run.vrLink = vrLink
-          }
-          return run
-        })
-        // when we receive the results of the last run, we run the next job!
-        runNext()
-        break
-      }
-      case EventTypesFromExtension.RunningScriptChanged: {
-        log({
-          action: 'Received "running-scripts-changed" command',
-          source: Sources.ResultsWebview,
-          info: e.data.payload,
-        })
-        runningScripts = e.data.payload
-        runs = runs.map(r => {
-          runningScripts.forEach(rs => {
-            if (r.name.fileName === getFileName(rs.confFile)) {
-              r.id = rs.pid
-            }
-          })
-          return r
-        })
-        // if there is no running script - run next
-        if (e.data.payload.length === 0) {
-          runNext()
-        }
-        break
-      }
+
       case EventTypesFromExtension.ScriptStopped: {
         log({
           action: 'Received "script-stopped" command',
@@ -299,16 +252,17 @@
           info: e.data.payload,
         })
         const pid = e.data.payload
-        const curRun = runs.find(run => run.id === pid)
-
+        const curRun = jobList.jobs.find(run => run.id === pid)
         if (curRun !== undefined) {
           const runName = curRun.name
           setStoppedJobStatus(runName.fileName)
         }
-
+        console.log('running scripts before filter', runningScripts)
         runningScripts = runningScripts.filter(rs => {
           return rs.pid !== pid
         })
+        console.log('running scripts before filter', runningScripts)
+
         break
       }
       case EventTypesFromExtension.SetOutput: {
@@ -346,7 +300,7 @@
           ) {
             newStatus = Status.success
           }
-          runs = setStatus(runName, newStatus)
+          jobList = setStatus(runName, newStatus)
         }
         break
       }
@@ -360,7 +314,7 @@
         const name = e.data.payload.fileName
         const uri = e.data.payload.jobListPath
         if (uri.path === jobList.dirPath.path) {
-          runs = setStatus(name, Status.missingSettings)
+          jobList = setStatus(name, Status.missingSettings)
         }
         break
       }
@@ -374,7 +328,7 @@
         const name = e.data.payload.fileName
         const uri = e.data.payload.jobListPath
         if (uri.path === jobList.dirPath.path) {
-          runs = setStatus(name, Status.settingsError)
+          jobList = setStatus(name, Status.settingsError)
         }
         break
       }
@@ -414,7 +368,7 @@
           info: e.data.payload,
         })
         const runName = e.data.payload
-        runs = setStatus(runName, Status.unableToRun)
+        jobList = setStatus(runName, Status.unableToRun)
         break
       }
 
@@ -426,7 +380,7 @@
         })
 
         const name: string = e.data.payload
-        const runToRun: Run = runs.find(r => {
+        const runToRun: Run = jobList.jobs.find(r => {
           return r.name.fileName === name
         })
         if (runToRun !== undefined) {
@@ -444,7 +398,7 @@
         const nameToDelete: string = e.data.payload.name
         const pathOfJobList: Uri = e.data.payload.path
         if (jobList.dirPath.path === pathOfJobList.path) {
-          const runToDelete: Run = runs.find(r => {
+          const runToDelete: Run = jobList.jobs.find(r => {
             return r.name.fileName === nameToDelete
           })
           if (runToDelete !== undefined) {
@@ -469,14 +423,15 @@
    * @param runName name of the run to update
    * @param link to verification report of run [runName]
    */
-  function setVerificationReportLink(pid: number, link: string) {
-    runs.forEach(run => {
-      if (run.id === pid) {
-        run.vrLink = link
-      }
-    })
-    runs = runs
-  }
+  // function setVerificationReportLink(pid: number, link: string) {
+  //   jobList.jobs = jobList.jobs.map(run => {
+  //     if (run.id === pid) {
+  //       run.vrLink = link
+  //     }
+  //     return run
+  //   })
+  //   return jobList
+  // }
 
   /**
    * set the status of the run named [runName] to be [value]
@@ -484,16 +439,16 @@
    * @param value status
    * @returns new list of runs after change
    */
-  function setStatus(runName: string, value: Status): Run[] {
-    runs.forEach(run => {
+  function setStatus(runName: string, value: Status): JobList {
+    jobList.jobs.forEach(job => {
       if (
-        run.name.fileName === runName &&
-        !(run.status === Status.success && value === Status.ready)
+        job.name.fileName === runName &&
+        !(job.status === Status.success && value === Status.ready)
       ) {
-        run.status = value
+        job.status = value
       }
     })
-    return runs
+    return jobList
   }
 
   /**
@@ -507,7 +462,7 @@
     duplicatedName: string,
     rule?: string,
   ): void {
-    const toDuplicate: Run = runs.find(
+    const toDuplicate: Run = jobList.jobs.find(
       run => run.name.fileName === nameToDuplicate,
     )
 
@@ -518,7 +473,7 @@
     }
 
     const duplicated: Run = {
-      id: runs.length,
+      id: jobList.jobs.length,
       name: {
         fileName: duplicatedName,
         displayName: namesMap.get(duplicatedName),
@@ -537,13 +492,15 @@
     }
   }
 
-  function addNewExpendable(title: string) {
+  function addNewExpendable(title: string, jobListPath: Uri) {
     $expandables = [
       ...$expandables,
       {
         title: title,
+        jobListPath: jobListPath,
         isExpanded: true,
         tree: [],
+        isJobList: false,
       },
     ]
   }
@@ -552,7 +509,7 @@
     if (jobName) {
       removeScript(jobName)
       if ($verificationResults.length === 0) {
-        runs = setStatus(jobName, Status.ready)
+        jobList = setStatus(jobName, Status.ready)
         return
       }
       if (
@@ -560,12 +517,12 @@
           return vr.name === jobName
         })
       ) {
-        runs = setStatus(jobName, Status.ready)
+        jobList = setStatus(jobName, Status.ready)
         return
       }
       $verificationResults.forEach(vr => {
         if (vr.name === jobName) {
-          runs = setStatus(jobName, Status.success)
+          jobList = setStatus(jobName, Status.success)
           vr.jobs.forEach(job => {
             job.verificationProgress.rules.forEach(rule => {
               if (rule.status === RuleStatuses.Running) {
@@ -579,11 +536,11 @@
             })
           })
         } else if (
-          runs.find(run => {
+          jobList.jobs.find(run => {
             return run.name.fileName === jobName
           })?.status === Status.running
         ) {
-          runs = setStatus(jobName, Status.ready)
+          jobList = setStatus(jobName, Status.ready)
         }
       })
       $verificationResults = $verificationResults
@@ -604,19 +561,19 @@
       if (!run.status) {
         run.status = Status.missingSettings
       }
-      runsCounter = runs.push(run)
-      addNewExpendable(run.name.displayName)
+      runsCounter = jobList.jobs.push(run)
+      addNewExpendable(run.name.displayName, run.name.jobListPath)
     } else {
       // don't create more than one new run while in rename state
       if (
-        runs.find(r => {
+        jobList.jobs.find(r => {
           return r.name.displayName === ''
         })
       )
         return
 
       jobList.jobs.push({
-        id: runs.length,
+        id: jobList.jobs.length,
         name: {
           fileName: '',
           displayName: '',
@@ -629,7 +586,7 @@
       jobList = jobList
 
       // runsCounter = runsCounter
-      addNewExpendable('')
+      addNewExpendable('', jobList.dirPath)
     }
   }
 
@@ -666,7 +623,7 @@
       clearOutput()
     }
 
-    runsCounter--
+    // runsCounter--
   }
 
   /**
@@ -679,10 +636,13 @@
     const JobNameMap: JobNameMap = run.name
 
     //add to pending queue
+    console.log(pendingQueue, 'pending queue before push')
+
     pendingQueue.push(JobNameMap)
-    runs = setStatus(JobNameMap.fileName, Status.pending)
+    console.log(pendingQueue, 'pending queue after push')
+    jobList = setStatus(JobNameMap.fileName, Status.pending)
     jobList.jobs = runs
-    pendingQueueCounter++
+    // pendingQueueCounter++
     $verificationResults = $verificationResults.filter(vr => {
       return vr.name !== JobNameMap.fileName
     })
@@ -713,6 +673,7 @@
       if (oldResult !== undefined) {
         let newResult: Verification = {
           name: newName,
+          pid: oldResult.pid,
           contract: oldResult.contract,
           spec: oldResult.spec,
           jobs: oldResult.jobs,
@@ -754,18 +715,18 @@
   /**
    * run the first pending run in the queue
    */
-  function runNext(): void {
-    if (pendingQueue.length > 0) {
-      let curRun = pendingQueue.shift()
-      pendingQueueCounter--
-      $verificationResults = $verificationResults.filter(vr => {
-        return vr.name !== curRun.fileName
-      })
-      runs = setStatus(curRun.fileName, Status.running)
-      jobList.jobs = runs
-      runScript(curRun)
-    }
-  }
+  // function runNext(): void {
+  //   if (pendingQueue.length > 0) {
+  //     let curRun = pendingQueue.shift()
+  //     // pendingQueueCounter--
+  //     $verificationResults = $verificationResults.filter(vr => {
+  //       return vr.name !== curRun.fileName
+  //     })
+  //     runs = setStatus(curRun.fileName, Status.running)
+  //     jobList.jobs = runs
+  //     runScript(curRun)
+  //   }
+  // }
 
   /**
    * from conf file uri to only the file name
@@ -778,7 +739,7 @@
    * run all the runs that are allowed to run
    */
   function runAll(): void {
-    const jobsToRun = runs.filter(singleRun => {
+    const jobsToRun = jobList.jobs.filter(singleRun => {
       return singleRun.status === Status.ready
     })
     jobsToRun.forEach((job, index) => {
@@ -791,13 +752,15 @@
    */
   function pendingStopFunc(run: Run): void {
     pendingQueue = pendingQueue.filter(rq => {
-      return rq.fileName !== run.name.fileName
+      return (
+        rq.fileName !== run.name.fileName && rq.jobListPath !== jobList.dirPath
+      )
     })
     $verificationResults = $verificationResults.filter(vr => {
       return vr.name !== run.name.fileName
     })
-    pendingQueueCounter--
-    runs = setStatus(run.name.fileName, Status.ready)
+    // pendingQueueCounter--
+    jobList = setStatus(run.name.fileName, Status.ready)
   }
 
   /**
@@ -814,7 +777,7 @@
   function expandCollapseAll() {
     if ($expandCollapse.hasResults) {
       $expandables = $expandables.map(element => {
-        if (element.title !== 'JOB LIST') {
+        if (!element.isJobList && element.jobListPath === jobList.dirPath) {
           element.isExpanded = $expandCollapse.var
         }
         element.tree = element.tree.map(treeItem => {
@@ -872,6 +835,7 @@
 <div>
   <Pane
     title={jobList.title}
+    jobListPath={jobList.dirPath}
     fixedActions={[
       {
         title: 'Run All',
@@ -909,33 +873,38 @@
           }}
         >
           <NewRun
-            editFunc={() => editRun(runs[index])}
-            deleteFunc={() => askToDeleteJob(runs[index].name)}
-            deleteRun={() => deleteRun(runs[index])}
+            editFunc={() => editRun(jobList.jobs[index])}
+            deleteFunc={() => askToDeleteJob(jobList.jobs[index].name)}
+            deleteRun={() => deleteRun(jobList.jobs[index])}
             {namesMap}
             {renameRun}
             duplicateFunc={duplicateRun}
-            runFunc={() => run(runs[index])}
-            status={runs[index].status}
+            runFunc={() => run(jobList.jobs[index])}
+            status={jobList.jobs[index].status}
             {newFetchOutput}
             pendingStopFunc={() => {
-              pendingStopFunc(runs[index])
+              jobList = setStatus(
+                jobList.jobs[index].name.fileName,
+                Status.pending,
+              )
+              pendingStopFunc(jobList.jobs[index])
             }}
             runningStopFunc={() => {
-              enableEdit(runs[index].name)
-              runs[index].vrLink = ''
-              const modal = runs[index].status !== Status.running
-              console.log('modal!!!', modal, runs[index].status)
-              stopScript(runs[index].id, modal)
+              enableEdit(jobList.jobs[index].name)
+              jobList.jobs[index].vrLink = ''
+              const modal = jobList.jobs[index].status !== Status.running
+              console.log('modal!!!', modal, jobList.jobs[index].status)
+              stopScript(jobList.jobs[index].id, modal)
             }}
             inactiveSelected={$focusedRun.path.path === jobList.dirPath.path
               ? $focusedRun.name
               : ''}
-            {setStatus}
-            vrLink={runs[index].vrLink}
-            hide={$hide.uri.path === jobList.dirPath.path && $hide.names[index]}
+            vrLink={jobList.jobs[index].vrLink}
+            hide={true}
             pos={$pos}
-            bind:runName={runs[index].name.displayName}
+            jobListUri={jobList.dirPath}
+            pid={jobList.jobs[index].id}
+            bind:runName={jobList.jobs[index].name.displayName}
           />
         </li>
       {/each}
@@ -946,6 +915,7 @@
   {#if output.variables && output.variables.length > 0}
     <Pane
       title={`${output.treeViewPath.ruleName} variables`}
+      jobListPath={jobList.dirPath}
       actions={[
         {
           title: 'Close Output',
@@ -958,7 +928,7 @@
     </Pane>
   {/if}
   {#if output.callTrace && Object.keys(output.callTrace).length > 0}
-    <Pane title={`CALL TRACE`}>
+    <Pane title={`CALL TRACE`} jobListPath={jobList.dirPath}>
       <Tree
         runDisplayName=""
         data={{
@@ -970,19 +940,25 @@
     </Pane>
   {/if}
   {#if selectedCalltraceFunction && selectedCalltraceFunction.variables && selectedCalltraceFunction.variables.length > 0}
-    <Pane title={`${selectedCalltraceFunction.name} variables`}>
+    <Pane
+      title={`${selectedCalltraceFunction.name} variables`}
+      jobListPath={jobList.dirPath}
+    >
       <CodeItemList codeItems={selectedCalltraceFunction.variables} />
     </Pane>
   {/if}
   {#if output.callResolutionWarnings && output.callResolutionWarnings.length > 0}
-    <Pane title={`Contract call resolution warnings`}>
+    <Pane
+      title={`Contract call resolution warnings`}
+      jobListPath={jobList.dirPath}
+    >
       {#each output.callResolutionWarnings as resolution}
         <ContractCallResolution contractCallResolution={resolution} />
       {/each}
     </Pane>
   {/if}
   {#if output.callResolution && output.callResolution.length > 0}
-    <Pane title={`Contract call resolution`}>
+    <Pane title={`Contract call resolution`} jobListPath={jobList.dirPath}>
       {#each output.callResolution as resolution}
         <ContractCallResolution contractCallResolution={resolution} />
       {/each}

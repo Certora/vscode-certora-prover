@@ -22,7 +22,8 @@
     // askToDeleteJob,
     initResults,
     uploadConf,
-    // enableEdit,
+    enableEdit,
+    runScript,
     // rename,
   } from './extension-actions'
   // import { smartMergeVerificationResult } from './utils/mergeResults'
@@ -34,7 +35,7 @@
     // Rule,
     // Verification,
     Run,
-    // JobNameMap,
+    JobNameMap,
     Status,
     // CONF_DIRECTORY,
     // RuleStatuses,
@@ -42,7 +43,7 @@
   import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
   // import NewRun from './components/NewRun.svelte'
 
-  import { writable } from 'svelte/store'
+  import { Writable, writable } from 'svelte/store'
   import {
     expandables,
     expandCollapse,
@@ -50,6 +51,7 @@
     jobLists,
   } from './store/store'
   import JobList from './components/JobList.svelte'
+  import type { Uri } from 'vscode'
 
   // export const hide = writable([])
   // export const pos = writable({ x: 0, y: 0 })
@@ -59,13 +61,14 @@
   // let outputRunName: string
   // let selectedCalltraceFunction: CallTraceFunction
 
-  // let runningScripts: { pid: number; confFile: string; uploaded: boolean }[] =
-  //   []
-  let runs: Run[] = []
-  // let pendingQueue: JobNameMap[] = []
-  // let pendingQueueCounter = 0
-  let namesMap: Map<string, string> = new Map()
-  let runsCounter = 0
+  let runningScripts: Writable<
+    { pid: number; confFile: string; uploaded: boolean }[]
+  > = writable([])
+  // let runs: Run[] = []
+  let pendingQueue: Writable<JobNameMap[]> = writable([])
+  let pendingQueueCounter = 0
+  // let namesMap: Map<string, string> = new Map()
+  // let runsCounter = 0
 
   let jobListCounter = 0
 
@@ -95,6 +98,7 @@
           $jobLists.push(confList)
           $jobLists = $jobLists
           jobListCounter++
+          addNewExpendable(confList.title, confList.dirPath)
         } else {
           $jobLists = $jobLists.map(jl => {
             if (jl.dirPath === curJobList.dirPath) {
@@ -107,19 +111,176 @@
         }
         break
       }
+      case EventTypesFromExtension.UploadingFiles: {
+        log({
+          action: 'Received "run-next" command',
+          source: Sources.ResultsWebview,
+          info: e.data.payload,
+        })
 
+        const curPid = e.data.payload.pid
+        const vrLink = e.data.payload.vrLink
+
+        $runningScripts = $runningScripts.map(rs => {
+          if (rs.pid === curPid) {
+            rs.uploaded = true
+            //todo: handle enable edit
+            // enableEdit(confToEnable)
+          }
+          return rs
+        })
+        $runningScripts = $runningScripts
+        $jobLists = $jobLists.map(jl => {
+          $runningScripts.forEach(rs => {
+            const urlArr = rs.confFile.split('/')
+            const confName = urlArr[urlArr.length - 1].replace('.conf', '')
+            const uriPath = urlArr.slice(0, urlArr.length - 1).join('/') + '/'
+            console.log(confName, uriPath, 'OMG')
+            console.log(jl.dirPath.path, 'OMG1')
+
+            if (uriPath === jl.dirPath.path) {
+              jl.jobs = jl.jobs.map(job => {
+                console.log(job.name.fileName, jl.dirPath.path, 'OMG2')
+                if (confName === job.name.fileName) {
+                  job.vrLink = vrLink
+                }
+                return job
+              })
+            }
+          })
+          return jl
+        })
+        // runs = runs.map(run => {
+        //   if (run.id === curPid) {
+        //     run.vrLink = vrLink
+        //   }
+        //   return run
+        // })
+        // when we receive the results of the last run, we run the next job!
+        runNext()
+        break
+      }
+      case EventTypesFromExtension.RunningScriptChanged: {
+        log({
+          action: 'Received "running-scripts-changed" command',
+          source: Sources.ResultsWebview,
+          info: e.data.payload,
+        })
+        // conf file is a full path to a conf file now
+        $runningScripts = e.data.payload
+
+        console.log('jobList before change of pid', $jobLists)
+        $jobLists = $jobLists.map(jl => {
+          $runningScripts.forEach(rs => {
+            const urlArr = rs.confFile.split('/')
+            const confName = urlArr[urlArr.length - 1].replace('.conf', '')
+            const uriPath = urlArr.slice(0, urlArr.length - 1).join('/') + '/'
+            console.log(confName, uriPath, 'OMG!')
+            console.log(jl.dirPath.path, 'OMG1!')
+
+            if (uriPath === jl.dirPath.path) {
+              jl.jobs = jl.jobs.map(job => {
+                console.log(job.name.fileName, jl.dirPath.path, 'OMG2!')
+                if (confName === job.name.fileName) {
+                  job.id = rs.pid
+                }
+                return job
+              })
+            }
+          })
+          return jl
+        })
+        console.log('jobList after change of pid', $jobLists)
+
+        // if there is no running script - run next
+        if (e.data.payload.length === 0) {
+          runNext()
+        }
+        break
+      }
+      // case EventTypesFromExtension.ScriptStopped: {
+      //   log({
+      //     action: 'Received "script-stopped" command',
+      //     source: Sources.ResultsWebview,
+      //     info: e.data.payload,
+      //   })
+      //   const pid = e.data.payload
+      //   const curRun = runs.find(run => run.id === pid)
+
+      //   if (curRun !== undefined) {
+      //     const runName = curRun.name
+      //     setStoppedJobStatus(runName.fileName)
+      //   }
+
+      //   runningScripts = runningScripts.filter(rs => {
+      //     return rs.pid !== pid
+      //   })
+      //   break
+      // }
       default:
         break
     }
   }
 
-  function addNewExpendable(title: string) {
+  /**
+   * from conf file uri to only the file name
+   */
+  //  function getFileName(confFile: string): string {
+  //   return confFile.replace(CONF_DIRECTORY, '').replace('.conf', '')
+  // }
+
+  // function findJobInJobLists(fileName: string, uri: Uri) {
+  //   const jobList = $jobLists.find(jl => {return jl.dirPath === uri})
+  //   if (jobList) {
+  //     return jobList.jobs.find(job => {return job.name.fileName === fileName})
+  //   }
+  // }
+
+  /**
+   * run the first pending run in the queue
+   */
+  function runNext(): void {
+    console.log(
+      'running scripts + pending queue from run next',
+      $runningScripts,
+      $pendingQueue,
+    )
+    const nonUploads = $runningScripts.filter(rs => {
+      return rs.uploaded === false
+    })
+    if ($pendingQueue.length > 0 && nonUploads.length === 0) {
+      let curRun = $pendingQueue.shift()
+      // pendingQueueCounter--
+      $verificationResults = $verificationResults.filter(vr => {
+        return vr.name !== curRun.fileName
+      })
+      $jobLists = $jobLists.map(jl => {
+        jl.jobs.forEach(job => {
+          if (
+            job.name.fileName === curRun.fileName &&
+            job.name.jobListPath === curRun.jobListPath
+          ) {
+            job.status = Status.running
+          }
+        })
+        return jl
+      })
+      $jobLists = $jobLists
+      // runs = setStatus(curRun.fileName, Status.running)
+      // jobList.jobs = runs
+      runScript(curRun)
+    }
+  }
+
+  function addNewExpendable(title: string, jobListPath: Uri) {
     $expandables = [
       ...$expandables,
       {
         title: title,
+        jobListPath: jobListPath,
         isExpanded: true,
         tree: [],
+        isJobList: true,
       },
     ]
   }
@@ -143,7 +304,7 @@
       title: 'JOB LIST',
       jobs: [
         {
-          id: runs.length,
+          id: 0,
           name: {
             fileName: '',
             displayName: '',
@@ -153,7 +314,7 @@
         },
       ],
     })
-    addNewExpendable('')
+    addNewExpendable('JOB LIST', null)
     // }
   }
 
@@ -197,7 +358,12 @@
 {:else}
   {#each $jobLists as jobList}
     {#key [jobListCounter]}
-      <JobList {jobList} />
+      <JobList
+        bind:jobList
+        bind:pendingQueue={$pendingQueue}
+        bind:runningScripts={$runningScripts}
+        {runNext}
+      />
     {/key}
   {/each}
 {/if}

@@ -336,6 +336,7 @@ export class ScriptRunner {
         }
         return rs
       })
+
       this.resultsWebviewProvider.postMessage<{ pid: number; vrLink: string }>({
         type: 'run-next',
         payload: { pid: pid, vrLink: vrLink !== undefined ? vrLink : '' },
@@ -415,7 +416,7 @@ export class ScriptRunner {
       return rs.pid === pid
     })
     if (scriptToStop === undefined) return
-
+    console.log('after script to stop')
     let doStop = true
     if (modal) {
       doStop = await this.askToStopJob(
@@ -423,6 +424,7 @@ export class ScriptRunner {
       )
     }
     if (!doStop) return
+    console.log('after do stop')
 
     if (scriptToStop.jobId !== undefined && scriptToStop.vrLink !== undefined) {
       this.stopUploadedScript(scriptToStop)
@@ -433,15 +435,6 @@ export class ScriptRunner {
           : `kill -15 ${pid}`
 
       exec(command)
-    } else {
-      // TODO: cover this possibility
-      console.log('twilight zone')
-      this.resultsWebviewProvider.postMessage({
-        type: 'script-stopped',
-        payload: pid,
-      })
-      this.removeRunningScript(pid)
-      return
     }
     this.resultsWebviewProvider.postMessage({
       type: 'script-stopped',
