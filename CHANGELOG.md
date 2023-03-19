@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
 
 * Create a job from a shell script file ([#88](https://github.com/Certora/vscode-certora-prover/pull/88))
 * Added option to choose branch on production / staging ([#87](https://github.com/Certora/vscode-certora-prover/pull/87))
-* Change icon in navigator when there is a validation error, added "Settings Error" state ([#87](https://github.com/Certora/vscode-certora-prover/pull/87))
+* Change icon in navigator when there is a validation error, added "Settings Error" state and better validation ([#87](https://github.com/Certora/vscode-certora-prover/pull/87))
 * Show type / parse errors from the cli in the PROBLEMS view ([#87](https://github.com/Certora/vscode-certora-prover/pull/87))
 
 ## Bug Fixes
