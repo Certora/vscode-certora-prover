@@ -131,25 +131,34 @@
         })
         $runningScripts = $runningScripts
         $jobLists = $jobLists.map(jl => {
-          $runningScripts.forEach(rs => {
-            const urlArr = rs.confFile.split('/')
-            const confName = urlArr[urlArr.length - 1].replace('.conf', '')
-            const uriPath = urlArr.slice(0, urlArr.length - 1).join('/') + '/'
-            console.log(confName, uriPath, 'OMG')
-            console.log(jl.dirPath.path, 'OMG1')
-
-            if (uriPath === jl.dirPath.path) {
-              jl.jobs = jl.jobs.map(job => {
-                console.log(job.name.fileName, jl.dirPath.path, 'OMG2')
-                if (confName === job.name.fileName) {
-                  job.vrLink = vrLink
-                }
-                return job
-              })
+          jl.jobs = jl.jobs.map(job => {
+            if (job.id === curPid) {
+              job.vrLink = vrLink
             }
+            return job
           })
           return jl
         })
+        // $jobLists = $jobLists.map(jl => {
+        //   $runningScripts.forEach(rs => {
+        //     const urlArr = rs.confFile.split('/')
+        //     const confName = urlArr[urlArr.length - 1].replace('.conf', '')
+        //     const uriPath = urlArr.slice(0, urlArr.length - 1).join('/') + '/'
+        //     console.log(confName, uriPath, 'OMG')
+        //     console.log(jl.dirPath.path, 'OMG1')
+
+        //     if (uriPath === jl.dirPath.path) {
+        //       jl.jobs = jl.jobs.map(job => {
+        //         console.log(job.name.fileName, jl.dirPath.path, 'OMG2')
+        //         if (confName === job.name.fileName) {
+        //           job.vrLink = vrLink
+        //         }
+        //         return job
+        //       })
+        //     }
+        //   })
+        //   return jl
+        // })
         // runs = runs.map(run => {
         //   if (run.id === curPid) {
         //     run.vrLink = vrLink
