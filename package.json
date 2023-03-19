@@ -152,6 +152,12 @@
         "title": "Open Settings",
         "category": "VSCode",
         "icon": "$(settings)"
+      },
+      {
+        "command": "certora.createJobList",
+        "title": "Open New Project Directory",
+        "category": "VSCode",
+        "icon": "$(add)"
       }
     ],
     "menus": {
@@ -163,6 +169,11 @@
         },
         {
           "command": "certora.openSettings",
+          "when": "view == results",
+          "group": "navigation"
+        },
+        {
+          "command": "certora.createJobList",
           "when": "view == results",
           "group": "navigation"
         }

@@ -3,7 +3,7 @@
    *  Shows all the information of a run: run name, status, action buttons etc.
    *-------------------------------------------------------------------------------------------- */
 
-  import { onDestroy, onMount } from 'svelte'
+  // import { onDestroy, onMount } from 'svelte'
   import { getIconPath } from '../utils/getIconPath'
   import ContextMenu from '../components/ContextMenu.svelte'
 
@@ -15,17 +15,25 @@
     Assert,
     Action,
     Status,
+    // JobNameMap,
+    // EventsFromExtension,
+    // EventTypesFromExtension,
   } from '../types'
+  // import { log, Sources } from '../utils/log'
   import Pane from './Pane.svelte'
   import Tree from './Tree.svelte'
-  import { verificationResults } from '../store/store'
+  import { jobLists, verificationResults } from '../store/store'
   import { writable } from 'svelte/store'
+  import type { Uri } from 'vscode'
 
   export let editFunc: () => void
   export let deleteFunc: () => void
   export let deleteRun: () => void
   export let namesMap: Map<string, string>
   export let runName: string = ''
+  export let jobListUri: Uri
+  export let pid: number
+
   const renameJob = writable(runName === '')
   // this creates the new conf file
   export let renameRun: (oldName: string, newName: string) => void
@@ -40,17 +48,17 @@
     vr: Verification,
   ) => void
 
-  export let expandedState = false
-  export let nowRunning = false
+  // export let expandedState = false
+  // export let nowRunning = false
 
-  export let isPending = false
+  // export let isPending = false
 
   export let pendingStopFunc: () => void
   export let runningStopFunc: () => void
 
   export let inactiveSelected: string = ''
 
-  export let setStatus: (name: string, status: Status) => void
+  // export let setStatus: (name: string, status: Status) => void
 
   export let status: Status
 
@@ -169,14 +177,14 @@
   /**
    * returns the status for a run that was just ran
    */
-  function getRunStatus(): Status {
-    if (isPending) {
-      statusChange(Status.pending)
-    } else if (nowRunning) {
-      statusChange(Status.running)
-    }
-    return status
-  }
+  // function getRunStatus(): Status {
+  //   if (isPending) {
+  //     statusChange(Status.pending)
+  //   } else if (nowRunning) {
+  //     statusChange(Status.running)
+  //   }
+  //   return status
+  // }
 
   /**
    * duplicate this run
@@ -280,25 +288,25 @@
    * change run status
    * @param newStatus status to change to
    */
-  function statusChange(newStatus: Status): void {
-    status = newStatus
-    setStatus(runName, newStatus)
-  }
+  // function statusChange(newStatus: Status): void {
+  //   status = newStatus
+  //   setStatus(runName, newStatus)
+  // }
 
   /**
    * stops a pending run
    */
   function pendingRunStop(): void {
-    statusChange(Status.ready)
+    // statusChange(Status.ready)
     pendingStopFunc()
-    isPending = false
+    // isPending = false
   }
 
   /**
    * creates 'stop' action according to run status
    */
   function createActionsForRunningScript(): Action[] {
-    if (isPending) {
+    if (status === Status.pending) {
       return [
         {
           title: 'Edit',
@@ -312,7 +320,7 @@
         },
       ]
     }
-    if (nowRunning) {
+    if (status === Status.running) {
       return [
         {
           title: 'Edit',
@@ -359,7 +367,7 @@
   }
 
   function onClick(e) {
-    if (!expandedState) {
+    if (!(status === Status.incompleteResults || status === Status.success)) {
       editFunc()
     }
   }
@@ -388,14 +396,16 @@
         on:change={onChange}
       />
     </div>
-  {:else if !nowRunning}
+  {:else if !(status === Status.pending || status === Status.running)}
     {#key [status, inactiveSelected]}
       <div class="results" on:click={onClick}>
         <Pane
           title={namesMap.get(runName)}
+          jobListPath={jobListUri}
           actions={createActions()}
           fixedActions={createFixedActions()}
-          showExpendIcon={expandedState}
+          showExpendIcon={status === Status.incompleteResults ||
+            status === Status.success}
           {status}
           inactiveSelected={runName === inactiveSelected}
           runFunc={status === Status.ready ||
@@ -405,7 +415,7 @@
             : null}
         >
           {#each $verificationResults as vr, index (index)}
-            {#if vr.name === runName}
+            {#if vr.name === runName && vr.pid === pid}
               <li
                 class="tree"
                 on:contextmenu|stopPropagation|preventDefault={() => null}
@@ -435,8 +445,9 @@
       >
         <Pane
           title={namesMap.get(runName)}
+          jobListPath={jobListUri}
           actions={createActionsForRunningScript()}
-          status={getRunStatus()}
+          {status}
           showExpendIcon={false}
           fixedActions={createFixedActions()}
         />

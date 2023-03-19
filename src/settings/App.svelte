@@ -29,7 +29,7 @@
     $specObj = newForm.specObj
     $verification_message =
       newForm.verificationMessage ||
-      $RunName.replaceAll('(', '').replaceAll(')', '')
+      $RunName.displayName.replaceAll('(', '').replaceAll(')', '')
     $solAdditionalContracts = newForm.solidityAdditionalContracts || []
   }
 
@@ -83,7 +83,7 @@
         source: Sources.SettingsWebview,
         info: e.data.payload,
       })
-      if ($RunName === e.data.payload) {
+      if ($RunName.displayName === e.data.payload) {
         $disableForm = true
       }
     }
@@ -93,7 +93,7 @@
         source: Sources.SettingsWebview,
         info: e.data.payload,
       })
-      if ($RunName === e.data.payload) {
+      if ($RunName.displayName === e.data.payload) {
         $disableForm = false
       }
     }

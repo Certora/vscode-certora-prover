@@ -2,6 +2,8 @@
  *  Here we declare types and enums
  *-------------------------------------------------------------------------------------------- */
 
+import { Uri } from 'vscode'
+
 export const CONF_DIRECTORY_NAME = 'certora/conf'
 export const CONF_DIRECTORY = 'certora/conf/'
 export const SH_DIRECTORY_NAME = 'certora/scripts'
@@ -10,6 +12,17 @@ export const CERTORA_INNER_DIR = '/.certora_internal/'
 export const CERTORA_INNER_DIR_BUILD = '/.certora_internal/scripts_to_build/'
 export const LOG_DIRECTORY_DEFAULT = 'certora_logs'
 export const LAST_CONFS = '.last_confs'
+
+export enum Status {
+  missingSettings = 'Missing Settings',
+  ready = 'Ready',
+  running = 'Running',
+  pending = 'Pending',
+  success = 'Ready Success',
+  unableToRun = 'Unable To Run',
+  incompleteResults = 'Incomplete Results',
+  settingsError = 'Settings Error',
+}
 
 export type JumpToDefinition = {
   file: string
@@ -161,6 +174,7 @@ export type InputFormData = {
 export type JobNameMap = {
   displayName: string
   fileName: string
+  jobListPath: Uri
 }
 
 export type Compiler = {
@@ -312,6 +326,7 @@ export type EventFromResultsWebview =
     }
   | {
       command: CommandFromResultsWebview.UploadConf
+      payload: Uri
     }
   | {
       command: CommandFromResultsWebview.Rename
@@ -324,7 +339,7 @@ export type EventFromSettingsWebview =
     }
   | {
       command: CommandFromSettingsWebview.CreateConfFile
-      payload: NewForm
+      payload: { form: NewForm; runName: JobNameMap }
     }
   | {
       command: CommandFromSettingsWebview.OpenBrowser
@@ -357,7 +372,20 @@ export type ResourceError = {
   topics: Topic[]
 }
 
-export type ConfToCreate = {
-  fileName: string
-  allowRun: number
+// export type ConfToCreate = {
+//   fileName: string
+//   allowRun: number
+// }
+
+export type Run = {
+  id: number
+  name: JobNameMap
+  status: Status
+  vrLink?: string
+}
+
+export type JobList = {
+  title: string
+  dirPath?: Uri
+  jobs?: Run[]
 }

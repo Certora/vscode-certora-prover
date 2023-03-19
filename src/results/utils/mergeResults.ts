@@ -45,11 +45,13 @@ export function addVerificationResult(
   results: Verification[],
   newResult: Job,
   name: string,
+  pid: number,
 ): void {
   const tree: Tree = newResult.verificationProgress
   addJobIdToProperties(newResult)
   const newVerification: Verification = {
     name: name,
+    pid: pid,
     contract: tree.contract,
     spec: tree.spec,
     jobs: [newResult],
@@ -61,6 +63,7 @@ export function smartMergeVerificationResult(
   results: Verification[],
   newResult: Job,
   name: string,
+  pid: number,
 ): void {
   const tree: Tree = newResult.verificationProgress
   // look for Verification with the same name
@@ -79,6 +82,7 @@ export function smartMergeVerificationResult(
     // create a new Verification object and push to the Verification[]
     const newVerification: Verification = {
       name: name,
+      pid: pid,
       contract: tree.contract,
       spec: tree.spec,
       jobs: [newResult],

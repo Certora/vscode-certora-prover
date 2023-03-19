@@ -2,9 +2,17 @@
  *  Here we declare types and enums
  *-------------------------------------------------------------------------------------------- */
 
+import type { Uri } from 'vscode'
+
 export type AdditionalContract = {
   file: string
   name?: string
+}
+
+export type JobNameMap = {
+  displayName: string
+  fileName: string
+  jobListPath: any
 }
 
 export type Link = {
@@ -143,7 +151,7 @@ export type EventsFromExtension =
     }
   | {
       type: EventTypesFromExtension.EditConfFile
-      payload: { confFile: ConfFile; runName: string }
+      payload: { confFile: ConfFile; runName: JobNameMap }
     }
   | {
       type: EventTypesFromExtension.FileChosen

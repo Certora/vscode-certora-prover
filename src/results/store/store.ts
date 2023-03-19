@@ -3,7 +3,7 @@
  *-------------------------------------------------------------------------------------------- */
 
 import { Writable, writable } from 'svelte/store'
-import type { Verification } from '../types'
+import type { JobList, Verification } from '../types'
 
 export const expandables = writable([])
 export const expandCollapse = writable({
@@ -13,3 +13,4 @@ export const expandCollapse = writable({
   hasResults: false,
 })
 export const verificationResults: Writable<Verification[]> = writable([])
+export const jobLists: Writable<JobList[]> = writable([])

@@ -7,7 +7,11 @@ export const checkMyInputs = writable(false)
 
 export const badInputs = writable({ sol: 0, spec: 0, msg: 0 })
 
-export const RunName = writable('')
+export const RunName = writable({
+  displayName: '',
+  fileName: '',
+  jobListPath: '',
+})
 
 export const disableForm = writable(false)
 

@@ -2,6 +2,8 @@
  *  Here we declare types and enums
  *-------------------------------------------------------------------------------------------- */
 
+import type { Uri } from 'vscode'
+
 export const CONF_DIRECTORY = 'certora/conf/'
 
 export type Action = {
@@ -152,6 +154,7 @@ export type ProgressResponse = {
 
 export type Verification = {
   name: string
+  pid: number
   spec: string
   contract: string
   jobs: Job[]
@@ -168,6 +171,32 @@ export type ConfToCreate = {
 export type JobNameMap = {
   displayName: string
   fileName: string
+  jobListPath: Uri
+}
+
+export enum Status {
+  missingSettings = 'Missing Settings',
+  ready = 'Ready',
+  running = 'Running',
+  pending = 'Pending',
+  success = 'Ready Success',
+  unableToRun = 'Unable To Run',
+  incompleteResults = 'Incomplete Results',
+  settingsError = 'Settings Error',
+}
+
+export type Run = {
+  id: number
+  name: JobNameMap
+  status: Status
+  vrLink?: string
+}
+
+export type JobList = {
+  title: string
+  fixedActions?: Action[]
+  dirPath?: Uri
+  jobs?: Run[]
 }
 
 export enum EventTypesFromExtension {
@@ -218,19 +247,19 @@ export type EventsFromExtension =
     }
   | {
       type: EventTypesFromExtension.AllowRun
-      payload: string
+      payload: JobNameMap
     }
   | {
       type: EventTypesFromExtension.BlockRun
-      payload: string
+      payload: JobNameMap
     }
   | {
       type: EventTypesFromExtension.SettingsError
-      payload: string
+      payload: JobNameMap
     }
   | {
       type: EventTypesFromExtension.FocusChanged
-      payload: string
+      payload: { name: string; path: Uri }
     }
   | {
       type: EventTypesFromExtension.UploadingFiles
@@ -242,31 +271,13 @@ export type EventsFromExtension =
     }
   | {
       type: EventTypesFromExtension.InitialJobs
-      payload: ConfToCreate[]
+      payload: JobList
     }
   | {
       type: EventTypesFromExtension.DeleteJob
-      payload: string
+      payload: { name: string; path: Uri }
     }
   | {
       type: EventTypesFromExtension.RunJob
       payload: string
     }
-
-export enum Status {
-  missingSettings = 'Missing Settings',
-  ready = 'Ready',
-  running = 'Running',
-  pending = 'Pending',
-  success = 'Ready Success',
-  unableToRun = 'Unable To Run',
-  incompleteResults = 'Incomplete Results',
-  settingsError = 'Settings Error',
-}
-
-export type Run = {
-  id: number
-  name: string
-  status: Status
-  vrLink?: string
-}

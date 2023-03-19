@@ -441,20 +441,15 @@ export function processForm(
   return form
 }
 
-export async function createConfFile(formData: InputFormData): Promise<void> {
+export async function createConfFile(
+  formData: InputFormData,
+  uri: Uri,
+): Promise<void> {
   try {
-    const basePath = workspace.workspaceFolders?.[0]
-
-    if (!basePath) return
-
     const encoder = new TextEncoder()
     const convertedData = convertSourceFormDataToConfFileJSON(formData)
     const content = encoder.encode(convertedData)
-    const path = Uri.joinPath(
-      basePath.uri,
-      CONF_DIRECTORY_NAME,
-      `${formData.name}.conf`,
-    )
+    const path = Uri.parse(uri.path + `${formData.name}.conf`)
     await workspace.fs.writeFile(path, content)
     log({
       action: `Conf file was created`,

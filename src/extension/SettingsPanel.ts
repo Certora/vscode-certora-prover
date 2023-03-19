@@ -23,17 +23,17 @@ export class SettingsPanel {
   private watcher: SmartContractsFilesWatcher
   // private editConfFile?: ConfFile
   private static allPanels: SettingsPanel[] = []
-  private curConfFileDisplayName: string
+  private curConfFileName: JobNameMap
+  // private curConfFileDisplayName: string
   private static resultsWebviewProvider: ResultsWebviewProvider
 
   private constructor(
     panel: vscode.WebviewPanel,
     extensionUri: vscode.Uri,
-    confFileDisplayName: string,
-    confFileName: string,
+    confFileName: JobNameMap,
     editConfFile?: ConfFile,
   ) {
-    this.curConfFileDisplayName = confFileDisplayName
+    this.curConfFileName = confFileName
 
     this._panel = panel
 
@@ -46,10 +46,12 @@ export class SettingsPanel {
     this.watcher.init(this._panel.webview)
     if (editConfFile) {
       const name =
-        confFileDisplayName !== '' ? confFileDisplayName : confFileName
+        confFileName.displayName !== ''
+          ? confFileName.displayName
+          : confFileName.fileName
       this._panel.webview.postMessage({
         type: 'edit-conf-file',
-        payload: { confFile: editConfFile, runName: name },
+        payload: { confFile: editConfFile, runName: confFileName },
       })
       // this.editConfFile = editConfFile
     }
@@ -59,7 +61,10 @@ export class SettingsPanel {
         if (SettingsPanel.resultsWebviewProvider) {
           SettingsPanel.resultsWebviewProvider.postMessage({
             type: 'focus-changed',
-            payload: confFileName,
+            payload: {
+              name: confFileName.fileName,
+              path: confFileName.jobListPath,
+            },
           })
         }
       }
@@ -81,29 +86,33 @@ export class SettingsPanel {
               source: Sources.Extension,
               info: e.payload,
             })
-            const form: InputFormData = processForm(e.payload, confFileName)
-            createConfFile(form)
+            const form: InputFormData = processForm(
+              e.payload.form,
+              confFileName.fileName,
+            )
+            const curNamesMap = e.payload.runName
+            createConfFile(form, e.payload.runName.jobListPath)
             if (
               form.mainContractName &&
               form.mainSolidityFile &&
               form.solidityCompiler &&
               form.specFile &&
-              !e.payload.checkMyInputs
+              !e.payload.form.checkMyInputs
             ) {
               // if all mandatory fields are filled - allow running
               SettingsPanel.resultsWebviewProvider.postMessage({
                 type: 'allow-run',
-                payload: confFileName,
+                payload: curNamesMap,
               })
-            } else if (!e.payload.checkMyInputs) {
+            } else if (!e.payload.form.checkMyInputs) {
               SettingsPanel.resultsWebviewProvider.postMessage({
                 type: 'block-run',
-                payload: confFileName,
+                payload: curNamesMap,
               })
             } else {
               SettingsPanel.resultsWebviewProvider.postMessage({
                 type: 'settings-error',
-                payload: confFileName,
+                payload: curNamesMap,
               })
             }
             break
@@ -137,7 +146,7 @@ export class SettingsPanel {
       if (SettingsPanel.resultsWebviewProvider) {
         SettingsPanel.resultsWebviewProvider.postMessage({
           type: 'focus-changed',
-          payload: '',
+          payload: { name: '', path: vscode.Uri.parse('') },
         })
       }
     }
@@ -146,24 +155,24 @@ export class SettingsPanel {
 
   public static disableForm(name: string): void {
     const panelToDisable = SettingsPanel.allPanels.find(
-      panel => panel.curConfFileDisplayName === name,
+      panel => panel.curConfFileName.displayName === name,
     )
     if (panelToDisable !== undefined) {
       panelToDisable._panel.webview.postMessage({
         type: 'disable-form',
-        payload: panelToDisable.curConfFileDisplayName,
+        payload: panelToDisable.curConfFileName.displayName,
       })
     }
   }
 
   public static enableForm(name: string): void {
     const panelToDisable = SettingsPanel.allPanels.find(
-      panel => panel.curConfFileDisplayName === name,
+      panel => panel.curConfFileName.displayName === name,
     )
     if (panelToDisable !== undefined) {
       panelToDisable._panel.webview.postMessage({
         type: 'enable-form',
-        payload: panelToDisable.curConfFileDisplayName,
+        payload: panelToDisable.curConfFileName.displayName,
       })
     }
   }
@@ -193,22 +202,24 @@ export class SettingsPanel {
     SettingsPanel.currentPanel = new SettingsPanel(
       panel,
       extensionUri,
-      confFileName.displayName,
-      confFileName.fileName,
+      confFileName,
       editConfFile,
     )
     this.allPanels.push(SettingsPanel.currentPanel)
     if (SettingsPanel.resultsWebviewProvider) {
       SettingsPanel.resultsWebviewProvider.postMessage({
         type: 'focus-changed',
-        payload: confFileName.fileName,
+        payload: {
+          name: confFileName.fileName,
+          path: confFileName.jobListPath,
+        },
       })
     }
   }
 
   public static removePanel(name: string): void {
     const panelToRemove = SettingsPanel.allPanels.find(
-      panel => panel.curConfFileDisplayName === name,
+      panel => panel.curConfFileName.displayName === name,
     )
     panelToRemove?.dispose()
   }
@@ -276,7 +287,10 @@ export class SettingsPanel {
     let isOpened = false
     if (editConfFile) {
       SettingsPanel.allPanels.forEach(panel => {
-        if (panel.curConfFileDisplayName === confName.displayName) {
+        if (
+          panel.curConfFileName.displayName === confName.displayName &&
+          panel.curConfFileName.jobListPath.path === confName.jobListPath.path
+        ) {
           isOpened = true
           SettingsPanel.currentPanel = panel
         }

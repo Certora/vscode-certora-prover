@@ -29,7 +29,7 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   public deleteConf: null | ((name: JobNameMap) => void) = null
   public askToDeleteJob: null | ((name: JobNameMap) => void) = null
   public createInitialJobs: null | (() => Promise<void>) = null
-  public uploadConf: null | (() => Promise<void>) = null
+  public uploadConf: null | ((jobListUri: vscode.Uri) => Promise<void>) = null
   public duplicate:
     | null
     | ((
@@ -181,7 +181,7 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
               source: Sources.Extension,
             })
             if (typeof this.uploadConf === 'function') {
-              this.uploadConf()
+              this.uploadConf(e.payload)
             }
             break
           case CommandFromResultsWebview.EnableEdit:
