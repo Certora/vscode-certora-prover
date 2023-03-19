@@ -15,10 +15,12 @@
     navState,
     specObj,
     solidityObj,
+    disableForm,
     specFilesArr,
   } from './stores/store.js'
   import CheckBoxInfo from './components/CheckBoxInfo.svelte'
   import { manageFiles } from './utils/refreshFiles'
+  import { Source } from './types'
 
   // this items arrary contains all the solidity files and should update on when updateItems is fired
   // some fake stuff
@@ -166,7 +168,10 @@
   }
 </script>
 
-<div class="card_parent_wrapper bg_dark border-rd">
+<div
+  class={'card_parent_wrapper bg_dark border-rd ' +
+    ($disableForm ? 'disable_main' : '')}
+>
   <CollapseCard
     chevron="padding-right:16px;"
     bind:open={$navState.specCheck.active}
@@ -222,6 +227,7 @@
                   placeholder="deafult: all rules"
                   bind:bindValue={$specObj.rules}
                   infoObj={infoObjArr.rules}
+                  source={Source.Spec}
                 />
               </div>
             </div>
@@ -241,6 +247,7 @@
                           placeholder="flag name"
                           bind:bindValue={obj.name}
                           infoObj={infoObjArr.flag}
+                          source={Source.Spec}
                         />
                       </div>
                       <div class="dark_input">
@@ -248,6 +255,7 @@
                           placeholder="value"
                           bind:bindValue={obj.value}
                           infoObj={infoObjArr.value}
+                          source={Source.Spec}
                         />
                       </div>
                       <i
@@ -267,9 +275,10 @@
                     <div class="dark_input input_x3">
                       <h3>Duration</h3>
                       <CustomInput
-                        placeholder="default: 600"
+                        placeholder="default: 300"
                         bind:bindValue={$specObj.duration}
                         infoObj={infoObjArr.duration}
+                        source={Source.Spec}
                       />
                     </div>
 
@@ -293,6 +302,7 @@
                         placeholder="default: 1"
                         bind:bindValue={$specObj.loopUnroll}
                         infoObj={infoObjArr.loop_iter}
+                        source={Source.Spec}
                       />
                     </div>
                   </div>
@@ -354,6 +364,20 @@
                     </div>
                   </div>
                   <div class="input_wrapper check_between  mt-8px">
+                    <div class="input_wrapper input_single">
+                      <div class="dark_input">
+                        <h3>Branch</h3>
+                        <CustomInput
+                          placeholder="default: master"
+                          bind:bindValue={$specObj.branchName}
+                          infoObj={infoObjArr.stg}
+                          source={Source.Spec}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="input_wrapper  mt-8px">
                     <div class="dark_input check_box_wrapper">
                       <label class="checkbox_container"
                         >Staging
@@ -366,18 +390,6 @@
                       <CheckBoxInfo infoObj={infoObjArr.stg} />
                     </div>
                   </div>
-                  {#if $specObj.runOnStg}
-                    <div class="input_wrapper input_single">
-                      <div class="dark_input">
-                        <h3>Branch Name</h3>
-                        <CustomInput
-                          placeholder="default: master"
-                          bind:bindValue={$specObj.branchName}
-                          infoObj={infoObjArr.stg}
-                        />
-                      </div>
-                    </div>
-                  {/if}
                 </div>
               </CollapseCard>
             </div>
@@ -513,5 +525,13 @@
       width: 100%;
       max-width: 100%;
     }
+  }
+  .disable_main {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .disable_main *:hover {
+    all: unset !important;
   }
 </style>

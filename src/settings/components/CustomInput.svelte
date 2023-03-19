@@ -13,11 +13,15 @@
     contractValidators,
   } from '../validations/validators.js'
   import { createFieldValidator } from '../validations/validation.js'
+  import { Source } from '../types'
 
-  import { checkMyInputs } from '../stores/store'
+  import { badInputs, checkMyInputs } from '../stores/store'
+
   export let placeholder = 'placeholder'
   export let bindValue
   export let disabledState = false
+  export let source
+  let flag = false
 
   export let infoObj = {
     infoText: 'some text...',
@@ -58,6 +62,7 @@
       validator = contractValidators()
       return
     }
+
     if ((infoObj.validator = 'valueValidator')) {
       validator = value => {
         return true
@@ -70,7 +75,6 @@
 
   const [validity, validate] = createFieldValidator(validator)
 
-  let mouse_is_on_input = false
   let icon_wrapper = false
   let showInfo = false
   let mouse_is_on_show_info = false
@@ -83,7 +87,6 @@
   function checkMouseLeaveInput() {
     setTimeout(() => {
       if (icon_wrapper) return
-      mouse_is_on_input = false
       icon_wrapper = false
     }, 100)
   }
@@ -99,6 +102,33 @@
       $checkMyInputs = inputs.some(el => {
         if (el.classList.contains('field-danger')) return true
       })
+      if (!$validity.valid) {
+        if (source === Source.Sol && !flag) {
+          $badInputs.sol += 1
+          flag = true
+        }
+        if (source === Source.Spec && !flag) {
+          $badInputs.spec += 1
+          flag = true
+        }
+        if (source === Source.Msg && !flag) {
+          $badInputs.msg += 1
+          flag = true
+        }
+      } else {
+        if (source === Source.Sol && flag) {
+          $badInputs.sol -= 1
+          flag = false
+        }
+        if (source === Source.Spec && flag) {
+          $badInputs.spec -= 1
+          flag = false
+        }
+        if (source === Source.Msg && flag) {
+          $badInputs.msg -= 1
+          flag = false
+        }
+      }
     })
   }
 </script>
@@ -113,13 +143,12 @@
     maxlength="255"
     bind:value={bindValue}
     {placeholder}
-    on:mouseenter={() => (mouse_is_on_input = true)}
     on:mouseleave={checkMouseLeaveInput}
     class:field-danger={!$validity.valid}
     use:validate={bindValue}
   />
 
-  {#if $validity.dirty && !$validity.valid}
+  {#if !$validity.valid}
     <!-- validation message -->
     <div class="input_error_message mt-8px">
       <i class="codicon codicon-warning" />
@@ -129,14 +158,16 @@
   <div
     class="icon_wrapper"
     on:mouseenter={() => (icon_wrapper = true)}
-    on:mouseleave={() => ((mouse_is_on_input = false), (icon_wrapper = false))}
+    on:mouseleave={() => (icon_wrapper = false)}
   >
     {#if bindValue !== ''}
       <i
         class="codicon codicon-close"
         on:click={() => {
-          bindValue = ''
-          icon_wrapper = false
+          if (!disabledState) {
+            bindValue = ''
+            icon_wrapper = false
+          }
         }}
       />
     {/if}
@@ -145,7 +176,6 @@
         class="codicon codicon-info"
         on:mouseenter={() => (showInfo = true)}
         on:mouseleave={checkMouseLeave}
-        style={mouse_is_on_input ? '' : 'display:none;'}
       />
     {/if}
   </div>

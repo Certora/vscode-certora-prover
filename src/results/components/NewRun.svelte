@@ -22,13 +22,14 @@
   import Pane from './Pane.svelte'
   import Tree from './Tree.svelte'
   import { verificationResults } from '../store/store'
+  import { writable } from 'svelte/store'
 
-  export let doRename: boolean = true
   export let editFunc: () => void
   export let deleteFunc: () => void
   export let deleteRun: () => void
   export let namesMap: Map<string, string>
   export let runName: string = ''
+  const renameJob = writable(runName === '')
   // this creates the new conf file
   export let renameRun: (oldName: string, newName: string) => void
   export let duplicateFunc: (
@@ -64,42 +65,44 @@
 
   let beforeRename = ''
 
-  let stop = false
+  // let stop = false
 
   const UNTITLED = 'untitled'
 
-  const listener = (e: MessageEvent<EventsFromExtension>) => {
-    switch (e.data.type) {
-      case EventTypesFromExtension.ParseError: {
-        log({
-          action: 'Received "parse-error" command',
-          source: Sources.ResultsWebview,
-          info: e.data.payload,
-        })
-        if (e.data.payload === runName) {
-          // change status to 'unableToRun' only if run wasn't stopped manually / intentionally
-          if (!stop) {
-            statusChange(Status.unableToRun)
-            stop = false
-          }
-        }
-        break
-      }
-    }
-  }
+  // const listener = (e: MessageEvent<EventsFromExtension>) => {
+  //   switch (e.data.type) {
+  //     case EventTypesFromExtension.ParseError: {
+  //       log({
+  //         action: 'Received "parse-error" command',
+  //         source: Sources.ResultsWebview,
+  //         info: e.data.payload,
+  //       })
+  //       if (e.data.payload === runName) {
+  //         // change status to 'unableToRun' only if run wasn't stopped manually / intentionally
+  //         if (!stop) {
 
-  onMount(() => {
-    window.addEventListener('message', listener)
-  })
+  //           editFunc()
+  //           statusChange(Status.unableToRun)
+  //           stop = false
+  //         }
+  //       }
+  //       break
+  //     }
+  //   }
+  // }
 
-  onDestroy(() => {
-    window.removeEventListener('message', listener)
-  })
+  // onMount(() => {
+  //   window.addEventListener('message', listener)
+  // })
+
+  // onDestroy(() => {
+  //   window.removeEventListener('message', listener)
+  // })
 
   function onKeyPress(e: any): void {
     // get out of 'rename' mode when enter is pressed
     if (e.key === 'Enter') {
-      doRename = false
+      $renameJob = false
 
       // we use untitled as default name, when creating a new run
       if (e.currentTarget.value === createInitialName()) {
@@ -194,7 +197,7 @@
    * get into rename mode
    */
   function setRename(): void {
-    doRename = true
+    $renameJob = true
     beforeRename = runName
   }
 
@@ -271,7 +274,6 @@
       goToRuleReportAction.disabled = false
     }
     actions.push(goToRuleReportAction)
-    hasResults()
     return actions
   }
 
@@ -304,6 +306,13 @@
         },
       },
     ]
+    if (status === Status.incompleteResults) {
+      actions.push({
+        title: 'Stop',
+        icon: 'stop-circle',
+        onClick: runningStop,
+      })
+    }
     return actions
   }
 
@@ -329,9 +338,9 @@
    * stops a running run
    */
   function runningStop(): void {
-    statusChange(Status.ready)
+    // statusChange(Status.ready)
     runningStopFunc()
-    stop = true
+    // stop = true
   }
 
   /**
@@ -341,6 +350,11 @@
     if (isPending) {
       return [
         {
+          title: 'Edit',
+          icon: 'gear',
+          onClick: editFunc,
+        },
+        {
           title: 'Stop',
           icon: 'stop-circle',
           onClick: pendingRunStop,
@@ -349,6 +363,11 @@
     }
     if (nowRunning) {
       return [
+        {
+          title: 'Edit',
+          icon: 'gear',
+          onClick: editFunc,
+        },
         {
           title: 'Stop',
           icon: 'stop-circle',
@@ -369,31 +388,8 @@
     var activeElement = document.activeElement
     var myElement = document.getElementById('rename_input ' + runName)
     if (activeElement !== myElement) {
-      doRename = false
+      $renameJob = false
     }
-  }
-
-  /**
-   * checks if a run has results
-   */
-  function hasResults(): boolean {
-    const result = $verificationResults.find(vr => {
-      return vr.name === runName
-    })
-    if (
-      result !== undefined &&
-      hasCompleteResults() &&
-      status !== Status.success
-    ) {
-      statusChange(Status.success)
-    } else if (
-      result !== undefined &&
-      status !== Status.incompleteResults &&
-      status !== Status.success
-    ) {
-      statusChange(Status.incompleteResults)
-    }
-    return result !== undefined
   }
 
   /**
@@ -428,7 +424,7 @@
 </script>
 
 <div class="body">
-  {#if doRename}
+  {#if $renameJob}
     <div class="renameInput">
       <img
         class="icon"
@@ -451,7 +447,7 @@
       />
     </div>
   {:else if !nowRunning}
-    {#key [status]}
+    {#key [status, inactiveSelected]}
       <div class="results" on:click={onClick}>
         <Pane
           title={namesMap.get(runName)}
@@ -468,7 +464,10 @@
         >
           {#each $verificationResults as vr, index (index)}
             {#if vr.name === runName}
-              <li class="tree">
+              <li
+                class="tree"
+                on:contextmenu|stopPropagation|preventDefault={() => null}
+              >
                 <Tree
                   runDisplayName={namesMap.get(runName)}
                   data={{
@@ -501,7 +500,13 @@
     {/key}
   {/if}
 </div>
-<ContextMenu {hide} actions={createActionsForContextMenu()} {pos} />
+<ContextMenu
+  {hide}
+  actions={status
+    ? createActionsForContextMenu()
+    : createActionsForContextMenu()}
+  {pos}
+/>
 
 <style lang="postcss">
   .body {

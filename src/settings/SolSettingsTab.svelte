@@ -12,12 +12,14 @@
   import SolidityFiles from './SolidityFiles.svelte'
   import { openBrowser } from './utils/openBrowser'
   import { manageFiles } from './utils/refreshFiles'
+  import { Source } from './types'
   import {
     solFilesArr,
     navState,
     solidityObj,
     solAdditionalContracts,
     isReset,
+    disableForm,
   } from './stores/store.js'
   import CustomList from './components/CustomList.svelte'
 
@@ -162,7 +164,10 @@
   }
 </script>
 
-<div class="card_parent_wrapper bg_dark border-rd">
+<div
+  class={'card_parent_wrapper bg_dark border-rd ' +
+    ($disableForm ? 'disable_main' : '')}
+>
   <CollapseCard
     chevron="padding-right:16px;"
     bind:open={$navState.solCheck.active}
@@ -224,6 +229,7 @@
                 <CustomInput
                   infoObj={infoObjArr.contractName}
                   placeholder="Contract"
+                  source={Source.Sol}
                   bind:bindValue={$solidityObj.mainContract}
                 />
               </div>
@@ -245,6 +251,7 @@
                       <CustomInput
                         infoObj={infoObjArr.solCompiler}
                         placeholder="example: solc7.6"
+                        source={Source.Sol}
                         bind:bindValue={$solidityObj.compiler.ver}
                       />
                     </div>
@@ -253,6 +260,7 @@
                       <CustomInput
                         infoObj={infoObjArr.solPackages}
                         placeholder="CVT-Executables-Mac"
+                        source={Source.Sol}
                         bind:bindValue={$solidityObj.compiler.exe}
                       />
                     </div>
@@ -279,6 +287,7 @@
                                 <CustomInput
                                   infoObj={infoObjArr.solc_args}
                                   placeholder="example: optimize-runs"
+                                  source={Source.Sol}
                                   bind:bindValue={obj.key}
                                 />
                               </div>
@@ -286,6 +295,7 @@
                                 <CustomInput
                                   infoObj={infoObjArr.solc_args}
                                   placeholder="value (optional)"
+                                  source={Source.Sol}
                                   bind:bindValue={obj.value}
                                 />
                               </div>
@@ -324,6 +334,7 @@
                                 <CustomInput
                                   infoObj={infoObjArr.package}
                                   placeholder="Package name"
+                                  source={Source.Sol}
                                   bind:bindValue={obj.packageName}
                                 />
                               </div>
@@ -331,6 +342,7 @@
                                 <CustomInput
                                   infoObj={infoObjArr.package}
                                   placeholder=".../path"
+                                  source={Source.Sol}
                                   bind:bindValue={obj.path}
                                 />
                               </div>
@@ -373,6 +385,7 @@
                         <CustomInput
                           infoObj={infoObjArr.linkVar}
                           placeholder="Variable"
+                          source={Source.Sol}
                           bind:bindValue={$solidityObj.linking[index].variable}
                         />
                       </div>
@@ -380,6 +393,7 @@
                         <CustomInput
                           infoObj={infoObjArr.linkContract}
                           placeholder="Other Contract"
+                          source={Source.Sol}
                           bind:bindValue={$solidityObj.linking[index]
                             .contractName}
                         />
@@ -419,3 +433,14 @@
     </div>
   </CollapseCard>
 </div>
+
+<style>
+  .disable_main {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .disable_main *:hover {
+    all: unset !important;
+  }
+</style>

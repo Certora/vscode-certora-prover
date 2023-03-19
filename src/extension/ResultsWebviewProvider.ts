@@ -19,8 +19,12 @@ import {
 export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   public viewType = 'results'
   private _panel: vscode.Webview | null = null
-  public stopScript: null | ((pid: number) => void) = null
+  public stopScript: null | ((pid: number, modal: boolean) => void) = null
   public editConfFile: null | ((name: JobNameMap) => Promise<void>) = null
+  public rename:
+    | null
+    | ((oldName: JobNameMap, newName: JobNameMap) => Promise<void>) = null
+
   public openSettings: null | ((name: JobNameMap) => void) = null
   public deleteConf: null | ((name: JobNameMap) => void) = null
   public askToDeleteJob: null | ((name: JobNameMap) => void) = null
@@ -35,6 +39,7 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
       ) => void) = null
 
   public runScript: null | ((name: JobNameMap) => void) = null
+  public enableEdit: null | ((name: JobNameMap) => void) = null
   public removeScript: null | ((name: string) => void) = null
 
   constructor(private readonly _extensionUri: vscode.Uri) {
@@ -77,16 +82,28 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
             })
             // this.stopScript is set in ScriptRunner.ts constructor
             if (typeof this.stopScript === 'function') {
-              this.stopScript(e.payload)
+              console.log('pid, modal:', e.payload.pid, e.payload.modal)
+              this.stopScript(e.payload.pid, e.payload.modal)
             }
             break
           case CommandFromResultsWebview.RunScript:
             log({
               action: 'Received "run-script" command',
               source: Sources.Extension,
+              info: e.payload,
             })
             if (typeof this.runScript === 'function') {
               this.runScript(e.payload)
+            }
+            break
+          case CommandFromResultsWebview.Rename:
+            log({
+              action: 'Received "rename" command',
+              source: Sources.Extension,
+              info: e.payload,
+            })
+            if (typeof this.rename === 'function') {
+              this.rename(e.payload.oldName, e.payload.newName)
             }
             break
           case CommandFromResultsWebview.OpenSettings:
@@ -166,6 +183,16 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
             })
             if (typeof this.uploadConf === 'function') {
               this.uploadConf()
+            }
+            break
+          case CommandFromResultsWebview.EnableEdit:
+            log({
+              action: 'Received "enable-edit" command',
+              source: Sources.Extension,
+              info: e.payload,
+            })
+            if (typeof this.enableEdit === 'function') {
+              this.enableEdit(e.payload)
             }
             break
           default:

@@ -22,6 +22,8 @@
     askToDeleteJob,
     initResults,
     uploadConf,
+    enableEdit,
+    rename,
   } from './extension-actions'
   import { smartMergeVerificationResult } from './utils/mergeResults'
   import { log, Sources } from './utils/log'
@@ -35,6 +37,7 @@
     JobNameMap,
     Status,
     CONF_DIRECTORY,
+    RuleStatuses,
   } from './types'
   import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
   import NewRun from './components/NewRun.svelte'
@@ -48,6 +51,7 @@
 
   export const hide = writable([])
   export const pos = writable({ x: 0, y: 0 })
+  export const focusedRun = writable('')
 
   let output: Output
   let outputRunName: string
@@ -60,7 +64,6 @@
   let pendingQueueCounter = 0
   let namesMap: Map<string, string> = new Map()
   let runsCounter = 0
-  let focusedRun: string = ''
 
   // listen to the results array to see if there are results or not
   $: $verificationResults.length > 0
@@ -144,26 +147,43 @@
             currentverificationResults: $verificationResults,
             newResult: e.data.payload,
             name: e.data.payload.runName,
+            pid: e.data.payload.pid,
           },
         })
-        setVerificationReportLink(
-          e.data.payload.runName,
-          e.data.payload.verificationReportLink,
-        )
+        const pid = e.data.payload.pid
+        const runName = runs.find(run => {
+          return run.id === pid
+        })?.name
+        if (!runName) return
+        setVerificationReportLink(pid, e.data.payload.verificationReportLink)
+        if (e.data.payload.jobStatus === 'FAILED') {
+          setStoppedJobStatus(runName)
+          return
+        }
         smartMergeVerificationResult(
           $verificationResults,
           e.data.payload,
-          e.data.payload.runName,
+          runName,
         )
         $verificationResults = $verificationResults
 
         updateExpendablesFromResults()
+        const thisRun = $verificationResults.find(vr => {
+          return vr.name === runName
+        })
+        if (
+          thisRun?.jobs.find(job => {
+            return !job.jobEnded
+          }) !== undefined
+        ) {
+          runs = setStatus(runName, Status.incompleteResults)
+        }
 
         if (e.data.payload.jobStatus === 'SUCCEEDED') {
-          if (e.data.payload.runName) {
-            removeScript(e.data.payload.runName)
+          if (runName) {
+            removeScript(runName)
+            runs = setStatus(runName, Status.success)
           }
-          runs = setStatus(e.data.payload.runName, Status.success)
         }
         log({
           action: 'After Smart merge current results with new result',
@@ -180,12 +200,20 @@
           source: Sources.ResultsWebview,
           info: e.data.payload,
         })
+        let confToEnable: JobNameMap = {
+          displayName: '',
+          fileName: '',
+        }
         const curPid = e.data.payload.pid
         const vrLink = e.data.payload.vrLink
-        runningScripts.forEach(rs => {
+        runningScripts = runningScripts.map(rs => {
           if (rs.pid === curPid) {
             rs.uploaded = true
+            confToEnable.fileName = getFileName(rs.confFile)
+            confToEnable.displayName = namesMap.get(confToEnable.fileName)
+            enableEdit(confToEnable)
           }
+          return rs
         })
         runningScripts = runningScripts
         runs = runs.map(run => {
@@ -207,7 +235,7 @@
         runningScripts = e.data.payload
         runs = runs.map(r => {
           runningScripts.forEach(rs => {
-            if (r.name === getFilename(rs.confFile)) {
+            if (r.name === getFileName(rs.confFile)) {
               r.id = rs.pid
             }
           })
@@ -227,16 +255,12 @@
         })
         const pid = e.data.payload
         const curRun = runs.find(run => run.id === pid)
+
         if (curRun !== undefined) {
-          if (
-            $verificationResults.find(vr => vr.name === curRun.name) !==
-            undefined
-          ) {
-            runs = setStatus(curRun.name, Status.unableToRun)
-          } else {
-            runs = setStatus(curRun.name, Status.ready)
-          }
+          const runName = curRun.name
+          setStoppedJobStatus(runName)
         }
+
         runningScripts = runningScripts.filter(rs => {
           return rs.pid !== pid
         })
@@ -266,7 +290,16 @@
           info: e.data.payload,
         })
         // status is changed to 'ready' when job is allowed to run
-        runs = setStatus(e.data.payload, Status.ready)
+        const runName = e.data.payload
+        let newStatus = Status.ready
+        if (
+          $verificationResults.find(vr => {
+            return vr.name === runName
+          })
+        ) {
+          newStatus = Status.success
+        }
+        runs = setStatus(runName, newStatus)
         break
       }
       case EventTypesFromExtension.BlockRun: {
@@ -277,6 +310,16 @@
         })
         // status is changed to 'finish setup' when job isn't allowed to run
         runs = setStatus(e.data.payload, Status.missingSettings)
+        break
+      }
+      case EventTypesFromExtension.SettingsError: {
+        log({
+          action: 'Received "settings-error" command',
+          source: Sources.ResultsWebview,
+          info: e.data.payload,
+        })
+        // status is changed to 'finish setup' when job isn't allowed to run
+        runs = setStatus(e.data.payload, Status.settingsError)
         break
       }
       case EventTypesFromExtension.ClearAllJobs: {
@@ -305,10 +348,19 @@
           source: Sources.ResultsWebview,
           info: e.data.payload,
         })
-        focusedRun = e.data.payload
+        $focusedRun = e.data.payload
         break
       }
-
+      case EventTypesFromExtension.ParseError: {
+        log({
+          action: 'Received "parse-error" command',
+          source: Sources.ResultsWebview,
+          info: e.data.payload,
+        })
+        const runName = e.data.payload
+        runs = setStatus(runName, Status.unableToRun)
+        break
+      }
       case EventTypesFromExtension.InitialJobs: {
         log({
           action: 'Received "initial-jobs" command',
@@ -380,9 +432,9 @@
    * @param runName name of the run to update
    * @param link to verification report of run [runName]
    */
-  function setVerificationReportLink(runName: string, link: string) {
+  function setVerificationReportLink(pid: number, link: string) {
     runs.forEach(run => {
-      if (run.name === runName) {
+      if (run.id === pid) {
         run.vrLink = link
       }
     })
@@ -397,7 +449,10 @@
    */
   function setStatus(runName: string, value: Status): Run[] {
     runs.forEach(run => {
-      if (run.name === runName) {
+      if (
+        run.name === runName &&
+        !(run.status === Status.success && value === Status.ready)
+      ) {
         run.status = value
       }
     })
@@ -441,7 +496,7 @@
     duplicate(confNameMapToDuplicate, confNameMapDuplicated, rule)
     createRun(duplicated)
     if (!rule) {
-      focusedRun = duplicatedName
+      $focusedRun = duplicatedName
     }
   }
 
@@ -454,6 +509,49 @@
         tree: [],
       },
     ]
+  }
+
+  function setStoppedJobStatus(jobName: string): void {
+    if (jobName) {
+      removeScript(jobName)
+      if ($verificationResults.length === 0) {
+        runs = setStatus(jobName, Status.ready)
+        return
+      }
+      if (
+        !$verificationResults.map(vr => {
+          return vr.name === jobName
+        })
+      ) {
+        runs = setStatus(jobName, Status.ready)
+        return
+      }
+      $verificationResults.forEach(vr => {
+        if (vr.name === jobName) {
+          runs = setStatus(jobName, Status.success)
+          vr.jobs.forEach(job => {
+            job.verificationProgress.rules.forEach(rule => {
+              if (rule.status === RuleStatuses.Running) {
+                rule.status = RuleStatuses.Killed
+              }
+              rule.children.forEach(child => {
+                if ((child.status = RuleStatuses.Running)) {
+                  child.status = RuleStatuses.Killed
+                }
+              })
+            })
+          })
+        } else if (
+          runs.find(run => {
+            return run.name === jobName
+          })?.status === Status.running
+        ) {
+          runs = setStatus(jobName, Status.ready)
+        }
+      })
+      $verificationResults = $verificationResults
+      return
+    }
   }
 
   /**
@@ -532,7 +630,11 @@
 
     //add to pending queue
     pendingQueue.push(JobNameMap)
+    runs = setStatus(JobNameMap.fileName, Status.pending)
     pendingQueueCounter++
+    $verificationResults = $verificationResults.filter(vr => {
+      return vr.name !== JobNameMap.fileName
+    })
 
     if (output && output.runName === run.name) {
       clearOutput()
@@ -541,7 +643,6 @@
     const shouldRunNext = runningScripts.every(rs => {
       return rs.uploaded === true
     })
-
     //if there are no running scripts => runNext
     if ((runningScripts.length === 0 || shouldRunNext) && index === 0) {
       runNext()
@@ -579,9 +680,7 @@
         fileName: newName,
         displayName: namesMap.get(newName),
       }
-
-      duplicate(oldConfNameMap, newConfNameMap)
-      deleteConf(oldConfNameMap)
+      rename(oldConfNameMap, newConfNameMap)
       namesMap.delete(oldName)
     }
     // rename new run
@@ -592,7 +691,7 @@
       }
       openSettings(JobNameMap)
     }
-    focusedRun = newName
+    $focusedRun = newName
   }
 
   /**
@@ -612,7 +711,7 @@
   /**
    * from conf file uri to only the file name
    */
-  function getFilename(confFile: string): string {
+  function getFileName(confFile: string): string {
     return confFile.replace(CONF_DIRECTORY, '').replace('.conf', '')
   }
 
@@ -620,26 +719,11 @@
    * run all the runs that are allowed to run
    */
   function runAll(): void {
-    runs.forEach((singleRun, index) => {
-      // runs with these statuses should not run automatically
-      if (
-        singleRun.status === Status.missingSettings ||
-        singleRun.status === Status.pending ||
-        singleRun.status === Status.running ||
-        singleRun.status === Status.unableToRun
-      ) {
-        return
-      }
-      const nowRunning = runningScripts.find(script => {
-        return getFilename(script.confFile) === singleRun.name
-      })
-      const inQueue = pendingQueue.find(pendingRun => {
-        return pendingRun.fileName === singleRun.name
-      })
-      //make sure runs aren't ran in parallel to themselves
-      if (inQueue === undefined && nowRunning === undefined) {
-        run(singleRun, index)
-      }
+    const jobsToRun = runs.filter(singleRun => {
+      return singleRun.status === Status.ready
+    })
+    jobsToRun.forEach((job, index) => {
+      run(job, index)
     })
   }
 
@@ -715,7 +799,7 @@
   }
 
   function showMenu(e, index) {
-    $pos = { x: e.clientX, y: e.clientY }
+    $pos = { x: e.clientX, y: e.pageY }
     resentHide()
     $hide[index] = false
   }
@@ -775,59 +859,57 @@
     >
       <ul class="running-scripts">
         {#each Array(runsCounter) as _, index (index)}
-          <!-- removing the keys in hope the one refreshed job won't refresh everything -->
-          {#key [focusedRun]}
-            <li
-              on:contextmenu|stopPropagation|preventDefault={e => {
-                showMenu(e, index)
+          <li
+            on:contextmenu|stopPropagation|preventDefault={e => {
+              showMenu(e, index)
+            }}
+          >
+            <NewRun
+              editFunc={() => editRun(runs[index])}
+              deleteFunc={() => askToDeleteThis(runs[index])}
+              deleteRun={() => deleteRun(runs[index])}
+              {namesMap}
+              {renameRun}
+              duplicateFunc={duplicateRun}
+              runFunc={() => run(runs[index])}
+              status={runs[index].status}
+              {newFetchOutput}
+              nowRunning={(runningScripts.find(
+                rs => getFileName(rs.confFile) === runs[index].name,
+              ) !== undefined ||
+                (pendingQueue.find(rs => rs.fileName === runs[index].name) !==
+                  undefined &&
+                  pendingQueueCounter > 0)) &&
+                $verificationResults.find(
+                  vr => runs[index].name === vr.name,
+                ) === undefined}
+              isPending={pendingQueue.find(
+                rs => rs.fileName === runs[index].name,
+              ) !== undefined && pendingQueueCounter > 0}
+              expandedState={$verificationResults.find(
+                vr => vr.name === runs[index].name,
+              ) !== undefined}
+              pendingStopFunc={() => {
+                pendingStopFunc(runs[index])
               }}
-            >
-              <NewRun
-                doRename={runs[index].name === ''}
-                editFunc={() => editRun(runs[index])}
-                deleteFunc={() => askToDeleteThis(runs[index])}
-                deleteRun={() => deleteRun(runs[index])}
-                {namesMap}
-                {renameRun}
-                duplicateFunc={duplicateRun}
-                runFunc={() => run(runs[index])}
-                status={runs[index].status}
-                {newFetchOutput}
-                nowRunning={(runningScripts.find(
-                  rs => getFilename(rs.confFile) === runs[index].name,
-                ) !== undefined ||
-                  (pendingQueue.find(rs => rs.fileName === runs[index].name) !==
-                    undefined &&
-                    pendingQueueCounter > 0)) &&
-                  $verificationResults.find(
-                    vr => runs[index].name === vr.name,
-                  ) === undefined}
-                isPending={pendingQueue.find(
-                  rs => rs.fileName === runs[index].name,
-                ) !== undefined && pendingQueueCounter > 0}
-                expandedState={$verificationResults.find(
-                  vr => vr.name === runs[index].name,
-                ) !== undefined}
-                pendingStopFunc={() => {
-                  pendingStopFunc(runs[index])
-                }}
-                runningStopFunc={() => {
-                  $verificationResults = $verificationResults.filter(vr => {
-                    return vr.name !== runs[index].name
-                  })
-                  runs = setStatus(runs[index].name, Status.ready)
-                  runs[index].vrLink = ''
-                  stopScript(runs[index].id)
-                }}
-                inactiveSelected={focusedRun}
-                {setStatus}
-                vrLink={runs[index].vrLink}
-                hide={$hide[index]}
-                pos={$pos}
-                bind:runName={runs[index].name}
-              />
-            </li>
-          {/key}
+              runningStopFunc={() => {
+                enableEdit({
+                  fileName: runs[index].name,
+                  displayName: namesMap.get(runs[index].name),
+                })
+                runs[index].vrLink = ''
+                const modal = runs[index].status !== Status.running
+                console.log('modal!!!', modal, runs[index].status)
+                stopScript(runs[index].id, modal)
+              }}
+              inactiveSelected={$focusedRun}
+              {setStatus}
+              vrLink={runs[index].vrLink}
+              hide={$hide[index]}
+              pos={$pos}
+              bind:runName={runs[index].name}
+            />
+          </li>
         {/each}
       </ul>
     </Pane>

@@ -4,7 +4,8 @@
    *-------------------------------------------------------------------------------------------- */
 
   import CustomInput from './components/CustomInput.svelte'
-  import { verification_message } from './stores/store.js'
+  import { verification_message, disableForm } from './stores/store.js'
+  import { Source } from './types'
 
   let infoObjArr = {
     msg: {
@@ -16,7 +17,11 @@
   }
 </script>
 
-<div class="card_parent_wrapper bg_dark border-rd" style="margin-bottom:25px;">
+<div
+  class={'card_parent_wrapper bg_dark border-rd ' +
+    ($disableForm ? 'disable_main' : '')}
+  style="margin-bottom:25px;"
+>
   <div class="header header_contracts">
     <i class="codicon codicon-comment" />
     <h3>Verification Message</h3>
@@ -28,8 +33,20 @@
           placeholder="Text message"
           bind:bindValue={$verification_message}
           infoObj={infoObjArr.msg}
+          source={Source.Msg}
         />
       </div>
     </div>
   </div>
 </div>
+
+<style>
+  .disable_main {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .disable_main *:hover {
+    all: unset !important;
+  }
+</style>

@@ -27,6 +27,7 @@ export enum RuleStatuses {
   Running = 'RUNNING',
   Timeout = 'TIMEOUT',
   Sanity = 'SANITY_FAILED',
+  Killed = 'KILLED',
 }
 
 // output can be either a string of a path or array of strings of path
@@ -137,6 +138,7 @@ export type Job = {
   progressUrl: string
   creationTime: string
   runName?: string
+  pid?: number
   verificationReportLink?: string
 }
 
@@ -184,6 +186,7 @@ export enum EventTypesFromExtension {
   InitialJobs = 'initial-jobs',
   DeleteJob = 'delete-job',
   RunJob = 'run-job',
+  SettingsError = 'settings-error',
 }
 
 export type EventsFromExtension =
@@ -222,6 +225,10 @@ export type EventsFromExtension =
       payload: string
     }
   | {
+      type: EventTypesFromExtension.SettingsError
+      payload: string
+    }
+  | {
       type: EventTypesFromExtension.FocusChanged
       payload: string
     }
@@ -254,6 +261,7 @@ export enum Status {
   success = 'Ready Success',
   unableToRun = 'Unable To Run',
   incompleteResults = 'Incomplete Results',
+  settingsError = 'Settings Error',
 }
 
 export type Run = {

@@ -87,7 +87,7 @@
             "description": "Maximal execution time per rule (in seconds)",
             "type": "integer",
             "exclusiveMinimum": -1,
-            "default": 600,
+            "default": 300,
             "order": 2
           }
         }

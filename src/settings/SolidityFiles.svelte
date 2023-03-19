@@ -10,9 +10,14 @@
   import Icon from './components/Icon.svelte'
   import CustomItem from './components/CustomItem.svelte'
   import CustomInput from './components/CustomInput.svelte'
-  import { solAdditionalContracts, solFilesArr } from './stores/store.js'
+  import {
+    solAdditionalContracts,
+    solFilesArr,
+    disableForm,
+  } from './stores/store.js'
   import { manageFiles } from './utils/refreshFiles'
   import CustomList from './components/CustomList.svelte'
+  import { Source } from './types'
 
   //   slots
   export let index
@@ -78,7 +83,9 @@
   }
 </script>
 
-<div class="bg_light border-rd mt-8px">
+<div
+  class={'bg_light border-rd mt-8px ' + ($disableForm ? 'disable_main' : '')}
+>
   <CollapseCard chevron="padding-right:12px;">
     <div
       slot="header"
@@ -98,7 +105,7 @@
         on:click|stopPropagation={() => removeSolFile(index)}
       />
     </div>
-    <div slot="body" class="p-12 pt-0">
+    <div slot="body" class="p-12 pt-0 ">
       <div class="input_wrapper">
         <div class="dark_input">
           <h3>Solidity File<span>*</span></h3>
@@ -125,6 +132,7 @@
           <CustomInput
             infoObj={infoObjArr.contractName}
             placeholder="Contract"
+            source={Source.Sol}
             bind:bindValue={$solAdditionalContracts[index].mainContract}
           />
         </div>
@@ -147,6 +155,7 @@
                 <CustomInput
                   infoObj={infoObjArr.solCompiler}
                   placeholder="example: solc7.6"
+                  source={Source.Sol}
                   bind:bindValue={$solAdditionalContracts[index].compiler.ver}
                 />
               </div>
@@ -155,6 +164,7 @@
                 <CustomInput
                   infoObj={infoObjArr.solPackages}
                   placeholder="CVT-Executables-Mac"
+                  source={Source.Sol}
                   bind:bindValue={$solAdditionalContracts[index].compiler.exe}
                 />
               </div>
@@ -176,6 +186,7 @@
                   <CustomInput
                     infoObj={infoObjArr.linkVar}
                     placeholder="Variable"
+                    source={Source.Sol}
                     bind:bindValue={obj.variable}
                   />
                 </div>
@@ -183,6 +194,7 @@
                   <CustomInput
                     infoObj={infoObjArr.linkContract}
                     placeholder="Other Contract"
+                    source={Source.Sol}
                     bind:bindValue={obj.contractName}
                   />
                 </div>
@@ -208,3 +220,14 @@
     </div>
   </CollapseCard>
 </div>
+
+<style>
+  .disable_main {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .disable_main *:hover {
+    all: unset !important;
+  }
+</style>
