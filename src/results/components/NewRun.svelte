@@ -308,11 +308,11 @@
   function createActionsForRunningScript(): Action[] {
     if (status === Status.pending) {
       return [
-        {
-          title: 'Edit',
-          icon: 'gear',
-          onClick: editFunc,
-        },
+        // {
+        //   title: 'Edit',
+        //   icon: 'gear',
+        //   onClick: editFunc,
+        // },
         {
           title: 'Stop',
           icon: 'stop-circle',
@@ -322,11 +322,11 @@
     }
     if (status === Status.running) {
       return [
-        {
-          title: 'Edit',
-          icon: 'gear',
-          onClick: editFunc,
-        },
+        // {
+        //   title: 'Edit',
+        //   icon: 'gear',
+        //   onClick: editFunc,
+        // },
         {
           title: 'Stop',
           icon: 'stop-circle',

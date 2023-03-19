@@ -287,9 +287,24 @@
         })
         // status is changed to 'ready' when job is allowed to run
         // todo: if status is running / pending - do nothing
+        const name = e.data.payload
         const runName = e.data.payload.fileName
         let newStatus = Status.ready
         const jobListPath = e.data.payload.jobListPath
+        const curJob = jobList.jobs.find(job => {
+          return (
+            job.name.fileName === name.fileName &&
+            job.name.jobListPath === name.jobListPath
+          )
+        })
+        if (
+          curJob &&
+          (curJob.status === Status.pending ||
+            curJob.status === Status.running ||
+            curJob.status === Status.incompleteResults)
+        ) {
+          return
+        }
         if (jobListPath.path === jobList.dirPath.path) {
           if (
             $verificationResults.find(vr => {
