@@ -20,8 +20,12 @@
   export let duplicateFunc = null
   export let initialExpandedState: boolean = false
   export let runDisplayName
+  export let jobEnded: boolean = false
 
   const dispatch = createEventDispatcher<{ fetchOutput: Assert | Rule }>()
+  $: jobEnded && rule?.status && rule.status === RuleStatuses.Running
+    ? (rule.status = RuleStatuses.Killed)
+    : null
   $: allowDuplicate =
     rule &&
     typeof duplicateFunc === 'function' &&
@@ -112,6 +116,7 @@
   {#each rule.children as child, i}
     <svelte:self
       rule={child}
+      {jobEnded}
       level={level + 1}
       setSize={rule.children.length}
       posInset={i}

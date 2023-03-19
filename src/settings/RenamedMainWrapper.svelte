@@ -57,30 +57,17 @@
   }
 </script>
 
-<div class={'main_wrapper '}>
+<div class="main_wrapper ">
   <div class="left_wrapper media"><RunSideNav /></div>
   <div class="right_wrapper">
     <div class="top_nav"><RunSideNav /></div>
     <SolSettingsTab />
     <SpecSettingsTab />
     <VerificationMessageTab />
-    <!-- <div class="feedback_space" />
-    <div class="feedback">
-      <a
-        id="feedback-button"
-        class="feedback-button"
-        title="Feedback"
-        hover="Support & Feedback"
-        href="https://forms.gle/zTadNeJZ7g1vmqFg6"
-        >
-        <div class="action-label codicon codicon-action codicon-feedback" />
-      </a>
-    </div> -->
   </div>
 </div>
 
 <style>
-  /* stylelint-disable */
   .top_nav {
     display: none;
   }
@@ -90,46 +77,6 @@
     height: 100vh;
     overflow: hidden;
   }
-
-  /* .feedback {
-    position: fixed;
-    width: 100%;
-    height: 60px;
-    bottom: 0px;
-    right: 0px;
-    background-color: var(--background);
-  }
-  .feedback_space {
-    position: relative;
-    width: 100%;
-    height: 70px;
-    bottom: 0px;
-    right: 0px;
-    background-color: var(--background);
-  }
-  .feedback-button {
-    position: fixed;
-    width: 30px;
-    height: 20px;
-    bottom: 15px;
-    right: 15px;
-    font-size: 11px;
-    background-color: var(--vscode-button-foreground);
-    color: var(--vscode-button-background);
-    border-radius: 30px;
-    padding-left: 13px;
-    padding-top: 6px;
-    border-color: transparent;
-    text-decoration: none;
-    cursor: pointer;
-  } */
-  /* .action-label {
-    position: relative;
-    display: inline-block;
-    overflow: hidden;
-    float: right;
-    padding-right: 15px;
-  } */
   .left_wrapper {
     box-sizing: border-box;
     width: 30%;

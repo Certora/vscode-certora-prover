@@ -82,7 +82,6 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
             })
             // this.stopScript is set in ScriptRunner.ts constructor
             if (typeof this.stopScript === 'function') {
-              console.log('pid, modal:', e.payload.pid, e.payload.modal)
               this.stopScript(e.payload.pid, e.payload.modal)
             }
             break
@@ -227,7 +226,7 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
       this.postMessage<Output>({ type: 'set-output', payload: data })
     } catch (e) {
       vscode.window.showErrorMessage(
-        `Certora verification service is currently unavailable. Please, try again later.`,
+        `Certora verification service is currently unavailable. Please, try again later. ${e}`,
       )
     }
   }

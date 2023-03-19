@@ -14,6 +14,22 @@
     RunName,
     badInputs,
   } from './stores/store.js'
+  const check = 'check'
+  const close = 'warning'
+  let solcCheck = check
+  let specCheck = check
+  let msgCheck = check
+
+  $: solDisabledState && !$badInputs.sol
+    ? (solcCheck = check)
+    : (solcCheck = close)
+  $: $specObj.specFile !== '' && !$badInputs.spec
+    ? (specCheck = check)
+    : (specCheck = close)
+  $: $verification_message !== '' && !$badInputs.msg
+    ? (msgCheck = check)
+    : (msgCheck = close)
+
   $: solDisabledState =
     $solidityObj.mainFile !== '' &&
     $solidityObj.mainContract !== '' &&
@@ -45,8 +61,8 @@
     </i>
 
     <h3>Solidity Contracts</h3>
-    <i class="codicon codicon-check" />
-    <i class="codicon codicon-close" />
+    <i class={`codicon codicon-${solcCheck}`} />
+    <!-- <i class="codicon codicon-close" /> -->
   </button>
   <button
     class="nav_settings_child"
@@ -58,8 +74,7 @@
   >
     <i class="codicon codicon-symbol-method" />
     <h3>Certora Spec</h3>
-    <i class="codicon codicon-check" />
-    <i class="codicon codicon-close" />
+    <i class={`codicon codicon-${specCheck}`} />
   </button>
   <button
     class="nav_settings_child"
@@ -71,8 +86,7 @@
   >
     <i class="codicon codicon-comment " />
     <h3>Verification Message</h3>
-    <i class="codicon codicon-check" />
-    <i class="codicon codicon-close" />
+    <i class={`codicon codicon-${msgCheck}`} />
   </button>
 </div>
 
@@ -102,7 +116,7 @@
     /* transition: color 0.2s ease-in-out; */
     margin: auto 0 auto auto;
   }
-  .codicon-close {
+  .codicon-warning {
     color: transparent;
     /* transition: color 0.2s ease-in-out; */
     margin: auto 0 auto auto;
@@ -110,8 +124,8 @@
   .checked .codicon-check {
     color: var(--vscode-testing-iconPassed);
   }
-  .error .codicon-close {
-    color: var(--vscode-editorError-foreground);
+  .error .codicon-warning {
+    color: #ee9d28;
   }
   .nav_settings_child i:nth-child(3),
   .nav_settings_child i:nth-child(1) {

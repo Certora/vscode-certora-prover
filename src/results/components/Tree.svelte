@@ -10,6 +10,7 @@
   import { TreeType } from '../types'
   import { expandables } from '../store/store'
   export let runDisplayName
+  export let jobEnded: boolean = false
   export let data:
     | {
         type: TreeType.Rules
@@ -65,6 +66,7 @@
             ]
           : []}
         duplicateFunc={data.tree.length !== 1 ? data.duplicateFunc : null}
+        {jobEnded}
         on:fetchOutput
       />
     {/each}

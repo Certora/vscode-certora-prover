@@ -65,7 +65,7 @@ function compilerValidator() {
 function filePathValidator() {
   return function email(value) {
     return (
-      !!value.match('^[-_ a-zA-Z0-9/@.]*$') ||
+      !!value.match('^[-_: a-zA-Z0-9/@.]*$') ||
       'Accepting only alphanumeric characters (including underscore, space, dash, slash)*'
     )
   }

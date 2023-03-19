@@ -61,15 +61,17 @@ export class ScriptProgressLongPolling {
 
       if (data.jobEnded && data.jobStatus === 'SUCCEEDED' && dataToUI) {
         if (Object.keys(dataToUI.verificationProgress).length === 0) {
-          return
+          console.log('SUSPICION CONFIRMED')
         }
 
         callback(dataToUI)
         return
       }
 
-      if (data.jobEnded) {
-        console.log('JOB ENDED!!!!!', data.jobId)
+      if (data.jobEnded && dataToUI) {
+        console.log('Job ended with status: ', data?.jobStatus)
+        callback(dataToUI)
+        return
       }
 
       if (
@@ -84,7 +86,7 @@ export class ScriptProgressLongPolling {
       }
     } catch (e) {
       window.showErrorMessage(
-        `Certora verification service is currently unavailable. Please, try again later.`,
+        `Certora verification service is currently unavailable. Please, try again later. ${e}`,
       )
     }
   }

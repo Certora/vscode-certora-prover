@@ -1,17 +1,16 @@
 /* ---------------------------------------------------------------------------------------------
- *  builds one validator. looks for wrong cherecters, and sends the findings.
+ *  builds one validator. looks for wrong characters, and sends the findings.
  *-------------------------------------------------------------------------------------------- */
 
 function buildValidator(validators) {
-  return function validate(value, dirty) {
+  return function validate(value) {
     if (!validators || validators.length === 0) {
-      return { dirty, valid: true }
+      return { valid: true }
     }
 
     const failing = validators.find(v => v(value) !== true)
 
     return {
-      dirty,
       valid: !failing,
       message: failing && failing(value),
     }

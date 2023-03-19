@@ -40,12 +40,6 @@ export class ScriptRunner {
     return splittedPathToConfFile[splittedPathToConfFile.length - 1]
   }
 
-  /**
-   * returns a uri of the conf.log file if the workspace path exists, null otherwise
-   * @param pathToConfFile path to the .conf file (relative)
-   * @param ts the time the file was created
-   * @returns the full path to the conf.log file or null
-   */
   private async getLogFilePath(pathToConfFile: string, ts: number) {
     let path = await getInternalDirPath()
     if (path) {
@@ -96,6 +90,42 @@ export class ScriptRunner {
         await workspace.fs.writeFile(logFilePath, content)
       }
     }
+  }
+
+  public async buildSh(shFile: string): Promise<boolean> {
+    const path = workspace.workspaceFolders?.[0]
+    if (!path) {
+      await window.showErrorMessage(
+        'Failed to build ' +
+          this.getConfFileName(shFile) +
+          ' into a configuration file',
+      )
+      return false
+    }
+    this.script = spawn(`sh`, [shFile], {
+      cwd: path.uri.fsPath,
+    })
+    if (!this.script) {
+      await window.showErrorMessage(
+        'Failed to build ' +
+          this.getConfFileName(shFile) +
+          ' into a configuration file',
+      )
+      return false
+    }
+    this.script.stderr.on('data', async (data: any) => {
+      const str = data.toString() as string
+      if (str) {
+        await window.showErrorMessage(
+          'Failed to build ' +
+            this.getConfFileName(shFile) +
+            ' into a configuration file: ' +
+            str,
+        )
+      }
+      return false
+    })
+    return true
   }
 
   private getRuleReportLink(str: string) {
@@ -200,10 +230,6 @@ export class ScriptRunner {
       }
     })
 
-    // this.script.stderr.on('data', async data => {
-    //   // this.removeRunningScript(pid)
-    // })
-
     this.script.on('error', async err => {
       console.error(err, 'this is an error from the script')
       this.removeRunningScript(pid)
@@ -271,15 +297,14 @@ export class ScriptRunner {
    * @returns boolean according to answer
    */
   private async askToStopJob(name: string): Promise<boolean> {
-    const stopAction = "Stop '" + name + "'"
+    const stopAction = `Stop '${name}'`
     const result = await window
       .showInformationMessage(
-        "Are you sure you want to stop '" + name + "' from running?",
+        `Are you sure you want to stop '${name}' from running?`,
         {
           modal: true,
-          // detail: 'Job configuration will be lost',
         },
-        ...[stopAction],
+        stopAction,
       )
       .then(items => {
         if (items === stopAction) {
@@ -292,7 +317,6 @@ export class ScriptRunner {
   }
 
   public stop = async (pid: number, modal: boolean): Promise<void> => {
-    console.log('pid, modal:2', pid, modal)
     const scriptToStop = this.runningScripts.find(rs => {
       return rs.pid === pid
     })
@@ -315,15 +339,6 @@ export class ScriptRunner {
           : `kill -15 ${pid}`
 
       exec(command)
-    } else {
-      // TODO: cover this possibility
-      console.log('twilight zone')
-      this.resultsWebviewProvider.postMessage({
-        type: 'script-stopped',
-        payload: pid,
-      })
-      this.removeRunningScript(pid)
-      return
     }
     this.resultsWebviewProvider.postMessage({
       type: 'script-stopped',
@@ -341,7 +356,7 @@ export class ScriptRunner {
     this.sendRunningScriptsToWebview()
   }
 
-  public renameRunningScript(oldConf: string, newConf: string) {
+  public renameRunningScript(oldConf: string, newConf: string): void {
     this.runningScripts = this.runningScripts.map(rs => {
       if (rs.confFile.includes(oldConf) || oldConf.includes(rs.confFile)) {
         rs.confFile = newConf

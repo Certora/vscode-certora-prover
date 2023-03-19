@@ -37,7 +37,6 @@
     JobNameMap,
     Status,
     CONF_DIRECTORY,
-    RuleStatuses,
   } from './types'
   import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
   import NewRun from './components/NewRun.svelte'
@@ -182,7 +181,8 @@
         if (e.data.payload.jobStatus === 'SUCCEEDED') {
           if (runName) {
             removeScript(runName)
-            runs = setStatus(runName, Status.success)
+            // runs = setStatus(runName, Status.success)
+            setStoppedJobStatus(runName)
           }
         }
         log({
@@ -258,7 +258,14 @@
 
         if (curRun !== undefined) {
           const runName = curRun.name
-          setStoppedJobStatus(runName)
+          if (
+            curRun.status === Status.running ||
+            curRun.status === Status.pending
+          ) {
+            runs = setStatus(runName, Status.ready)
+          } else if (curRun.status === Status.incompleteResults) {
+            setStoppedJobStatus(runName)
+          }
         }
 
         runningScripts = runningScripts.filter(rs => {
@@ -511,42 +518,31 @@
     ]
   }
 
+  /**
+   * when a job was cancel from outside sources
+   * @param jobName the name of the job that was canceled
+   */
   function setStoppedJobStatus(jobName: string): void {
     if (jobName) {
       removeScript(jobName)
-      if ($verificationResults.length === 0) {
-        runs = setStatus(jobName, Status.ready)
-        return
-      }
       if (
+        $verificationResults.length === 0 ||
         !$verificationResults.map(vr => {
           return vr.name === jobName
         })
       ) {
-        runs = setStatus(jobName, Status.ready)
+        runs = setStatus(jobName, Status.unableToRun)
         return
       }
       $verificationResults.forEach(vr => {
         if (vr.name === jobName) {
           runs = setStatus(jobName, Status.success)
-          vr.jobs.forEach(job => {
-            job.verificationProgress.rules.forEach(rule => {
-              if (rule.status === RuleStatuses.Running) {
-                rule.status = RuleStatuses.Killed
-              }
-              rule.children.forEach(child => {
-                if ((child.status = RuleStatuses.Running)) {
-                  child.status = RuleStatuses.Killed
-                }
-              })
-            })
-          })
         } else if (
           runs.find(run => {
             return run.name === jobName
           })?.status === Status.running
         ) {
-          runs = setStatus(jobName, Status.ready)
+          runs = setStatus(jobName, Status.unableToRun)
         }
       })
       $verificationResults = $verificationResults
@@ -840,7 +836,7 @@
           onClick: runAll,
         },
         {
-          title: 'Create New Job From Conf File',
+          title: 'Create New Job From Existing File',
           icon: 'new-file',
           onClick: uploadConf,
         },
@@ -899,7 +895,6 @@
                 })
                 runs[index].vrLink = ''
                 const modal = runs[index].status !== Status.running
-                console.log('modal!!!', modal, runs[index].status)
                 stopScript(runs[index].id, modal)
               }}
               inactiveSelected={$focusedRun}

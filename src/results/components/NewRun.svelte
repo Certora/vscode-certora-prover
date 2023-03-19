@@ -15,10 +15,7 @@
     Assert,
     Action,
     Status,
-    EventsFromExtension,
-    EventTypesFromExtension,
   } from '../types'
-  import { log, Sources } from '../utils/log'
   import Pane from './Pane.svelte'
   import Tree from './Tree.svelte'
   import { verificationResults } from '../store/store'
@@ -65,39 +62,7 @@
 
   let beforeRename = ''
 
-  // let stop = false
-
   const UNTITLED = 'untitled'
-
-  // const listener = (e: MessageEvent<EventsFromExtension>) => {
-  //   switch (e.data.type) {
-  //     case EventTypesFromExtension.ParseError: {
-  //       log({
-  //         action: 'Received "parse-error" command',
-  //         source: Sources.ResultsWebview,
-  //         info: e.data.payload,
-  //       })
-  //       if (e.data.payload === runName) {
-  //         // change status to 'unableToRun' only if run wasn't stopped manually / intentionally
-  //         if (!stop) {
-
-  //           editFunc()
-  //           statusChange(Status.unableToRun)
-  //           stop = false
-  //         }
-  //       }
-  //       break
-  //     }
-  //   }
-  // }
-
-  // onMount(() => {
-  //   window.addEventListener('message', listener)
-  // })
-
-  // onDestroy(() => {
-  //   window.removeEventListener('message', listener)
-  // })
 
   function onKeyPress(e: any): void {
     // get out of 'rename' mode when enter is pressed
@@ -231,11 +196,6 @@
    */
   function createActions(): Action[] {
     let actions: Action[] = [
-      // {
-      //   title: 'Rename',
-      //   icon: 'edit',
-      //   onClick: setRename,
-      // },
       {
         title: 'Edit',
         icon: 'gear',
@@ -310,7 +270,7 @@
       actions.push({
         title: 'Stop',
         icon: 'stop-circle',
-        onClick: runningStop,
+        onClick: runningStopFunc,
       })
     }
     return actions
@@ -332,15 +292,6 @@
     statusChange(Status.ready)
     pendingStopFunc()
     isPending = false
-  }
-
-  /**
-   * stops a running run
-   */
-  function runningStop(): void {
-    // statusChange(Status.ready)
-    runningStopFunc()
-    // stop = true
   }
 
   /**
@@ -371,7 +322,8 @@
         {
           title: 'Stop',
           icon: 'stop-circle',
-          onClick: runningStop,
+          disabled: vrLink ? false : true,
+          onClick: vrLink ? runningStopFunc : null,
         },
       ]
     }
@@ -390,16 +342,6 @@
     if (activeElement !== myElement) {
       $renameJob = false
     }
-  }
-
-  /**
-   * checks if there exists complete results for this job
-   */
-  function hasCompleteResults(): boolean {
-    const result = $verificationResults.find(vr => {
-      return vr.name === runName
-    })
-    return result.jobs.find(job => job.jobStatus === 'SUCCEEDED') !== undefined
   }
 
   // was copied from App.svelte
@@ -475,6 +417,8 @@
                     tree: retrieveRules(vr.jobs),
                     duplicateFunc: duplicate,
                   }}
+                  jobEnded={status === Status.success ||
+                    status === Status.unableToRun}
                   on:fetchOutput={e => newFetchOutput(e, vr)}
                 />
               </li>

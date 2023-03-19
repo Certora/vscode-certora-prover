@@ -4,8 +4,12 @@
 
 export const CONF_DIRECTORY_NAME = 'certora/conf'
 export const CONF_DIRECTORY = 'certora/conf/'
+export const SH_DIRECTORY_NAME = 'certora/scripts'
+export const SH_DIRECTORY = 'certora/scripts/'
 export const CERTORA_INNER_DIR = '/.certora_internal/'
+export const CERTORA_INNER_DIR_BUILD = '/.certora_internal/scripts_to_build/'
 export const LOG_DIRECTORY_DEFAULT = 'certora_logs'
+export const LAST_CONFS = '.last_confs'
 
 export type JumpToDefinition = {
   file: string
