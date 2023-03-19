@@ -286,6 +286,7 @@
           info: e.data.payload,
         })
         // status is changed to 'ready' when job is allowed to run
+        // todo: if status is running / pending - do nothing
         const runName = e.data.payload.fileName
         let newStatus = Status.ready
         const jobListPath = e.data.payload.jobListPath

@@ -66,7 +66,7 @@
   > = writable([])
   // let runs: Run[] = []
   let pendingQueue: Writable<JobNameMap[]> = writable([])
-  let pendingQueueCounter = 0
+  // let pendingQueueCounter = 0
   // let namesMap: Map<string, string> = new Map()
   // let runsCounter = 0
 
@@ -102,12 +102,12 @@
         //   runs = setStatus(runName, Status.incompleteResults)
         // }
 
-        if (e.data.payload.jobStatus === 'SUCCEEDED') {
-          if (runName) {
-            removeScript(runName)
-            // runs = setStatus(runName, Status.success)
-            setStoppedJobStatus(runName)
-          }
+        // if (e.data.payload.jobStatus === 'SUCCEEDED') {
+        //   if (runName) {
+        //     removeScript(runName)
+        //     // runs = setStatus(runName, Status.success)
+        //     setStoppedJobStatus(runName)
+        //   }
         if (!curJobList) {
           $jobLists.push(confList)
           $jobLists = $jobLists
@@ -221,190 +221,189 @@
         }
         break
       }
-// <<<<<<< HEAD
-//       case EventTypesFromExtension.ScriptStopped: {
-//         log({
-//           action: 'Received "script-stopped" command',
-//           source: Sources.ResultsWebview,
-//           info: e.data.payload,
-//         })
-//         const pid = e.data.payload
-//         const curRun = runs.find(run => run.id === pid)
+      //       case EventTypesFromExtension.ScriptStopped: {
+      //         log({
+      //           action: 'Received "script-stopped" command',
+      //           source: Sources.ResultsWebview,
+      //           info: e.data.payload,
+      //         })
+      //         const pid = e.data.payload
+      //         const curRun = runs.find(run => run.id === pid)
 
-//         if (curRun !== undefined) {
-//           const runName = curRun.name
-//           if (
-//             curRun.status === Status.running ||
-//             curRun.status === Status.pending
-//           ) {
-//             runs = setStatus(runName, Status.ready)
-//           } else if (curRun.status === Status.incompleteResults) {
-//             setStoppedJobStatus(runName)
-//           }
-//         }
+      //         if (curRun !== undefined) {
+      //           const runName = curRun.name
+      //           if (
+      //             curRun.status === Status.running ||
+      //             curRun.status === Status.pending
+      //           ) {
+      //             runs = setStatus(runName, Status.ready)
+      //           } else if (curRun.status === Status.incompleteResults) {
+      //             setStoppedJobStatus(runName)
+      //           }
+      //         }
 
-//         runningScripts = runningScripts.filter(rs => {
-//           return rs.pid !== pid
-//         })
-//         break
-//       }
-//       case EventTypesFromExtension.SetOutput: {
-//         log({
-//           action: 'Received "get-output" command',
-//           source: Sources.ResultsWebview,
-//           info: e.data.payload,
-//         })
-//         if (
-//           e.data.payload &&
-//           ((e.data.payload.callResolution &&
-//             e.data.payload.callResolution.length > 0) ||
-//             (e.data.payload.variables && e.data.payload.variables.length > 0))
-//         ) {
-//           output = e.data.payload
-//           output.runName = outputRunName
-//         }
-//         break
-//       }
-//       case EventTypesFromExtension.AllowRun: {
-//         log({
-//           action: 'Received "allow-run" command',
-//           source: Sources.ResultsWebview,
-//           info: e.data.payload,
-//         })
-//         // status is changed to 'ready' when job is allowed to run
-//         const runName = e.data.payload
-//         let newStatus = Status.ready
-//         if (
-//           $verificationResults.find(vr => {
-//             return vr.name === runName
-//           })
-//         ) {
-//           newStatus = Status.success
-//         }
-//         runs = setStatus(runName, newStatus)
-//         break
-//       }
-//       case EventTypesFromExtension.BlockRun: {
-//         log({
-//           action: 'Received "block-run" command',
-//           source: Sources.ResultsWebview,
-//           info: e.data.payload,
-//         })
-//         // status is changed to 'finish setup' when job isn't allowed to run
-//         runs = setStatus(e.data.payload, Status.missingSettings)
-//         break
-//       }
-//       case EventTypesFromExtension.SettingsError: {
-//         log({
-//           action: 'Received "settings-error" command',
-//           source: Sources.ResultsWebview,
-//           info: e.data.payload,
-//         })
-//         // status is changed to 'finish setup' when job isn't allowed to run
-//         runs = setStatus(e.data.payload, Status.settingsError)
-//         break
-//       }
-//       case EventTypesFromExtension.ClearAllJobs: {
-//         log({
-//           action: 'Received "clear-all-jobs" command',
-//           source: Sources.ResultsWebview,
-//           info: {
-//             current$verificationResults: $verificationResults,
-//           },
-//         })
-//         if ($verificationResults.length > 0) $verificationResults = []
-//         clearOutput()
-//         break
-//       }
-//       case EventTypesFromExtension.CreateJob: {
-//         log({
-//           action: 'Received "create-new-job" command',
-//           source: Sources.ResultsWebview,
-//         })
-//         createRun()
-//         break
-//       }
-//       case EventTypesFromExtension.FocusChanged: {
-//         log({
-//           action: 'Received "focus-changed" command',
-//           source: Sources.ResultsWebview,
-//           info: e.data.payload,
-//         })
-//         $focusedRun = e.data.payload
-//         break
-//       }
-//       case EventTypesFromExtension.ParseError: {
-//         log({
-//           action: 'Received "parse-error" command',
-//           source: Sources.ResultsWebview,
-//           info: e.data.payload,
-//         })
-//         const runName = e.data.payload
-//         runs = setStatus(runName, Status.unableToRun)
-//         break
-//       }
-//       case EventTypesFromExtension.InitialJobs: {
-//         log({
-//           action: 'Received "initial-jobs" command',
-//           source: Sources.ResultsWebview,
-//           info: e.data.payload,
-//         })
-//         const confList = e.data.payload
-//         confList.forEach(file => {
-//           if (!namesMap.has(file.fileName)) {
-//             let curStatus = Status.missingSettings
-//             if (file.allowRun) {
-//               curStatus = Status.ready
-//             }
-//             const newRun = {
-//               id: runs.length,
-//               name: file.fileName,
-//               status: curStatus || Status.missingSettings,
-//             }
-//             namesMap.set(newRun.name, newRun.name.replaceAll('_', ' '))
-//             createRun(newRun)
-//           }
-//         })
-//         break
-//       }
-//       case EventTypesFromExtension.RunJob: {
-//         log({
-//           action: 'Received "run-job" command',
-//           source: Sources.ResultsWebview,
-//           info: e.data.payload,
-//         })
+      //         runningScripts = runningScripts.filter(rs => {
+      //           return rs.pid !== pid
+      //         })
+      //         break
+      //       }
+      //       case EventTypesFromExtension.SetOutput: {
+      //         log({
+      //           action: 'Received "get-output" command',
+      //           source: Sources.ResultsWebview,
+      //           info: e.data.payload,
+      //         })
+      //         if (
+      //           e.data.payload &&
+      //           ((e.data.payload.callResolution &&
+      //             e.data.payload.callResolution.length > 0) ||
+      //             (e.data.payload.variables && e.data.payload.variables.length > 0))
+      //         ) {
+      //           output = e.data.payload
+      //           output.runName = outputRunName
+      //         }
+      //         break
+      //       }
+      //       case EventTypesFromExtension.AllowRun: {
+      //         log({
+      //           action: 'Received "allow-run" command',
+      //           source: Sources.ResultsWebview,
+      //           info: e.data.payload,
+      //         })
+      //         // status is changed to 'ready' when job is allowed to run
+      //         const runName = e.data.payload
+      //         let newStatus = Status.ready
+      //         if (
+      //           $verificationResults.find(vr => {
+      //             return vr.name === runName
+      //           })
+      //         ) {
+      //           newStatus = Status.success
+      //         }
+      //         runs = setStatus(runName, newStatus)
+      //         break
+      //       }
+      //       case EventTypesFromExtension.BlockRun: {
+      //         log({
+      //           action: 'Received "block-run" command',
+      //           source: Sources.ResultsWebview,
+      //           info: e.data.payload,
+      //         })
+      //         // status is changed to 'finish setup' when job isn't allowed to run
+      //         runs = setStatus(e.data.payload, Status.missingSettings)
+      //         break
+      //       }
+      //       case EventTypesFromExtension.SettingsError: {
+      //         log({
+      //           action: 'Received "settings-error" command',
+      //           source: Sources.ResultsWebview,
+      //           info: e.data.payload,
+      //         })
+      //         // status is changed to 'finish setup' when job isn't allowed to run
+      //         runs = setStatus(e.data.payload, Status.settingsError)
+      //         break
+      //       }
+      //       case EventTypesFromExtension.ClearAllJobs: {
+      //         log({
+      //           action: 'Received "clear-all-jobs" command',
+      //           source: Sources.ResultsWebview,
+      //           info: {
+      //             current$verificationResults: $verificationResults,
+      //           },
+      //         })
+      //         if ($verificationResults.length > 0) $verificationResults = []
+      //         clearOutput()
+      //         break
+      //       }
+      //       case EventTypesFromExtension.CreateJob: {
+      //         log({
+      //           action: 'Received "create-new-job" command',
+      //           source: Sources.ResultsWebview,
+      //         })
+      //         createRun()
+      //         break
+      //       }
+      //       case EventTypesFromExtension.FocusChanged: {
+      //         log({
+      //           action: 'Received "focus-changed" command',
+      //           source: Sources.ResultsWebview,
+      //           info: e.data.payload,
+      //         })
+      //         $focusedRun = e.data.payload
+      //         break
+      //       }
+      //       case EventTypesFromExtension.ParseError: {
+      //         log({
+      //           action: 'Received "parse-error" command',
+      //           source: Sources.ResultsWebview,
+      //           info: e.data.payload,
+      //         })
+      //         const runName = e.data.payload
+      //         runs = setStatus(runName, Status.unableToRun)
+      //         break
+      //       }
+      //       case EventTypesFromExtension.InitialJobs: {
+      //         log({
+      //           action: 'Received "initial-jobs" command',
+      //           source: Sources.ResultsWebview,
+      //           info: e.data.payload,
+      //         })
+      //         const confList = e.data.payload
+      //         confList.forEach(file => {
+      //           if (!namesMap.has(file.fileName)) {
+      //             let curStatus = Status.missingSettings
+      //             if (file.allowRun) {
+      //               curStatus = Status.ready
+      //             }
+      //             const newRun = {
+      //               id: runs.length,
+      //               name: file.fileName,
+      //               status: curStatus || Status.missingSettings,
+      //             }
+      //             namesMap.set(newRun.name, newRun.name.replaceAll('_', ' '))
+      //             createRun(newRun)
+      //           }
+      //         })
+      //         break
+      //       }
+      //       case EventTypesFromExtension.RunJob: {
+      //         log({
+      //           action: 'Received "run-job" command',
+      //           source: Sources.ResultsWebview,
+      //           info: e.data.payload,
+      //         })
 
-//         const name: string = e.data.payload
-//         const runToRun: Run = runs.find(r => {
-//           return r.name === name
-//         })
-//         if (runToRun !== undefined) {
-//           run(runToRun)
-//         }
-//         break
-//       }
-//       case EventTypesFromExtension.DeleteJob: {
-//         log({
-//           action: 'Received "delete-job" command',
-//           source: Sources.ResultsWebview,
-//           info: e.data.payload,
-//         })
+      //         const name: string = e.data.payload
+      //         const runToRun: Run = runs.find(r => {
+      //           return r.name === name
+      //         })
+      //         if (runToRun !== undefined) {
+      //           run(runToRun)
+      //         }
+      //         break
+      //       }
+      //       case EventTypesFromExtension.DeleteJob: {
+      //         log({
+      //           action: 'Received "delete-job" command',
+      //           source: Sources.ResultsWebview,
+      //           info: e.data.payload,
+      //         })
 
-//         const nameToDelete: string = e.data.payload
-//         const runToDelete: Run = runs.find(r => {
-//           return r.name === nameToDelete
-//         })
-//         if (runToDelete !== undefined) {
-//           const jobNameMap: JobNameMap = {
-//             fileName: nameToDelete,
-//             displayName: namesMap.get(nameToDelete),
-//           }
-//           deleteRun(runToDelete)
-//           deleteConf(jobNameMap)
-//         }
-//         break
-//       }
-// =======
+      //         const nameToDelete: string = e.data.payload
+      //         const runToDelete: Run = runs.find(r => {
+      //           return r.name === nameToDelete
+      //         })
+      //         if (runToDelete !== undefined) {
+      //           const jobNameMap: JobNameMap = {
+      //             fileName: nameToDelete,
+      //             displayName: namesMap.get(nameToDelete),
+      //           }
+      //           deleteRun(runToDelete)
+      //           deleteConf(jobNameMap)
+      //         }
+      //         break
+      //       }
+      // =======
       // case EventTypesFromExtension.ScriptStopped: {
       //   log({
       //     action: 'Received "script-stopped" command',
@@ -491,7 +490,6 @@
       },
     ]
   }
-
 
   /**
    * adds a new run to runs array and increase the counter
