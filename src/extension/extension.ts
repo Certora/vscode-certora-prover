@@ -517,9 +517,10 @@ export function activate(context: vscode.ExtensionContext): void {
     try {
       const confFile: ConfFile = await readConf(file)
       // add send_only flag to conf file, if it doesn't exist
-      if (!confFile.send_only) {
+      if (!confFile.send_only || !confFile.run_source) {
         try {
           confFile.send_only = true
+          confFile.run_source = 'VSCODE'
           const encoder = new TextEncoder()
           const content = encoder.encode(JSON.stringify(confFile))
           await vscode.workspace.fs.writeFile(file, content)
