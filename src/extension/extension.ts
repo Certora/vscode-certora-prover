@@ -220,6 +220,20 @@ export function activate(context: vscode.ExtensionContext): void {
     } catch (e) {
       console.log('Cannot rename:', e)
     }
+    const lastResultsUri = getLastResultsUri()
+    if (lastResultsUri) {
+      const oldResultsUri = vscode.Uri.parse(
+        lastResultsUri.path + '/' + oldName.fileName + '.json',
+      )
+      const resultsUri = vscode.Uri.parse(
+        lastResultsUri.path + '/' + newName.fileName + '.json',
+      )
+      try {
+        await vscode.workspace.fs.rename(oldResultsUri, resultsUri)
+      } catch (e) {
+        console.log('Cannot rename:', e)
+      }
+    }
   }
 
   /**
@@ -592,6 +606,7 @@ export function activate(context: vscode.ExtensionContext): void {
               decoder.decode(await vscode.workspace.fs.readFile(pathUri)),
             )
             const job: Job = jsonContent.data
+            job.runName = name
             if (job) {
               resultsWebviewProvider.postMessage<Job>({
                 type: 'receive-new-job-result',
