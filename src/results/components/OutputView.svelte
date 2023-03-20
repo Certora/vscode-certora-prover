@@ -20,7 +20,7 @@
   }
 </script>
 
-{#if output}
+{#if output && output.runName.jobListPath === jobList.dirPath}
   {#if output.variables && output.variables.length > 0}
     <Pane
       title={`${output.treeViewPath.ruleName} variables`}

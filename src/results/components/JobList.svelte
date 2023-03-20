@@ -74,12 +74,11 @@
   $: jobList ? updateJobList() : null
 
   let output: Output
-  let outputRunName: string
+  let outputRunName: { fileName: string; jobListPath: Uri }
   let selectedCalltraceFunction: CallTraceFunction
 
-  let runs: Run[] = []
-  // let pendingQueue: JobNameMap[] = []
-  // let pendingQueueCounter = 0
+  // let runs: Run[] = []
+
   let namesMap: Map<string, string> = new Map()
   let runsCounter = 0
 
@@ -102,8 +101,8 @@
           // createRun(newRun)
         }
       })
-      runs = jobList.jobs
-      runsCounter = runs.length
+      // runs = jobList.jobs
+      runsCounter = jobList.jobs.length
     }
 
     $expandables.push({
@@ -139,7 +138,10 @@
         'result',
       )}&output=${clickedRuleOrAssert.output}`
       getOutput(outputUrl)
-      outputRunName = vr.name
+      outputRunName = {
+        fileName: vr.name,
+        jobListPath: jobList.dirPath,
+      }
     } else {
       console.log(
         'Error occurred while fetching the output - job id is  undefined',
@@ -198,10 +200,12 @@
           },
         })
         const pid = e.data.payload.pid
-        const runName = jobList.jobs.find(run => {
+        const run = jobList.jobs.find(run => {
           return run.id === pid
-        })?.name
-        if (!runName) return
+        })
+        console.log('run and name: ', run, run?.name)
+        const runName = run?.name
+        if (!run || !runName) return
         // setVerificationReportLink(pid, e.data.payload.verificationReportLink)
         if (e.data.payload.jobStatus === 'FAILED') {
           setStoppedJobStatus(runName.fileName)
@@ -227,10 +231,8 @@
         }
 
         if (e.data.payload.jobStatus === 'SUCCEEDED') {
-          if (runName) {
-            removeScript(runName.fileName)
-            jobList = setStatus(runName.fileName, Status.success)
-          }
+          removeScript(runName.fileName)
+          jobList = setStatus(runName.fileName, Status.success)
         }
         log({
           action: 'After Smart merge current results with new result',
@@ -294,7 +296,7 @@
         const curJob = jobList.jobs.find(job => {
           return (
             job.name.fileName === name.fileName &&
-            job.name.jobListPath === name.jobListPath
+            job.name.jobListPath.path === name.jobListPath.path
           )
         })
         if (
@@ -632,7 +634,11 @@
     // jobList.jobs = runs
     jobList = jobList
     namesMap.delete(name.fileName)
-    if (output && output.runName === name.fileName) {
+    if (
+      output &&
+      output.runName.fileName === name.fileName &&
+      output.runName.jobListPath.path === name.jobListPath.path
+    ) {
       clearOutput()
     }
 
@@ -654,13 +660,16 @@
     pendingQueue.push(JobNameMap)
     console.log(pendingQueue, 'pending queue after push')
     jobList = setStatus(JobNameMap.fileName, Status.pending)
-    jobList.jobs = runs
+    // jobList.jobs = runs
     // pendingQueueCounter++
     $verificationResults = $verificationResults.filter(vr => {
       return vr.name !== JobNameMap.fileName
     })
-
-    if (output && output.runName === run.name.fileName) {
+    if (
+      output &&
+      output.runName.fileName === run.name.fileName &&
+      output.runName.jobListPath.path === run.name.jobListPath.path
+    ) {
       clearOutput()
     }
 

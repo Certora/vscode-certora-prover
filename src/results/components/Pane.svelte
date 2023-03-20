@@ -70,7 +70,10 @@
   function toggleExpand() {
     if (
       $expandables.find(element => {
-        return element.title === title
+        return (
+          element.title === title &&
+          element.jobListPath.path === jobListPath.path
+        )
       }) === undefined
     ) {
       $expandables.push({
@@ -82,7 +85,10 @@
       })
     }
     $expandables = $expandables.map(element => {
-      if (element.title === title) {
+      if (
+        element.title === title &&
+        element.jobListPath.path === jobListPath.path
+      ) {
         element.isExpanded = !element.isExpanded
       }
       return element
@@ -93,7 +99,9 @@
 <div
   class="pane"
   class:expanded={$expandables.find(element => {
-    return element.title === title
+    return (
+      element.title === title && element.jobListPath.path === jobListPath.path
+    )
   })?.isExpanded}
   id={title}
 >
@@ -110,14 +118,19 @@
     role="button"
     aria-label={`${title} section`}
     aria-expanded={$expandables.find(element => {
-      return element.title === title
+      return (
+        element.title === title && element.jobListPath.path === jobListPath.path
+      )
     })?.isExpanded}
   >
     {#if showExpendIcon}
       <div
         class="arrow-icon codicon codicon-chevron-{$expandables.find(
           element => {
-            return element.title === title
+            return (
+              element.title === title &&
+              element.jobListPath.path === jobListPath.path
+            )
           },
         )?.isExpanded
           ? 'down'
@@ -152,7 +165,7 @@
     <div style="border-bottom: 0.2px solid var(--pane-border-color);" />
   {/if}
   {#if $expandables.find(element => {
-    return element.title === title
+    return element.title === title && element.jobListPath.path === jobListPath.path
   })?.isExpanded}
     <div class="pane-body">
       <slot />

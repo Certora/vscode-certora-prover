@@ -414,8 +414,9 @@
             ? runFunc
             : null}
         >
+          <!-- todo: find out why we can't see the results under job that are in other dirs -->
           {#each $verificationResults as vr, index (index)}
-            {#if vr.name === runName && vr.pid === pid}
+            {#if vr.pid === pid}
               <li
                 class="tree"
                 on:contextmenu|stopPropagation|preventDefault={() => null}

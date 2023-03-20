@@ -217,6 +217,7 @@ export class ScriptRunner {
         await this.polling.run(progressUrl, async data => {
           data.pid = pid
           data.runName = confFileName
+          console.log('pid and name from running scripts:', pid, confFileName)
           this.runningScripts.forEach(rs => {
             if (rs && rs.pid === pid && rs.vrLink) {
               data.verificationReportLink = rs.vrLink

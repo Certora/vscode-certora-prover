@@ -114,7 +114,7 @@ type TreeViewPath = {
 }
 
 export type Output = {
-  runName?: string
+  runName?: { fileName: string; jobListPath: Uri }
   treeViewPath: TreeViewPath
   graph_link: string
   jumpToDefinition: JumpToDefinition[]
