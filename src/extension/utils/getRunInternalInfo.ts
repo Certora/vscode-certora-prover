@@ -26,9 +26,12 @@ export async function getInternalDirPath(): Promise<Uri | undefined> {
   const internalUri = Uri.parse(path.uri.path + CERTORA_INNER_DIR)
   const checked = await checkDir(internalUri)
   if (checked) {
-    const innerDirs: [string, FileType][] = await workspace.fs.readDirectory(
+    let innerDirs: [string, FileType][] = await workspace.fs.readDirectory(
       internalUri,
     )
+    innerDirs = innerDirs.filter(dir => {
+      return dir[0] !== '.last_results'
+    })
     const dates: ([Date, string] | null)[] = innerDirs.map(
       (dir: [string, FileType]) => {
         if (dir[1] === 2) {

@@ -150,10 +150,12 @@
           },
         })
         const pid = e.data.payload.pid
-        const runName = runs.find(run => {
-          return run.id === pid
-        })?.name
-        if (!runName) return
+        const vrName = e.data.payload.runName
+        const run = runs.find(run => {
+          return run.name === vrName
+        })
+        const runName = run?.name
+        if (!run || !runName) return
         setVerificationReportLink(pid, e.data.payload.verificationReportLink)
         if (e.data.payload.jobStatus === 'FAILED') {
           setStoppedJobStatus(runName)
@@ -167,15 +169,14 @@
         $verificationResults = $verificationResults
 
         updateExpendablesFromResults()
-        const thisRun = $verificationResults.find(vr => {
-          return vr.name === runName
-        })
-        if (
-          thisRun?.jobs.find(job => {
-            return !job.jobEnded
-          }) !== undefined
-        ) {
+
+        const thisRun = e.data.payload
+        if (!thisRun.jobEnded) {
           runs = setStatus(runName, Status.incompleteResults)
+        }
+
+        if (thisRun.jobStatus === 'RUNNING' && thisRun.jobEnded) {
+          runs = setStatus(runName, Status.success)
         }
 
         if (e.data.payload.jobStatus === 'SUCCEEDED') {

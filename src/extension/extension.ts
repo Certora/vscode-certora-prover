@@ -16,6 +16,7 @@ import {
   JobNameMap,
   CERTORA_INNER_DIR_BUILD,
   CERTORA_INNER_DIR,
+  Job,
 } from './types'
 import { createConfFile } from './utils/createConfFile'
 import { confFileToFormData } from './utils/confFileToInputForm'
@@ -465,6 +466,7 @@ export function activate(context: vscode.ExtensionContext): void {
           })
           const awaitedList = await Promise.all(confList)
           sendFilesToCreateJobs(awaitedList)
+          getLastResults(awaitedList)
         })
       }
     }
@@ -549,6 +551,51 @@ export function activate(context: vscode.ExtensionContext): void {
       type: 'initial-jobs',
       payload: files,
     })
+  }
+
+  async function getLastResults(files: ConfToCreate[]) {
+    const path = vscode.workspace.workspaceFolders?.[0]
+    if (!path) return
+    files.forEach(file => {
+      // read certora internal dir
+      // look for file in title
+      // look for full path in json?
+      // get the content in type
+      // send the array as verification results
+      const name = file.fileName
+      const internalUri = vscode.Uri.parse(
+        path.uri.path + CERTORA_INNER_DIR + '.last_results',
+      )
+      const confFiles = vscode.workspace.fs.readDirectory(internalUri)
+      confFiles.then(f => {
+        console.log(f, name, '==========!!!!')
+        f.forEach(async fileArr => {
+          // console.log(fileArr, fileArr[0], fileArr[0].replace('.conf', ''))
+          if (fileArr[0].replace('.json', '') === name) {
+            console.log('YAS', name)
+            const pathUri = vscode.Uri.parse(
+              internalUri.path + '/' + fileArr[0],
+            )
+            const decoder = new TextDecoder()
+            const jsonContent = JSON.parse(
+              decoder.decode(await vscode.workspace.fs.readFile(pathUri)),
+            )
+            const job: Job = jsonContent.data
+            if (job) {
+              resultsWebviewProvider.postMessage<Job>({
+                type: 'receive-new-job-result',
+                payload: job,
+              })
+            }
+          }
+        })
+      })
+    })
+
+    // resultsWebviewProvider.postMessage<Job>({
+    //   type: 'receive-new-job-result',
+    //   payload: data,
+    // })
   }
 
   /**

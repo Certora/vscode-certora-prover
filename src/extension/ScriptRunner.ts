@@ -217,6 +217,7 @@ export class ScriptRunner {
         await this.polling.run(progressUrl, async data => {
           data.pid = pid
           data.runName = confFileName
+          await this.saveLastResults(path.uri, confFile, data)
           this.runningScripts.forEach(rs => {
             if (rs && rs.pid === pid && rs.vrLink) {
               data.verificationReportLink = rs.vrLink
@@ -258,6 +259,38 @@ export class ScriptRunner {
         })
       }
     })
+  }
+
+  /**
+   * saves the results of the last run of a job to the certora internal directory
+   * @param path Uri path to workspace directory
+   * @param confFile path to conf file
+   * @param data data of a job to save
+   */
+  private async saveLastResults(
+    path: Uri,
+    confFile: string,
+    data: Job,
+  ): Promise<void> {
+    try {
+      const targetUri: Uri = Uri.parse(
+        path.path +
+          CERTORA_INNER_DIR +
+          '.last_results/' +
+          this.getConfFileName(confFile).replace('.conf', '') +
+          '.json',
+      )
+      data.jobEnded = true
+      const content = {
+        confFile: path.path + confFile,
+        data: data,
+      }
+      const encoder = new TextEncoder()
+      const encodedContent = encoder.encode(JSON.stringify(content))
+      await workspace.fs.writeFile(targetUri, encodedContent)
+    } catch (e) {
+      console.log('[INNER ERROR]', e)
+    }
   }
 
   private stopUploadedScript(scriptToStop: RunningScript) {

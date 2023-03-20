@@ -417,8 +417,7 @@
                     tree: retrieveRules(vr.jobs),
                     duplicateFunc: duplicate,
                   }}
-                  jobEnded={status === Status.success ||
-                    status === Status.unableToRun}
+                  jobEnded={status !== Status.incompleteResults}
                   on:fetchOutput={e => newFetchOutput(e, vr)}
                 />
               </li>
