@@ -280,11 +280,11 @@ export class ScriptRunner {
           this.getConfFileName(confFile).replace('.conf', '') +
           '.json',
       )
-      data.jobEnded = true
       const content = {
         confFile: path.path + confFile,
-        data: data,
+        data: JSON.parse(JSON.stringify(data)),
       }
+      content.data.jobEnded = true
       const encoder = new TextEncoder()
       const encodedContent = encoder.encode(JSON.stringify(content))
       await workspace.fs.writeFile(targetUri, encodedContent)
