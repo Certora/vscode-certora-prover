@@ -338,6 +338,17 @@ export function activate(context: vscode.ExtensionContext): void {
         // sometimes we call this function just to close the panel
       }
     }
+    const lastResultsUri = getLastResultsUri()
+    if (lastResultsUri) {
+      const resultsUri = vscode.Uri.parse(
+        lastResultsUri.path + '/' + name.fileName + '.json',
+      )
+      try {
+        await vscode.workspace.fs.delete(resultsUri)
+      } catch (e) {
+        // can't delete results file
+      }
+    }
 
     SettingsPanel.removePanel(name.displayName)
     scriptRunner.removeRunningScriptByName(name.fileName)
@@ -553,26 +564,26 @@ export function activate(context: vscode.ExtensionContext): void {
     })
   }
 
-  async function getLastResults(files: ConfToCreate[]) {
+  function getLastResultsUri() {
     const path = vscode.workspace.workspaceFolders?.[0]
     if (!path) return
+    return vscode.Uri.parse(path.uri.path + CERTORA_INNER_DIR + '.last_results')
+  }
+
+  /**
+   * read last results from certora inner dir and send them to the results webview
+   * @param files names of files
+   * @returns void
+   */
+  function getLastResults(files: ConfToCreate[]) {
     files.forEach(file => {
-      // read certora internal dir
-      // look for file in title
-      // look for full path in json?
-      // get the content in type
-      // send the array as verification results
       const name = file.fileName
-      const internalUri = vscode.Uri.parse(
-        path.uri.path + CERTORA_INNER_DIR + '.last_results',
-      )
+      const internalUri = getLastResultsUri()
+      if (!internalUri) return
       const confFiles = vscode.workspace.fs.readDirectory(internalUri)
       confFiles.then(f => {
-        console.log(f, name, '==========!!!!')
         f.forEach(async fileArr => {
-          // console.log(fileArr, fileArr[0], fileArr[0].replace('.conf', ''))
           if (fileArr[0].replace('.json', '') === name) {
-            console.log('YAS', name)
             const pathUri = vscode.Uri.parse(
               internalUri.path + '/' + fileArr[0],
             )
@@ -591,11 +602,6 @@ export function activate(context: vscode.ExtensionContext): void {
         })
       })
     })
-
-    // resultsWebviewProvider.postMessage<Job>({
-    //   type: 'receive-new-job-result',
-    //   payload: data,
-    // })
   }
 
   /**
