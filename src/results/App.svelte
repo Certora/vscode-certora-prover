@@ -409,6 +409,24 @@
         }
         break
       }
+      case EventTypesFromExtension.DeleteResults: {
+        log({
+          action: 'Received "delete-results" command',
+          source: Sources.ResultsWebview,
+          info: e.data.payload,
+        })
+        const nameToDelete = e.data.payload
+        runs = runs.map(run => {
+          if (run.name === nameToDelete) {
+            run.status = Status.ready
+          }
+          return run
+        })
+        $verificationResults = $verificationResults.filter(vr => {
+          return vr.name !== nameToDelete
+        })
+        break
+      }
       case EventTypesFromExtension.DeleteJob: {
         log({
           action: 'Received "delete-job" command',

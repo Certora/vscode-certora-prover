@@ -3,7 +3,7 @@
    *  Shows all the information of a run: run name, status, action buttons etc.
    *-------------------------------------------------------------------------------------------- */
 
-  import { onDestroy, onMount } from 'svelte'
+  // import { onDestroy, onMount } from 'svelte'
   import { getIconPath } from '../utils/getIconPath'
   import ContextMenu from '../components/ContextMenu.svelte'
 
@@ -20,6 +20,7 @@
   import Tree from './Tree.svelte'
   import { verificationResults } from '../store/store'
   import { writable } from 'svelte/store'
+  import { clearResults } from '../extension-actions'
 
   export let editFunc: () => void
   export let deleteFunc: () => void
@@ -261,9 +262,7 @@
       {
         title: 'Duplicate',
         icon: 'files',
-        onClick: () => {
-          duplicate()
-        },
+        onClick: duplicate,
       },
     ]
     if (status === Status.incompleteResults) {
@@ -271,6 +270,19 @@
         title: 'Stop',
         icon: 'stop-circle',
         onClick: runningStopFunc,
+      })
+    }
+    if (
+      $verificationResults.find(vr => {
+        return vr.name === runName
+      }) !== undefined
+    ) {
+      actions.push({
+        title: 'Clear Results',
+        icon: '',
+        onClick: () => {
+          clearResults(runName)
+        },
       })
     }
     return actions

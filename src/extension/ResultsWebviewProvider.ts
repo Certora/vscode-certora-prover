@@ -41,6 +41,7 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   public runScript: null | ((name: JobNameMap) => void) = null
   public enableEdit: null | ((name: JobNameMap) => void) = null
   public removeScript: null | ((name: string) => void) = null
+  public clearResults: null | ((name: string) => void) = null
 
   constructor(private readonly _extensionUri: vscode.Uri) {
     this._extensionUri = _extensionUri
@@ -64,6 +65,15 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
             })
             if (typeof this.createInitialJobs === 'function') {
               this.createInitialJobs()
+            }
+            break
+          case CommandFromResultsWebview.ClearResults:
+            log({
+              action: 'Received "clear-results" command',
+              source: Sources.Extension,
+            })
+            if (typeof this.clearResults === 'function') {
+              this.clearResults(e.payload)
             }
             break
           case CommandFromResultsWebview.NavigateToCode:

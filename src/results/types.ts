@@ -185,6 +185,7 @@ export enum EventTypesFromExtension {
   ScriptStopped = 'script-stopped',
   InitialJobs = 'initial-jobs',
   DeleteJob = 'delete-job',
+  DeleteResults = 'delete-results',
   RunJob = 'run-job',
   SettingsError = 'settings-error',
 }
@@ -246,6 +247,10 @@ export type EventsFromExtension =
     }
   | {
       type: EventTypesFromExtension.DeleteJob
+      payload: string
+    }
+  | {
+      type: EventTypesFromExtension.DeleteResults
       payload: string
     }
   | {
