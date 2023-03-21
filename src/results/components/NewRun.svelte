@@ -244,11 +244,6 @@
   function createActionsForContextMenu(): Action[] {
     let actions: Action[] = [
       {
-        title: 'Rename',
-        icon: 'edit',
-        onClick: setRename,
-      },
-      {
         title: 'Edit',
         icon: 'gear',
         onClick: editFunc,
@@ -271,6 +266,12 @@
         title: 'Stop',
         icon: 'stop-circle',
         onClick: runningStopFunc,
+      })
+    } else {
+      actions.unshift({
+        title: 'Rename',
+        icon: 'edit',
+        onClick: setRename,
       })
     }
     return actions
