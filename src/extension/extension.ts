@@ -294,7 +294,11 @@ export function activate(context: vscode.ExtensionContext): void {
     const confUri = vscode.Uri.parse(path + '/' + confFile)
     try {
       const content = await readConf(confUri)
-      if (!content.send_only || !content.run_source) {
+      if (
+        !content.send_only ||
+        !content.run_source ||
+        content.run_source !== 'VSCODE'
+      ) {
         content.send_only = true
         content.run_source = 'VSCODE'
         try {
@@ -539,7 +543,11 @@ export function activate(context: vscode.ExtensionContext): void {
     try {
       const confFile: ConfFile = await readConf(file)
       // add send_only flag to conf file, if it doesn't exist
-      if (!confFile.send_only || !confFile.run_source) {
+      if (
+        !confFile.send_only ||
+        !confFile.run_source ||
+        confFile.run_source !== 'VSCODE'
+      ) {
         try {
           confFile.send_only = true
           confFile.run_source = 'VSCODE'
