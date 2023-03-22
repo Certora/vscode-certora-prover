@@ -4,14 +4,7 @@
 
 import { workspace, Uri, window } from 'vscode'
 import { log, Sources } from './log'
-import {
-  CONF_DIRECTORY_NAME,
-  InputFormData,
-  NewForm,
-  SolcArg,
-  SolidityObj,
-} from '../types'
-import { link } from 'fs'
+import { CONF_DIRECTORY_NAME, NewForm, SolidityObj } from '../types'
 
 type ConfFile = {
   files?: string[]
@@ -23,6 +16,8 @@ type ConfFile = {
   cache?: string
   msg?: string
   packages?: string[]
+  solc_args?: string[]
+  solc_map?: any
 } & Record<string, boolean | string>
 
 function setAdditionalSetting(val?: string) {
@@ -48,203 +43,26 @@ function setAdditionalSetting(val?: string) {
  * if additional contracts have solc filled, but all the solc's are the same - use [solc] flag
  * otherwise, use [solc_map] flag with the different solc's
  * @param config conf file to whrite the solc/solc_map flag to
- * @param inputFormData where the data from the user is stored
+ * @param solcObj where the data from the user is stored
  */
-function additionalContractsSolc(
-  config: ConfFile,
-  inputFormData: SolidityObj[],
-) {
-  const findSimilar = inputFormData.every(sm => {
+function additionalContractsSolc(config: ConfFile, solcObj: SolidityObj[]) {
+  const findSimilar = solcObj.every(sm => {
     return (
-      sm.compiler.ver === inputFormData[0].compiler.ver &&
-      sm.compiler.exe === inputFormData[0].compiler.exe
+      sm.compiler.ver + sm.compiler.exe === config.solc ||
+      sm.compiler.ver + '/' + sm.compiler.exe === config.solc
     )
   })
-  if (findSimilar) {
-    const singleSolc = inputFormData[0].compiler.exe
-      ? inputFormData[0].compiler.exe + '/' + inputFormData[0].compiler.ver
-      : inputFormData[0].compiler.ver
-    config.solc = singleSolc || 'solc'
-  } else {
+  if (!findSimilar) {
+    delete config.solc
     // object with contracts as keys and solc versions as values
-    config.solc_map = JSON.parse(
-      JSON.stringify(
-        Object.fromEntries(
-          inputFormData.map(solObj => {
-            const singleSolc = solObj.compiler.exe
-              ? solObj.compiler.exe + '/' + solObj.compiler.ver
-              : solObj.compiler.ver
-            return [singleSolc]
-          }),
-        ),
-      ),
-    )
-  }
-}
-
-function convertSourceFormDataToConfFileJSON(
-  inputFormData: InputFormData,
-): string {
-  const config: ConfFile = {}
-  if (!Array.isArray(config.files)) config.files = []
-
-  if (inputFormData.specFile && inputFormData.mainContractName) {
-    config.verify = [
-      `${inputFormData.mainContractName}:${inputFormData.specFile}`,
-    ]
-  }
-
-  if (inputFormData.mainSolidityFile) {
-    if (inputFormData.mainContractName) {
-      config.files.push(
-        `${inputFormData.mainSolidityFile}:${inputFormData.mainContractName}`,
-      )
-    } else {
-      config.files.push(inputFormData.mainSolidityFile)
-    }
-  }
-
-  if (
-    inputFormData.useAdditionalContracts &&
-    inputFormData.additionalContracts?.length > 0
-  ) {
-    inputFormData.additionalContracts.forEach(contract => {
-      config.files?.push(
-        `${contract.file}${
-          contract.contractName ? `:${contract.contractName}` : ''
-        }`,
-      )
+    config.solc_map = {}
+    solcObj.forEach(singleSolcObj => {
+      const singleSolc = singleSolcObj.compiler.exe
+        ? singleSolcObj.compiler.exe + '/' + singleSolcObj.compiler.ver
+        : singleSolcObj.compiler.ver
+      const contract = singleSolcObj.mainContract
+      config.solc_map[contract] = singleSolc
     })
-  }
-  if (
-    inputFormData.useAdditionalContracts &&
-    inputFormData.solc_map.length > 1
-  ) {
-    // additionalContractsSolc(config, inputFormData)
-  } else {
-    config.solc = inputFormData.solidityCompiler || 'solc'
-  }
-
-  if (inputFormData.link?.length > 0) {
-    config.link = []
-
-    inputFormData.link.forEach(group => {
-      config.link?.push(
-        `${group.contractName}:${group.fieldName}=${group.associatedContractName}`,
-      )
-    })
-  }
-
-  if (
-    inputFormData.extendedSettings?.filter(({ flag }) => flag !== '').length > 0
-  ) {
-    config.settings = []
-
-    inputFormData.extendedSettings.forEach(({ flag }) => {
-      config.settings?.push(flag)
-    })
-  }
-  if (inputFormData.useStaging) {
-    config.staging = inputFormData.branch || 'master'
-  }
-  if (inputFormData.branch && !inputFormData.useStaging) {
-    config.cloud = inputFormData.branch
-  }
-
-  if (inputFormData.cacheName) {
-    config.cache = inputFormData.cacheName
-  }
-
-  if (inputFormData.message) {
-    config.msg = inputFormData.message
-  }
-
-  if (inputFormData.additionalSettings?.length) {
-    inputFormData.additionalSettings.forEach(({ flag, value }) => {
-      if (flag) {
-        config[flag] = setAdditionalSetting(value as string)
-      }
-    })
-  }
-
-  return JSON.stringify(config, null, 2)
-}
-
-/**
- * translate 'link' attribute between forms
- * @param form InputFormData
- * @param solObj SilidityObj
- * @param contractName name of the contract that has the link
- */
-function processLink(
-  form: InputFormData,
-  solObj: SolidityObj,
-  contractName: string,
-) {
-  const linking = solObj.linking
-  if (linking.length > 0) {
-    linking.forEach(link => {
-      if (link.variable && link.contractName) {
-        form.link.push({
-          contractName: contractName,
-          fieldName: link.variable,
-          associatedContractName: link.contractName,
-        })
-      }
-    })
-  }
-}
-
-/**
- * add additional setting with flag [flag] and value [value] the the form
- * @param flag flag (string)
- * @param value value (string)
- * @param form to add additional setting to
- */
-function addAdditionalSetting(
-  flag: string,
-  value: string,
-  form: InputFormData,
-) {
-  if (value) {
-    form.additionalSettings.push({
-      flag: flag,
-      value: value,
-    })
-  }
-}
-
-/**
- * add solidity arguments (solc_args) into the conf file.
- * to do this, we nees to create an array with all the solidity argument in the format:
- * ["someFlag", "someOtherFlag", "valueOfOtherflag"]
- * where in the example above, the argument "someFlag" has no value, and the argument "someOtherFlag"
- * has the value "valueOfOtherflag".
- * @param flag strings that has the name of the flag for solidity arguments ("solc_args")
- * @param solcArgs array of solidity arguments in the format: { key:string, value: string }
- * @param form InputFormData to add solc_args to
- */
-function addSolcArguments(
-  flag: string,
-  solcArgs: SolcArg[],
-  form: InputFormData,
-) {
-  if (solcArgs) {
-    let strSolcArgs = '['
-    solcArgs.forEach(arg => {
-      if (arg.key && arg.value) {
-        strSolcArgs += '--' + arg.key + ',' + arg.value + ','
-      } else if (arg.key) {
-        strSolcArgs += '--' + arg.key + ','
-      }
-    })
-    if (strSolcArgs !== '[') {
-      strSolcArgs = strSolcArgs.replace(/.$/, ']')
-      form.additionalSettings.push({
-        flag: flag,
-        value: strSolcArgs,
-      })
-    }
   }
 }
 
@@ -276,56 +94,40 @@ function processCompilerPath(file: string, pathToFile?: string): string {
  */
 function processAdditionalContracts(
   solidityAdditionalContracts: SolidityObj[],
-  form: InputFormData,
+  config: ConfFile,
 ) {
-  form.useAdditionalContracts = true
-  form.solc_map.push({
-    contract: form.mainContractName,
-    solidityCompiler: form.solidityCompiler,
+  solidityAdditionalContracts.forEach(contract => {
+    config.files?.push(
+      `${contract.mainFile.value}${
+        contract.mainContract ? `:${contract.mainContract}` : ''
+      }`,
+    )
+    processLinking(contract, config)
   })
-
-  solidityAdditionalContracts.forEach(solObj => {
-    if (solObj.mainContract) {
-      form.additionalContracts.push({
-        file: solObj.mainFile.value?.toString(),
-        contractName: solObj.mainContract,
-      })
-
-      processLink(form, solObj, solObj.mainContract)
-
-      if (solObj.compiler.ver) {
-        const compilerFullPath = processCompilerPath(
-          solObj.compiler.ver,
-          solObj.compiler.exe,
-        )
-        form.solc_map.push({
-          contract: solObj.mainContract,
-          solidityCompiler: compilerFullPath,
-        })
-      }
-    }
-  })
+  additionalContractsSolc(config, solidityAdditionalContracts)
 }
 
 /**
- * translate information about packages between forms
- * @param solObj translate from
- * @param form translate to
+ * translate information about links between forms
+ * @param solidityObj translate from
+ * @param config translate to
  */
-function processPackages(solObj: SolidityObj, form: InputFormData) {
-  const solDir = solObj.solidityPackageDir
-  if (solDir && solDir.length > 0) {
-    const packages: string[] = []
-    solDir.forEach(pack => {
-      if (pack.packageName && pack.path) {
-        packages.push(pack.packageName + '=' + pack.path)
+function processLinking(solidityObj: SolidityObj, config: ConfFile) {
+  const linking = solidityObj.linking
+  const contractName = solidityObj.mainContract
+  if (linking.length > 0) {
+    if (!config.link) {
+      config.link = []
+    }
+    linking.forEach(link => {
+      if (link.variable && link.contractName) {
+        config.link?.push(
+          `${contractName}:${link.variable}=${link.contractName}`,
+        )
       }
     })
-    if (packages.length > 0) {
-      form.additionalSettings.push({
-        flag: 'packages',
-        value: packages,
-      })
+    if (config.link.length === 0) {
+      delete config.link
     }
   }
 }
@@ -350,33 +152,35 @@ export function newFormToConf(newForm: NewForm): string {
     }
   }
 
+  const solc = processCompilerPath(
+    newForm.solidityObj.compiler.ver,
+    newForm.solidityObj.compiler.exe,
+  )
+
+  config.solc = solc
+
   if (
     newForm.solidityAdditionalContracts &&
     newForm.solidityAdditionalContracts.length > 0
   ) {
-    newForm.solidityAdditionalContracts.forEach(contract => {
-      config.files?.push(
-        `${contract.mainFile.value}${
-          contract.mainContract ? `:${contract.mainContract}` : ''
-        }`,
-      )
-      const linking = contract.linking
-      const contractName = contract.mainContract
-      if (linking.length > 0) {
-        config.link = []
-        linking.forEach(link => {
-          if (link.variable && link.contractName) {
-            config.link?.push(
-              `${contractName}:${link.variable}=${link.contractName}`,
-            )
-          }
-        })
-      }
-    })
-    additionalContractsSolc(config, newForm.solidityAdditionalContracts)
+    processAdditionalContracts(newForm.solidityAdditionalContracts, config)
   }
 
-  // todo: deal with packages and other processing stuff
+  const solcArgs = newForm.solidityObj.solidityArgs
+  if (solcArgs) {
+    const strSolcArgs: string[] = []
+    solcArgs.forEach(arg => {
+      if (arg.key && arg.value) {
+        strSolcArgs.push('--' + arg.key, arg.value)
+      } else if (arg.key) {
+        strSolcArgs.push('--' + arg.key)
+      }
+    })
+    if (strSolcArgs) {
+      config.solc_args = strSolcArgs
+    }
+  }
+
   const solDir = newForm.solidityObj.solidityPackageDir
   if (solDir && solDir.length > 0) {
     const packages: string[] = []
@@ -389,31 +193,8 @@ export function newFormToConf(newForm: NewForm): string {
       config.packages = packages
     }
   }
-  // LINKING FOR MAIN CONTRACT
-  const linking = newForm.solidityObj.linking
-  const contractName = newForm.solidityObj.mainContract
-  if (linking.length > 0) {
-    if (!config.link) {
-      config.link = []
-    }
-    linking.forEach(link => {
-      if (link.variable && link.contractName) {
-        config.link?.push(
-          `${contractName}:${link.variable}=${link.contractName}`,
-        )
-      }
-    })
-  }
+  processLinking(newForm.solidityObj, config)
 
-  // if (
-  //   inputFormData.extendedSettings?.filter(({ flag }) => flag !== '').length > 0
-  // ) {
-  //   config.settings = []
-
-  //   inputFormData.extendedSettings.forEach(({ flag }) => {
-  //     config.settings?.push(flag)
-  //   })
-  // }
   if (newForm.specObj.runOnStg) {
     config.staging = newForm.specObj.branchName || 'master'
   }
@@ -421,77 +202,40 @@ export function newFormToConf(newForm: NewForm): string {
     config.cloud = newForm.specObj.branchName
   }
 
-  // if (inputFormData.cacheName) {
-  //   config.cache = inputFormData.cacheName
-  // }
-
   if (newForm.verificationMessage) {
     config.msg = newForm.verificationMessage
   }
-  // additional settings for all flags from old conversion newForm -> oldForm
-  // addAdditionalSetting(
-  //   'optimistic_loop',
-  //   newForm.specObj.optimisticLoop.toString(),
-  //   form,
-  // )
+
   if (newForm.specObj.optimisticLoop) {
     config.optimistic_loop = setAdditionalSetting(
       newForm.specObj.optimisticLoop.toString(),
     )
   }
-  // if (value) {
-  //   form.additionalSettings.push({
-  //     flag: flag,
-  //     value: value,
-  //   })
-  // }
 
-  // addAdditionalSetting(
-  //   'multi_assert_check',
-  //   newForm.specObj.multiAssert.toString(),
-  //   form,
-  // )
   if (newForm.specObj.multiAssert) {
     config.multi_assert_check = setAdditionalSetting(
       newForm.specObj.multiAssert.toString(),
     )
   }
 
-  // addAdditionalSetting(
-  //   'send_only',
-  //   (newForm.specObj.sendOnly as boolean).toString(),
-  //   form,
-  // )
   if (newForm.specObj.sendOnly) {
     config.send_only = setAdditionalSetting(newForm.specObj.sendOnly.toString())
   }
 
-  // addAdditionalSetting('smt_timeout', newForm.specObj.duration, form)
   if (newForm.specObj.duration) {
     config.smt_timeout = setAdditionalSetting(newForm.specObj.duration)
   }
 
-  // addAdditionalSetting('loop_iter', newForm.specObj.loopUnroll, form)
   if (newForm.specObj.loopUnroll) {
     config.loop_iter = setAdditionalSetting(newForm.specObj.loopUnroll)
   }
 
-  // addAdditionalSetting(
-  //   'disableLocalTypeChecking',
-  //   (!(newForm.specObj.localTypeChecking as boolean)).toString(),
-  //   form,
-  // )
   if (newForm.specObj.localTypeChecking) {
     config.disableLocalTypeChecking = setAdditionalSetting(
       (!newForm.specObj.localTypeChecking).toString(),
     )
   }
 
-  // addAdditionalSetting(
-  //   'packages_path',
-  //   newForm.solidityObj.solidityPackageDefaultPath,
-  //   form,
-  // )
   if (newForm.solidityObj.solidityPackageDefaultPath) {
     config.packages_path = setAdditionalSetting(
       newForm.solidityObj.solidityPackageDefaultPath,
@@ -500,35 +244,21 @@ export function newFormToConf(newForm: NewForm): string {
 
   if (newForm.specObj.rules) {
     const rulesArr = newForm.specObj.rules.trim().split(',')
-    // form.additionalSettings.push({
-    //   flag: 'rule',
-    //   value: rulesArr,
-    // })
     config.rule = setAdditionalSetting(rulesArr.toString())
   }
 
-  // addAdditionalSetting('method', newForm.solidityObj.specifiMethod, form)
   if (newForm.solidityObj.specifiMethod) {
     config.method = setAdditionalSetting(newForm.solidityObj.specifiMethod)
   }
 
   if (newForm.specObj.ruleSanity) {
     if (newForm.specObj.advancedSanity) {
-      // addAdditionalSetting('rule_sanity', 'advanced', form)
       config.rule_sanity = setAdditionalSetting('advanced')
     } else {
-      // addAdditionalSetting('rule_sanity', 'basic', form)
       config.rule_sanity = setAdditionalSetting('basic')
     }
   }
-  // if (inputFormData.additionalSettings?.length) {
-  //   inputFormData.additionalSettings.forEach(({ flag, value }) => {
-  //     if (flag) {
-  //       config[flag] = setAdditionalSetting(value as string)
-  //     }
-  //   })
-  // }
-  // return config
+
   return JSON.stringify(config, null, 2)
 }
 
@@ -538,123 +268,123 @@ export function newFormToConf(newForm: NewForm): string {
  * @param confFileName name of the related conf file (string)
  * @returns InputFormData (translated from NewForm)
  */
-export function processForm(
-  newForm: NewForm,
-  confFileName: string,
-): InputFormData {
-  const compilerDirectory: string = processCompilerPath(
-    newForm.solidityObj.compiler.ver,
-    newForm.solidityObj.compiler.exe,
-  )
-  const mainSolFile = newForm.solidityObj.mainFile?.value || ''
-  const mainSpecFile = newForm.specObj.specFile.value || ''
-  const form: InputFormData = {
-    name: confFileName,
-    mainSolidityFile: mainSolFile,
-    mainContractName: newForm.solidityObj.mainContract,
-    specFile: mainSpecFile,
-    solidityCompiler: compilerDirectory,
-    useAdditionalContracts: false,
-    additionalContracts: [],
-    link: [],
-    extendedSettings: [],
-    useStaging: newForm.specObj.runOnStg,
-    branch: '',
-    cacheName: '',
-    message: confFileName,
-    additionalSettings: [],
-    solc_map: [],
-  }
+// export function processForm(
+//   newForm: NewForm,
+//   confFileName: string,
+// ): InputFormData {
+//   const compilerDirectory: string = processCompilerPath(
+//     newForm.solidityObj.compiler.ver,
+//     newForm.solidityObj.compiler.exe,
+//   )
+//   const mainSolFile = newForm.solidityObj.mainFile?.value || ''
+//   const mainSpecFile = newForm.specObj.specFile.value || ''
+//   const form: InputFormData = {
+//     name: confFileName,
+//     mainSolidityFile: mainSolFile,
+//     mainContractName: newForm.solidityObj.mainContract,
+//     specFile: mainSpecFile,
+//     solidityCompiler: compilerDirectory,
+//     useAdditionalContracts: false,
+//     additionalContracts: [],
+//     link: [],
+//     extendedSettings: [],
+//     useStaging: newForm.specObj.runOnStg,
+//     branch: '',
+//     cacheName: '',
+//     message: confFileName,
+//     additionalSettings: [],
+//     solc_map: [],
+//   }
 
-  if (
-    newForm.solidityAdditionalContracts &&
-    newForm.solidityAdditionalContracts.length > 0
-  ) {
-    processAdditionalContracts(newForm.solidityAdditionalContracts, form)
-  }
+//   if (
+//     newForm.solidityAdditionalContracts &&
+//     newForm.solidityAdditionalContracts.length > 0
+//   ) {
+//     processAdditionalContracts(newForm.solidityAdditionalContracts, form)
+//   }
 
-  if (newForm.verificationMessage as string) {
-    form.message = newForm.verificationMessage as string
-  }
+//   if (newForm.verificationMessage as string) {
+//     form.message = newForm.verificationMessage as string
+//   }
 
-  addAdditionalSetting(
-    'optimistic_loop',
-    newForm.specObj.optimisticLoop.toString(),
-    form,
-  )
+//   addAdditionalSetting(
+//     'optimistic_loop',
+//     newForm.specObj.optimisticLoop.toString(),
+//     form,
+//   )
 
-  addAdditionalSetting(
-    'multi_assert_check',
-    newForm.specObj.multiAssert.toString(),
-    form,
-  )
+//   addAdditionalSetting(
+//     'multi_assert_check',
+//     newForm.specObj.multiAssert.toString(),
+//     form,
+//   )
 
-  addAdditionalSetting(
-    'send_only',
-    (newForm.specObj.sendOnly as boolean).toString(),
-    form,
-  )
+//   addAdditionalSetting(
+//     'send_only',
+//     (newForm.specObj.sendOnly as boolean).toString(),
+//     form,
+//   )
 
-  addAdditionalSetting('smt_timeout', newForm.specObj.duration, form)
+//   addAdditionalSetting('smt_timeout', newForm.specObj.duration, form)
 
-  addAdditionalSetting('loop_iter', newForm.specObj.loopUnroll, form)
+//   addAdditionalSetting('loop_iter', newForm.specObj.loopUnroll, form)
 
-  addAdditionalSetting(
-    'disableLocalTypeChecking',
-    (!(newForm.specObj.localTypeChecking as boolean)).toString(),
-    form,
-  )
+//   addAdditionalSetting(
+//     'disableLocalTypeChecking',
+//     (!(newForm.specObj.localTypeChecking as boolean)).toString(),
+//     form,
+//   )
 
-  if (newForm.specObj.runOnStg) {
-    form.useStaging = true
-    form.branch = newForm.specObj.branchName || 'master'
-  }
+//   if (newForm.specObj.runOnStg) {
+//     form.useStaging = true
+//     form.branch = newForm.specObj.branchName || 'master'
+//   }
 
-  if (newForm.specObj.branchName && !newForm.specObj.runOnStg) {
-    form.branch = newForm.specObj.branchName || 'production'
-  }
+//   if (newForm.specObj.branchName && !newForm.specObj.runOnStg) {
+//     form.branch = newForm.specObj.branchName || 'production'
+//   }
 
-  addAdditionalSetting(
-    'packages_path',
-    newForm.solidityObj.solidityPackageDefaultPath,
-    form,
-  )
+//   addAdditionalSetting(
+//     'packages_path',
+//     newForm.solidityObj.solidityPackageDefaultPath,
+//     form,
+//   )
 
-  if (newForm.specObj.rules) {
-    const rulesArr = newForm.specObj.rules.trim().split(',')
-    form.additionalSettings.push({
-      flag: 'rule',
-      value: rulesArr,
-    })
-  }
+//   if (newForm.specObj.rules) {
+//     const rulesArr = newForm.specObj.rules.trim().split(',')
+//     form.additionalSettings.push({
+//       flag: 'rule',
+//       value: rulesArr,
+//     })
+//   }
 
-  addAdditionalSetting('method', newForm.solidityObj.specifiMethod, form)
+//   addAdditionalSetting('method', newForm.solidityObj.specifiMethod, form)
 
-  if (newForm.specObj.ruleSanity) {
-    if (newForm.specObj.advancedSanity) {
-      addAdditionalSetting('rule_sanity', 'advanced', form)
-    } else {
-      addAdditionalSetting('rule_sanity', 'basic', form)
-    }
-  }
+//   if (newForm.specObj.ruleSanity) {
+//     if (newForm.specObj.advancedSanity) {
+//       addAdditionalSetting('rule_sanity', 'advanced', form)
+//     } else {
+//       addAdditionalSetting('rule_sanity', 'basic', form)
+//     }
+//   }
 
-  addSolcArguments('solc_args', newForm.solidityObj.solidityArgs, form)
+//   addSolcArguments('solc_args', newForm.solidityObj.solidityArgs, form)
 
-  processPackages(newForm.solidityObj, form)
+//   processPackages(newForm.solidityObj, form)
 
-  const additionalSettings = newForm.specObj.properties
-  if (
-    additionalSettings &&
-    additionalSettings.length > 0 &&
-    additionalSettings[0].name
-  ) {
-    additionalSettings.forEach(flag => {
-      addAdditionalSetting(flag.name, flag.value || 'true', form)
-    })
-  }
-  processLink(form, newForm.solidityObj, newForm.solidityObj.mainContract)
-  return form
-}
+//   const additionalSettings = newForm.specObj.properties
+//   if (
+//     additionalSettings &&
+//     additionalSettings.length > 0 &&
+//     additionalSettings[0].name
+//   ) {
+//     additionalSettings.forEach(flag => {
+//       addAdditionalSetting(flag.name, flag.value || 'true', form)
+//     })
+//   }
+//   processLink(form, newForm.solidityObj, newForm.solidityObj.mainContract)
+//   return form
+// }
 
 export async function createConfFile(
   formData: NewForm,
@@ -673,7 +403,6 @@ export async function createConfFile(
       CONF_DIRECTORY_NAME,
       `${confFileName}.conf`,
     )
-    console.log('===path', path)
     await workspace.fs.writeFile(path, content)
     log({
       action: `Conf file was created`,

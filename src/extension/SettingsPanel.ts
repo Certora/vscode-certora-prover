@@ -5,18 +5,16 @@
 import * as vscode from 'vscode'
 import { SmartContractsFilesWatcher } from './SmartContractsFilesWatcher'
 import { getNonce } from './utils/getNonce'
-import { createConfFile, processForm } from './utils/createConfFile'
+import { createConfFile } from './utils/createConfFile'
 import { log, Sources } from './utils/log'
 import {
   CommandFromSettingsWebview,
   ConfFile,
   JobNameMap,
   EventFromSettingsWebview,
-  InputFormData,
   NewForm,
 } from './types'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
-import { type } from 'os'
 
 export class SettingsPanel {
   public static currentPanel?: SettingsPanel
@@ -85,7 +83,7 @@ export class SettingsPanel {
             })
             const form: NewForm = e.payload
             if (confFileName) {
-              console.log('=====', confFileName, typeof confFileName)
+              // console.log('=====', confFileName, typeof confFileName)
               createConfFile(form, confFileName)
             }
             if (
