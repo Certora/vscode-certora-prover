@@ -12,13 +12,13 @@ import {
   ConfToCreate,
   CONF_DIRECTORY,
   CONF_DIRECTORY_NAME,
-  InputFormData,
   JobNameMap,
   CERTORA_INNER_DIR_BUILD,
   CERTORA_INNER_DIR,
+  NewForm,
 } from './types'
 import { createConfFile } from './utils/createConfFile'
-import { confFileToFormData } from './utils/confFileToInputForm'
+import { confFileToFormData } from './utils/confFileToFormData'
 import { checkDir } from './utils/checkDir'
 
 export function activate(context: vscode.ExtensionContext): void {
@@ -32,12 +32,8 @@ export function activate(context: vscode.ExtensionContext): void {
     const path = vscode.workspace.workspaceFolders?.[0]
     if (!path) return
     const confFileDefault = getDefaultSettings()
-    const emptyForm: InputFormData = confFileToFormData(
-      confFileDefault,
-      name.fileName,
-    )
-    // todo: deafult setitngs should be in the new format
-    // createConfFile(emptyForm, name.fileName)
+    const emptyForm: NewForm = confFileToFormData(confFileDefault)
+    createConfFile(emptyForm, name.fileName)
     renderSettingsPanel(name, confFileDefault)
   }
 

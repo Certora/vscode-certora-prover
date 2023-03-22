@@ -259,132 +259,13 @@ export function newFormToConf(newForm: NewForm): string {
     }
   }
 
+  // additional flags
+  newForm.specObj.properties.forEach(prop => {
+    config[prop.name] = setAdditionalSetting(prop.value)
+  })
+
   return JSON.stringify(config, null, 2)
 }
-
-/**
- * TEMPORARY: translates data between the new form format to the old one
- * @param newForm new format
- * @param confFileName name of the related conf file (string)
- * @returns InputFormData (translated from NewForm)
- */
-// export function processForm(
-//   newForm: NewForm,
-//   confFileName: string,
-// ): InputFormData {
-//   const compilerDirectory: string = processCompilerPath(
-//     newForm.solidityObj.compiler.ver,
-//     newForm.solidityObj.compiler.exe,
-//   )
-//   const mainSolFile = newForm.solidityObj.mainFile?.value || ''
-//   const mainSpecFile = newForm.specObj.specFile.value || ''
-//   const form: InputFormData = {
-//     name: confFileName,
-//     mainSolidityFile: mainSolFile,
-//     mainContractName: newForm.solidityObj.mainContract,
-//     specFile: mainSpecFile,
-//     solidityCompiler: compilerDirectory,
-//     useAdditionalContracts: false,
-//     additionalContracts: [],
-//     link: [],
-//     extendedSettings: [],
-//     useStaging: newForm.specObj.runOnStg,
-//     branch: '',
-//     cacheName: '',
-//     message: confFileName,
-//     additionalSettings: [],
-//     solc_map: [],
-//   }
-
-//   if (
-//     newForm.solidityAdditionalContracts &&
-//     newForm.solidityAdditionalContracts.length > 0
-//   ) {
-//     processAdditionalContracts(newForm.solidityAdditionalContracts, form)
-//   }
-
-//   if (newForm.verificationMessage as string) {
-//     form.message = newForm.verificationMessage as string
-//   }
-
-//   addAdditionalSetting(
-//     'optimistic_loop',
-//     newForm.specObj.optimisticLoop.toString(),
-//     form,
-//   )
-
-//   addAdditionalSetting(
-//     'multi_assert_check',
-//     newForm.specObj.multiAssert.toString(),
-//     form,
-//   )
-
-//   addAdditionalSetting(
-//     'send_only',
-//     (newForm.specObj.sendOnly as boolean).toString(),
-//     form,
-//   )
-
-//   addAdditionalSetting('smt_timeout', newForm.specObj.duration, form)
-
-//   addAdditionalSetting('loop_iter', newForm.specObj.loopUnroll, form)
-
-//   addAdditionalSetting(
-//     'disableLocalTypeChecking',
-//     (!(newForm.specObj.localTypeChecking as boolean)).toString(),
-//     form,
-//   )
-
-//   if (newForm.specObj.runOnStg) {
-//     form.useStaging = true
-//     form.branch = newForm.specObj.branchName || 'master'
-//   }
-
-//   if (newForm.specObj.branchName && !newForm.specObj.runOnStg) {
-//     form.branch = newForm.specObj.branchName || 'production'
-//   }
-
-//   addAdditionalSetting(
-//     'packages_path',
-//     newForm.solidityObj.solidityPackageDefaultPath,
-//     form,
-//   )
-
-//   if (newForm.specObj.rules) {
-//     const rulesArr = newForm.specObj.rules.trim().split(',')
-//     form.additionalSettings.push({
-//       flag: 'rule',
-//       value: rulesArr,
-//     })
-//   }
-
-//   addAdditionalSetting('method', newForm.solidityObj.specifiMethod, form)
-
-//   if (newForm.specObj.ruleSanity) {
-//     if (newForm.specObj.advancedSanity) {
-//       addAdditionalSetting('rule_sanity', 'advanced', form)
-//     } else {
-//       addAdditionalSetting('rule_sanity', 'basic', form)
-//     }
-//   }
-
-//   addSolcArguments('solc_args', newForm.solidityObj.solidityArgs, form)
-
-//   processPackages(newForm.solidityObj, form)
-
-//   const additionalSettings = newForm.specObj.properties
-//   if (
-//     additionalSettings &&
-//     additionalSettings.length > 0 &&
-//     additionalSettings[0].name
-//   ) {
-//     additionalSettings.forEach(flag => {
-//       addAdditionalSetting(flag.name, flag.value || 'true', form)
-//     })
-//   }
-//   processLink(form, newForm.solidityObj, newForm.solidityObj.mainContract)
-//   return form
-// }
 
 export async function createConfFile(
   formData: NewForm,

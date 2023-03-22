@@ -194,7 +194,7 @@ export type FileFormat = {
 
 // solidity part of the new settings view
 export type SolidityObj = {
-  mainFile: FileFormat
+  mainFile: any
   mainContract: string
   linking: Link[]
   specifiMethod: string
@@ -211,7 +211,7 @@ export type Property = {
 
 // spec part of the new settings view
 export type SpecObj = {
-  specFile: FileFormat
+  specFile: any
   rules: string
   duration: string
   inherit: string
