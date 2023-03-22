@@ -13,8 +13,10 @@ import {
   JobNameMap,
   EventFromSettingsWebview,
   InputFormData,
+  NewForm,
 } from './types'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
+import { type } from 'os'
 
 export class SettingsPanel {
   public static currentPanel?: SettingsPanel
@@ -81,13 +83,16 @@ export class SettingsPanel {
               source: Sources.Extension,
               info: e.payload,
             })
-            const form: InputFormData = processForm(e.payload, confFileName)
-            createConfFile(form)
+            const form: NewForm = e.payload
+            if (confFileName) {
+              console.log('=====', confFileName, typeof confFileName)
+              createConfFile(form, confFileName)
+            }
             if (
-              form.mainContractName &&
-              form.mainSolidityFile &&
-              form.solidityCompiler &&
-              form.specFile &&
+              form.solidityObj.mainContract &&
+              form.solidityObj.mainFile &&
+              form.solidityObj.compiler.ver &&
+              form.specObj.specFile &&
               !e.payload.checkMyInputs
             ) {
               // if all mandatory fields are filled - allow running

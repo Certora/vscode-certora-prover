@@ -36,7 +36,8 @@ export function activate(context: vscode.ExtensionContext): void {
       confFileDefault,
       name.fileName,
     )
-    createConfFile(emptyForm)
+    // todo: deafult setitngs should be in the new format
+    // createConfFile(emptyForm, name.fileName)
     renderSettingsPanel(name, confFileDefault)
   }
 
