@@ -187,7 +187,8 @@
                     infoObj={infoObjArr.linkVar}
                     placeholder="Variable"
                     source={Source.Sol}
-                    bind:bindValue={obj.variable}
+                    bind:bindValue={$solAdditionalContracts[index].linking
+                      .variable}
                   />
                 </div>
                 <div class="dark_input">
@@ -195,7 +196,8 @@
                     infoObj={infoObjArr.linkContract}
                     placeholder="Other Contract"
                     source={Source.Sol}
-                    bind:bindValue={obj.contractName}
+                    bind:bindValue={$solAdditionalContracts[index].linking
+                      .contractName}
                   />
                 </div>
                 <i
