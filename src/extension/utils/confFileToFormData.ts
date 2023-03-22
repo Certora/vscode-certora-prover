@@ -84,17 +84,12 @@ function getAdditionalSettings(confFile: ConfFile) {
  * @param solidityObj solidity object
  */
 function processCompiler(solc: string, solidityObj: SolidityObj) {
-  // todo: remove try catch
-  try {
-    if (solc.includes('/')) {
-      const index = solc.lastIndexOf('/')
-      solidityObj.compiler.exe = solc.slice(1, index)
-      solidityObj.compiler.ver = solc.slice(index + 1, solc.length)
-    } else {
-      solidityObj.compiler.ver = solc
-    }
-  } catch (e) {
-    console.log(e, 'INNER ERROR')
+  if (solc.includes('/')) {
+    const index = solc.lastIndexOf('/')
+    solidityObj.compiler.exe = solc.slice(1, index)
+    solidityObj.compiler.ver = solc.slice(index + 1, solc.length)
+  } else {
+    solidityObj.compiler.ver = solc
   }
 }
 
@@ -104,20 +99,15 @@ function processCompiler(solc: string, solidityObj: SolidityObj) {
  * @param solidityObj solidity object
  */
 function processPackages(packages: string[], solidityObj: SolidityObj) {
-  // todo: remove try catch?
-  try {
-    packages.forEach(packageStr => {
-      const re = /"/gi
-      const packageArray = packageStr.replace(re, '').split(/[:|=]/)
-      const tempPackage: SolidityPackageDir = {
-        packageName: packageArray[0],
-        path: packageArray[1],
-      }
-      solidityObj.solidityPackageDir.push(tempPackage)
-    })
-  } catch (e) {
-    console.log(e, '[INNER ERROR]')
-  }
+  packages.forEach(packageStr => {
+    const re = /"/gi
+    const packageArray = packageStr.replace(re, '').split(/[:|=]/)
+    const tempPackage: SolidityPackageDir = {
+      packageName: packageArray[0],
+      path: packageArray[1],
+    }
+    solidityObj.solidityPackageDir.push(tempPackage)
+  })
 }
 
 function processLink(linkArr: string[], solidityObj: SolidityObj) {
@@ -373,15 +363,10 @@ function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
           }
         })
       } else if (confFile.solc) {
-        // todo: reverse? pop?
         if (confFile.solc.includes('/')) {
           const solcArr = confFile.solc.split('/')
-          tempForm.compiler.ver = solcArr.reverse()[0]
-          tempForm.compiler.exe = solcArr
-            .reverse()
-            .join('/')
-            .replace(tempForm.compiler.ver, '')
-            .replace('/', '')
+          tempForm.compiler.ver = solcArr.pop() || ''
+          tempForm.compiler.exe = solcArr.reverse().join('/')
         } else {
           tempForm.compiler.ver = confFile.solc
         }

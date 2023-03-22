@@ -47,6 +47,7 @@ function setAdditionalSetting(val?: string) {
  * @param solcObj where the data from the user is stored
  */
 function additionalContractsSolc(config: ConfFile, solcObj: SolidityObj[]) {
+  delete config.solc_map
   const findSimilar = solcObj.every(sm => {
     return (
       sm.compiler.ver + sm.compiler.exe === config.solc ||
@@ -76,16 +77,21 @@ function additionalContractsSolc(config: ConfFile, solcObj: SolidityObj[]) {
  */
 function processCompilerPath(file: string, pathToFile?: string): string {
   let compDir: string = pathToFile || ''
-  if (compDir !== '' && compDir.split('').reverse()[0] !== '/') {
+  if (compDir && compDir.split('').reverse()[0] !== '/') {
     compDir += '/'
   }
   // checks if the path given in compDir is valid
-  const compDirUri: Uri = Uri.parse(compDir)
-  let compilerFullPath = file
-  if (compDirUri.path !== '/' && compDirUri.path !== undefined) {
-    compilerFullPath = compDirUri.path + file
+  try {
+    const compDirUri: Uri = Uri.parse(compDir)
+    let compilerFullPath = file
+    if (compDirUri.path !== '/' && compDirUri.path !== undefined) {
+      compilerFullPath = compDirUri.path + file
+    }
+    return compilerFullPath
+  } catch (e) {
+    console.log('[BAD SOLC EXE PATH]', e)
   }
-  return compilerFullPath
+  return file
 }
 
 /**
@@ -164,12 +170,17 @@ export function newFormToConf(newForm: NewForm): string {
   )
 
   config.solc = solc
+  console.log(solc, 'current solc')
 
   if (
     newForm.solidityAdditionalContracts &&
     newForm.solidityAdditionalContracts.length > 0
   ) {
     processAdditionalContracts(newForm.solidityAdditionalContracts, config)
+  }
+
+  if (config.solc_map) {
+    config.solc_map[newForm.solidityObj.mainContract] = solc
   }
 
   const solcArgs = newForm.solidityObj.solidityArgs
