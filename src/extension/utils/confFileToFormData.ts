@@ -15,7 +15,6 @@ const newForm: NewForm = {
     mainFile: '',
     mainContract: '',
     linking: [],
-    specifiMethod: '',
     compiler: {
       exe: '',
       ver: '',
@@ -28,7 +27,6 @@ const newForm: NewForm = {
     specFile: '',
     rules: '',
     duration: '',
-    inherit: '',
     optimisticLoop: false,
     loopUnroll: '',
     properties: [],
@@ -50,7 +48,6 @@ const stableFields = [
   'solc',
   'link',
   'staging',
-  'cache',
   'msg',
   'multi_assert_check',
   'packages',
@@ -58,7 +55,6 @@ const stableFields = [
   'solc_args',
   'smt_timeout',
   'loop_iter',
-  'method',
   'disableLocalTypeChecking',
   'optimistic_loop',
   'packages_path',
@@ -166,9 +162,6 @@ function processSolidityAttributes(
     }
   } else {
     solidityObj.solidityArgs.push({ key: '', value: '' })
-  }
-  if (confFile.method) {
-    solidityObj.specifiMethod = confFile.method.toString()
   }
 }
 
@@ -325,7 +318,6 @@ function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
         mainFile: '',
         mainContract: '',
         linking: [],
-        specifiMethod: '',
         compiler: {
           exe: '',
           ver: '',

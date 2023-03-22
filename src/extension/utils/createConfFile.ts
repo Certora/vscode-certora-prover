@@ -43,7 +43,7 @@ function setAdditionalSetting(val?: string) {
  * if only the main contract has solc: using [solc] flag
  * if additional contracts have solc filled, but all the solc's are the same - use [solc] flag
  * otherwise, use [solc_map] flag with the different solc's
- * @param config conf file to whrite the solc/solc_map flag to
+ * @param config conf file to write the solc/solc_map flag to
  * @param solcObj where the data from the user is stored
  */
 function additionalContractsSolc(config: ConfFile, solcObj: SolidityObj[]) {
@@ -70,7 +70,7 @@ function additionalContractsSolc(config: ConfFile, solcObj: SolidityObj[]) {
 
 /**
  * check validity of full path of the compiler, and return a valid path, or
- * jost the compiler file name if the path to it is not valid
+ * just the compiler file name if the path to it is not valid
  * @param file compiler file
  * @param pathToFile path to compiler file
  * @returns valid path
@@ -89,6 +89,7 @@ function processCompilerPath(file: string, pathToFile?: string): string {
     }
     return compilerFullPath
   } catch (e) {
+    // if the exe is nonsense
     console.log('[BAD SOLC EXE PATH]', e)
   }
   return file
@@ -170,7 +171,6 @@ export function newFormToConf(newForm: NewForm): string {
   )
 
   config.solc = solc
-  console.log(solc, 'current solc')
 
   if (
     newForm.solidityAdditionalContracts &&
@@ -265,10 +265,6 @@ export function newFormToConf(newForm: NewForm): string {
     if (rulesArr.length > 0) {
       config.rule = rulesArr
     }
-  }
-
-  if (newForm.solidityObj.specifiMethod) {
-    config.method = setAdditionalSetting(newForm.solidityObj.specifiMethod)
   }
 
   if (newForm.specObj.ruleSanity) {

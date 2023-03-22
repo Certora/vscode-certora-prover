@@ -167,7 +167,6 @@ export type SolidityObj = {
   mainFile: any
   mainContract: string
   linking: Link[]
-  specifiMethod: string
   compiler: Compiler
   solidityArgs: SolcArg[]
   solidityPackageDefaultPath: string
@@ -184,7 +183,6 @@ export type SpecObj = {
   specFile: any
   rules: string
   duration: string
-  inherit: string
   optimisticLoop: boolean
   loopUnroll: string
   properties: Property[]

@@ -64,7 +64,6 @@ export const solidityObj = writable({
   mainFile: '',
   mainContract: '',
   linking: [{ variable: '', contractName: '' }],
-  specifiMethod: '',
   compiler: { exe: '', ver: '' },
   solidityPackageDefaultPath: '',
   solidityArgs: [
@@ -85,7 +84,6 @@ export const specObj = writable({
   specFile: '',
   rules: '',
   duration: '',
-  inherit: '',
   optimisticLoop: true,
   loopUnroll: '',
   properties: [
