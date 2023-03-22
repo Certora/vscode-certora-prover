@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------------------------------
- *  Creates a conf file from an inputFormData type.
+ *  Creates a conf file from an NewForm data type.
  *-------------------------------------------------------------------------------------------- */
 
 import { workspace, Uri, window } from 'vscode'
@@ -18,6 +18,7 @@ type ConfFile = {
   packages?: string[]
   solc_args?: string[]
   solc_map?: any
+  rule?: string[]
 } & Record<string, boolean | string>
 
 function setAdditionalSetting(val?: string) {
@@ -132,6 +133,11 @@ function processLinking(solidityObj: SolidityObj, config: ConfFile) {
   }
 }
 
+/**
+ * from NewForm format to conf file format (settings form to json)
+ * @param newForm data in NewForm format
+ * @returns data in conf file format (as string)
+ */
 export function newFormToConf(newForm: NewForm): string {
   const config: ConfFile = {}
   if (!Array.isArray(config.files)) config.files = []
@@ -170,10 +176,11 @@ export function newFormToConf(newForm: NewForm): string {
   if (solcArgs) {
     const strSolcArgs: string[] = []
     solcArgs.forEach(arg => {
-      if (arg.key && arg.value) {
-        strSolcArgs.push('--' + arg.key, arg.value)
-      } else if (arg.key) {
+      if (arg.key) {
         strSolcArgs.push('--' + arg.key)
+      }
+      if (arg.value) {
+        strSolcArgs.push(arg.value)
       }
     })
     if (strSolcArgs) {
@@ -244,7 +251,9 @@ export function newFormToConf(newForm: NewForm): string {
 
   if (newForm.specObj.rules) {
     const rulesArr = newForm.specObj.rules.trim().split(',')
-    config.rule = setAdditionalSetting(rulesArr.toString())
+    if (rulesArr.length > 0) {
+      config.rule = rulesArr
+    }
   }
 
   if (newForm.solidityObj.specifiMethod) {

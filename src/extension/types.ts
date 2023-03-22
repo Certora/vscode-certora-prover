@@ -128,36 +128,6 @@ export type Output = {
   variables?: Variable[]
 }
 
-export type InputFormData = {
-  name: string
-  mainSolidityFile: string
-  mainContractName: string
-  specFile: string
-  solidityCompiler: string
-  useAdditionalContracts: boolean
-  additionalContracts: {
-    file: string
-    contractName?: string
-  }[]
-  link: {
-    contractName: string
-    fieldName: string
-    associatedContractName: string
-  }[]
-  extendedSettings: {
-    flag: string
-  }[]
-  useStaging: boolean
-  branch: string
-  cacheName: string
-  message: string
-  additionalSettings: {
-    flag: string
-    value: string | string[]
-  }[]
-  solc_map: { contract: string; solidityCompiler: string }[]
-}
-
 export type JobNameMap = {
   displayName: string
   fileName: string

@@ -159,12 +159,8 @@ function processSolidityAttributes(
   }
 
   if (confFile.solc_args) {
-    // todo: check if I can get an array of strings in confFile.solc_args
     try {
-      const solcArgsArr = confFile.solc_args
-        .toString()
-        .replace(/[[]']/, '')
-        .split(',')
+      const solcArgsArr = confFile.solc_args as string[]
       solcArgsArr.forEach(arg => {
         const tempArg = { key: '', value: '' }
         if (arg.includes('--')) {

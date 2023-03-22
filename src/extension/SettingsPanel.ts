@@ -83,7 +83,6 @@ export class SettingsPanel {
             })
             const form: NewForm = e.payload
             if (confFileName) {
-              // console.log('=====', confFileName, typeof confFileName)
               createConfFile(form, confFileName)
             }
             if (
