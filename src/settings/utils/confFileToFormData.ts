@@ -234,7 +234,6 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
   const form = newForm as NewForm
 
   if (Array.isArray(confFile.files) && confFile.files.length > 0) {
-    // form.solidityObj.mainFile = confFile.files[0] as string
     // look for main contract
     const mainFile = confFile.files.find(file => {
       const contract = getContractNameFromFile(file)
