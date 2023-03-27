@@ -8,6 +8,10 @@ All notable changes to this project will be documented in this file.
 
 * Save last results of a job run ([#92](https://github.com/Certora/vscode-certora-prover/pull/92))
 
+## Bug Fixes
+
+* Shell script to conf file convertor: if main contract is not in the first file - still recognize the main contract ([#93](https://github.com/Certora/vscode-certora-prover/pull/93))
+
 ### 0.1.3 (2023-03-19)
 
 ## Features

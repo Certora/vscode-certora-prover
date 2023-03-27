@@ -245,11 +245,6 @@
   function createActionsForContextMenu(): Action[] {
     let actions: Action[] = [
       {
-        title: 'Rename',
-        icon: 'edit',
-        onClick: setRename,
-      },
-      {
         title: 'Edit',
         icon: 'gear',
         onClick: editFunc,
@@ -271,6 +266,15 @@
         icon: 'stop-circle',
         onClick: runningStopFunc,
       })
+    } else {
+      actions = [
+        {
+          title: 'Rename',
+          icon: 'edit',
+          onClick: setRename,
+        },
+        ...actions,
+      ]
     }
     if (
       $verificationResults.find(vr => {

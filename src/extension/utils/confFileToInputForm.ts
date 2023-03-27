@@ -63,7 +63,7 @@ export function confFileToFormData(
   form.name = jobName
 
   // convert solidity file / contract
-  if (Array.isArray(confFile.files) && confFile.files.length > 0) {
+  if (Array.isArray(confFile.files) && confFile.files.length) {
     form.mainSolidityFile = confFile.files[0] as string
 
     if (form.mainSolidityFile.includes(':')) {
