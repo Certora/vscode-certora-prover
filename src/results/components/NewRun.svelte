@@ -268,11 +268,14 @@
         onClick: runningStopFunc,
       })
     } else {
-      actions.unshift({
-        title: 'Rename',
-        icon: 'edit',
-        onClick: setRename,
-      })
+      actions = [
+        {
+          title: 'Rename',
+          icon: 'edit',
+          onClick: setRename,
+        },
+        ...actions,
+      ]
     }
     return actions
   }

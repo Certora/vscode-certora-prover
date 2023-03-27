@@ -534,8 +534,8 @@ export function activate(context: vscode.ExtensionContext): void {
       if (
         confFile.files !== undefined &&
         confFile.verify !== undefined &&
-        confFile.files.length > 0 &&
-        confFile.verify?.length > 0 &&
+        confFile.files?.length &&
+        confFile.verify?.length &&
         confFile.solc
       ) {
         fileObj.allowRun = 1
