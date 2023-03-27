@@ -267,9 +267,9 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
     }
     if (specFile) {
       const fileArr = specFile.split('/')
-      const labelTypeArr = fileArr.reverse()[0].split('.')
+      const labelTypeArr = fileArr.pop().split('.')
       const label = labelTypeArr[0]
-      const path = fileArr[0]
+      const path = fileArr.join('/') || ''
       const type = '.' + labelTypeArr[1]
       const fileInFormat = {
         value: specFile,
