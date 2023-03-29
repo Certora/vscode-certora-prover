@@ -313,7 +313,9 @@ export function activate(context: vscode.ExtensionContext): void {
         }
       }
     } catch (e) {
-      // cannot read conf uri
+      vscode.window.showErrorMessage(
+        `Can't read conf file: ${name.fileName + '.conf'} \nError: ${e}`,
+      )
     }
     scriptRunner.run(confFile)
   }
