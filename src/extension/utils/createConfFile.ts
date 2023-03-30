@@ -77,7 +77,7 @@ function additionalContractsSolc(config: ConfFile, solcObj: SolidityObj[]) {
  */
 function processCompilerPath(file: string, pathToFile?: string): string {
   let compDir: string = pathToFile || ''
-  if (compDir && compDir.split('').reverse()[0] !== '/') {
+  if (compDir && compDir.split('').pop() !== '/') {
     compDir += '/'
   }
   // checks if the path given in compDir is valid

@@ -240,7 +240,7 @@ export class SettingsPanel {
       if (fileUri && fileUri[0]) {
         const file = fileUri[0].fsPath.replace(uri.path + '/', '')
         const fileArr = file.split('/')
-        const labelTypeArr = fileArr.reverse()[0].split('.')
+        const labelTypeArr: string[] = fileArr.pop()?.split('.') || []
         const label = labelTypeArr[0]
         const path = fileArr[0]
         const type = '.' + labelTypeArr[1]

@@ -84,7 +84,7 @@ function getAdditionalSettings(confFile: ConfFile) {
 function processCompiler(solc: string, solidityObj: SolidityObj) {
   if (solc.includes('/')) {
     const index = solc.lastIndexOf('/')
-    solidityObj.compiler.exe = solc.slice(1, index)
+    solidityObj.compiler.exe = solc.slice(0, index)
     solidityObj.compiler.ver = solc.slice(index + 1, solc.length)
   } else {
     solidityObj.compiler.ver = solc
@@ -300,8 +300,8 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
 
 function getContractNameFromFile(fileStr: string): string {
   const contract = fileStr.includes(':')
-    ? fileStr.split(':').reverse()[0]
-    : fileStr.split('/').reverse()[0].replace('.sol', '')
+    ? fileStr.split(':').pop()
+    : fileStr.split('/').pop().replace('.sol', '')
   return contract
 }
 
@@ -314,6 +314,7 @@ function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
   const tempFormArr: SolidityObj[] = []
   confFile.files?.forEach(contractStr => {
     const mainContract = getContractNameFromFile(contractStr)
+    console.log(mainContract, form.solidityObj.mainContract, '========')
     if (mainContract !== form.solidityObj.mainContract) {
       // create contract
       const tempForm: SolidityObj = {
@@ -357,13 +358,7 @@ function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
           }
         })
       } else if (confFile.solc) {
-        if (confFile.solc.includes('/')) {
-          const solcArr = confFile.solc.split('/')
-          tempForm.compiler.ver = solcArr.pop() || ''
-          tempForm.compiler.exe = solcArr.reverse().join('/')
-        } else {
-          tempForm.compiler.ver = confFile.solc
-        }
+        processCompiler(confFile.solc, tempForm)
       }
       tempFormArr.push(tempForm)
     }
