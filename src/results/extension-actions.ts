@@ -176,7 +176,7 @@ export function navigateToCode(jumpToDefinition: JumpToDefinition[]): void {
     info: jumpToDefinition,
   })
 
-  if (jumpToDefinition.length === 0) return
+  if (!jumpToDefinition.length) return
 
   vscode.postMessage({
     command: Commands.NavigateToCode,

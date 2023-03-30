@@ -138,7 +138,7 @@ function processSolidityAttributes(
     processCompiler(confFile.solc, solidityObj)
   }
 
-  if (confFile.link && confFile.link.length > 0) {
+  if (confFile.link && confFile.link.length) {
     processLink(confFile.link, solidityObj)
   }
 
@@ -225,7 +225,7 @@ function processSpecAttributes(confFile: ConfFile, specObj: SpecObj) {
   }
 
   const additionalSettings = getAdditionalSettings(confFile)
-  if (Object.keys(additionalSettings)?.length > 0) {
+  if (Object.keys(additionalSettings)?.length) {
     specObj.properties = Object.keys(additionalSettings).map(key => ({
       name: key as string,
       value: additionalSettings[key] ? additionalSettings[key].toString() : '',
@@ -236,7 +236,7 @@ function processSpecAttributes(confFile: ConfFile, specObj: SpecObj) {
 export function confFileToFormData(confFile: ConfFile): NewForm {
   const form = newForm as NewForm
 
-  if (Array.isArray(confFile.files) && confFile.files.length > 0) {
+  if (Array.isArray(confFile.files) && confFile.files.length) {
     // look for main contract
     const mainFile = confFile.files.find(file => {
       const contract = getContractNameFromFile(file)
@@ -344,7 +344,7 @@ function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
         ].replace('.sol', '')
       }
       // link
-      if (confFile.link && confFile.link.length > 0) {
+      if (confFile.link && confFile.link.length) {
         processLink(confFile.link, tempForm)
       }
 

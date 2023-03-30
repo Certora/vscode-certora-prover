@@ -65,7 +65,7 @@
   let runsCounter = 0
 
   // listen to the results array to see if there are results or not
-  $: $verificationResults.length > 0
+  $: $verificationResults.length
     ? ($expandCollapse.hasResults = true)
     : ($expandCollapse.hasResults = false)
 
@@ -84,7 +84,7 @@
         curOutput = clickedRuleOrAssert.output
       } else if (
         clickedRuleOrAssert.output &&
-        clickedRuleOrAssert.output.length > 0
+        clickedRuleOrAssert.output.length
       ) {
         curOutput = clickedRuleOrAssert.output[0]
       }
@@ -126,7 +126,7 @@
         $expandables = $expandables.map(element => {
           if (
             element.title === namesMap.get(job.runName) &&
-            element.tree.length === 0
+            !element.tree.length
           ) {
             element.tree = temp
           }
@@ -242,7 +242,7 @@
           return r
         })
         // if there is no running script - run next
-        if (e.data.payload.length === 0) {
+        if (!e.data.payload.length) {
           runNext()
         }
         break
@@ -282,8 +282,8 @@
         if (
           e.data.payload &&
           ((e.data.payload.callResolution &&
-            e.data.payload.callResolution.length > 0) ||
-            (e.data.payload.variables && e.data.payload.variables.length > 0))
+            e.data.payload.callResolution.length) ||
+            (e.data.payload.variables && e.data.payload.variables.length))
         ) {
           output = e.data.payload
           output.runName = outputRunName
@@ -337,7 +337,7 @@
             current$verificationResults: $verificationResults,
           },
         })
-        if ($verificationResults.length > 0) $verificationResults = []
+        if ($verificationResults.length) $verificationResults = []
         clearOutput()
         break
       }
@@ -526,7 +526,7 @@
     if (jobName) {
       removeScript(jobName)
       if (
-        $verificationResults.length === 0 ||
+        !$verificationResults.length ||
         !$verificationResults.map(vr => {
           return vr.name === jobName
         })
@@ -640,7 +640,7 @@
       return rs.uploaded === true
     })
     //if there are no running scripts => runNext
-    if ((runningScripts.length === 0 || shouldRunNext) && index === 0) {
+    if ((!runningScripts.length || shouldRunNext) && index === 0) {
       runNext()
     }
   }
@@ -694,7 +694,7 @@
    * run the first pending run in the queue
    */
   function runNext(): void {
-    if (pendingQueue.length > 0) {
+    if (pendingQueue.length) {
       let curRun = pendingQueue.shift()
       pendingQueueCounter--
       $verificationResults = $verificationResults.filter(vr => {
@@ -779,7 +779,7 @@
       isExpanded: true,
       tree: [],
     })
-    if (runs.length === 0) {
+    if (!runs.length) {
       initResults()
     }
   })
@@ -911,7 +911,7 @@
   </div>
 {/if}
 {#if output}
-  {#if output.variables && output.variables.length > 0}
+  {#if output.variables && output.variables.length}
     <Pane
       title={`${output.treeViewPath.ruleName} variables`}
       actions={[
@@ -925,7 +925,7 @@
       <CodeItemList codeItems={output.variables} />
     </Pane>
   {/if}
-  {#if output.callTrace && Object.keys(output.callTrace).length > 0}
+  {#if output.callTrace && Object.keys(output.callTrace).length}
     <Pane title={`CALL TRACE`}>
       <Tree
         runDisplayName=""
@@ -937,19 +937,19 @@
       />
     </Pane>
   {/if}
-  {#if selectedCalltraceFunction && selectedCalltraceFunction.variables && selectedCalltraceFunction.variables.length > 0}
+  {#if selectedCalltraceFunction && selectedCalltraceFunction.variables && selectedCalltraceFunction.variables.length}
     <Pane title={`${selectedCalltraceFunction.name} variables`}>
       <CodeItemList codeItems={selectedCalltraceFunction.variables} />
     </Pane>
   {/if}
-  {#if output.callResolutionWarnings && output.callResolutionWarnings.length > 0}
+  {#if output.callResolutionWarnings && output.callResolutionWarnings.length}
     <Pane title={`Contract call resolution warnings`}>
       {#each output.callResolutionWarnings as resolution}
         <ContractCallResolution contractCallResolution={resolution} />
       {/each}
     </Pane>
   {/if}
-  {#if output.callResolution && output.callResolution.length > 0}
+  {#if output.callResolution && output.callResolution.length}
     <Pane title={`Contract call resolution`}>
       {#each output.callResolution as resolution}
         <ContractCallResolution contractCallResolution={resolution} />

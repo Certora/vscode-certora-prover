@@ -135,7 +135,7 @@ export class SettingsPanel {
 
   removeFromAllPanelsAndDispose = (): void => {
     SettingsPanel.allPanels = SettingsPanel.allPanels.filter(p => p !== this)
-    if (SettingsPanel.allPanels.length === 0) {
+    if (!SettingsPanel.allPanels.length) {
       if (SettingsPanel.resultsWebviewProvider) {
         SettingsPanel.resultsWebviewProvider.postMessage({
           type: 'focus-changed',

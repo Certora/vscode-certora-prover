@@ -44,7 +44,7 @@ export async function navigateToCode(
       }
     })
 
-    if (documentsToUpdateFocus.length > 0) {
+    if (documentsToUpdateFocus.length) {
       vscode.window.visibleTextEditors.forEach(editor => {
         documentsToUpdateFocus.forEach(({ document, line, col }) => {
           if (editor.document.uri.path === document.uri.path) {
@@ -59,7 +59,7 @@ export async function navigateToCode(
       })
     }
 
-    if (documentsToOpen.length === 0) return
+    if (!documentsToOpen.length) return
 
     for (const item of documentsToOpen) {
       const { file, line, col } = item

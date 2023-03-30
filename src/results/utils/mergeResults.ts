@@ -29,7 +29,7 @@ function addJobIdToRules(jobId: string, rules: Rule[]) {
   rules.forEach(rule => {
     rule.jobId = jobId
     addJobIdToAsserts(jobId, rule.asserts)
-    if (rule.children != null && rule.children.length > 0) {
+    if (rule.children != null && rule.children.length) {
       addJobIdToRules(jobId, rule.children)
     }
   })
@@ -134,7 +134,7 @@ async function smartRulesMerge(prevJobs: Job[], newJob: Job): Promise<void> {
     const commonRules = newRules.filter(rule =>
       prevRules.some(({ name }) => rule.name === name),
     )
-    if (commonRules.length > 0) {
+    if (commonRules.length) {
       console.log('commonRules length is ' + commonRules.length)
       console.log(commonRules)
       compareRulesCreationTime(commonRules, prevJob, newJob)
@@ -151,7 +151,7 @@ async function compareRulesCreationTime(
   newJob: Job,
 ) {
   console.log('compareRulesCreationTime')
-  if (commonRules.length > 0) {
+  if (commonRules.length) {
     try {
       console.log('compareRulesCreationTime')
       const prevPostTime = prevJob.creationTime
@@ -197,7 +197,7 @@ function removeEmptyJobs(jobs: Job[]) {
     const tree: Tree = jobs[i].verificationProgress
     const rules = tree.rules
     console.log(rules)
-    if (rules.length === 0) {
+    if (!rules.length) {
       console.log(jobs[i].jobId)
       jobs.splice(i, 1)
     }

@@ -84,7 +84,7 @@ function processCompilerPath(file: string, pathToFile?: string): string {
   try {
     const compDirUri: Uri = Uri.parse(compDir)
     let compilerFullPath = file
-    if (compDirUri.path !== '/' && compDirUri.path !== undefined) {
+    if (compDirUri.path !== '/' && compDirUri.path) {
       compilerFullPath = compDirUri.path + file
     }
     return compilerFullPath
@@ -123,7 +123,7 @@ function processAdditionalContracts(
 function processLinking(solidityObj: SolidityObj, config: ConfFile) {
   const linking = solidityObj.linking
   const contractName = solidityObj.mainContract
-  if (linking.length > 0) {
+  if (linking.length) {
     if (!config.link) {
       config.link = []
     }
@@ -134,7 +134,7 @@ function processLinking(solidityObj: SolidityObj, config: ConfFile) {
         )
       }
     })
-    if (config.link.length === 0) {
+    if (!config.link.length) {
       delete config.link
     }
   }
@@ -174,7 +174,7 @@ export function newFormToConf(newForm: NewForm): string {
 
   if (
     newForm.solidityAdditionalContracts &&
-    newForm.solidityAdditionalContracts.length > 0
+    newForm.solidityAdditionalContracts.length
   ) {
     processAdditionalContracts(newForm.solidityAdditionalContracts, config)
   }
@@ -200,14 +200,14 @@ export function newFormToConf(newForm: NewForm): string {
   }
 
   const solDir = newForm.solidityObj.solidityPackageDir
-  if (solDir && solDir.length > 0) {
+  if (solDir && solDir.length) {
     const packages: string[] = []
     solDir.forEach(pack => {
       if (pack.packageName && pack.path) {
         packages.push(pack.packageName + '=' + pack.path)
       }
     })
-    if (packages.length > 0) {
+    if (packages.length) {
       config.packages = packages
     }
   }
@@ -264,7 +264,7 @@ export function newFormToConf(newForm: NewForm): string {
 
   if (newForm.specObj.rules) {
     const rulesArr = newForm.specObj.rules.trim().split(',')
-    if (rulesArr.length > 0) {
+    if (rulesArr.length) {
       config.rule = rulesArr
     }
   }
