@@ -258,11 +258,28 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
   const form = newForm as NewForm
 
   if (Array.isArray(confFile.files) && confFile.files.length > 0) {
-    form.solidityObj.mainFile = confFile.files[0] as string
-
-    if (form.solidityObj.mainFile.includes(':')) {
-      form.solidityObj.mainFile = form.solidityObj.mainFile.split(':')[0]
-      form.solidityObj.mainContract = confFile.files[0].split(':')[1]
+    // form.solidityObj.mainFile = confFile.files[0] as string
+    // look for main contract
+    const mainFile = confFile.files.find(file => {
+      const contract = getContractNameFromFile(file)
+      const mainContract = confFile.verify
+        ? confFile.verify[0].split(':')[0]
+        : ''
+      return contract === mainContract
+    })
+    if (mainFile) {
+      form.solidityObj.mainContract = getContractNameFromFile(mainFile)
+      if (mainFile.includes(':')) {
+        form.solidityObj.mainFile = mainFile.split(':')[0]
+      } else {
+        form.solidityObj.mainFile = mainFile
+      }
+    } else {
+      form.solidityObj.mainFile = confFile.files[0] as string
+      if (form.solidityObj.mainFile.includes(':')) {
+        form.solidityObj.mainFile = form.solidityObj.mainFile.split(':')[0]
+        form.solidityObj.mainContract = confFile.files[0].split(':')[1]
+      }
     }
   }
 
@@ -275,9 +292,9 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
     }
     if (specFile) {
       const fileArr = specFile.split('/')
-      const labelTypeArr = fileArr.reverse()[0].split('.')
+      const labelTypeArr = fileArr.pop().split('.')
       const label = labelTypeArr[0]
-      const path = fileArr[0]
+      const path = fileArr.join('/')
       const type = '.' + labelTypeArr[1]
       const fileInFormat = {
         value: specFile,
@@ -303,6 +320,13 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
   return form
 }
 
+function getContractNameFromFile(fileStr: string): string {
+  const contract = fileStr.includes(':')
+    ? fileStr.split(':').reverse()[0]
+    : fileStr.split('/').reverse()[0].replace('.sol', '')
+  return contract
+}
+
 /**
  * fill additional contracts values from the conf file
  * @param confFile to get values from (solidity file, contract name, compiler, link)
@@ -310,8 +334,9 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
  */
 function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
   const tempFormArr: SolidityObj[] = []
-  confFile.files.forEach((contractStr, index) => {
-    if (index !== 0) {
+  confFile.files.forEach(contractStr => {
+    const mainContract = getContractNameFromFile(contractStr)
+    if (mainContract !== form.solidityObj.mainContract) {
       // create contract
       const tempForm: SolidityObj = {
         mainFile: '',

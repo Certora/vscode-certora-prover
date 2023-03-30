@@ -544,15 +544,19 @@ export function activate(context: vscode.ExtensionContext): void {
     }
     try {
       const confFile: ConfFile = await readConf(file)
-      // add send_only flag to conf file, if it doesn't exist
+      // add send_only / disableLocalTypeChecking flags to conf file, if they don't exist
       if (
         !confFile.send_only ||
         !confFile.run_source ||
-        confFile.run_source !== 'VSCODE'
+        confFile.run_source !== 'VSCODE' ||
+        !Object.entries(confFile).find(entry => {
+          return entry[0] === 'disableLocalTypeChecking'
+        })
       ) {
         try {
           confFile.send_only = true
           confFile.run_source = 'VSCODE'
+          confFile.disableLocalTypeChecking = false
           const encoder = new TextEncoder()
           const content = encoder.encode(JSON.stringify(confFile, null, 2))
           await vscode.workspace.fs.writeFile(file, content)
@@ -561,8 +565,8 @@ export function activate(context: vscode.ExtensionContext): void {
       if (
         confFile.files !== undefined &&
         confFile.verify !== undefined &&
-        confFile.files.length > 0 &&
-        confFile.verify?.length > 0 &&
+        confFile.files?.length &&
+        confFile.verify?.length &&
         confFile.solc
       ) {
         fileObj.allowRun = 1
