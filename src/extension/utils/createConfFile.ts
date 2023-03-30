@@ -380,6 +380,12 @@ export function processForm(
     form,
   )
 
+  addAdditionalSetting(
+    'run_source',
+    (newForm.specObj.runSource as string).toString(),
+    form,
+  )
+
   addAdditionalSetting('smt_timeout', newForm.specObj.duration, form)
 
   addAdditionalSetting('loop_iter', newForm.specObj.loopUnroll, form)
