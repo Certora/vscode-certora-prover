@@ -282,10 +282,38 @@ export function activate(context: vscode.ExtensionContext): void {
     return path.split('/').reverse()[0].replace(exe, '')
   }
 
-  function runScript(name: JobNameMap): void {
+  async function runScript(name: JobNameMap): Promise<void> {
     // SettingsPanel.removePanel(name.displayName)
     SettingsPanel.disableForm(name.displayName)
     const confFile = getConfFilePath(name.fileName)
+    // add hidden flags
+    const path = vscode.workspace.workspaceFolders?.[0].uri.path || ''
+    const confUri = vscode.Uri.parse(path + '/' + confFile)
+    try {
+      const content = await readConf(confUri)
+      if (
+        !content.send_only ||
+        !content.run_source ||
+        content.run_source !== 'VSCODE'
+      ) {
+        content.send_only = true
+        content.run_source = 'VSCODE'
+        try {
+          const encoder = new TextEncoder()
+          const contentToWrite = encoder.encode(
+            JSON.stringify(content, null, 2),
+          )
+          await vscode.workspace.fs.writeFile(confUri, contentToWrite)
+        } catch (e) {
+          // cannot write to conf
+          console.log('[INNER ERROR]', e)
+        }
+      }
+    } catch (e) {
+      vscode.window.showErrorMessage(
+        `Can't read conf file: ${name.fileName + '.conf'} \nError: ${e}`,
+      )
+    }
     scriptRunner.run(confFile)
   }
 
@@ -434,7 +462,7 @@ export function activate(context: vscode.ExtensionContext): void {
       }
       if (newConfFileUri) {
         const encoder = new TextEncoder()
-        const content = encoder.encode(JSON.stringify(jsonContent))
+        const content = encoder.encode(JSON.stringify(jsonContent, null, 2))
         await vscode.workspace.fs.writeFile(newConfFileUri, content)
       }
     }
@@ -516,15 +544,18 @@ export function activate(context: vscode.ExtensionContext): void {
       // add send_only / disableLocalTypeChecking flags to conf file, if they don't exist
       if (
         !confFile.send_only ||
+        !confFile.run_source ||
+        confFile.run_source !== 'VSCODE' ||
         !Object.entries(confFile).find(entry => {
           return entry[0] === 'disableLocalTypeChecking'
         })
       ) {
         try {
           confFile.send_only = true
+          confFile.run_source = 'VSCODE'
           confFile.disableLocalTypeChecking = false
           const encoder = new TextEncoder()
-          const content = encoder.encode(JSON.stringify(confFile))
+          const content = encoder.encode(JSON.stringify(confFile, null, 2))
           await vscode.workspace.fs.writeFile(file, content)
         } catch (e) {}
       }

@@ -99,4 +99,5 @@ export const specObj = writable({
   localTypeChecking: true,
   multiAssert: false,
   sendOnly: true,
+  runSource: 'VSCODE',
 })

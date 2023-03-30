@@ -224,6 +224,8 @@ export function newFormToConf(newForm: NewForm): string {
     config.msg = newForm.verificationMessage
   }
 
+  config.run_source = 'VSCODE'
+
   if (newForm.specObj.optimisticLoop) {
     config.optimistic_loop = setAdditionalSetting(
       newForm.specObj.optimisticLoop.toString(),
