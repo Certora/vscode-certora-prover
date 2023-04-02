@@ -402,7 +402,7 @@ export class ScriptRunner {
   // filter log files by name
   private filterLogFiles(name: string): void {
     this.logFiles = this.logFiles.filter(lf => {
-      return lf.path.split('/').reverse()[0].split('.conf')[0] !== name
+      return lf.path.split('/').pop()?.replace('.conf', '')[0] !== name
     })
   }
 

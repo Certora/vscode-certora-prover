@@ -5,14 +5,14 @@
 import * as vscode from 'vscode'
 import { SmartContractsFilesWatcher } from './SmartContractsFilesWatcher'
 import { getNonce } from './utils/getNonce'
-import { createConfFile, processForm } from './utils/createConfFile'
+import { createConfFile } from './utils/createConfFile'
 import { log, Sources } from './utils/log'
 import {
   CommandFromSettingsWebview,
   ConfFile,
   JobNameMap,
   EventFromSettingsWebview,
-  InputFormData,
+  NewForm,
 } from './types'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 
@@ -81,13 +81,15 @@ export class SettingsPanel {
               source: Sources.Extension,
               info: e.payload,
             })
-            const form: InputFormData = processForm(e.payload, confFileName)
-            createConfFile(form)
+            const form: NewForm = e.payload
+            if (confFileName) {
+              createConfFile(form, confFileName)
+            }
             if (
-              form.mainContractName &&
-              form.mainSolidityFile &&
-              form.solidityCompiler &&
-              form.specFile &&
+              form.solidityObj.mainContract &&
+              form.solidityObj.mainFile &&
+              form.solidityObj.compiler.ver &&
+              form.specObj.specFile &&
               !e.payload.checkMyInputs
             ) {
               // if all mandatory fields are filled - allow running
@@ -133,7 +135,7 @@ export class SettingsPanel {
 
   removeFromAllPanelsAndDispose = (): void => {
     SettingsPanel.allPanels = SettingsPanel.allPanels.filter(p => p !== this)
-    if (SettingsPanel.allPanels.length === 0) {
+    if (!SettingsPanel.allPanels.length) {
       if (SettingsPanel.resultsWebviewProvider) {
         SettingsPanel.resultsWebviewProvider.postMessage({
           type: 'focus-changed',
@@ -238,7 +240,7 @@ export class SettingsPanel {
       if (fileUri && fileUri[0]) {
         const file = fileUri[0].fsPath.replace(uri.path + '/', '')
         const fileArr = file.split('/')
-        const labelTypeArr = fileArr.reverse()[0].split('.')
+        const labelTypeArr: string[] = fileArr.pop()?.split('.') || []
         const label = labelTypeArr[0]
         const path = fileArr[0]
         const type = '.' + labelTypeArr[1]

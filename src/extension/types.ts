@@ -128,36 +128,6 @@ export type Output = {
   variables?: Variable[]
 }
 
-export type InputFormData = {
-  name: string
-  mainSolidityFile: string
-  mainContractName: string
-  specFile: string
-  solidityCompiler: string
-  useAdditionalContracts: boolean
-  additionalContracts: {
-    file: string
-    contractName?: string
-  }[]
-  link: {
-    contractName: string
-    fieldName: string
-    associatedContractName: string
-  }[]
-  extendedSettings: {
-    flag: string
-  }[]
-  useStaging: boolean
-  branch: string
-  cacheName: string
-  message: string
-  additionalSettings: {
-    flag: string
-    value: string | string[]
-  }[]
-  solc_map: { contract: string; solidityCompiler: string }[]
-}
-
 export type JobNameMap = {
   displayName: string
   fileName: string
@@ -194,10 +164,9 @@ export type FileFormat = {
 
 // solidity part of the new settings view
 export type SolidityObj = {
-  mainFile: FileFormat
+  mainFile: any
   mainContract: string
   linking: Link[]
-  specifiMethod: string
   compiler: Compiler
   solidityArgs: SolcArg[]
   solidityPackageDefaultPath: string
@@ -211,10 +180,9 @@ export type Property = {
 
 // spec part of the new settings view
 export type SpecObj = {
-  specFile: FileFormat
+  specFile: any
   rules: string
   duration: string
-  inherit: string
   optimisticLoop: boolean
   loopUnroll: string
   properties: Property[]

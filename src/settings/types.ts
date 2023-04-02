@@ -67,7 +67,6 @@ export type SolidityObj = {
   mainFile: any
   mainContract: string
   linking: Link[]
-  specifiMethod: string
   compiler: Compiler
   solidityArgs: SolcArg[]
   solidityPackageDefaultPath: string
@@ -84,7 +83,6 @@ export type SpecObj = {
   specFile: any
   rules: string
   duration: string
-  inherit: string
   optimisticLoop: boolean
   loopUnroll: string
   properties: Property[]
@@ -95,7 +93,7 @@ export type SpecObj = {
   localTypeChecking: boolean
   multiAssert: boolean
   sendOnly: boolean
-  runSource?: string
+  runSource: string
 }
 // change to multiple solidity / spec
 export type NewForm = {

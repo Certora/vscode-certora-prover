@@ -7,6 +7,7 @@ import { solidityObj, solAdditionalContracts } from '../stores/store'
 
 function contractValidators() {
   return function email(value) {
+    if (!value) return
     let objArr = []
     solAdditionalContracts.subscribe(obj => (objArr = obj))
     const contracts = objArr.map(contractObj => {
@@ -31,6 +32,7 @@ function contractValidators() {
 
 function emailValidator() {
   return function email(value) {
+    if (!value) return
     return (
       !!value.match('^[a-zA-Z0-9_]*$') ||
       'Accepting only alphanumeric characters (including the underscore)*'
@@ -39,6 +41,7 @@ function emailValidator() {
 }
 function spaceAndDashValidator() {
   return function email(value) {
+    if (!value) return
     return (
       !!value.match('^(($)|[a-zA-Z0-9]+)-{0,1}[_, a-zA-Z0-9]*$') ||
       'Accepting only alphanumeric characters (including underscore, space, dash, comma)*'
@@ -48,6 +51,7 @@ function spaceAndDashValidator() {
 function messageAndNameValidator() {
   const regex = /^[-_, a-zA-Z0-9()]*$/g
   return function email(value) {
+    if (!value) return
     return (
       !!value.match(regex) ||
       'Accepting only alphanumeric characters (including underscore, space, dash, comma, parentheses)*'
@@ -56,6 +60,7 @@ function messageAndNameValidator() {
 }
 function compilerValidator() {
   return function email(value) {
+    if (!value) return
     return (
       !!value.match('^[.a-zA-Z0-9]*$') ||
       'Accepting only alphanumeric characters (including the dot)*'
@@ -64,6 +69,7 @@ function compilerValidator() {
 }
 function filePathValidator() {
   return function email(value) {
+    if (!value) return
     return (
       !!value.match('^[-_: a-zA-Z0-9/@.]*$') ||
       'Accepting only alphanumeric characters (including underscore, space, dash, slash)*'
@@ -72,6 +78,7 @@ function filePathValidator() {
 }
 function numberValidator() {
   return function email(value) {
+    if (!value) return
     return !!value.match('^[0-9]*$') || 'Accepting numbers Only'
   }
 }

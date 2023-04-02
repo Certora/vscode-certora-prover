@@ -88,7 +88,7 @@
       $solidityObj.mainContract = $solidityObj.mainFile.label
         .toString()
         .split('/')
-        .reverse()[0]
+        .pop()
         .replace('.sol', '')
     }
     $isReset = false

@@ -41,7 +41,7 @@
   let prev_items
 
   onMount(() => {
-    if (items.length > 0 && !isMulti && value) {
+    if (items.length && !isMulti && value) {
       const _hoverItemIndex = items.findIndex(
         item => item[optionIdentifier] === value[optionIdentifier],
       )
@@ -68,7 +68,7 @@
 
   beforeUpdate(() => {
     if (!items) items = []
-    if (items !== prev_items && items.length > 0) {
+    if (items !== prev_items && items.length) {
       hoverItemIndex = 0
     }
 
@@ -145,7 +145,7 @@
         break
       case 'Enter':
         e.preventDefault()
-        if (items.length === 0) break
+        if (!items.length) break
         const hoverItem = items[hoverItemIndex]
         if (
           value &&
@@ -164,7 +164,7 @@
         break
       case 'Tab':
         e.preventDefault()
-        if (items.length === 0) {
+        if (!items.length) {
           return closeList()
         }
         if (

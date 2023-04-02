@@ -27,9 +27,7 @@
     ? (rule.status = RuleStatuses.Killed)
     : null
   $: allowDuplicate =
-    rule &&
-    typeof duplicateFunc === 'function' &&
-    rule.jumpToDefinition.length > 0
+    rule && typeof duplicateFunc === 'function' && rule.jumpToDefinition.length
   $: label = rule?.name || assert?.message
   $: formattedLabel = label === null || label === 'null' ? 'No message' : label
   $: ruleIcon = rule?.status
@@ -63,7 +61,7 @@
   {posInset}
   {level}
   {actions}
-  hasChildren={rule?.children.length > 0 || rule?.asserts.length > 0}
+  hasChildren={rule?.children.length || rule?.asserts.length}
   bind:isExpanded={$isExpanded}
   on:click={() => {
     if (assert) {
@@ -77,7 +75,7 @@
 
     $isExpanded = !$isExpanded
     $expandables = $expandables.map(element => {
-      if (element.title === runDisplayName && element.tree.length > 0) {
+      if (element.title === runDisplayName && element.tree.length) {
         element.tree = element.tree.map(treeItem => {
           if (treeItem.title === rule.name) {
             treeItem.isExpanded = $isExpanded
@@ -112,7 +110,7 @@
   </div>
 </BaseTreeItem>
 
-{#if $isExpanded && rule?.children.length > 0}
+{#if $isExpanded && rule?.children.length}
   {#each rule.children as child, i}
     <svelte:self
       rule={child}
@@ -120,7 +118,7 @@
       level={level + 1}
       setSize={rule.children.length}
       posInset={i}
-      actions={child.jumpToDefinition.length > 0
+      actions={child.jumpToDefinition.length
         ? [
             {
               title: 'Go to code',
@@ -135,14 +133,14 @@
     />
   {/each}
 {/if}
-{#if $isExpanded && rule?.asserts.length > 0}
+{#if $isExpanded && rule?.asserts.length}
   {#each rule.asserts as child, i}
     <svelte:self
       assert={child}
       level={level + 1}
       setSize={rule.children.length}
       posInset={i}
-      actions={child.jumpToDefinition.length > 0
+      actions={child.jumpToDefinition.length
         ? [
             {
               title: 'Go to code',

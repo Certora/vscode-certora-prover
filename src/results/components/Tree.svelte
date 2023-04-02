@@ -25,7 +25,7 @@
   function getInitialExpandedState(rule: Rule): boolean {
     let initExpandedState: boolean = false
     $expandables.forEach(element => {
-      if (element.title === runDisplayName && element.tree.length > 0) {
+      if (element.title === runDisplayName && element.tree.length) {
         const initExpandedStateArr = element.tree.map(treeItem => {
           if (treeItem.title === rule.name) {
             return treeItem.isExpanded
@@ -54,7 +54,7 @@
         {runDisplayName}
         setSize={data.tree.length}
         posInset={i + 1}
-        actions={rule.jumpToDefinition.length > 0
+        actions={rule.jumpToDefinition.length
           ? [
               {
                 title: 'Go to code',
@@ -77,7 +77,7 @@
         {callTraceFunction}
         setSize={data.tree.length}
         posInset={i + 1}
-        actions={callTraceFunction.jumpToDefinition.length > 0
+        actions={callTraceFunction.jumpToDefinition.length
           ? [
               {
                 title: 'Go to code',

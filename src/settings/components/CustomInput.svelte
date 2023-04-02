@@ -102,7 +102,7 @@
       $checkMyInputs = inputs.some(el => {
         if (el.classList.contains('field-danger')) return true
       })
-      if (!$validity.valid) {
+      if (!$validity.valid && $validity.message) {
         if (source === Source.Sol && !flag) {
           $badInputs.sol += 1
           flag = true
@@ -144,11 +144,11 @@
     bind:value={bindValue}
     {placeholder}
     on:mouseleave={checkMouseLeaveInput}
-    class:field-danger={!$validity.valid}
+    class:field-danger={!$validity.valid && $validity.message}
     use:validate={bindValue}
   />
 
-  {#if !$validity.valid}
+  {#if !$validity.valid && $validity.message}
     <!-- validation message -->
     <div class="input_error_message mt-8px">
       <i class="codicon codicon-warning" />

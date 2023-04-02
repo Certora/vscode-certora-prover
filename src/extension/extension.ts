@@ -12,14 +12,11 @@ import {
   ConfToCreate,
   CONF_DIRECTORY,
   CONF_DIRECTORY_NAME,
-  InputFormData,
   JobNameMap,
   CERTORA_INNER_DIR_BUILD,
   CERTORA_INNER_DIR,
   Job,
 } from './types'
-import { createConfFile } from './utils/createConfFile'
-import { confFileToFormData } from './utils/confFileToInputForm'
 import { checkDir } from './utils/checkDir'
 
 export function activate(context: vscode.ExtensionContext): void {
@@ -29,15 +26,24 @@ export function activate(context: vscode.ExtensionContext): void {
    * and display name of the run
    * @returns null
    */
-  function showSettings(name: JobNameMap) {
+  async function showSettings(name: JobNameMap) {
     const path = vscode.workspace.workspaceFolders?.[0]
     if (!path) return
-    const confFileDefault = getDefaultSettings()
-    const emptyForm: InputFormData = confFileToFormData(
-      confFileDefault,
-      name.fileName,
-    )
-    createConfFile(emptyForm)
+    const confFileDefault: ConfFile = getDefaultSettings()
+    try {
+      const basePath = vscode.workspace.workspaceFolders?.[0]
+      if (!basePath) return
+      const encoder = new TextEncoder()
+      const content = encoder.encode(JSON.stringify(confFileDefault))
+      const path = vscode.Uri.joinPath(
+        basePath.uri,
+        CONF_DIRECTORY_NAME,
+        `${name.fileName}.conf`,
+      )
+      await vscode.workspace.fs.writeFile(path, content)
+    } catch (e) {
+      // cannot write to conf file
+    }
     renderSettingsPanel(name, confFileDefault)
   }
 
@@ -297,7 +303,7 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   function getFileName(path: string, exe = '.conf'): string {
-    return path.split('/').reverse()[0].replace(exe, '')
+    return path.split('/').pop()?.replace(exe, '') || ''
   }
 
   async function runScript(name: JobNameMap): Promise<void> {
@@ -669,9 +675,9 @@ export function activate(context: vscode.ExtensionContext): void {
     files?.map(async fileUri => {
       try {
         const fileArr = fileUri.path.split('/')
-        const fileName = fileArr.reverse()[0]
+        const fileName = fileArr.pop()
         // let target
-        if (fileName.endsWith('.conf')) {
+        if (fileName?.endsWith('.conf')) {
           const target = vscode.Uri.joinPath(
             path.uri,
             CONF_DIRECTORY_NAME,

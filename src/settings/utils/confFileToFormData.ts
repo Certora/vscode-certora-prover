@@ -15,7 +15,6 @@ const newForm: NewForm = {
     mainFile: '',
     mainContract: '',
     linking: [],
-    specifiMethod: '',
     compiler: {
       exe: '',
       ver: '',
@@ -28,7 +27,6 @@ const newForm: NewForm = {
     specFile: '',
     rules: '',
     duration: '',
-    inherit: '',
     optimisticLoop: false,
     loopUnroll: '',
     properties: [],
@@ -51,7 +49,6 @@ const stableFields = [
   'solc',
   'link',
   'staging',
-  'cache',
   'msg',
   'multi_assert_check',
   'packages',
@@ -59,7 +56,6 @@ const stableFields = [
   'solc_args',
   'smt_timeout',
   'loop_iter',
-  'method',
   'disableLocalTypeChecking',
   'optimistic_loop',
   'packages_path',
@@ -86,17 +82,15 @@ function getAdditionalSettings(confFile: ConfFile) {
  * @param solidityObj solidity object
  */
 function processCompiler(solc: string, solidityObj: SolidityObj) {
-  // todo: remove try catch
-  try {
-    if (solc.includes('/')) {
-      const index = solc.lastIndexOf('/')
-      solidityObj.compiler.exe = solc.slice(1, index)
-      solidityObj.compiler.ver = solc.slice(index + 1, solc.length)
-    } else {
-      solidityObj.compiler.ver = solc
-    }
-  } catch (e) {
-    console.log(e, 'INNER ERROR')
+  if (solc.includes('/')) {
+    // const index = solc.lastIndexOf('/')
+    // solidityObj.compiler.exe = solc.slice(0, index)
+    // solidityObj.compiler.ver = solc.slice(index + 1, solc.length)
+    const solcArr = solc.split('/')
+    solidityObj.compiler.ver = solcArr.pop()
+    solidityObj.compiler.exe = solcArr.join('/')
+  } else {
+    solidityObj.compiler.ver = solc
   }
 }
 
@@ -106,20 +100,15 @@ function processCompiler(solc: string, solidityObj: SolidityObj) {
  * @param solidityObj solidity object
  */
 function processPackages(packages: string[], solidityObj: SolidityObj) {
-  // todo: remove try catch?
-  try {
-    packages.forEach(packageStr => {
-      const re = /"/gi
-      const packageArray = packageStr.replace(re, '').split(/[:|=]/)
-      const tempPackage: SolidityPackageDir = {
-        packageName: packageArray[0],
-        path: packageArray[1],
-      }
-      solidityObj.solidityPackageDir.push(tempPackage)
-    })
-  } catch (e) {
-    console.log(e, '[INNER ERROR]')
-  }
+  packages.forEach(packageStr => {
+    const re = /"/gi
+    const packageArray = packageStr.replace(re, '').split(/[:|=]/)
+    const tempPackage: SolidityPackageDir = {
+      packageName: packageArray[0],
+      path: packageArray[1],
+    }
+    solidityObj.solidityPackageDir.push(tempPackage)
+  })
 }
 
 function processLink(linkArr: string[], solidityObj: SolidityObj) {
@@ -152,21 +141,17 @@ function processSolidityAttributes(
     processCompiler(confFile.solc, solidityObj)
   }
 
-  if (confFile.link && confFile.link.length > 0) {
+  if (confFile.link && confFile.link.length) {
     processLink(confFile.link, solidityObj)
   }
 
   if (confFile.packages) {
-    processPackages(confFile.packages, solidityObj)
+    processPackages(confFile.packages as string[], solidityObj)
   }
 
   if (confFile.solc_args) {
-    // todo: check if I can get an array of strings in confFile.solc_args
     try {
-      const solcArgsArr = confFile.solc_args
-        .toString()
-        .replace(/[[]']/, '')
-        .split(',')
+      const solcArgsArr = confFile.solc_args as unknown as string[]
       solcArgsArr.forEach(arg => {
         const tempArg = { key: '', value: '' }
         if (arg.includes('--')) {
@@ -182,9 +167,6 @@ function processSolidityAttributes(
     }
   } else {
     solidityObj.solidityArgs.push({ key: '', value: '' })
-  }
-  if (confFile.method) {
-    solidityObj.specifiMethod = confFile.method.toString()
   }
 }
 
@@ -246,7 +228,7 @@ function processSpecAttributes(confFile: ConfFile, specObj: SpecObj) {
   }
 
   const additionalSettings = getAdditionalSettings(confFile)
-  if (Object.keys(additionalSettings)?.length > 0) {
+  if (Object.keys(additionalSettings)?.length) {
     specObj.properties = Object.keys(additionalSettings).map(key => ({
       name: key as string,
       value: additionalSettings[key] ? additionalSettings[key].toString() : '',
@@ -257,8 +239,7 @@ function processSpecAttributes(confFile: ConfFile, specObj: SpecObj) {
 export function confFileToFormData(confFile: ConfFile): NewForm {
   const form = newForm as NewForm
 
-  if (Array.isArray(confFile.files) && confFile.files.length > 0) {
-    // form.solidityObj.mainFile = confFile.files[0] as string
+  if (Array.isArray(confFile.files) && confFile.files.length) {
     // look for main contract
     const mainFile = confFile.files.find(file => {
       const contract = getContractNameFromFile(file)
@@ -294,7 +275,7 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
       const fileArr = specFile.split('/')
       const labelTypeArr = fileArr.pop().split('.')
       const label = labelTypeArr[0]
-      const path = fileArr.join('/')
+      const path = fileArr.join('/') || ''
       const type = '.' + labelTypeArr[1]
       const fileInFormat = {
         value: specFile,
@@ -314,7 +295,7 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
   }
 
   // additional contracts
-  if (confFile.files?.length > 1) {
+  if (confFile.files && confFile.files.length > 1) {
     processAdditionalContracts(confFile, form)
   }
   return form
@@ -322,8 +303,8 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
 
 function getContractNameFromFile(fileStr: string): string {
   const contract = fileStr.includes(':')
-    ? fileStr.split(':').reverse()[0]
-    : fileStr.split('/').reverse()[0].replace('.sol', '')
+    ? fileStr.split(':').pop()
+    : fileStr.split('/').pop().replace('.sol', '')
   return contract
 }
 
@@ -334,15 +315,15 @@ function getContractNameFromFile(fileStr: string): string {
  */
 function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
   const tempFormArr: SolidityObj[] = []
-  confFile.files.forEach(contractStr => {
+  confFile.files?.forEach(contractStr => {
     const mainContract = getContractNameFromFile(contractStr)
+    console.log(mainContract, form.solidityObj.mainContract, '========')
     if (mainContract !== form.solidityObj.mainContract) {
       // create contract
       const tempForm: SolidityObj = {
         mainFile: '',
         mainContract: '',
         linking: [],
-        specifiMethod: '',
         compiler: {
           exe: '',
           ver: '',
@@ -366,7 +347,7 @@ function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
         ].replace('.sol', '')
       }
       // link
-      if (confFile.link && confFile.link.length > 0) {
+      if (confFile.link && confFile.link.length) {
         processLink(confFile.link, tempForm)
       }
 
@@ -380,18 +361,7 @@ function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
           }
         })
       } else if (confFile.solc) {
-        // todo: reverse? pop?
-        if (confFile.solc.includes('/')) {
-          const solcArr = confFile.solc.split('/')
-          tempForm.compiler.ver = solcArr.reverse()[0]
-          tempForm.compiler.exe = solcArr
-            .reverse()
-            .join('/')
-            .replace(tempForm.compiler.ver, '')
-            .replace('/', '')
-        } else {
-          tempForm.compiler.ver = confFile.solc
-        }
+        processCompiler(confFile.solc, tempForm)
       }
       tempFormArr.push(tempForm)
     }

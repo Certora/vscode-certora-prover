@@ -60,9 +60,8 @@ export class ScriptProgressLongPolling {
       }
 
       if (data.jobEnded && data.jobStatus === 'SUCCEEDED' && dataToUI) {
-        if (Object.keys(dataToUI.verificationProgress).length === 0) {
-          console.log('SUSPICION CONFIRMED')
-        }
+        // if (!Object.keys(dataToUI.verificationProgress).length) {
+        // }
 
         callback(dataToUI)
         return
