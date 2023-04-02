@@ -2,10 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-### 0.1.4 ()
+### 0.1.4 (2023-04-02)
 
 ## Features
- 
+
+* Save last results of a job run ([#92](https://github.com/Certora/vscode-certora-prover/pull/92))
 
 ## Bug Fixes
 

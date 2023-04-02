@@ -15,6 +15,7 @@ import {
   JobNameMap,
   CERTORA_INNER_DIR_BUILD,
   CERTORA_INNER_DIR,
+  Job,
 } from './types'
 import { checkDir } from './utils/checkDir'
 
@@ -225,6 +226,20 @@ export function activate(context: vscode.ExtensionContext): void {
     } catch (e) {
       console.log('Cannot rename:', e)
     }
+    const lastResultsUri = getLastResultsUri()
+    if (lastResultsUri) {
+      const oldResultsUri = vscode.Uri.parse(
+        lastResultsUri.path + '/' + oldName.fileName + '.json',
+      )
+      const resultsUri = vscode.Uri.parse(
+        lastResultsUri.path + '/' + newName.fileName + '.json',
+      )
+      try {
+        await vscode.workspace.fs.rename(oldResultsUri, resultsUri)
+      } catch (e) {
+        console.log('Cannot rename:', e)
+      }
+    }
   }
 
   /**
@@ -341,10 +356,10 @@ export function activate(context: vscode.ExtensionContext): void {
    * @param name name of the job to delete
    */
   function askToDeleteJob(name: JobNameMap): void {
-    const deleteAction = "Delete '" + name.displayName + "' forever"
+    const deleteAction = `Delete '${name.displayName}' forever`
     vscode.window
       .showInformationMessage(
-        "Are you sure you want to delete '" + name.displayName + "'?",
+        `Are you sure you want to delete '${name.displayName}'?`,
         {
           modal: true,
           detail: 'Job configuration will be lost',
@@ -371,6 +386,7 @@ export function activate(context: vscode.ExtensionContext): void {
         // sometimes we call this function just to close the panel
       }
     }
+    await clearResults(name.fileName)
 
     SettingsPanel.removePanel(name.displayName)
     scriptRunner.removeRunningScriptByName(name.fileName)
@@ -499,6 +515,7 @@ export function activate(context: vscode.ExtensionContext): void {
           })
           const awaitedList = await Promise.all(confList)
           sendFilesToCreateJobs(awaitedList)
+          getLastResults(awaitedList)
         })
       }
     }
@@ -594,6 +611,50 @@ export function activate(context: vscode.ExtensionContext): void {
     })
   }
 
+  function getLastResultsUri() {
+    const path = vscode.workspace.workspaceFolders?.[0]
+    if (!path) return
+    return vscode.Uri.parse(path.uri.path + CERTORA_INNER_DIR + 'last_results')
+  }
+
+  /**
+   * read last results from certora inner dir and send them to the results webview
+   * @param files names of files
+   * @returns void
+   */
+  function getLastResults(files: ConfToCreate[]) {
+    files.forEach(async file => {
+      const name = file.fileName
+      const internalUri = getLastResultsUri()
+      if (!internalUri) return
+      const dirExists = await checkDir(internalUri)
+      if (dirExists) {
+        const confFiles = vscode.workspace.fs.readDirectory(internalUri)
+        confFiles.then(f => {
+          f.forEach(async fileArr => {
+            if (fileArr[0].replace('.json', '') === name) {
+              const pathUri = vscode.Uri.parse(
+                internalUri.path + '/' + fileArr[0],
+              )
+              const decoder = new TextDecoder()
+              const jsonContent = JSON.parse(
+                decoder.decode(await vscode.workspace.fs.readFile(pathUri)),
+              )
+              const job: Job = jsonContent.data
+              job.runName = name
+              if (job) {
+                resultsWebviewProvider.postMessage<Job>({
+                  type: 'receive-new-job-result',
+                  payload: job,
+                })
+              }
+            }
+          })
+        })
+      }
+    })
+  }
+
   /**
    * browse for conf files, and than copy these files into [CONF_DIRECTORY]
    */
@@ -633,6 +694,46 @@ export function activate(context: vscode.ExtensionContext): void {
     })
   }
 
+  function askToDeleteResults(name: string): void {
+    const deleteAction = `Delete '${name}' last results forever`
+    vscode.window
+      .showInformationMessage(
+        `Are you sure you want to delete '${name}' last results?`,
+        {
+          modal: true,
+          detail: '',
+        },
+        ...[deleteAction],
+      )
+      .then(async items => {
+        resultsWebviewProvider.postMessage<string>({
+          type: 'delete-results',
+          payload: name,
+        })
+        if (items === deleteAction) {
+          await clearResults(name)
+        }
+      })
+  }
+
+  /**
+   * delete results backup
+   * @param name name of results to delete
+   */
+  async function clearResults(name: string): Promise<void> {
+    const lastResultsUri = getLastResultsUri()
+    if (lastResultsUri) {
+      const resultsUri = vscode.Uri.parse(
+        lastResultsUri.path + '/' + name + '.json',
+      )
+      try {
+        await vscode.workspace.fs.delete(resultsUri)
+      } catch (e) {
+        // can't delete results file
+      }
+    }
+  }
+
   function openExtensionSettings() {
     vscode.commands.executeCommand(
       'workbench.action.openSettings',
@@ -666,6 +767,7 @@ export function activate(context: vscode.ExtensionContext): void {
   resultsWebviewProvider.uploadConf = uploadConf
   resultsWebviewProvider.enableEdit = enableEdit
   resultsWebviewProvider.rename = rename
+  resultsWebviewProvider.clearResults = askToDeleteResults
 
   const scriptRunner = new ScriptRunner(resultsWebviewProvider)
 
