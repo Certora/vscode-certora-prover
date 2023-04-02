@@ -30,7 +30,7 @@ export async function getInternalDirPath(): Promise<Uri | undefined> {
       internalUri,
     )
     innerDirs = innerDirs.filter(dir => {
-      return dir[0] !== '.last_results'
+      return dir[0] !== 'last_results'
     })
     const dates: ([Date, string] | null)[] = innerDirs.map(
       (dir: [string, FileType]) => {

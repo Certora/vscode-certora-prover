@@ -577,7 +577,7 @@ export function activate(context: vscode.ExtensionContext): void {
   function getLastResultsUri() {
     const path = vscode.workspace.workspaceFolders?.[0]
     if (!path) return
-    return vscode.Uri.parse(path.uri.path + CERTORA_INNER_DIR + '.last_results')
+    return vscode.Uri.parse(path.uri.path + CERTORA_INNER_DIR + 'last_results')
   }
 
   /**
@@ -586,32 +586,35 @@ export function activate(context: vscode.ExtensionContext): void {
    * @returns void
    */
   function getLastResults(files: ConfToCreate[]) {
-    files.forEach(file => {
+    files.forEach(async file => {
       const name = file.fileName
       const internalUri = getLastResultsUri()
       if (!internalUri) return
-      const confFiles = vscode.workspace.fs.readDirectory(internalUri)
-      confFiles.then(f => {
-        f.forEach(async fileArr => {
-          if (fileArr[0].replace('.json', '') === name) {
-            const pathUri = vscode.Uri.parse(
-              internalUri.path + '/' + fileArr[0],
-            )
-            const decoder = new TextDecoder()
-            const jsonContent = JSON.parse(
-              decoder.decode(await vscode.workspace.fs.readFile(pathUri)),
-            )
-            const job: Job = jsonContent.data
-            job.runName = name
-            if (job) {
-              resultsWebviewProvider.postMessage<Job>({
-                type: 'receive-new-job-result',
-                payload: job,
-              })
+      const dirExists = await checkDir(internalUri)
+      if (dirExists) {
+        const confFiles = vscode.workspace.fs.readDirectory(internalUri)
+        confFiles.then(f => {
+          f.forEach(async fileArr => {
+            if (fileArr[0].replace('.json', '') === name) {
+              const pathUri = vscode.Uri.parse(
+                internalUri.path + '/' + fileArr[0],
+              )
+              const decoder = new TextDecoder()
+              const jsonContent = JSON.parse(
+                decoder.decode(await vscode.workspace.fs.readFile(pathUri)),
+              )
+              const job: Job = jsonContent.data
+              job.runName = name
+              if (job) {
+                resultsWebviewProvider.postMessage<Job>({
+                  type: 'receive-new-job-result',
+                  payload: job,
+                })
+              }
             }
-          }
+          })
         })
-      })
+      }
     })
   }
 

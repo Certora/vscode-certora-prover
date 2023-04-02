@@ -276,7 +276,7 @@ export class ScriptRunner {
       const targetUri: Uri = Uri.parse(
         path.path +
           CERTORA_INNER_DIR +
-          '.last_results/' +
+          'last_results/' +
           this.getConfFileName(confFile).replace('.conf', '') +
           '.json',
       )
