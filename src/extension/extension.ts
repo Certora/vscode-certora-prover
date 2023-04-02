@@ -15,10 +15,7 @@ import {
   JobNameMap,
   CERTORA_INNER_DIR_BUILD,
   CERTORA_INNER_DIR,
-  // NewForm,
 } from './types'
-// import { createConfFile } from './utils/createConfFile'
-// import { confFileToFormData } from './utils/confFileToFormData'
 import { checkDir } from './utils/checkDir'
 
 export function activate(context: vscode.ExtensionContext): void {
