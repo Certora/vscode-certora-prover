@@ -138,7 +138,7 @@
   }
 
   function spacesToUnderscores(name: string): string {
-    return name.replaceAll(' ', '_').toLocaleLowerCase()
+    return name.replaceAll(' ', '_')
   }
 
   function onChange(
@@ -173,6 +173,7 @@
     if (isPending) {
       statusChange(Status.pending)
     } else if (nowRunning) {
+      console.log('now running!')
       statusChange(Status.running)
     }
     return status

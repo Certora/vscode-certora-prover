@@ -130,7 +130,7 @@ export type Output = {
 
 export type JobNameMap = {
   displayName: string
-  fileName: string
+  confPath: string
 }
 
 export type Compiler = {
@@ -332,6 +332,6 @@ export type ResourceError = {
 }
 
 export type ConfToCreate = {
-  fileName: string
+  confPath: string
   allowRun: number
 }

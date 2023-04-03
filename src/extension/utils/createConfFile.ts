@@ -297,11 +297,7 @@ export async function createConfFile(
     const encoder = new TextEncoder()
     const convertedData = newFormToConf(formData)
     const content = encoder.encode(convertedData)
-    const path = Uri.joinPath(
-      basePath.uri,
-      CONF_DIRECTORY_NAME,
-      `${confFileName}.conf`,
-    )
+    const path = Uri.parse(confFileName)
     await workspace.fs.writeFile(path, content)
     log({
       action: `Conf file was created`,

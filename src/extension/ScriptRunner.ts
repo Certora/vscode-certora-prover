@@ -420,7 +420,7 @@ export class ScriptRunner {
 
   public removeRunningScriptByName(name: string): void {
     this.runningScripts = this.runningScripts.filter(script => {
-      return this.getConfFileName(script.confFile).replace('.conf', '') !== name
+      return script.confFile !== name
     })
     this.filterLogFiles(name)
     this.sendRunningScriptsToWebview()

@@ -27,8 +27,8 @@ export function activate(context: vscode.ExtensionContext): void {
    * @returns null
    */
   async function showSettings(name: JobNameMap) {
-    const path = vscode.workspace.workspaceFolders?.[0]
-    if (!path) return
+    // const path = vscode.workspace.workspaceFolders?.[0]
+    // if (!path) return
     const confFileDefault: ConfFile = getDefaultSettings()
     try {
       const basePath = vscode.workspace.workspaceFolders?.[0]
@@ -38,10 +38,12 @@ export function activate(context: vscode.ExtensionContext): void {
       const path = vscode.Uri.joinPath(
         basePath.uri,
         CONF_DIRECTORY_NAME,
-        `${name.fileName}.conf`,
+        getFileName(name.confPath) + '.conf',
       )
+      name.confPath = path.path
       await vscode.workspace.fs.writeFile(path, content)
     } catch (e) {
+      console.log('[INNER ERROR - CREATE NEW CONF]')
       // cannot write to conf file
     }
     renderSettingsPanel(name, confFileDefault)
@@ -144,7 +146,7 @@ export function activate(context: vscode.ExtensionContext): void {
    * @returns Promise<void>
    */
   async function editConf(name: JobNameMap): Promise<void> {
-    const confFileUri = getConfUri(name.fileName)
+    const confFileUri = vscode.Uri.parse(name.confPath)
     if (confFileUri) {
       try {
         const confFileContent = await readConf(confFileUri)
@@ -152,7 +154,7 @@ export function activate(context: vscode.ExtensionContext): void {
       } catch (e) {
         resultsWebviewProvider.postMessage({
           type: 'settings-error',
-          payload: name.fileName,
+          payload: name.confPath,
         })
         vscode.window.showErrorMessage(
           `Can't read conf file: ${confFileUri.path}. Error: ${e}`,
@@ -202,42 +204,33 @@ export function activate(context: vscode.ExtensionContext): void {
     oldName: JobNameMap,
     newName: JobNameMap,
   ): Promise<void> {
-    const path = vscode.workspace.workspaceFolders?.[0]
-    if (!path) return
-    const oldConf = vscode.Uri.joinPath(
-      path.uri,
-      getConfFilePath(oldName.fileName),
-    )
-    const newConf = vscode.Uri.joinPath(
-      path.uri,
-      getConfFilePath(newName.fileName),
-    )
+    // const path = vscode.workspace.workspaceFolders?.[0]
+    // if (!path) return
+    const oldConf = vscode.Uri.parse(oldName.confPath)
+    const newConf = vscode.Uri.parse(newName.confPath)
     try {
       await vscode.workspace.fs.rename(
         vscode.Uri.parse(oldConf.path),
         vscode.Uri.parse(newConf.path),
       )
-      scriptRunner.renameRunningScript(
-        getConfFilePath(oldName.fileName),
-        getConfFilePath(newName.fileName),
-      )
+      scriptRunner.renameRunningScript(oldName.confPath, newName.confPath)
       SettingsPanel.removePanel(oldName.displayName)
       await editConf(newName)
     } catch (e) {
-      console.log('Cannot rename:', e)
+      console.log('Cannot rename conf file:', e)
     }
     const lastResultsUri = getLastResultsUri()
     if (lastResultsUri) {
       const oldResultsUri = vscode.Uri.parse(
-        lastResultsUri.path + '/' + oldName.fileName + '.json',
+        lastResultsUri.path + '/' + getFileName(oldName.confPath) + '.json',
       )
       const resultsUri = vscode.Uri.parse(
-        lastResultsUri.path + '/' + newName.fileName + '.json',
+        lastResultsUri.path + '/' + getFileName(newName.confPath) + '.json',
       )
       try {
         await vscode.workspace.fs.rename(oldResultsUri, resultsUri)
       } catch (e) {
-        console.log('Cannot rename:', e)
+        console.log('Cannot rename results:', e)
       }
     }
   }
@@ -257,7 +250,7 @@ export function activate(context: vscode.ExtensionContext): void {
   ): Promise<void> {
     // get the content of the conf to duplicate
     // create a new conf file with the name of "duplicated", content of "to duplicate", and open it with settings view
-    const confFileUri = getConfUri(toDuplicate.fileName)
+    const confFileUri = vscode.Uri.parse(toDuplicate.confPath)
     if (confFileUri) {
       try {
         const confFileContent = await readConf(confFileUri)
@@ -271,7 +264,8 @@ export function activate(context: vscode.ExtensionContext): void {
         }
 
         try {
-          const newConfFileUri = getConfUri(duplicated.fileName)
+          const newConfFileUri = vscode.Uri.parse(duplicated.confPath)
+          console.log(newConfFileUri, 'NEW CONF FILE URI')
           if (newConfFileUri) {
             const encoder = new TextEncoder()
             const content = encoder.encode(
@@ -285,7 +279,7 @@ export function activate(context: vscode.ExtensionContext): void {
         if (rule) {
           resultsWebviewProvider.postMessage<string>({
             type: 'run-job',
-            payload: duplicated.fileName,
+            payload: duplicated.confPath,
           })
         } else {
           renderSettingsPanel(duplicated, confFileContent)
@@ -309,10 +303,10 @@ export function activate(context: vscode.ExtensionContext): void {
   async function runScript(name: JobNameMap): Promise<void> {
     // SettingsPanel.removePanel(name.displayName)
     SettingsPanel.disableForm(name.displayName)
-    const confFile = getConfFilePath(name.fileName)
+    // const confFile = vscode.Uri.parse(name.confPath)
     // add hidden flags
-    const path = vscode.workspace.workspaceFolders?.[0].uri.path || ''
-    const confUri = vscode.Uri.parse(path + '/' + confFile)
+    // const path = vscode.workspace.workspaceFolders?.[0].uri.path || ''
+    const confUri = vscode.Uri.parse(name.confPath)
     try {
       const content = await readConf(confUri)
       if (
@@ -335,10 +329,10 @@ export function activate(context: vscode.ExtensionContext): void {
       }
     } catch (e) {
       vscode.window.showErrorMessage(
-        `Can't read conf file: ${name.fileName + '.conf'} \nError: ${e}`,
+        `Can't read conf file: ${name.confPath} \nError: ${e}`,
       )
     }
-    scriptRunner.run(confFile)
+    scriptRunner.run(confUri.path)
   }
 
   function getConfUri(name: string): vscode.Uri | void {
@@ -370,7 +364,7 @@ export function activate(context: vscode.ExtensionContext): void {
         if (items === deleteAction) {
           resultsWebviewProvider.postMessage<string>({
             type: 'delete-job',
-            payload: name.fileName,
+            payload: name.confPath,
           })
           deleteConfFile(name)
         }
@@ -378,7 +372,7 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   async function deleteConfFile(name: JobNameMap): Promise<void> {
-    const confFileUri: vscode.Uri | void = getConfUri(name.fileName)
+    const confFileUri: vscode.Uri | void = vscode.Uri.parse(name.confPath)
     if (confFileUri) {
       try {
         await vscode.workspace.fs.delete(confFileUri)
@@ -386,10 +380,10 @@ export function activate(context: vscode.ExtensionContext): void {
         // sometimes we call this function just to close the panel
       }
     }
-    await clearResults(name.fileName)
+    await clearResults(name.confPath)
 
     SettingsPanel.removePanel(name.displayName)
-    scriptRunner.removeRunningScriptByName(name.fileName)
+    scriptRunner.removeRunningScriptByName(name.confPath)
   }
 
   /**
@@ -513,7 +507,9 @@ export function activate(context: vscode.ExtensionContext): void {
               vscode.Uri.parse(confDirectoryPath + file[0]),
             )
           })
-          const awaitedList = await Promise.all(confList)
+          const awaitedList = (await Promise.all(confList)).filter(file => {
+            return file.confPath.endsWith('.conf')
+          })
           sendFilesToCreateJobs(awaitedList)
           getLastResults(awaitedList)
         })
@@ -562,7 +558,7 @@ export function activate(context: vscode.ExtensionContext): void {
    */
   async function createFileObject(file: vscode.Uri): Promise<ConfToCreate> {
     const fileObj: ConfToCreate = {
-      fileName: getFileName(vscode.workspace.asRelativePath(file)),
+      confPath: file.path,
       allowRun: 0,
     }
     try {
@@ -624,7 +620,7 @@ export function activate(context: vscode.ExtensionContext): void {
    */
   function getLastResults(files: ConfToCreate[]) {
     files.forEach(async file => {
-      const name = file.fileName
+      const name = getFileName(file.confPath)
       const internalUri = getLastResultsUri()
       if (!internalUri) return
       const dirExists = await checkDir(internalUri)

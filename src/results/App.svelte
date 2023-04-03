@@ -203,15 +203,17 @@
         })
         let confToEnable: JobNameMap = {
           displayName: '',
-          fileName: '',
+          confPath: '',
         }
         const curPid = e.data.payload.pid
         const vrLink = e.data.payload.vrLink
         runningScripts = runningScripts.map(rs => {
           if (rs.pid === curPid) {
             rs.uploaded = true
-            confToEnable.fileName = getFileName(rs.confFile)
-            confToEnable.displayName = namesMap.get(confToEnable.fileName)
+            confToEnable.confPath = rs.confFile
+            confToEnable.displayName = namesMap.get(
+              getFileName(confToEnable.confPath),
+            )
             enableEdit(confToEnable)
           }
           return rs
@@ -236,7 +238,7 @@
         runningScripts = e.data.payload
         runs = runs.map(r => {
           runningScripts.forEach(rs => {
-            if (r.name === getFileName(rs.confFile)) {
+            if (r.confPath === rs.confFile) {
               r.id = rs.pid
             }
           })
@@ -302,7 +304,7 @@
         let newStatus = Status.ready
         if (
           $verificationResults.find(vr => {
-            return vr.name === runName
+            return vr.name === getFileName(runName)
           })
         ) {
           newStatus = Status.success
@@ -356,7 +358,7 @@
           source: Sources.ResultsWebview,
           info: e.data.payload,
         })
-        $focusedRun = e.data.payload
+        $focusedRun = getFileName(e.data.payload)
         break
       }
       case EventTypesFromExtension.ParseError: {
@@ -377,14 +379,16 @@
         })
         const confList = e.data.payload
         confList.forEach(file => {
-          if (!namesMap.has(file.fileName)) {
+          const fileName = file.confPath.split('/').pop().replace('.conf', '')
+          if (!namesMap.has(fileName)) {
             let curStatus = Status.missingSettings
             if (file.allowRun) {
               curStatus = Status.ready
             }
             const newRun = {
               id: runs.length,
-              name: file.fileName,
+              name: fileName,
+              confPath: file.confPath,
               status: curStatus || Status.missingSettings,
             }
             namesMap.set(newRun.name, newRun.name.replaceAll('_', ' '))
@@ -400,9 +404,9 @@
           info: e.data.payload,
         })
 
-        const name: string = e.data.payload
+        const path: string = e.data.payload
         const runToRun: Run = runs.find(r => {
-          return r.name === name
+          return r.confPath === path
         })
         if (runToRun !== undefined) {
           run(runToRun)
@@ -436,12 +440,12 @@
 
         const nameToDelete: string = e.data.payload
         const runToDelete: Run = runs.find(r => {
-          return r.name === nameToDelete
+          return r.confPath === nameToDelete
         })
         if (runToDelete !== undefined) {
           const jobNameMap: JobNameMap = {
-            fileName: nameToDelete,
-            displayName: namesMap.get(nameToDelete),
+            confPath: nameToDelete,
+            displayName: namesMap.get(getFileName(nameToDelete)),
           }
           deleteRun(runToDelete)
           deleteConf(jobNameMap)
@@ -469,14 +473,14 @@
 
   /**
    * set the status of the run named [runName] to be [value]
-   * @param runName name of a run
+   * @param runConfPath name of a run
    * @param value status
    * @returns new list of runs after change
    */
-  function setStatus(runName: string, value: Status): Run[] {
+  function setStatus(runConfPath: string, value: Status): Run[] {
     runs.forEach(run => {
       if (
-        run.name === runName &&
+        (run.confPath === runConfPath || run.name === runConfPath) &&
         !(run.status === Status.success && value === Status.ready)
       ) {
         run.status = value
@@ -504,19 +508,27 @@
       newStatus = Status.ready
     }
 
+    // old path recreation
+    const newPathArr = toDuplicate.confPath.split('/')
+    newPathArr[newPathArr.length - 1] = newPathArr[
+      newPathArr.length - 1
+    ].replace(nameToDuplicate, duplicatedName)
+    const newPath = newPathArr.join('/')
+
     const duplicated: Run = {
       id: runs.length,
       name: duplicatedName,
+      confPath: newPath,
       status: newStatus,
     }
 
     const confNameMapDuplicated: JobNameMap = {
-      fileName: duplicated.name,
+      confPath: duplicated.confPath,
       displayName: namesMap.get(duplicated.name),
     }
 
     const confNameMapToDuplicate: JobNameMap = {
-      fileName: toDuplicate.name,
+      confPath: toDuplicate.confPath,
       displayName: namesMap.get(toDuplicate.name),
     }
     duplicate(confNameMapToDuplicate, confNameMapDuplicated, rule)
@@ -587,6 +599,7 @@
       runsCounter = runs.push({
         id: runs.length,
         name: '',
+        confPath: '',
         status: Status.missingSettings,
       })
       addNewExpendable('')
@@ -595,7 +608,7 @@
 
   function editRun(run: Run): void {
     const JobNameMap: JobNameMap = {
-      fileName: run.name,
+      confPath: run.confPath,
       displayName: namesMap.get(run.name),
     }
     editConfFile(JobNameMap)
@@ -639,16 +652,16 @@
   function run(run: Run, index = 0): void {
     run.vrLink = ''
     const JobNameMap: JobNameMap = {
-      fileName: run.name,
+      confPath: run.confPath,
       displayName: namesMap.get(run.name),
     }
 
     //add to pending queue
     pendingQueue.push(JobNameMap)
-    runs = setStatus(JobNameMap.fileName, Status.pending)
+    runs = setStatus(JobNameMap.confPath, Status.pending)
     pendingQueueCounter++
     $verificationResults = $verificationResults.filter(vr => {
-      return vr.name !== JobNameMap.fileName
+      return vr.name !== getFileName(JobNameMap.confPath)
     })
 
     if (output && output.runName === run.name) {
@@ -671,10 +684,10 @@
    */
   function renameRun(oldName: string, newName: string): void {
     // rename existing run
-    if (oldName !== '') {
+    if (oldName) {
       // the renamed run should have the same verification results, if they exist
       let oldResult = $verificationResults.find(vr => vr.name === oldName)
-      if (oldResult !== undefined) {
+      if (oldResult) {
         let newResult: Verification = {
           name: newName,
           contract: oldResult.contract,
@@ -687,12 +700,23 @@
         $verificationResults.push(newResult)
       }
 
+      const curRun = runs.find(singleRun => {
+        return singleRun.name === newName
+      })
+
+      // new path creation
+      const newPathArr = curRun.confPath.split('/')
+      newPathArr[newPathArr.length - 1] = newPathArr[
+        newPathArr.length - 1
+      ].replace(oldName, newName)
+      const newPath = newPathArr.join('/')
+
       const oldConfNameMap: JobNameMap = {
-        fileName: oldName,
+        confPath: curRun.confPath,
         displayName: namesMap.get(oldName),
       }
       const newConfNameMap: JobNameMap = {
-        fileName: newName,
+        confPath: newPath,
         displayName: namesMap.get(newName),
       }
       rename(oldConfNameMap, newConfNameMap)
@@ -701,7 +725,7 @@
     // rename new run
     else {
       const JobNameMap: JobNameMap = {
-        fileName: newName,
+        confPath: newName,
         displayName: namesMap.get(newName),
       }
       openSettings(JobNameMap)
@@ -717,7 +741,7 @@
       let curRun = pendingQueue.shift()
       pendingQueueCounter--
       $verificationResults = $verificationResults.filter(vr => {
-        return vr.name !== curRun.fileName
+        return vr.name !== getFileName(curRun.confPath)
       })
       runScript(curRun)
     }
@@ -747,13 +771,13 @@
    */
   function pendingStopFunc(run: Run): void {
     pendingQueue = pendingQueue.filter(rq => {
-      return rq.fileName !== run.name
+      return rq.confPath !== run.confPath
     })
     $verificationResults = $verificationResults.filter(vr => {
       return vr.name !== run.name
     })
     pendingQueueCounter--
-    runs = setStatus(run.name, Status.ready)
+    runs = setStatus(run.confPath, Status.ready)
   }
 
   /**
@@ -762,7 +786,7 @@
    */
   function askToDeleteThis(run: Run): void {
     const jobNameMap: JobNameMap = {
-      fileName: run.name,
+      confPath: run.confPath,
       displayName: namesMap.get(run.name),
     }
     askToDeleteJob(jobNameMap)
@@ -890,16 +914,17 @@
               status={runs[index].status}
               {newFetchOutput}
               nowRunning={(runningScripts.find(
-                rs => getFileName(rs.confFile) === runs[index].name,
+                rs => rs.confFile === runs[index].confPath,
               ) !== undefined ||
-                (pendingQueue.find(rs => rs.fileName === runs[index].name) !==
-                  undefined &&
+                (pendingQueue.find(
+                  rs => rs.confPath === runs[index].confPath,
+                ) !== undefined &&
                   pendingQueueCounter > 0)) &&
                 $verificationResults.find(
                   vr => runs[index].name === vr.name,
                 ) === undefined}
               isPending={pendingQueue.find(
-                rs => rs.fileName === runs[index].name,
+                rs => rs.confPath === runs[index].confPath,
               ) !== undefined && pendingQueueCounter > 0}
               expandedState={$verificationResults.find(
                 vr => vr.name === runs[index].name,
@@ -909,7 +934,7 @@
               }}
               runningStopFunc={() => {
                 enableEdit({
-                  fileName: runs[index].name,
+                  confPath: runs[index].confPath,
                   displayName: namesMap.get(runs[index].name),
                 })
                 runs[index].vrLink = ''

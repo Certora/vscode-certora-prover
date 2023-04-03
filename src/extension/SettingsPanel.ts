@@ -196,14 +196,14 @@ export class SettingsPanel {
       panel,
       extensionUri,
       confFileName.displayName,
-      confFileName.fileName,
+      confFileName.confPath,
       editConfFile,
     )
     this.allPanels.push(SettingsPanel.currentPanel)
     if (SettingsPanel.resultsWebviewProvider) {
       SettingsPanel.resultsWebviewProvider.postMessage({
         type: 'focus-changed',
-        payload: confFileName.fileName,
+        payload: confFileName.confPath,
       })
     }
   }

@@ -162,12 +162,13 @@ export type CreationTime = {
 }
 
 export type ConfToCreate = {
-  fileName: string
+  // fileName: string
+  confPath: string
   allowRun: number
 }
 export type JobNameMap = {
   displayName: string
-  fileName: string
+  confPath: string
 }
 
 export enum EventTypesFromExtension {
@@ -272,6 +273,7 @@ export enum Status {
 export type Run = {
   id: number
   name: string
+  confPath: string
   status: Status
   vrLink?: string
 }
