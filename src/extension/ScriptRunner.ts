@@ -155,16 +155,14 @@ export class ScriptRunner {
   public run(confFile: string): void {
     PostProblems.resetDiagnosticCollection()
 
-    const path = workspace.workspaceFolders?.[0]
-
-    if (!path) return
+    const path = confFile.split('/certora/conf/')[0]
 
     const ts = Date.now()
     const channel = window.createOutputChannel(
       `Certora IDE - ${confFile}-${ts}`,
     )
     this.script = spawn(`certoraRun`, [confFile], {
-      cwd: path.uri.fsPath,
+      cwd: path,
     })
 
     if (!this.script) return
@@ -217,7 +215,7 @@ export class ScriptRunner {
         await this.polling.run(progressUrl, async data => {
           data.pid = pid
           data.runName = confFileName
-          await this.saveLastResults(path.uri, confFile, data)
+          await this.saveLastResults(Uri.parse(path), confFile, data)
           this.runningScripts.forEach(rs => {
             if (rs && rs.pid === pid && rs.vrLink) {
               data.verificationReportLink = rs.vrLink

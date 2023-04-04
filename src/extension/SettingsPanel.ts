@@ -41,9 +41,9 @@ export class SettingsPanel {
       this._panel.webview,
       extensionUri,
     )
-
-    this.watcher = new SmartContractsFilesWatcher()
-    this.watcher.init(this._panel.webview)
+    const pathToUse = confFileName.split('/certora/conf/')[0]
+    this.watcher = new SmartContractsFilesWatcher(vscode.Uri.parse(pathToUse))
+    this.watcher.init(this._panel.webview, vscode.Uri.parse(pathToUse))
     if (editConfFile) {
       const name =
         confFileDisplayName !== '' ? confFileDisplayName : confFileName
@@ -73,7 +73,16 @@ export class SettingsPanel {
               action: 'Received "smart-contracts-files-refresh" command',
               source: Sources.Extension,
             })
-            this.watcher.init(this._panel.webview)
+            if (confFileName) {
+              const pathToUse = confFileName.split('/certora/conf/')[0]
+              this.watcher.init(
+                this._panel.webview,
+                vscode.Uri.parse(pathToUse),
+              )
+            } else {
+              this.watcher.init(this._panel.webview)
+            }
+
             break
           case CommandFromSettingsWebview.CreateConfFile: {
             log({

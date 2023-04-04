@@ -189,6 +189,7 @@ export enum EventTypesFromExtension {
   DeleteResults = 'delete-results',
   RunJob = 'run-job',
   SettingsError = 'settings-error',
+  clearResults = 'clear-results',
 }
 
 export type EventsFromExtension =
@@ -224,6 +225,10 @@ export type EventsFromExtension =
     }
   | {
       type: EventTypesFromExtension.BlockRun
+      payload: string
+    }
+  | {
+      type: EventTypesFromExtension.clearResults
       payload: string
     }
   | {
@@ -276,4 +281,9 @@ export type Run = {
   confPath: string
   status: Status
   vrLink?: string
+}
+
+export type jobList = {
+  runs: Run[]
+  path: string
 }

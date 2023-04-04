@@ -332,6 +332,24 @@
         runs = setStatus(e.data.payload, Status.settingsError)
         break
       }
+      case EventTypesFromExtension.clearResults: {
+        log({
+          action: 'Received "clear-results" command',
+          source: Sources.ResultsWebview,
+          info: e.data.payload,
+        })
+        const name = getFileName(e.data.payload)
+        $verificationResults = $verificationResults.filter(vr => {
+          return vr.name !== name
+        })
+        runs = runs.map(run => {
+          if (run.name === name) {
+            run.status = Status.ready
+          }
+          return run
+        })
+        break
+      }
       case EventTypesFromExtension.ClearAllJobs: {
         log({
           action: 'Received "clear-all-jobs" command',
@@ -379,7 +397,7 @@
         })
         const confList = e.data.payload
         confList.forEach(file => {
-          const fileName = file.confPath.split('/').pop().replace('.conf', '')
+          const fileName = getFileName(file.confPath)
           if (!namesMap.has(fileName)) {
             let curStatus = Status.missingSettings
             if (file.allowRun) {
@@ -751,7 +769,7 @@
    * from conf file uri to only the file name
    */
   function getFileName(confFile: string): string {
-    return confFile.replace(CONF_DIRECTORY, '').replace('.conf', '')
+    return confFile.split('/').pop().replace('.conf', '')
   }
 
   /**
@@ -904,6 +922,7 @@
             }}
           >
             <NewRun
+              pathToConf={runs[index].confPath}
               editFunc={() => editRun(runs[index])}
               deleteFunc={() => askToDeleteThis(runs[index])}
               deleteRun={() => deleteRun(runs[index])}

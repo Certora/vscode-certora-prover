@@ -335,3 +335,10 @@ export type ConfToCreate = {
   confPath: string
   allowRun: number
 }
+
+// wip: recursive object for a dir?
+export type DirObj = {
+  path: string
+  runs: ConfToCreate[]
+  children: DirObj[]
+}

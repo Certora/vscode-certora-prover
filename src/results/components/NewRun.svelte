@@ -21,6 +21,8 @@
   import { writable } from 'svelte/store'
   import { clearResults } from '../extension-actions'
 
+  export let pathToConf: string
+
   export let editFunc: () => void
   export let deleteFunc: () => void
   export let deleteRun: () => void
@@ -285,7 +287,7 @@
         title: 'Clear Results',
         icon: '',
         onClick: () => {
-          clearResults(runName)
+          clearResults(pathToConf)
         },
       })
     }

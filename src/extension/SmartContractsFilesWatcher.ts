@@ -12,7 +12,7 @@ export class SmartContractsFilesWatcher {
   disposables: vscode.Disposable[]
   webview: vscode.Webview | undefined
 
-  constructor() {
+  constructor(path?: vscode.Uri) {
     this.webview = undefined
     this.files = []
     this.filesSol = []
@@ -30,12 +30,15 @@ export class SmartContractsFilesWatcher {
     this.disposables.push(
       this.fileSystemWatcher,
       vscode.workspace.onDidChangeWorkspaceFolders(() => {
-        this.init(this.webview)
+        this.init(this.webview, path)
       }),
     )
   }
 
-  public async init(webview: vscode.Webview | undefined): Promise<void> {
+  public async init(
+    webview: vscode.Webview | undefined,
+    path?: vscode.Uri,
+  ): Promise<void> {
     this.webview = webview
     this.files = await vscode.workspace.findFiles(
       '**/*.{spec,sol}',
@@ -45,9 +48,14 @@ export class SmartContractsFilesWatcher {
     this.filesSol = []
     this.filesSpec = []
 
-    this.files.forEach(file => {
-      const fileObj = this.getFileFormat(file)
+    if (path) {
+      this.files = this.files.filter(file => {
+        return file.path.includes(path.path)
+      })
+    }
 
+    this.files.forEach(file => {
+      const fileObj = this.getFileFormat(file, path)
       if (fileObj.type === '.sol') {
         this.filesSol.push(fileObj)
       } else {
@@ -83,8 +91,14 @@ export class SmartContractsFilesWatcher {
     }
   }
 
-  private getFileFormat(fileUri: vscode.Uri) {
+  private getFileFormat(fileUri: vscode.Uri, basePath?: vscode.Uri) {
     let path = vscode.workspace.asRelativePath(fileUri, true)
+    if (basePath) {
+      path = fileUri.path.replace(basePath.path + '/', '')
+    }
+
+    const fullPath = path
+
     const fileArr = path.split('/')
     let label = fileArr[fileArr.length - 1]
     // remove labale from path (file.sol)
@@ -99,9 +113,9 @@ export class SmartContractsFilesWatcher {
     }
     label = label.replace('.spec', '').replace('.sol', '')
     return {
-      value: vscode.workspace.asRelativePath(fileUri),
+      value: fullPath,
       label,
-      path,
+      path: basePath ? basePath.path : path,
       type,
     }
   }

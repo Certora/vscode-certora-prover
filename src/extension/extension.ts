@@ -219,7 +219,7 @@ export function activate(context: vscode.ExtensionContext): void {
     } catch (e) {
       console.log('Cannot rename conf file:', e)
     }
-    const lastResultsUri = getLastResultsUri()
+    const lastResultsUri = getLastResultsUri(newConf.path)
     if (lastResultsUri) {
       const oldResultsUri = vscode.Uri.parse(
         lastResultsUri.path + '/' + getFileName(oldName.confPath) + '.json',
@@ -332,6 +332,7 @@ export function activate(context: vscode.ExtensionContext): void {
         `Can't read conf file: ${name.confPath} \nError: ${e}`,
       )
     }
+    console.log(confUri.path, 'from run script')
     scriptRunner.run(confUri.path)
   }
 
@@ -493,27 +494,39 @@ export function activate(context: vscode.ExtensionContext): void {
   async function createInitialJobs(): Promise<void> {
     const path = vscode.workspace.workspaceFolders?.[0]
     if (path) {
-      watchForBuilds()
+      // watchForBuilds()
+
+      // wip: get the paths to the conf files for the dir structure
+      const confFilesDirs = await vscode.workspace.findFiles(
+        '**/*certora/conf/**',
+        '',
+      )
+
+      const fileObjects = confFilesDirs.map(async file => {
+        return await createFileObject(file)
+      })
 
       // conf files:
-      const confDirectoryPath = path.uri.path + '/' + CONF_DIRECTORY
-      const confDirectoryUri = vscode.Uri.parse(confDirectoryPath)
-      const checked = await checkDir(confDirectoryUri)
-      if (checked) {
-        const confFiles = vscode.workspace.fs.readDirectory(confDirectoryUri)
-        confFiles.then(async f => {
-          const confList = f.map(async file => {
-            return await createFileObject(
-              vscode.Uri.parse(confDirectoryPath + file[0]),
-            )
-          })
-          const awaitedList = (await Promise.all(confList)).filter(file => {
-            return file.confPath.endsWith('.conf')
-          })
-          sendFilesToCreateJobs(awaitedList)
-          getLastResults(awaitedList)
-        })
-      }
+      // const confDirectoryPath = path.uri.path + '/' + CONF_DIRECTORY
+      // const confDirectoryUri = vscode.Uri.parse(confDirectoryPath)
+      // const checked = await checkDir(confDirectoryUri)
+      // if (checked) {
+      //   const confFiles = vscode.workspace.fs.readDirectory(confDirectoryUri)
+      //   confFiles.then(async f => {
+      //     const confList = f.map(async file => {
+      //       return await createFileObject(
+      //         vscode.Uri.parse(confDirectoryPath + file[0]),
+      //       )
+      //     })
+      //     const awaitedList = (await Promise.all(confList)).filter(file => {
+      //       return file.confPath.endsWith('.conf')
+      //     })
+      // console.log(awaitedList, '====')
+      const awaitedList = await Promise.all(fileObjects)
+      sendFilesToCreateJobs(awaitedList)
+      getLastResults(awaitedList)
+      //   })
+      // }
     }
     // users can copy conf files to the conf folder and it will create a job!
     // they can also copy files to the script directory and create conf files from them!
@@ -579,7 +592,9 @@ export function activate(context: vscode.ExtensionContext): void {
           const encoder = new TextEncoder()
           const content = encoder.encode(JSON.stringify(confFile, null, 2))
           await vscode.workspace.fs.writeFile(file, content)
-        } catch (e) {}
+        } catch (e) {
+          console.log('[write new content error]', e)
+        }
       }
       if (
         confFile.files !== undefined &&
@@ -591,7 +606,8 @@ export function activate(context: vscode.ExtensionContext): void {
         fileObj.allowRun = 1
       }
     } catch (e) {
-      // listen to file changes
+      // listen to file changes]
+      console.log('[read conf error]', e)
     }
     return fileObj
   }
@@ -607,10 +623,10 @@ export function activate(context: vscode.ExtensionContext): void {
     })
   }
 
-  function getLastResultsUri() {
-    const path = vscode.workspace.workspaceFolders?.[0]
+  function getLastResultsUri(filePath: string) {
+    const path = vscode.Uri.parse(filePath.split('/certora/conf/')[0])
     if (!path) return
-    return vscode.Uri.parse(path.uri.path + CERTORA_INNER_DIR + 'last_results')
+    return vscode.Uri.parse(path.path + CERTORA_INNER_DIR + 'last_results')
   }
 
   /**
@@ -621,7 +637,7 @@ export function activate(context: vscode.ExtensionContext): void {
   function getLastResults(files: ConfToCreate[]) {
     files.forEach(async file => {
       const name = getFileName(file.confPath)
-      const internalUri = getLastResultsUri()
+      const internalUri = getLastResultsUri(file.confPath)
       if (!internalUri) return
       const dirExists = await checkDir(internalUri)
       if (dirExists) {
@@ -691,10 +707,11 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   function askToDeleteResults(name: string): void {
-    const deleteAction = `Delete '${name}' last results forever`
+    const confName = getFileName(name)
+    const deleteAction = `Delete '${confName}' last results forever`
     vscode.window
       .showInformationMessage(
-        `Are you sure you want to delete '${name}' last results?`,
+        `Are you sure you want to delete '${confName}' last results?`,
         {
           modal: true,
           detail: '',
@@ -717,15 +734,21 @@ export function activate(context: vscode.ExtensionContext): void {
    * @param name name of results to delete
    */
   async function clearResults(name: string): Promise<void> {
-    const lastResultsUri = getLastResultsUri()
-    if (lastResultsUri) {
+    const lastResultsUri = getLastResultsUri(name)
+    const path = vscode.workspace.workspaceFolders?.[0]
+    if (lastResultsUri && path) {
       const resultsUri = vscode.Uri.parse(
-        lastResultsUri.path + '/' + name + '.json',
+        lastResultsUri.path + '/' + getFileName(name) + '.json',
       )
       try {
         await vscode.workspace.fs.delete(resultsUri)
+        resultsWebviewProvider.postMessage({
+          type: 'clear-results',
+          payload: name,
+        })
       } catch (e) {
         // can't delete results file
+        // console.log('CANNOT DELETE FILE', e)
       }
     }
   }
