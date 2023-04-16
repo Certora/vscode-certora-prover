@@ -23,6 +23,10 @@
 
   export let pathToConf: string
 
+  $: pathToConf
+    ? console.log('path to conf', pathToConf)
+    : console.log('no path to conf')
+
   export let editFunc: () => void
   export let deleteFunc: () => void
   export let deleteRun: () => void

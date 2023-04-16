@@ -37,6 +37,7 @@
     JobNameMap,
     Status,
     CONF_DIRECTORY,
+    jobList,
   } from './types'
   import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
   import NewRun from './components/NewRun.svelte'
@@ -44,9 +45,11 @@
   import { writable } from 'svelte/store'
   import {
     expandables,
-    expandCollapse,
+    // expandCollapse,
+    jobLists,
     verificationResults,
   } from './store/store'
+  import JobList from './components/JobList.svelte'
 
   export const hide = writable([])
   export const pos = writable({ x: 0, y: 0 })
@@ -58,48 +61,48 @@
 
   let runningScripts: { pid: number; confFile: string; uploaded: boolean }[] =
     []
-  let runs: Run[] = []
+  // let runs: Run[] = []
   let pendingQueue: JobNameMap[] = []
   let pendingQueueCounter = 0
-  let namesMap: Map<string, string> = new Map()
+  // let namesMap: Map<string, string> = new Map()
   let runsCounter = 0
 
   // listen to the results array to see if there are results or not
-  $: $verificationResults.length
-    ? ($expandCollapse.hasResults = true)
-    : ($expandCollapse.hasResults = false)
+  // $: $verificationResults.length
+  //   ? ($expandCollapse.hasResults = true)
+  //   : ($expandCollapse.hasResults = false)
 
-  function newFetchOutput(e: CustomEvent<Assert | Rule>, vr: Verification) {
-    let clickedRuleOrAssert = e.detail
+  // function newFetchOutput(e: CustomEvent<Assert | Rule>, vr: Verification) {
+  //   let clickedRuleOrAssert = e.detail
 
-    const index = vr.jobs.findIndex(
-      job => job.jobId === clickedRuleOrAssert.jobId,
-    )
+  //   const index = vr.jobs.findIndex(
+  //     job => job.jobId === clickedRuleOrAssert.jobId,
+  //   )
 
-    if (index > -1) {
-      // type of Rule.output / Assert.output is going to be changed to string[] in a new version
-      // of certora prover. support both new & old versions:
-      let curOutput: string | null = null
-      if (typeof clickedRuleOrAssert.output === 'string') {
-        curOutput = clickedRuleOrAssert.output
-      } else if (
-        clickedRuleOrAssert.output &&
-        clickedRuleOrAssert.output.length
-      ) {
-        curOutput = clickedRuleOrAssert.output[0]
-      }
-      const outputUrl = `${vr.jobs[index].progressUrl.replace(
-        'progress',
-        'result',
-      )}&output=${clickedRuleOrAssert.output}`
-      getOutput(outputUrl)
-      outputRunName = vr.name
-    } else {
-      console.log(
-        'Error occurred while fetching the output - job id is  undefined',
-      )
-    }
-  }
+  //   if (index > -1) {
+  //     // type of Rule.output / Assert.output is going to be changed to string[] in a new version
+  //     // of certora prover. support both new & old versions:
+  //     let curOutput: string | null = null
+  //     if (typeof clickedRuleOrAssert.output === 'string') {
+  //       curOutput = clickedRuleOrAssert.output
+  //     } else if (
+  //       clickedRuleOrAssert.output &&
+  //       clickedRuleOrAssert.output.length
+  //     ) {
+  //       curOutput = clickedRuleOrAssert.output[0]
+  //     }
+  //     const outputUrl = `${vr.jobs[index].progressUrl.replace(
+  //       'progress',
+  //       'result',
+  //     )}&output=${clickedRuleOrAssert.output}`
+  //     getOutput(outputUrl)
+  //     outputRunName = vr.name
+  //   } else {
+  //     console.log(
+  //       'Error occurred while fetching the output - job id is  undefined',
+  //     )
+  //   }
+  // }
 
   function selectCalltraceFunction(e: CustomEvent<CallTraceFunction>) {
     selectedCalltraceFunction = e.detail
@@ -113,118 +116,118 @@
   /**
    * updated the results tree expand values according to results
    */
-  function updateExpendablesFromResults() {
-    $verificationResults.forEach(vr => {
-      return vr.jobs.forEach(job => {
-        const temp = job.verificationProgress.rules.map(rule => {
-          return {
-            title: rule.name,
-            isExpanded: false,
-            tree: [],
-          }
-        })
-        $expandables = $expandables.map(element => {
-          if (
-            element.title === namesMap.get(job.runName) &&
-            !element.tree.length
-          ) {
-            element.tree = temp
-          }
-          return element
-        })
-      })
-    })
-  }
+  // function updateExpendablesFromResults() {
+  //   $verificationResults.forEach(vr => {
+  //     return vr.jobs.forEach(job => {
+  //       const temp = job.verificationProgress.rules.map(rule => {
+  //         return {
+  //           title: rule.name,
+  //           isExpanded: false,
+  //           tree: [],
+  //         }
+  //       })
+  //       $expandables = $expandables.map(element => {
+  //         if (
+  //           element.title === namesMap.get(job.runName) &&
+  //           !element.tree.length
+  //         ) {
+  //           element.tree = temp
+  //         }
+  //         return element
+  //       })
+  //     })
+  //   })
+  // }
 
   const listener = (e: MessageEvent<EventsFromExtension>) => {
     switch (e.data.type) {
-      case EventTypesFromExtension.ReceiveNewJobResult: {
-        log({
-          action: 'Smart merge current results with new result',
-          source: Sources.ResultsWebview,
-          info: {
-            currentverificationResults: $verificationResults,
-            newResult: e.data.payload,
-            name: e.data.payload.runName,
-            pid: e.data.payload.pid,
-          },
-        })
-        const pid = e.data.payload.pid
-        const vrName = e.data.payload.runName
-        const run = runs.find(run => {
-          return run.name === vrName
-        })
-        const runName = run?.name
-        if (!run || !runName) return
-        setVerificationReportLink(pid, e.data.payload.verificationReportLink)
-        if (e.data.payload.jobStatus === 'FAILED') {
-          setStoppedJobStatus(runName)
-          return
-        }
-        smartMergeVerificationResult(
-          $verificationResults,
-          e.data.payload,
-          runName,
-        )
-        $verificationResults = $verificationResults
+      // case EventTypesFromExtension.ReceiveNewJobResult: {
+      //   log({
+      //     action: 'Smart merge current results with new result',
+      //     source: Sources.ResultsWebview,
+      //     info: {
+      //       currentverificationResults: $verificationResults,
+      //       newResult: e.data.payload,
+      //       name: e.data.payload.runName,
+      //       pid: e.data.payload.pid,
+      //     },
+      //   })
+      //   const pid = e.data.payload.pid
+      //   const vrName = e.data.payload.runName
+      //   const run = runs.find(run => {
+      //     return run.name === vrName
+      //   })
+      //   const runName = run?.name
+      //   if (!run || !runName) return
+      //   setVerificationReportLink(pid, e.data.payload.verificationReportLink)
+      //   if (e.data.payload.jobStatus === 'FAILED') {
+      //     setStoppedJobStatus(runName)
+      //     return
+      //   }
+      //   smartMergeVerificationResult(
+      //     $verificationResults,
+      //     e.data.payload,
+      //     runName,
+      //   )
+      //   $verificationResults = $verificationResults
 
-        updateExpendablesFromResults()
+      //   updateExpendablesFromResults()
 
-        const thisRun = e.data.payload
-        if (!thisRun.jobEnded) {
-          runs = setStatus(runName, Status.incompleteResults)
-        }
+      //   const thisRun = e.data.payload
+      //   if (!thisRun.jobEnded) {
+      //     runs = setStatus(runName, Status.incompleteResults)
+      //   }
 
-        if (thisRun.jobStatus === 'RUNNING' && thisRun.jobEnded) {
-          runs = setStatus(runName, Status.success)
-        }
+      //   if (thisRun.jobStatus === 'RUNNING' && thisRun.jobEnded) {
+      //     runs = setStatus(runName, Status.success)
+      //   }
 
-        if (e.data.payload.jobStatus === 'SUCCEEDED') {
-          if (runName) {
-            removeScript(runName)
-            // runs = setStatus(runName, Status.success)
-            setStoppedJobStatus(runName)
-          }
-        }
-        log({
-          action: 'After Smart merge current results with new result',
-          source: Sources.ResultsWebview,
-          info: {
-            updated$verificationResults: $verificationResults,
-          },
-        })
-        break
-      }
+      //   if (e.data.payload.jobStatus === 'SUCCEEDED') {
+      //     if (runName) {
+      //       removeScript(runName)
+      //       // runs = setStatus(runName, Status.success)
+      //       setStoppedJobStatus(runName)
+      //     }
+      //   }
+      //   log({
+      //     action: 'After Smart merge current results with new result',
+      //     source: Sources.ResultsWebview,
+      //     info: {
+      //       updated$verificationResults: $verificationResults,
+      //     },
+      //   })
+      //   break
+      // }
       case EventTypesFromExtension.UploadingFiles: {
         log({
           action: 'Received "run-next" command',
           source: Sources.ResultsWebview,
           info: e.data.payload,
         })
-        let confToEnable: JobNameMap = {
-          displayName: '',
-          confPath: '',
-        }
-        const curPid = e.data.payload.pid
-        const vrLink = e.data.payload.vrLink
-        runningScripts = runningScripts.map(rs => {
-          if (rs.pid === curPid) {
-            rs.uploaded = true
-            confToEnable.confPath = rs.confFile
-            confToEnable.displayName = namesMap.get(
-              getFileName(confToEnable.confPath),
-            )
-            enableEdit(confToEnable)
-          }
-          return rs
-        })
-        runningScripts = runningScripts
-        runs = runs.map(run => {
-          if (run.id === curPid) {
-            run.vrLink = vrLink
-          }
-          return run
-        })
+        // let confToEnable: JobNameMap = {
+        //   displayName: '',
+        //   confPath: '',
+        // }
+        // const curPid = e.data.payload.pid
+        // const vrLink = e.data.payload.vrLink
+        // runningScripts = runningScripts.map(rs => {
+        //   if (rs.pid === curPid) {
+        //     rs.uploaded = true
+        //     confToEnable.confPath = rs.confFile
+        //     confToEnable.displayName = namesMap.get(
+        //       getFileName(confToEnable.confPath),
+        //     )
+        //     enableEdit(confToEnable)
+        //   }
+        //   return rs
+        // })
+        // runningScripts = runningScripts
+        // runs = runs.map(run => {
+        //   if (run.id === curPid) {
+        //     run.vrLink = vrLink
+        //   }
+        //   return run
+        // })
         // when we receive the results of the last run, we run the next job!
         runNext()
         break
@@ -236,46 +239,46 @@
           info: e.data.payload,
         })
         runningScripts = e.data.payload
-        runs = runs.map(r => {
-          runningScripts.forEach(rs => {
-            if (r.confPath === rs.confFile) {
-              r.id = rs.pid
-            }
-          })
-          return r
-        })
+        // runs = runs.map(r => {
+        //   runningScripts.forEach(rs => {
+        //     if (r.confPath === rs.confFile) {
+        //       r.id = rs.pid
+        //     }
+        //   })
+        //   return r
+        // })
         // if there is no running script - run next
         if (!e.data.payload.length) {
           runNext()
         }
         break
       }
-      case EventTypesFromExtension.ScriptStopped: {
-        log({
-          action: 'Received "script-stopped" command',
-          source: Sources.ResultsWebview,
-          info: e.data.payload,
-        })
-        const pid = e.data.payload
-        const curRun = runs.find(run => run.id === pid)
+      // case EventTypesFromExtension.ScriptStopped: {
+      //   log({
+      //     action: 'Received "script-stopped" command',
+      //     source: Sources.ResultsWebview,
+      //     info: e.data.payload,
+      //   })
+      //   const pid = e.data.payload
+      //   const curRun = runs.find(run => run.id === pid)
 
-        if (curRun !== undefined) {
-          const runName = curRun.name
-          if (
-            curRun.status === Status.running ||
-            curRun.status === Status.pending
-          ) {
-            runs = setStatus(runName, Status.ready)
-          } else if (curRun.status === Status.incompleteResults) {
-            setStoppedJobStatus(runName)
-          }
-        }
+      //   if (curRun !== undefined) {
+      //     const runName = curRun.name
+      //     if (
+      //       curRun.status === Status.running ||
+      //       curRun.status === Status.pending
+      //     ) {
+      //       runs = setStatus(runName, Status.ready)
+      //     } else if (curRun.status === Status.incompleteResults) {
+      //       setStoppedJobStatus(runName)
+      //     }
+      //   }
 
-        runningScripts = runningScripts.filter(rs => {
-          return rs.pid !== pid
-        })
-        break
-      }
+      //   runningScripts = runningScripts.filter(rs => {
+      //     return rs.pid !== pid
+      //   })
+      //   break
+      // }
       case EventTypesFromExtension.SetOutput: {
         log({
           action: 'Received "get-output" command',
@@ -293,63 +296,63 @@
         }
         break
       }
-      case EventTypesFromExtension.AllowRun: {
-        log({
-          action: 'Received "allow-run" command',
-          source: Sources.ResultsWebview,
-          info: e.data.payload,
-        })
-        // status is changed to 'ready' when job is allowed to run
-        const runName = e.data.payload
-        let newStatus = Status.ready
-        if (
-          $verificationResults.find(vr => {
-            return vr.name === getFileName(runName)
-          })
-        ) {
-          newStatus = Status.success
-        }
-        runs = setStatus(runName, newStatus)
-        break
-      }
-      case EventTypesFromExtension.BlockRun: {
-        log({
-          action: 'Received "block-run" command',
-          source: Sources.ResultsWebview,
-          info: e.data.payload,
-        })
-        // status is changed to 'finish setup' when job isn't allowed to run
-        runs = setStatus(e.data.payload, Status.missingSettings)
-        break
-      }
-      case EventTypesFromExtension.SettingsError: {
-        log({
-          action: 'Received "settings-error" command',
-          source: Sources.ResultsWebview,
-          info: e.data.payload,
-        })
-        // status is changed to 'finish setup' when job isn't allowed to run
-        runs = setStatus(e.data.payload, Status.settingsError)
-        break
-      }
-      case EventTypesFromExtension.clearResults: {
-        log({
-          action: 'Received "clear-results" command',
-          source: Sources.ResultsWebview,
-          info: e.data.payload,
-        })
-        const name = getFileName(e.data.payload)
-        $verificationResults = $verificationResults.filter(vr => {
-          return vr.name !== name
-        })
-        runs = runs.map(run => {
-          if (run.name === name) {
-            run.status = Status.ready
-          }
-          return run
-        })
-        break
-      }
+      // case EventTypesFromExtension.AllowRun: {
+      //   log({
+      //     action: 'Received "allow-run" command',
+      //     source: Sources.ResultsWebview,
+      //     info: e.data.payload,
+      //   })
+      //   // status is changed to 'ready' when job is allowed to run
+      //   const runName = e.data.payload
+      //   let newStatus = Status.ready
+      //   if (
+      //     $verificationResults.find(vr => {
+      //       return vr.name === getFileName(runName)
+      //     })
+      //   ) {
+      //     newStatus = Status.success
+      //   }
+      //   runs = setStatus(runName, newStatus)
+      //   break
+      // }
+      // case EventTypesFromExtension.BlockRun: {
+      //   log({
+      //     action: 'Received "block-run" command',
+      //     source: Sources.ResultsWebview,
+      //     info: e.data.payload,
+      //   })
+      //   // status is changed to 'finish setup' when job isn't allowed to run
+      //   runs = setStatus(e.data.payload, Status.missingSettings)
+      //   break
+      // }
+      // case EventTypesFromExtension.SettingsError: {
+      //   log({
+      //     action: 'Received "settings-error" command',
+      //     source: Sources.ResultsWebview,
+      //     info: e.data.payload,
+      //   })
+      //   // status is changed to 'finish setup' when job isn't allowed to run
+      //   runs = setStatus(e.data.payload, Status.settingsError)
+      //   break
+      // }
+      // case EventTypesFromExtension.clearResults: {
+      //   log({
+      //     action: 'Received "clear-results" command',
+      //     source: Sources.ResultsWebview,
+      //     info: e.data.payload,
+      //   })
+      //   const name = getFileName(e.data.payload)
+      //   $verificationResults = $verificationResults.filter(vr => {
+      //     return vr.name !== name
+      //   })
+      //   runs = runs.map(run => {
+      //     if (run.name === name) {
+      //       run.status = Status.ready
+      //     }
+      //     return run
+      //   })
+      //   break
+      // }
       case EventTypesFromExtension.ClearAllJobs: {
         log({
           action: 'Received "clear-all-jobs" command',
@@ -362,14 +365,14 @@
         clearOutput()
         break
       }
-      case EventTypesFromExtension.CreateJob: {
-        log({
-          action: 'Received "create-new-job" command',
-          source: Sources.ResultsWebview,
-        })
-        createRun()
-        break
-      }
+      // case EventTypesFromExtension.CreateJob: {
+      //   log({
+      //     action: 'Received "create-new-job" command',
+      //     source: Sources.ResultsWebview,
+      //   })
+      //   createRun()
+      //   break
+      // }
       case EventTypesFromExtension.FocusChanged: {
         log({
           action: 'Received "focus-changed" command',
@@ -379,377 +382,447 @@
         $focusedRun = getFileName(e.data.payload)
         break
       }
-      case EventTypesFromExtension.ParseError: {
-        log({
-          action: 'Received "parse-error" command',
-          source: Sources.ResultsWebview,
-          info: e.data.payload,
-        })
-        const runName = e.data.payload
-        runs = setStatus(runName, Status.unableToRun)
-        break
-      }
+      // case EventTypesFromExtension.ParseError: {
+      //   log({
+      //     action: 'Received "parse-error" command',
+      //     source: Sources.ResultsWebview,
+      //     info: e.data.payload,
+      //   })
+      //   const runName = e.data.payload
+      //   runs = setStatus(runName, Status.unableToRun)
+      //   break
+      // }
       case EventTypesFromExtension.InitialJobs: {
         log({
           action: 'Received "initial-jobs" command',
           source: Sources.ResultsWebview,
           info: e.data.payload,
         })
-        const confList = e.data.payload
-        confList.forEach(file => {
+        // todo: create the tree of dir job lists
+        if ($jobLists.length) return
+        const confList = e.data.payload.sort((item1, item2) => {
+          if (item1.confPath > item2.confPath) {
+            return 1
+          }
+          return -1
+        })
+        // job list for the workspace?
+        const singleJobList: jobList = {
+          runs: [],
+          title: 'JOB LIST',
+          path: confList[0].workspaceFolder,
+          namesMap: new Map(),
+          children: [],
+        }
+        $jobLists.push(singleJobList)
+        confList.forEach((file, index) => {
+          const relativePath = file.confPath
+            .replace(file.workspaceFolder, '')
+            .split('certora/conf')[0]
+          const pathArr = relativePath.split('/').filter(item => item)
+
+          // create dir structure
+          pathArr.forEach((item, index) => {
+            const itemJobList: jobList = {
+              runs: [],
+              title: item,
+              path: relativePath.split(item)[0],
+              namesMap: new Map(),
+              children: [],
+            }
+            $jobLists = $jobLists.map(jl => {
+              if (
+                !jl.children.find(child => {
+                  return child.title === item && child.path === itemJobList.path
+                })
+              ) {
+                // either add to the JOB LIST (workspace folder) or to the directory that is before this one in the path
+                if (index === 0 && jl.path === confList[0].workspaceFolder) {
+                  jl.children.push(itemJobList)
+                } else if (
+                  jl.title === pathArr[index - 1] &&
+                  jl.path === itemJobList.path.split(pathArr[index - 1])[0]
+                ) {
+                  jl.children.push(itemJobList)
+                }
+              }
+              return jl
+            })
+            // add to the job list (todo: delete this?)
+            if (
+              !$jobLists.find(jobList => {
+                return (
+                  jobList.title === item && jobList.path === itemJobList.path
+                )
+              })
+            ) {
+              $jobLists.push(itemJobList)
+            }
+          })
+
+          console.log('job list after arr foreach', $jobLists)
+
           const fileName = getFileName(file.confPath)
-          if (!namesMap.has(fileName)) {
-            let curStatus = Status.missingSettings
-            if (file.allowRun) {
-              curStatus = Status.ready
+          let curStatus = Status.missingSettings
+          if (file.allowRun) {
+            curStatus = Status.ready
+          }
+          const newRun = {
+            id: index,
+            name: fileName,
+            confPath: file.confPath,
+            status: curStatus,
+          }
+          $jobLists = $jobLists.map(jl => {
+            if (
+              jl.title === pathArr[pathArr.length - 1] &&
+              jl.path === relativePath.split(pathArr[pathArr.length - 1])[0]
+            ) {
+              jl.runs.push(newRun)
+              jl.namesMap.set(newRun.name, newRun.name.replaceAll('_', ' '))
             }
-            const newRun = {
-              id: runs.length,
-              name: fileName,
-              confPath: file.confPath,
-              status: curStatus || Status.missingSettings,
-            }
-            namesMap.set(newRun.name, newRun.name.replaceAll('_', ' '))
-            createRun(newRun)
-          }
+            return jl
+          })
         })
+        console.log('JOB LISTS', $jobLists)
         break
       }
-      case EventTypesFromExtension.RunJob: {
-        log({
-          action: 'Received "run-job" command',
-          source: Sources.ResultsWebview,
-          info: e.data.payload,
-        })
+      // case EventTypesFromExtension.RunJob: {
+      //   log({
+      //     action: 'Received "run-job" command',
+      //     source: Sources.ResultsWebview,
+      //     info: e.data.payload,
+      //   })
 
-        const path: string = e.data.payload
-        const runToRun: Run = runs.find(r => {
-          return r.confPath === path
-        })
-        if (runToRun !== undefined) {
-          run(runToRun)
-        }
-        break
-      }
-      case EventTypesFromExtension.DeleteResults: {
-        log({
-          action: 'Received "delete-results" command',
-          source: Sources.ResultsWebview,
-          info: e.data.payload,
-        })
-        const nameToDelete = e.data.payload
-        runs = runs.map(run => {
-          if (run.name === nameToDelete) {
-            run.status = Status.ready
-          }
-          return run
-        })
-        $verificationResults = $verificationResults.filter(vr => {
-          return vr.name !== nameToDelete
-        })
-        break
-      }
-      case EventTypesFromExtension.DeleteJob: {
-        log({
-          action: 'Received "delete-job" command',
-          source: Sources.ResultsWebview,
-          info: e.data.payload,
-        })
+      //   const path: string = e.data.payload
+      //   const runToRun: Run = runs.find(r => {
+      //     return r.confPath === path
+      //   })
+      //   if (runToRun !== undefined) {
+      //     run(runToRun)
+      //   }
+      //   break
+      // }
+      // case EventTypesFromExtension.DeleteResults: {
+      //   log({
+      //     action: 'Received "delete-results" command',
+      //     source: Sources.ResultsWebview,
+      //     info: e.data.payload,
+      //   })
+      //   const nameToDelete = e.data.payload
+      //   runs = runs.map(run => {
+      //     if (run.name === nameToDelete) {
+      //       run.status = Status.ready
+      //     }
+      //     return run
+      //   })
+      //   $verificationResults = $verificationResults.filter(vr => {
+      //     return vr.name !== nameToDelete
+      //   })
+      //   break
+      // }
+      // case EventTypesFromExtension.DeleteJob: {
+      //   log({
+      //     action: 'Received "delete-job" command',
+      //     source: Sources.ResultsWebview,
+      //     info: e.data.payload,
+      //   })
 
-        const nameToDelete: string = e.data.payload
-        const runToDelete: Run = runs.find(r => {
-          return r.confPath === nameToDelete
-        })
-        if (runToDelete !== undefined) {
-          const jobNameMap: JobNameMap = {
-            confPath: nameToDelete,
-            displayName: namesMap.get(getFileName(nameToDelete)),
-          }
-          deleteRun(runToDelete)
-          deleteConf(jobNameMap)
-        }
-        break
-      }
+      //   const nameToDelete: string = e.data.payload
+      //   const runToDelete: Run = runs.find(r => {
+      //     return r.confPath === nameToDelete
+      //   })
+      //   if (runToDelete !== undefined) {
+      //     const jobNameMap: JobNameMap = {
+      //       confPath: nameToDelete,
+      //       displayName: namesMap.get(getFileName(nameToDelete)),
+      //     }
+      //     deleteRun(runToDelete)
+      //     deleteConf(jobNameMap)
+      //   }
+      //   break
+      // }
       default:
         break
     }
   }
 
-  /**
-   * set vrLink of the run with name [runName] to [link]
-   * @param runName name of the run to update
-   * @param link to verification report of run [runName]
-   */
-  function setVerificationReportLink(pid: number, link: string) {
-    runs.forEach(run => {
-      if (run.id === pid) {
-        run.vrLink = link
-      }
-    })
-    runs = runs
-  }
+  // /**
+  //  * set vrLink of the run with name [runName] to [link]
+  //  * @param runName name of the run to update
+  //  * @param link to verification report of run [runName]
+  //  */
+  // function setVerificationReportLink(pid: number, link: string) {
+  //   runs.forEach(run => {
+  //     if (run.id === pid) {
+  //       run.vrLink = link
+  //     }
+  //   })
+  //   runs = runs
+  // }
 
-  /**
-   * set the status of the run named [runName] to be [value]
-   * @param runConfPath name of a run
-   * @param value status
-   * @returns new list of runs after change
-   */
-  function setStatus(runConfPath: string, value: Status): Run[] {
-    runs.forEach(run => {
-      if (
-        (run.confPath === runConfPath || run.name === runConfPath) &&
-        !(run.status === Status.success && value === Status.ready)
-      ) {
-        run.status = value
-      }
-    })
-    return runs
-  }
+  // /**
+  //  * set the status of the run named [runName] to be [value]
+  //  * @param runConfPath name of a run
+  //  * @param value status
+  //  * @returns new list of runs after change
+  //  */
+  // function setStatus(runConfPath: string, value: Status): Run[] {
+  //   runs.forEach(run => {
+  //     if (
+  //       (run.confPath === runConfPath || run.name === runConfPath) &&
+  //       !(run.status === Status.success && value === Status.ready)
+  //     ) {
+  //       run.status = value
+  //     }
+  //   })
+  //   return runs
+  // }
 
-  /**
-   * duplicate [name to duplicate] into [duplicatedName]
-   * this will create a new run and a new conf file with a duplicated name
-   * @param nameToDuplicate
-   * @param duplicatedName
-   */
-  function duplicateRun(
-    nameToDuplicate: string,
-    duplicatedName: string,
-    rule?: string,
-  ): void {
-    const toDuplicate: Run = runs.find(run => run.name === nameToDuplicate)
+  // /**
+  //  * duplicate [name to duplicate] into [duplicatedName]
+  //  * this will create a new run and a new conf file with a duplicated name
+  //  * @param nameToDuplicate
+  //  * @param duplicatedName
+  //  */
+  // function duplicateRun(
+  //   nameToDuplicate: string,
+  //   duplicatedName: string,
+  //   rule?: string,
+  // ): void {
+  //   const toDuplicate: Run = runs.find(run => run.name === nameToDuplicate)
 
-    // the status of the new run cannot be 'success' (haven't run yet => no results)
-    let newStatus = toDuplicate.status
-    if (newStatus === Status.success) {
-      newStatus = Status.ready
-    }
+  //   // the status of the new run cannot be 'success' (haven't run yet => no results)
+  //   let newStatus = toDuplicate.status
+  //   if (newStatus === Status.success) {
+  //     newStatus = Status.ready
+  //   }
 
-    // old path recreation
-    const newPathArr = toDuplicate.confPath.split('/')
-    newPathArr[newPathArr.length - 1] = newPathArr[
-      newPathArr.length - 1
-    ].replace(nameToDuplicate, duplicatedName)
-    const newPath = newPathArr.join('/')
+  //   // old path recreation
+  //   const newPathArr = toDuplicate.confPath.split('/')
+  //   newPathArr[newPathArr.length - 1] = newPathArr[
+  //     newPathArr.length - 1
+  //   ].replace(nameToDuplicate, duplicatedName)
+  //   const newPath = newPathArr.join('/')
 
-    const duplicated: Run = {
-      id: runs.length,
-      name: duplicatedName,
-      confPath: newPath,
-      status: newStatus,
-    }
+  //   const duplicated: Run = {
+  //     id: runs.length,
+  //     name: duplicatedName,
+  //     confPath: newPath,
+  //     status: newStatus,
+  //   }
 
-    const confNameMapDuplicated: JobNameMap = {
-      confPath: duplicated.confPath,
-      displayName: namesMap.get(duplicated.name),
-    }
+  //   const confNameMapDuplicated: JobNameMap = {
+  //     confPath: duplicated.confPath,
+  //     displayName: namesMap.get(duplicated.name),
+  //   }
 
-    const confNameMapToDuplicate: JobNameMap = {
-      confPath: toDuplicate.confPath,
-      displayName: namesMap.get(toDuplicate.name),
-    }
-    duplicate(confNameMapToDuplicate, confNameMapDuplicated, rule)
-    createRun(duplicated)
-    if (!rule) {
-      $focusedRun = duplicatedName
-    }
-  }
+  //   const confNameMapToDuplicate: JobNameMap = {
+  //     confPath: toDuplicate.confPath,
+  //     displayName: namesMap.get(toDuplicate.name),
+  //   }
+  //   duplicate(confNameMapToDuplicate, confNameMapDuplicated, rule)
+  //   createRun(duplicated)
+  //   if (!rule) {
+  //     $focusedRun = duplicatedName
+  //   }
+  // }
 
-  function addNewExpendable(title: string) {
-    $expandables = [
-      ...$expandables,
-      {
-        title: title,
-        isExpanded: true,
-        tree: [],
-      },
-    ]
-  }
+  // function addNewExpendable(title: string) {
+  //   $expandables = [
+  //     ...$expandables,
+  //     {
+  //       title: title,
+  //       isExpanded: true,
+  //       tree: [],
+  //     },
+  //   ]
+  // }
 
-  /**
-   * when a job was cancel from outside sources
-   * @param jobName the name of the job that was canceled
-   */
-  function setStoppedJobStatus(jobName: string): void {
-    if (jobName) {
-      removeScript(jobName)
-      if (
-        !$verificationResults.length ||
-        !$verificationResults.map(vr => {
-          return vr.name === jobName
-        })
-      ) {
-        runs = setStatus(jobName, Status.unableToRun)
-        return
-      }
-      $verificationResults.forEach(vr => {
-        if (vr.name === jobName) {
-          runs = setStatus(jobName, Status.success)
-        } else if (
-          runs.find(run => {
-            return run.name === jobName
-          })?.status === Status.running
-        ) {
-          runs = setStatus(jobName, Status.unableToRun)
-        }
-      })
-      $verificationResults = $verificationResults
-      return
-    }
-  }
+  // /**
+  //  * when a job was cancel from outside sources
+  //  * @param jobName the name of the job that was canceled
+  //  */
+  // function setStoppedJobStatus(jobName: string): void {
+  //   if (jobName) {
+  //     removeScript(jobName)
+  //     if (
+  //       !$verificationResults.length ||
+  //       !$verificationResults.map(vr => {
+  //         return vr.name === jobName
+  //       })
+  //     ) {
+  //       runs = setStatus(jobName, Status.unableToRun)
+  //       return
+  //     }
+  //     $verificationResults.forEach(vr => {
+  //       if (vr.name === jobName) {
+  //         runs = setStatus(jobName, Status.success)
+  //       } else if (
+  //         runs.find(run => {
+  //           return run.name === jobName
+  //         })?.status === Status.running
+  //       ) {
+  //         runs = setStatus(jobName, Status.unableToRun)
+  //       }
+  //     })
+  //     $verificationResults = $verificationResults
+  //     return
+  //   }
+  // }
 
   /**
    * adds a new run to runs array and increase the counter
    * @param run new run. if doest exists - creates a new run object
    */
   function createRun(run?: Run): void {
-    $hide.push(true)
-    if (run) {
-      if (!run.status) {
-        run.status = Status.missingSettings
-      }
-      runsCounter = runs.push(run)
-      addNewExpendable(namesMap.get(run.name))
-    } else {
-      // don't create more than one new run while in rename state
-      if (runs.find(r => r.name === '')) return
-      runsCounter = runs.push({
-        id: runs.length,
-        name: '',
-        confPath: '',
-        status: Status.missingSettings,
-      })
-      addNewExpendable('')
-    }
+    // todo: create run with the tree of job lists
+    // $hide.push(true)
+    // if (run) {
+    //   if (!run.status) {
+    //     run.status = Status.missingSettings
+    //   }
+    //   runsCounter = runs.push(run)
+    //   addNewExpendable(namesMap.get(run.name))
+    // } else {
+    //   // don't create more than one new run while in rename state
+    //   if (runs.find(r => r.name === '')) return
+    //   runsCounter = runs.push({
+    //     id: runs.length,
+    //     name: '',
+    //     confPath: '',
+    //     status: Status.missingSettings,
+    //   })
+    //   addNewExpendable('')
+    // }
   }
 
-  function editRun(run: Run): void {
-    const JobNameMap: JobNameMap = {
-      confPath: run.confPath,
-      displayName: namesMap.get(run.name),
-    }
-    editConfFile(JobNameMap)
-  }
+  // function editRun(run: Run): void {
+  //   const JobNameMap: JobNameMap = {
+  //     confPath: run.confPath,
+  //     displayName: namesMap.get(run.name),
+  //   }
+  //   editConfFile(JobNameMap)
+  // }
 
-  /**
-   * deletes a run and it's results
-   * @param runToDelete run to delete
-   */
-  function deleteRun(runToDelete: Run): void {
-    const name = runToDelete.name
+  // /**
+  //  * deletes a run and it's results
+  //  * @param runToDelete run to delete
+  //  */
+  // function deleteRun(runToDelete: Run): void {
+  //   const name = runToDelete.name
 
-    //delete results
-    $verificationResults = $verificationResults.filter(vr => {
-      return vr.name !== name
-    })
+  //   //delete results
+  //   $verificationResults = $verificationResults.filter(vr => {
+  //     return vr.name !== name
+  //   })
 
-    //delete from running scripts
-    runningScripts = runningScripts.filter(rs => {
-      return rs.confFile !== name
-    })
+  //   //delete from running scripts
+  //   runningScripts = runningScripts.filter(rs => {
+  //     return rs.confFile !== name
+  //   })
 
-    //delete run
-    runs = runs.filter(run => {
-      return run !== runToDelete
-    })
-    namesMap.delete(name)
+  //   //delete run
+  //   runs = runs.filter(run => {
+  //     return run !== runToDelete
+  //   })
+  //   namesMap.delete(name)
 
-    if (output && output.runName === name) {
-      clearOutput()
-    }
+  //   if (output && output.runName === name) {
+  //     clearOutput()
+  //   }
 
-    runsCounter--
-  }
+  //   runsCounter--
+  // }
 
-  /**
-   * either run this run or add to pending queue
-   * @param run run to run
-   * @param index if 0 - run, else: add to pending queue
-   */
-  function run(run: Run, index = 0): void {
-    run.vrLink = ''
-    const JobNameMap: JobNameMap = {
-      confPath: run.confPath,
-      displayName: namesMap.get(run.name),
-    }
+  // /**
+  //  * either run this run or add to pending queue
+  //  * @param run run to run
+  //  * @param index if 0 - run, else: add to pending queue
+  //  */
+  // function run(run: Run, index = 0): void {
+  //   run.vrLink = ''
+  //   const JobNameMap: JobNameMap = {
+  //     confPath: run.confPath,
+  //     displayName: namesMap.get(run.name),
+  //   }
 
-    //add to pending queue
-    pendingQueue.push(JobNameMap)
-    runs = setStatus(JobNameMap.confPath, Status.pending)
-    pendingQueueCounter++
-    $verificationResults = $verificationResults.filter(vr => {
-      return vr.name !== getFileName(JobNameMap.confPath)
-    })
+  //   //add to pending queue
+  //   pendingQueue.push(JobNameMap)
+  //   runs = setStatus(JobNameMap.confPath, Status.pending)
+  //   pendingQueueCounter++
+  //   $verificationResults = $verificationResults.filter(vr => {
+  //     return vr.name !== getFileName(JobNameMap.confPath)
+  //   })
 
-    if (output && output.runName === run.name) {
-      clearOutput()
-    }
+  //   if (output && output.runName === run.name) {
+  //     clearOutput()
+  //   }
 
-    const shouldRunNext = runningScripts.every(rs => {
-      return rs.uploaded === true
-    })
-    //if there are no running scripts => runNext
-    if ((!runningScripts.length || shouldRunNext) && index === 0) {
-      runNext()
-    }
-  }
+  //   const shouldRunNext = runningScripts.every(rs => {
+  //     return rs.uploaded === true
+  //   })
+  //   //if there are no running scripts => runNext
+  //   if ((!runningScripts.length || shouldRunNext) && index === 0) {
+  //     runNext()
+  //   }
+  // }
 
-  /**
-   * rename the run named oldName to newName (also renames the conf file)
-   * @param oldName name to change
-   * @param newName new name for the run and conf
-   */
-  function renameRun(oldName: string, newName: string): void {
-    // rename existing run
-    if (oldName) {
-      // the renamed run should have the same verification results, if they exist
-      let oldResult = $verificationResults.find(vr => vr.name === oldName)
-      if (oldResult) {
-        let newResult: Verification = {
-          name: newName,
-          contract: oldResult.contract,
-          spec: oldResult.spec,
-          jobs: oldResult.jobs,
-        }
-        $verificationResults = $verificationResults.filter(vr => {
-          return vr.name !== oldName
-        })
-        $verificationResults.push(newResult)
-      }
+  // /**
+  //  * rename the run named oldName to newName (also renames the conf file)
+  //  * @param oldName name to change
+  //  * @param newName new name for the run and conf
+  //  */
+  // function renameRun(oldName: string, newName: string): void {
+  //   // rename existing run
+  //   if (oldName) {
+  //     // the renamed run should have the same verification results, if they exist
+  //     let oldResult = $verificationResults.find(vr => vr.name === oldName)
+  //     if (oldResult) {
+  //       let newResult: Verification = {
+  //         name: newName,
+  //         contract: oldResult.contract,
+  //         spec: oldResult.spec,
+  //         jobs: oldResult.jobs,
+  //       }
+  //       $verificationResults = $verificationResults.filter(vr => {
+  //         return vr.name !== oldName
+  //       })
+  //       $verificationResults.push(newResult)
+  //     }
 
-      const curRun = runs.find(singleRun => {
-        return singleRun.name === newName
-      })
+  //     const curRun = runs.find(singleRun => {
+  //       return singleRun.name === newName
+  //     })
 
-      // new path creation
-      const newPathArr = curRun.confPath.split('/')
-      newPathArr[newPathArr.length - 1] = newPathArr[
-        newPathArr.length - 1
-      ].replace(oldName, newName)
-      const newPath = newPathArr.join('/')
+  //     // new path creation
+  //     const newPathArr = curRun.confPath.split('/')
+  //     newPathArr[newPathArr.length - 1] = newPathArr[
+  //       newPathArr.length - 1
+  //     ].replace(oldName, newName)
+  //     const newPath = newPathArr.join('/')
 
-      const oldConfNameMap: JobNameMap = {
-        confPath: curRun.confPath,
-        displayName: namesMap.get(oldName),
-      }
-      const newConfNameMap: JobNameMap = {
-        confPath: newPath,
-        displayName: namesMap.get(newName),
-      }
-      rename(oldConfNameMap, newConfNameMap)
-      namesMap.delete(oldName)
-    }
-    // rename new run
-    else {
-      const JobNameMap: JobNameMap = {
-        confPath: newName,
-        displayName: namesMap.get(newName),
-      }
-      openSettings(JobNameMap)
-    }
-    $focusedRun = newName
-  }
+  //     const oldConfNameMap: JobNameMap = {
+  //       confPath: curRun.confPath,
+  //       displayName: namesMap.get(oldName),
+  //     }
+  //     const newConfNameMap: JobNameMap = {
+  //       confPath: newPath,
+  //       displayName: namesMap.get(newName),
+  //     }
+  //     rename(oldConfNameMap, newConfNameMap)
+  //     namesMap.delete(oldName)
+  //   }
+  //   // rename new run
+  //   else {
+  //     const JobNameMap: JobNameMap = {
+  //       confPath: newName,
+  //       displayName: namesMap.get(newName),
+  //     }
+  //     openSettings(JobNameMap)
+  //   }
+  //   $focusedRun = newName
+  // }
 
   /**
    * run the first pending run in the queue
@@ -772,66 +845,66 @@
     return confFile.split('/').pop().replace('.conf', '')
   }
 
-  /**
-   * run all the runs that are allowed to run
-   */
-  function runAll(): void {
-    const jobsToRun = runs.filter(singleRun => {
-      return singleRun.status === Status.ready
-    })
-    jobsToRun.forEach((job, index) => {
-      run(job, index)
-    })
-  }
+  // /**
+  //  * run all the runs that are allowed to run
+  //  */
+  // function runAll(): void {
+  //   const jobsToRun = runs.filter(singleRun => {
+  //     return singleRun.status === Status.ready
+  //   })
+  //   jobsToRun.forEach((job, index) => {
+  //     run(job, index)
+  //   })
+  // }
 
-  /**
-   * stops a pending run
-   */
-  function pendingStopFunc(run: Run): void {
-    pendingQueue = pendingQueue.filter(rq => {
-      return rq.confPath !== run.confPath
-    })
-    $verificationResults = $verificationResults.filter(vr => {
-      return vr.name !== run.name
-    })
-    pendingQueueCounter--
-    runs = setStatus(run.confPath, Status.ready)
-  }
+  // /**
+  //  * stops a pending run
+  //  */
+  // function pendingStopFunc(run: Run): void {
+  //   pendingQueue = pendingQueue.filter(rq => {
+  //     return rq.confPath !== run.confPath
+  //   })
+  //   $verificationResults = $verificationResults.filter(vr => {
+  //     return vr.name !== run.name
+  //   })
+  //   pendingQueueCounter--
+  //   runs = setStatus(run.confPath, Status.ready)
+  // }
 
-  /**
-   * ask to delete the job "run"
-   * @param run the job to delete
-   */
-  function askToDeleteThis(run: Run): void {
-    const jobNameMap: JobNameMap = {
-      confPath: run.confPath,
-      displayName: namesMap.get(run.name),
-    }
-    askToDeleteJob(jobNameMap)
-  }
+  // /**
+  //  * ask to delete the job "run"
+  //  * @param run the job to delete
+  //  */
+  // function askToDeleteThis(run: Run): void {
+  //   const jobNameMap: JobNameMap = {
+  //     confPath: run.confPath,
+  //     displayName: namesMap.get(run.name),
+  //   }
+  //   askToDeleteJob(jobNameMap)
+  // }
 
-  /**
-   * operates the expand / collapse functionality
-   */
-  function expandCollapseAll() {
-    if ($expandCollapse.hasResults) {
-      $expandables = $expandables.map(element => {
-        if (element.title !== 'JOB LIST') {
-          element.isExpanded = $expandCollapse.var
-        }
-        element.tree = element.tree.map(treeItem => {
-          treeItem.isExpanded = $expandCollapse.var
-          return treeItem
-        })
-        return element
-      })
-      $expandCollapse.title = $expandCollapse.var
-        ? 'Collapse All'
-        : 'Expand All'
-      $expandCollapse.icon = $expandCollapse.var ? 'collapse-all' : 'expand-all'
-      $expandCollapse.var = !$expandCollapse.var
-    }
-  }
+  // /**
+  //  * operates the expand / collapse functionality
+  //  */
+  // function expandCollapseAll() {
+  //   if ($expandCollapse.hasResults) {
+  //     $expandables = $expandables.map(element => {
+  //       if (element.title !== 'JOB LIST') {
+  //         element.isExpanded = $expandCollapse.var
+  //       }
+  //       element.tree = element.tree.map(treeItem => {
+  //         treeItem.isExpanded = $expandCollapse.var
+  //         return treeItem
+  //       })
+  //       return element
+  //     })
+  //     $expandCollapse.title = $expandCollapse.var
+  //       ? 'Collapse All'
+  //       : 'Expand All'
+  //     $expandCollapse.icon = $expandCollapse.var ? 'collapse-all' : 'expand-all'
+  //     $expandCollapse.var = !$expandCollapse.var
+  //   }
+  // }
 
   onMount(() => {
     window.addEventListener('message', listener)
@@ -840,9 +913,9 @@
       isExpanded: true,
       tree: [],
     })
-    if (!runs.length) {
-      initResults()
-    }
+    // if (!runs.length) {
+    initResults()
+    // }
   })
 
   onDestroy(() => {
@@ -855,18 +928,18 @@
     })
   }
 
-  function showMenu(e, index) {
-    $pos = { x: e.clientX, y: e.pageY }
-    resentHide()
-    $hide[index] = false
-  }
+  // function showMenu(e, index) {
+  //   $pos = { x: e.clientX, y: e.pageY }
+  //   resentHide()
+  //   $hide[index] = false
+  // }
 
   window.onclick = function (event) {
     resentHide()
   }
 </script>
 
-{#if runsCounter === 0}
+{#if $jobLists.length === 0}
   <div class="zero-state">
     <div class="command">
       <h3 class="command-description">Welcome To Certora Prover IDE</h3>
@@ -888,89 +961,24 @@
   </div>
 {:else}
   <div>
-    <Pane
+    <!-- <Pane
       title="JOB LIST"
-      fixedActions={[
-        {
-          title: 'Run All',
-          icon: 'run-all',
-          onClick: runAll,
-        },
-        {
-          title: 'Create New Job From Existing File',
-          icon: 'new-file',
-          onClick: uploadConf,
-        },
-        {
-          title: 'Create New Job',
-          icon: 'diff-added',
-          onClick: createRun,
-        },
-        {
-          title: $expandCollapse.title,
-          icon: $expandCollapse.icon,
-          onClick: expandCollapseAll,
-          disabled: !$expandCollapse.hasResults,
-        },
-      ]}
-    >
-      <ul class="running-scripts">
-        {#each Array(runsCounter) as _, index (index)}
-          <li
-            on:contextmenu|stopPropagation|preventDefault={e => {
-              showMenu(e, index)
-            }}
-          >
-            <NewRun
-              pathToConf={runs[index].confPath}
-              editFunc={() => editRun(runs[index])}
-              deleteFunc={() => askToDeleteThis(runs[index])}
-              deleteRun={() => deleteRun(runs[index])}
-              {namesMap}
-              {renameRun}
-              duplicateFunc={duplicateRun}
-              runFunc={() => run(runs[index])}
-              status={runs[index].status}
-              {newFetchOutput}
-              nowRunning={(runningScripts.find(
-                rs => rs.confFile === runs[index].confPath,
-              ) !== undefined ||
-                (pendingQueue.find(
-                  rs => rs.confPath === runs[index].confPath,
-                ) !== undefined &&
-                  pendingQueueCounter > 0)) &&
-                $verificationResults.find(
-                  vr => runs[index].name === vr.name,
-                ) === undefined}
-              isPending={pendingQueue.find(
-                rs => rs.confPath === runs[index].confPath,
-              ) !== undefined && pendingQueueCounter > 0}
-              expandedState={$verificationResults.find(
-                vr => vr.name === runs[index].name,
-              ) !== undefined}
-              pendingStopFunc={() => {
-                pendingStopFunc(runs[index])
-              }}
-              runningStopFunc={() => {
-                enableEdit({
-                  confPath: runs[index].confPath,
-                  displayName: namesMap.get(runs[index].name),
-                })
-                runs[index].vrLink = ''
-                const modal = runs[index].status !== Status.running
-                stopScript(runs[index].id, modal)
-              }}
-              inactiveSelected={$focusedRun}
-              {setStatus}
-              vrLink={runs[index].vrLink}
-              hide={$hide[index]}
-              pos={$pos}
-              bind:runName={runs[index].name}
-            />
-          </li>
-        {/each}
-      </ul>
-    </Pane>
+      fixedActions={[]}
+    > -->
+    <!-- {#each $jobLists as jl, index (index)} -->
+    <JobList
+      path={$jobLists[0].path}
+      title={$jobLists[0].title}
+      runs={$jobLists[0].runs}
+      namesMap={$jobLists[0].namesMap}
+      children={$jobLists[0].children}
+      bind:focusedRun={$focusedRun}
+      bind:output
+      bind:runningScripts
+      bind:pendingQueue
+    />
+    <!-- {/each} -->
+    <!-- </Pane> -->
   </div>
 {/if}
 {#if output}
@@ -1070,9 +1078,9 @@
     }
   }
 
-  .running-scripts {
+  /* .running-scripts {
     padding: 0;
     margin: 0;
     list-style-type: none;
-  }
+  } */
 </style>

@@ -334,6 +334,7 @@ export type ResourceError = {
 export type ConfToCreate = {
   confPath: string
   allowRun: number
+  workspaceFolder: string
 }
 
 // wip: recursive object for a dir?

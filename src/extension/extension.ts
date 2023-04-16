@@ -570,9 +570,11 @@ export function activate(context: vscode.ExtensionContext): void {
    * @returns Promise<ConfToCreate>
    */
   async function createFileObject(file: vscode.Uri): Promise<ConfToCreate> {
+    const path = vscode.workspace.workspaceFolders?.[0].uri.path
     const fileObj: ConfToCreate = {
       confPath: file.path,
       allowRun: 0,
+      workspaceFolder: path || '',
     }
     try {
       const confFile: ConfFile = await readConf(file)
@@ -720,7 +722,7 @@ export function activate(context: vscode.ExtensionContext): void {
       )
       .then(async items => {
         resultsWebviewProvider.postMessage<string>({
-          type: 'delete-results',
+          type: 'clear-results',
           payload: name,
         })
         if (items === deleteAction) {

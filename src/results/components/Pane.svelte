@@ -38,6 +38,34 @@
     [Status.settingsError, statusIcons.settingsError],
   ])
 
+  // add to expandables
+  if (
+    $expandables.find(element => {
+      return element.title === title
+    }) === undefined
+  ) {
+    // if ($expandables.find(element => {
+    //   return element.title === father
+    // }) !== undefined)
+    // $expandables = $expandables.map(item => {
+    //   if (item.name === father) {
+    //     item.tree.push({
+    //     title: title,
+    //     isExpanded: false,
+    //     tree: [],
+    //   })
+    //   }
+    //   return item
+    // })
+    // else {
+    $expandables.push({
+      title: title,
+      isExpanded: false,
+      tree: [],
+    })
+    // }
+  }
+
   /**
    * panel class can change the panels cursor and show if its selected
    */
@@ -66,17 +94,17 @@
   }
 
   function toggleExpand() {
-    if (
-      $expandables.find(element => {
-        return element.title === title
-      }) === undefined
-    ) {
-      $expandables.push({
-        title: title,
-        isExpanded: false,
-        tree: [],
-      })
-    }
+    // if (
+    //   $expandables.find(element => {
+    //     return element.title === title
+    //   }) === undefined
+    // ) {
+    //   $expandables.push({
+    //     title: title,
+    //     isExpanded: false,
+    //     tree: [],
+    //   })
+    // }
     $expandables = $expandables.map(element => {
       if (element.title === title) {
         element.isExpanded = !element.isExpanded

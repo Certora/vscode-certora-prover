@@ -61,7 +61,7 @@
   {posInset}
   {level}
   {actions}
-  hasChildren={rule?.children.length || rule?.asserts.length}
+  hasChildren={rule?.children.length !== 0 || rule?.asserts.length !== 0}
   bind:isExpanded={$isExpanded}
   on:click={() => {
     if (assert) {

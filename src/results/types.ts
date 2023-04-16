@@ -162,9 +162,9 @@ export type CreationTime = {
 }
 
 export type ConfToCreate = {
-  // fileName: string
   confPath: string
   allowRun: number
+  workspaceFolder: string
 }
 export type JobNameMap = {
   displayName: string
@@ -186,7 +186,7 @@ export enum EventTypesFromExtension {
   ScriptStopped = 'script-stopped',
   InitialJobs = 'initial-jobs',
   DeleteJob = 'delete-job',
-  DeleteResults = 'delete-results',
+  // DeleteResults = 'delete-results',
   RunJob = 'run-job',
   SettingsError = 'settings-error',
   clearResults = 'clear-results',
@@ -255,10 +255,10 @@ export type EventsFromExtension =
       type: EventTypesFromExtension.DeleteJob
       payload: string
     }
-  | {
-      type: EventTypesFromExtension.DeleteResults
-      payload: string
-    }
+  // | {
+  //     type: EventTypesFromExtension.DeleteResults
+  //     payload: string
+  //   }
   | {
       type: EventTypesFromExtension.RunJob
       payload: string
@@ -285,5 +285,8 @@ export type Run = {
 
 export type jobList = {
   runs: Run[]
+  namesMap: Map<string, string>
   path: string
+  title: string
+  children: jobList[]
 }
