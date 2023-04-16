@@ -6,12 +6,7 @@ export function getProgressUrl(text: string): string | null {
   const urlRegex = /(https?:\/\/[^\s]+)/g
   const urlMatches = text.match(urlRegex)
 
-  if (
-    urlMatches &&
-    urlMatches.find(url => {
-      return url.includes('anonymousKey')
-    })
-  ) {
+  if (urlMatches) {
     const url = urlMatches.find(url => {
       return url.includes('anonymousKey')
     })
