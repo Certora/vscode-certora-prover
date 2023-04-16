@@ -3,18 +3,19 @@
  *-------------------------------------------------------------------------------------------- */
 
 export function getProgressUrl(text: string): string | null {
-  if (!text.includes('You can follow up on the status:')) {
-    return null
-  }
-
   const urlRegex = /(https?:\/\/[^\s]+)/g
   const urlMatches = text.match(urlRegex)
 
-  if (urlMatches) {
-    const [url] = urlMatches
-    return url.includes('jobStatus')
-      ? url.replace('jobStatus', 'progress')
-      : null
+  if (
+    urlMatches &&
+    urlMatches.find(url => {
+      return url.includes('anonymousKey')
+    })
+  ) {
+    const url = urlMatches.find(url => {
+      return url.includes('anonymousKey')
+    })
+    return url?.includes('output') ? url.replace('output', 'progress') : null
   }
   return null
 }
