@@ -16,7 +16,7 @@
     stopScript,
     uploadConf,
   } from '../extension-actions'
-  import { expandables, jobLists, verificationResults } from '../store/store'
+  import { expandables, verificationResults } from '../store/store'
   import {
     Assert,
     CallTraceFunction,
@@ -40,8 +40,9 @@
   export let children
   export let isExpanded
 
+  export let resetHide
+
   export let runs: Run[] = []
-  $: runs ? console.log('runs===: ', runs) : console.log('no runs')
   export let namesMap: Map<string, string> = new Map()
   let runsCounter
   $: runs ? (runsCounter = runs.length) : (runsCounter = 0)
@@ -63,7 +64,7 @@
 
   export let level = 0
 
-  export const hide = writable([])
+  // export const hide = writable([])
   export const pos = writable({ x: 0, y: 0 })
 
   export const expandCollapse = writable({
@@ -83,14 +84,14 @@
 
   onMount(() => {
     window.addEventListener('message', listener)
-    if (
-      runs.length &&
-      !$verificationResults.find(vr => {
-        return vr.name === run.name
-      })
-    ) {
-      initResults()
-    }
+    // if (
+    //   runs.length &&
+    //   !$verificationResults.find(vr => {
+    //     return vr.name === '' //todo = ?
+    //   })
+    // ) {
+    //   initResults()
+    // }
   })
 
   const listener = (e: MessageEvent<EventsFromExtension>) => {
@@ -109,20 +110,21 @@
         const pid = e.data.payload.pid
         const vrName = e.data.payload.runName
         const run = runs.find(run => {
-          return run.name === vrName
+          return run.confPath === vrName
         })
         console.log('run?', run, 'runs;', runs)
         const runName = run?.name
-        if (!run || !runName) return
+        const confPath = run?.confPath
+        if (!run || !runName || !confPath) return
         setVerificationReportLink(pid, e.data.payload.verificationReportLink)
         if (e.data.payload.jobStatus === 'FAILED') {
-          setStoppedJobStatus(runName)
+          setStoppedJobStatus(confPath)
           return
         }
         smartMergeVerificationResult(
           $verificationResults,
           e.data.payload,
-          runName,
+          confPath,
         )
         $verificationResults = $verificationResults
 
@@ -130,18 +132,18 @@
 
         const thisRun = e.data.payload
         if (!thisRun.jobEnded) {
-          runs = setStatus(runName, Status.incompleteResults)
+          runs = setStatus(confPath, Status.incompleteResults)
         }
 
         if (thisRun.jobStatus === 'RUNNING' && thisRun.jobEnded) {
-          runs = setStatus(runName, Status.success)
+          runs = setStatus(confPath, Status.success)
         }
 
         if (e.data.payload.jobStatus === 'SUCCEEDED') {
-          if (runName) {
+          if (runName && confPath) {
             removeScript(runName)
             // runs = setStatus(runName, Status.success)
-            setStoppedJobStatus(runName)
+            setStoppedJobStatus(confPath)
           }
         }
         log({
@@ -271,24 +273,6 @@
         }
         break
       }
-      //   case EventTypesFromExtension.DeleteResults: {
-      //     log({
-      //       action: 'Received "delete-results" command',
-      //       source: Sources.ResultsWebview,
-      //       info: e.data.payload,
-      //     })
-      //     const nameToDelete = e.data.payload
-      //     runs = runs.map(run => {
-      //       if (run.name === nameToDelete) {
-      //         run.status = Status.ready
-      //       }
-      //       return run
-      //     })
-      //     $verificationResults = $verificationResults.filter(vr => {
-      //       return vr.name !== nameToDelete
-      //     })
-      //     break
-      //   }
       case EventTypesFromExtension.RunningScriptChanged: {
         log({
           action: 'Received "running-scripts-changed" command',
@@ -296,6 +280,7 @@
           info: e.data.payload,
         })
         // runningScripts = e.data.payload
+
         runs = runs.map(r => {
           runningScripts.forEach(rs => {
             if (r.confPath === rs.confFile) {
@@ -304,10 +289,6 @@
           })
           return r
         })
-        // if there is no running script - run next
-        // if (!e.data.payload.length) {
-        //   runNext()
-        // }
         break
       }
       case EventTypesFromExtension.UploadingFiles: {
@@ -356,12 +337,8 @@
           return r.confPath === nameToDelete
         })
         if (runToDelete !== undefined) {
-          const jobNameMap: JobNameMap = {
-            confPath: nameToDelete,
-            displayName: namesMap.get(getFileName(nameToDelete)),
-          }
           deleteRun(runToDelete)
-          deleteConf(jobNameMap)
+          console.log('run was deleted:', runs, namesMap, runsCounter)
         }
         break
       }
@@ -491,24 +468,28 @@
    * @param run new run. if doest exists - creates a new run object
    */
   function createRun(run?: Run): void {
-    $hide.push(true)
+    // $hide.push(true)
     if (run) {
       if (!run.status) {
         run.status = Status.missingSettings
       }
       runsCounter = runs.push(run)
-      addNewExpendable(namesMap.get(run.name))
+      // addNewExpendable(namesMap.get(run.name))
+      console.log(runs, 'runs from createRun1')
     } else {
       // don't create more than one new run while in rename state
       if (runs.find(r => r.name === '')) return
-      runsCounter = runs.push({
+      const newRun: Run = {
         id: runs.length,
         name: '',
         confPath: '',
         status: Status.missingSettings,
+        showContextMenu: false,
         isExpanded: false,
-      })
-      addNewExpendable('')
+      }
+      runsCounter = runs.push(newRun)
+      console.log(runs, 'runs from createRun')
+      // addNewExpendable('')
     }
   }
 
@@ -554,19 +535,32 @@
     $expandCollapse.var = !$expandCollapse.var
   }
 
-  function resentHide() {
-    $hide = $hide.map(item => {
-      return (item = true)
+  // function resentHide() {
+  //   runs = runs.map(run => {
+  //     run.showContextMenu = false
+  //     return run
+  //   })
+  // }
+
+  function showMenu(e, run) {
+    $pos = { x: e.clientX, y: e.pageY }
+    resetHide()
+    runs = runs.map(singleRun => {
+      if (singleRun === run) {
+        singleRun.showContextMenu = true
+      }
+      return singleRun
     })
   }
 
-  function showMenu(e, index) {
-    $pos = { x: e.clientX, y: e.pageY }
-    resentHide()
-    $hide[index] = false
-  }
-
   function editRun(run: Run): void {
+    console.log(
+      namesMap,
+      'from edit run',
+      namesMap.get(run.name),
+      run.name,
+      run.confPath,
+    )
     const jobNameMap: JobNameMap = {
       confPath: run.confPath,
       displayName: namesMap.get(run.name),
@@ -612,7 +606,6 @@
     if (output && output.runName === name) {
       clearOutput()
     }
-
     runsCounter--
   }
 
@@ -665,16 +658,31 @@
       }
       rename(oldConfNameMap, newConfNameMap)
       namesMap.delete(oldName)
+      runs = runs.filter(run => {
+        return run.name !== oldName
+      })
+      focusedRun = newConfNameMap.confPath
     }
     // rename new run
     else {
-      const JobNameMap: JobNameMap = {
-        confPath: newName,
+      const jobNameMap: JobNameMap = {
+        confPath: `${path + title}/certora/conf/${newName}.conf'`,
         displayName: namesMap.get(newName),
       }
-      openSettings(JobNameMap)
+
+      runs = runs.map(run => {
+        console.log(run, 'wtf run')
+        if (run.name === newName) {
+          run.confPath = `${path + title}/certora/conf/${newName}.conf'`
+        }
+        return run
+      })
+      console.log(runs, 'runs from rename')
+      console.log('look at me im a new name', jobNameMap, namesMap)
+      openSettings(jobNameMap)
+      focusedRun = jobNameMap.confPath
     }
-    focusedRun = newName
+    // focusedRun = newName
   }
 
   /**
@@ -708,6 +716,7 @@
       name: duplicatedName,
       confPath: newPath,
       status: newStatus,
+      showContextMenu: false,
       isExpanded: false,
     }
 
@@ -723,7 +732,7 @@
     duplicate(confNameMapToDuplicate, confNameMapDuplicated, rule)
     createRun(duplicated)
     if (!rule) {
-      focusedRun = duplicatedName
+      focusedRun = newPath
     }
   }
 
@@ -861,12 +870,16 @@
         {
           title: 'Create New Job From Existing File',
           icon: 'new-file',
-          onClick: uploadConf,
+          onClick: () => {
+            uploadConf(path + title)
+          },
         },
         {
           title: 'Create New Job',
           icon: 'diff-added',
-          onClick: createRun,
+          onClick: () => {
+            createRun()
+          },
         },
         {
           title: $expandCollapse.title,
@@ -884,7 +897,7 @@
         {#each Array(runsCounter) as _, index (index)}
           <li
             on:contextmenu|stopPropagation|preventDefault={e => {
-              showMenu(e, index)
+              showMenu(e, runs[index])
             }}
           >
             <NewRun
@@ -892,7 +905,6 @@
               editFunc={() => editRun(runs[index])}
               deleteFunc={() => askToDeleteThis(runs[index])}
               deleteRun={() => deleteRun(runs[index])}
-              {namesMap}
               {renameRun}
               duplicateFunc={duplicateRun}
               runFunc={() => run(runs[index])}
@@ -906,13 +918,13 @@
                 ) !== undefined &&
                   pendingQueueCounter > 0)) &&
                 $verificationResults.find(
-                  vr => runs[index].name === vr.name,
+                  vr => runs[index].confPath === vr.name,
                 ) === undefined}
               isPending={pendingQueue.find(
                 rs => rs.confPath === runs[index].confPath,
               ) !== undefined && pendingQueueCounter > 0}
               expandedState={$verificationResults.find(
-                vr => vr.name === runs[index].name,
+                vr => vr.name === runs[index].confPath,
               ) !== undefined}
               pendingStopFunc={() => {
                 pendingStopFunc(runs[index])
@@ -929,8 +941,9 @@
               inactiveSelected={focusedRun}
               {setStatus}
               vrLink={runs[index].vrLink}
-              hide={$hide[index]}
               pos={$pos}
+              bind:hide={runs[index].showContextMenu}
+              bind:namesMap
               bind:runName={runs[index].name}
               bind:isExpanded={runs[index].isExpanded}
             />
@@ -939,11 +952,12 @@
       </ul>
       {#each children as child, index}
         <svelte:self
-          path={child.path}
-          title={child.title}
-          runs={child.runs}
-          namesMap={child.namesMap}
-          children={child.children}
+          {resetHide}
+          bind:path={child.path}
+          bind:title={child.title}
+          bind:runs={child.runs}
+          bind:namesMap={child.namesMap}
+          bind:children={child.children}
           level={level + 10}
           bind:activateExpandCollapse={child.activateExpandCollapse}
           bind:isExpanded={child.isExpanded}

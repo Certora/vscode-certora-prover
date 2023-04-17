@@ -185,6 +185,7 @@ export enum EventTypesFromExtension {
   UploadingFiles = 'run-next',
   ScriptStopped = 'script-stopped',
   InitialJobs = 'initial-jobs',
+  newJob = 'new-job',
   DeleteJob = 'delete-job',
   // DeleteResults = 'delete-results',
   RunJob = 'run-job',
@@ -252,6 +253,10 @@ export type EventsFromExtension =
       payload: ConfToCreate[]
     }
   | {
+      type: EventTypesFromExtension.newJob
+      payload: ConfToCreate
+    }
+  | {
       type: EventTypesFromExtension.DeleteJob
       payload: string
     }
@@ -281,6 +286,7 @@ export type Run = {
   confPath: string
   status: Status
   isExpanded: boolean
+  showContextMenu: boolean
   vrLink?: string
 }
 

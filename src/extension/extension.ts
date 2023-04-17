@@ -31,16 +31,16 @@ export function activate(context: vscode.ExtensionContext): void {
     // if (!path) return
     const confFileDefault: ConfFile = getDefaultSettings()
     try {
-      const basePath = vscode.workspace.workspaceFolders?.[0]
-      if (!basePath) return
+      // const basePath = vscode.workspace.workspaceFolders?.[0]
+      // if (!basePath) return
       const encoder = new TextEncoder()
       const content = encoder.encode(JSON.stringify(confFileDefault))
-      const path = vscode.Uri.joinPath(
-        basePath.uri,
-        CONF_DIRECTORY_NAME,
-        getFileName(name.confPath) + '.conf',
-      )
-      name.confPath = path.path
+      // const fileArr = name.confPath.split('/')
+      // const fileName = fileArr.pop()
+      // const pathWithoutCertoraDir = fileArr.join('/')
+      const path = vscode.Uri.parse(name.confPath)
+      // name.confPath = path.path
+      console.log('path from show settings', path)
       await vscode.workspace.fs.writeFile(path, content)
     } catch (e) {
       console.log('[INNER ERROR - CREATE NEW CONF]')
@@ -525,11 +525,26 @@ export function activate(context: vscode.ExtensionContext): void {
       const awaitedList = await Promise.all(fileObjects)
       sendFilesToCreateJobs(awaitedList)
       getLastResults(awaitedList)
+      const pathsToWatch: string[] = []
+      awaitedList.forEach(al => {
+        console.log(
+          'path to watch',
+          al.confPath.split(CONF_DIRECTORY_NAME)[0] + CONF_DIRECTORY_NAME,
+        )
+        const confDirectoryToWatch = vscode.Uri.parse(
+          al.confPath.split(CONF_DIRECTORY_NAME)[0] + CONF_DIRECTORY_NAME,
+        )
+        if (!pathsToWatch.includes(confDirectoryToWatch.path)) {
+          createConfWatcher(confDirectoryToWatch)
+        }
+        pathsToWatch.push(confDirectoryToWatch.path)
+      })
       //   })
       // }
     }
     // users can copy conf files to the conf folder and it will create a job!
     // they can also copy files to the script directory and create conf files from them!
+
     if (path) {
       const confDirectoryToWatch = vscode.Uri.joinPath(
         path.uri,
@@ -546,7 +561,10 @@ export function activate(context: vscode.ExtensionContext): void {
       )
       fileSystemWatcher.onDidCreate(async file => {
         const fileObj: ConfToCreate = await createFileObject(file)
-        sendFilesToCreateJobs([fileObj])
+        resultsWebviewProvider.postMessage<ConfToCreate>({
+          type: 'new-job',
+          payload: fileObj,
+        })
       })
       // vscode asks to delete a conf file before is it deleted to avoid mistakes,
       // so I think deleting the job with it is a good idea
@@ -655,7 +673,7 @@ export function activate(context: vscode.ExtensionContext): void {
                 decoder.decode(await vscode.workspace.fs.readFile(pathUri)),
               )
               const job: Job = jsonContent.data
-              job.runName = name
+              job.runName = file.confPath
               if (job) {
                 resultsWebviewProvider.postMessage<Job>({
                   type: 'receive-new-job-result',
@@ -672,15 +690,18 @@ export function activate(context: vscode.ExtensionContext): void {
   /**
    * browse for conf files, and than copy these files into [CONF_DIRECTORY]
    */
-  async function uploadConf(): Promise<void> {
-    const path = vscode.workspace.workspaceFolders?.[0]
-    if (!path) return
+  async function uploadConf(path: string): Promise<void> {
+    // const path = vscode.workspace.workspaceFolders?.[0]
+    // if (!path) return
+    if (!path || path === '') {
+      const path = vscode.workspace.workspaceFolders?.[0].uri.path
+    }
     // cannot select many because .sh files handling is an asynchronous build
     const options: vscode.OpenDialogOptions = {
       canSelectMany: false,
       canSelectFolders: false,
       openLabel: 'Open',
-      defaultUri: path.uri,
+      defaultUri: vscode.Uri.parse(path),
       filters: {
         'File type': ['conf', 'sh'],
       },
@@ -693,7 +714,7 @@ export function activate(context: vscode.ExtensionContext): void {
         // let target
         if (fileName?.endsWith('.conf')) {
           const target = vscode.Uri.joinPath(
-            path.uri,
+            vscode.Uri.parse(path),
             CONF_DIRECTORY_NAME,
             fileName,
           )

@@ -48,13 +48,14 @@ export function clearResults(name: string) {
   })
 }
 
-export function uploadConf(): void {
+export function uploadConf(path: string): void {
   log({
     action: 'Send "upload-conf" command',
     source: Sources.ResultsWebview,
   })
   vscode.postMessage({
     command: Commands.UploadConf,
+    payload: path,
   })
 }
 

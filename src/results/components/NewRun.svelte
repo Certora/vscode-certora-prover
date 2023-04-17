@@ -23,10 +23,6 @@
 
   export let pathToConf: string
 
-  $: pathToConf
-    ? console.log('path to conf', pathToConf)
-    : console.log('no path to conf')
-
   export let editFunc: () => void
   export let deleteFunc: () => void
   export let deleteRun: () => void
@@ -63,7 +59,7 @@
 
   export let vrLink = ''
 
-  export let hide = true
+  export let hide = false
 
   export let pos
 
@@ -420,7 +416,7 @@
           fixedActions={createFixedActions()}
           showExpendIcon={expandedState}
           {status}
-          inactiveSelected={runName === inactiveSelected}
+          inactiveSelected={pathToConf === inactiveSelected}
           runFunc={status === Status.ready ||
           status === Status.success ||
           status === Status.unableToRun
@@ -429,7 +425,7 @@
           bind:isExpanded
         >
           {#each $verificationResults as vr, index (index)}
-            {#if vr.name === runName}
+            {#if vr.name === pathToConf}
               <li
                 class="tree"
                 on:contextmenu|stopPropagation|preventDefault={() => null}

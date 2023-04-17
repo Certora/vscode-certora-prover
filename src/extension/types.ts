@@ -286,6 +286,7 @@ export type EventFromResultsWebview =
     }
   | {
       command: CommandFromResultsWebview.UploadConf
+      payload: string
     }
   | {
       command: CommandFromResultsWebview.Rename

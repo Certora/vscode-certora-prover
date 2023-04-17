@@ -2,13 +2,13 @@
   // import { writable } from 'svelte/store'
   import type { Action } from '../types'
 
-  export let hide = true
+  export let hide = false
   export let actions: Action[] = []
   export let pos = { x: 0, y: 0 }
 </script>
 
 <div
-  class={'dropdown-content ' + (hide ? 'hide' : '')}
+  class={'dropdown-content ' + (hide ? '' : 'hide')}
   style="top: {pos.y}px; left: {pos.x}px;"
 >
   <div class="gap" />
