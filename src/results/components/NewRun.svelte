@@ -33,6 +33,7 @@
   export let namesMap: Map<string, string>
   export let runName: string = ''
   const renameJob = writable(runName === '')
+  export let isExpanded
   // this creates the new conf file
   export let renameRun: (oldName: string, newName: string) => void
   export let duplicateFunc: (
@@ -425,6 +426,7 @@
           status === Status.unableToRun
             ? runFunc
             : null}
+          bind:isExpanded
         >
           {#each $verificationResults as vr, index (index)}
             {#if vr.name === runName}

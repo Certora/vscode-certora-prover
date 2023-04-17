@@ -280,6 +280,7 @@ export type Run = {
   name: string
   confPath: string
   status: Status
+  isExpanded: boolean
   vrLink?: string
 }
 
@@ -288,5 +289,7 @@ export type jobList = {
   namesMap: Map<string, string>
   path: string
   title: string
+  isExpanded: boolean
   children: jobList[]
+  activateExpandCollapse: boolean
 }

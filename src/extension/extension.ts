@@ -499,7 +499,7 @@ export function activate(context: vscode.ExtensionContext): void {
       // wip: get the paths to the conf files for the dir structure
       const confFilesDirs = await vscode.workspace.findFiles(
         '**/*certora/conf/**',
-        '',
+        '**/.certora_internal/**',
       )
 
       const fileObjects = confFilesDirs.map(async file => {

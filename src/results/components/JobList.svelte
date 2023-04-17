@@ -38,6 +38,7 @@
   export let title
   export let focusedRun
   export let children
+  export let isExpanded
 
   export let runs: Run[] = []
   $: runs ? console.log('runs===: ', runs) : console.log('no runs')
@@ -71,6 +72,10 @@
     var: true,
     hasResults: false,
   })
+
+  export let activateExpandCollapse
+
+  $: activateExpandCollapse ? expandCollapseAll() : null
 
   $: $verificationResults.length
     ? ($expandCollapse.hasResults = true)
@@ -501,6 +506,7 @@
         name: '',
         confPath: '',
         status: Status.missingSettings,
+        isExpanded: false,
       })
       addNewExpendable('')
     }
@@ -521,22 +527,31 @@
    * operates the expand / collapse functionality
    */
   function expandCollapseAll() {
-    // if ($expandCollapse.hasResults) {
-    $expandables = $expandables.map(element => {
-      if (element.title === title) {
-        //   element.isExpanded = $expandCollapse.var
-        // }
-        element.tree = element.tree.map(treeItem => {
-          treeItem.isExpanded = $expandCollapse.var
-          return treeItem
-        })
-      }
-      return element
-    })
+    console.log('expandCollapseAll from', title)
+    activateExpandCollapse = false
+    if (runs.length) {
+      runs = runs.map(run => {
+        if (!run.isExpanded && $expandCollapse.var) run.isExpanded = true
+        if (run.isExpanded && !$expandCollapse.var) run.isExpanded = false
+        return run
+      })
+    }
+    if (children.length) {
+      children = children.map(child => {
+        if (!child.isExpanded && $expandCollapse.var) {
+          child.isExpanded = true
+          child.activateExpandCollapse = true
+        }
+        if (child.isExpanded && !$expandCollapse.var) {
+          child.isExpanded = false
+          child.activateExpandCollapse = true
+        }
+        return child
+      })
+    }
     $expandCollapse.title = $expandCollapse.var ? 'Collapse All' : 'Expand All'
     $expandCollapse.icon = $expandCollapse.var ? 'collapse-all' : 'expand-all'
     $expandCollapse.var = !$expandCollapse.var
-    // }
   }
 
   function resentHide() {
@@ -693,6 +708,7 @@
       name: duplicatedName,
       confPath: newPath,
       status: newStatus,
+      isExpanded: false,
     }
 
     const confNameMapDuplicated: JobNameMap = {
@@ -833,7 +849,37 @@
 
 <div>
   <div style="margin-left:{level}px;">
-    <Pane {title} fixedActions={createActions()}>
+    <Pane
+      {title}
+      fixedActions={[
+        {
+          title: 'Run All',
+          icon: 'run-all',
+          onClick: runAll,
+          disabled: runs.length === 0,
+        },
+        {
+          title: 'Create New Job From Existing File',
+          icon: 'new-file',
+          onClick: uploadConf,
+        },
+        {
+          title: 'Create New Job',
+          icon: 'diff-added',
+          onClick: createRun,
+        },
+        {
+          title: $expandCollapse.title,
+          icon: $expandCollapse.icon,
+          onClick: expandCollapseAll,
+          disabled:
+            $verificationResults.find(vr => {
+              return vr.name === title
+            }) !== undefined,
+        },
+      ]}
+      bind:isExpanded
+    >
       <ul class="running-scripts">
         {#each Array(runsCounter) as _, index (index)}
           <li
@@ -886,6 +932,7 @@
               hide={$hide[index]}
               pos={$pos}
               bind:runName={runs[index].name}
+              bind:isExpanded={runs[index].isExpanded}
             />
           </li>
         {/each}
@@ -898,6 +945,8 @@
           namesMap={child.namesMap}
           children={child.children}
           level={level + 10}
+          bind:activateExpandCollapse={child.activateExpandCollapse}
+          bind:isExpanded={child.isExpanded}
           bind:focusedRun
           bind:output
           bind:runningScripts
