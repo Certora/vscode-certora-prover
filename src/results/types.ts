@@ -187,10 +187,10 @@ export enum EventTypesFromExtension {
   InitialJobs = 'initial-jobs',
   newJob = 'new-job',
   DeleteJob = 'delete-job',
-  // DeleteResults = 'delete-results',
   RunJob = 'run-job',
   SettingsError = 'settings-error',
   clearResults = 'clear-results',
+  EmptyWorkspace = 'empty-workspace',
 }
 
 export type EventsFromExtension =
@@ -218,6 +218,10 @@ export type EventsFromExtension =
     }
   | {
       type: EventTypesFromExtension.ParseError
+      payload: string
+    }
+  | {
+      type: EventTypesFromExtension.EmptyWorkspace
       payload: string
     }
   | {

@@ -27,7 +27,7 @@ export function activate(context: vscode.ExtensionContext): void {
    * @returns null
    */
   async function showSettings(name: JobNameMap) {
-    // const path = vscode.workspace.workspaceFolders?.[0]
+    // const path = vscode.workspace.workspaceFolders?.[0]?.uri.path
     // if (!path) return
     const confFileDefault: ConfFile = getDefaultSettings()
     try {
@@ -492,8 +492,13 @@ export function activate(context: vscode.ExtensionContext): void {
    * all conf files in the conf folder will become jobs!
    */
   async function createInitialJobs(): Promise<void> {
+    // todo: do we rather look for any certora/conf dir and open empty job lists?
     const path = vscode.workspace.workspaceFolders?.[0]
     if (path) {
+      resultsWebviewProvider.postMessage<string>({
+        type: 'empty-workspace',
+        payload: path.uri.path,
+      })
       // watchForBuilds()
 
       // wip: get the paths to the conf files for the dir structure
@@ -502,27 +507,15 @@ export function activate(context: vscode.ExtensionContext): void {
         '**/.certora_internal/**',
       )
 
+      console.log(confFilesDirs, 'from find files')
+
       const fileObjects = confFilesDirs.map(async file => {
         return await createFileObject(file)
       })
 
-      // conf files:
-      // const confDirectoryPath = path.uri.path + '/' + CONF_DIRECTORY
-      // const confDirectoryUri = vscode.Uri.parse(confDirectoryPath)
-      // const checked = await checkDir(confDirectoryUri)
-      // if (checked) {
-      //   const confFiles = vscode.workspace.fs.readDirectory(confDirectoryUri)
-      //   confFiles.then(async f => {
-      //     const confList = f.map(async file => {
-      //       return await createFileObject(
-      //         vscode.Uri.parse(confDirectoryPath + file[0]),
-      //       )
-      //     })
-      //     const awaitedList = (await Promise.all(confList)).filter(file => {
-      //       return file.confPath.endsWith('.conf')
-      //     })
-      // console.log(awaitedList, '====')
       const awaitedList = await Promise.all(fileObjects)
+      console.log(awaitedList, 'awaited list')
+      if (!awaitedList || !awaitedList.length) return
       sendFilesToCreateJobs(awaitedList)
       getLastResults(awaitedList)
       const pathsToWatch: string[] = []
@@ -539,8 +532,6 @@ export function activate(context: vscode.ExtensionContext): void {
         }
         pathsToWatch.push(confDirectoryToWatch.path)
       })
-      //   })
-      // }
     }
     // users can copy conf files to the conf folder and it will create a job!
     // they can also copy files to the script directory and create conf files from them!
@@ -580,6 +571,7 @@ export function activate(context: vscode.ExtensionContext): void {
     } catch (e) {
       console.log('ERROR:', e, '[internal error from  the file system watcher]')
     }
+    // TODO: save listeners in an object to delete them when the job list gets deleted
   }
 
   /**

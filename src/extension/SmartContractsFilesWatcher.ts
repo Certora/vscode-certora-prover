@@ -115,7 +115,7 @@ export class SmartContractsFilesWatcher {
     return {
       value: fullPath,
       label,
-      path: basePath ? basePath.path : path,
+      path: basePath ? basePath.path + '/' + path : path,
       type,
     }
   }

@@ -16,7 +16,7 @@
     stopScript,
     uploadConf,
   } from '../extension-actions'
-  import { expandables, verificationResults } from '../store/store'
+  import { expandables, jobLists, verificationResults } from '../store/store'
   import {
     Assert,
     CallTraceFunction,
@@ -41,6 +41,7 @@
   export let isExpanded
 
   export let resetHide
+  export let deleteJobList
 
   export let runs: Run[] = []
   export let namesMap: Map<string, string> = new Map()
@@ -84,6 +85,7 @@
 
   onMount(() => {
     window.addEventListener('message', listener)
+    console.log('job list updated', title)
     // if (
     //   runs.length &&
     //   !$verificationResults.find(vr => {
@@ -188,16 +190,29 @@
           info: e.data.payload,
         })
         // status is changed to 'ready' when job is allowed to run
-        const runName = e.data.payload
+        const runPath = e.data.payload
+        const curRun = runs.find(run => {
+          return run.confPath === runPath
+        })
+        console.log(curRun, 'cur run from allow run', runPath)
+        // don't change status of running job
+        if (
+          !curRun ||
+          (curRun &&
+            (curRun.status === Status.pending ||
+              curRun.status === Status.running))
+        )
+          return
         let newStatus = Status.ready
         if (
           $verificationResults.find(vr => {
-            return vr.name === getFileName(runName)
-          })
+            return vr.name === runPath
+          }) !== undefined
         ) {
+          console.log('found results!')
           newStatus = Status.success
         }
-        runs = setStatus(runName, newStatus)
+        runs = setStatus(runPath, newStatus)
         break
       }
       case EventTypesFromExtension.BlockRun: {
@@ -207,6 +222,16 @@
           info: e.data.payload,
         })
         // status is changed to 'finish setup' when job isn't allowed to run
+        // don't change status of running job
+        const runName = e.data.payload
+        const curRun = runs.find(run => {
+          return run.confPath === runName
+        })
+        if (
+          curRun &&
+          (curRun.status === Status.pending || curRun.status === Status.running)
+        )
+          return
         runs = setStatus(e.data.payload, Status.missingSettings)
         break
       }
@@ -217,6 +242,15 @@
           info: e.data.payload,
         })
         // status is changed to 'finish setup' when job isn't allowed to run
+        const runName = e.data.payload
+        const curRun = runs.find(run => {
+          return run.confPath === runName
+        })
+        if (
+          curRun &&
+          (curRun.status === Status.pending || curRun.status === Status.running)
+        )
+          return
         runs = setStatus(e.data.payload, Status.settingsError)
         break
       }
@@ -280,7 +314,7 @@
           info: e.data.payload,
         })
         // runningScripts = e.data.payload
-
+        if (!e.data.payload || !e.data.payload.length) return
         runs = runs.map(r => {
           runningScripts.forEach(rs => {
             if (r.confPath === rs.confFile) {
@@ -310,7 +344,7 @@
             confToEnable.displayName = namesMap.get(
               getFileName(confToEnable.confPath),
             )
-            enableEdit(confToEnable)
+            if (confToEnable.displayName) enableEdit(confToEnable)
           }
           return rs
         })
@@ -429,7 +463,11 @@
     runs.forEach(run => {
       if (
         (run.confPath === runConfPath || run.name === runConfPath) &&
-        !(run.status === Status.success && value === Status.ready)
+        !(
+          run.status === Status.success &&
+          value !== Status.pending &&
+          value !== Status.running
+        )
       ) {
         run.status = value
       }
@@ -488,7 +526,6 @@
         isExpanded: false,
       }
       runsCounter = runs.push(newRun)
-      console.log(runs, 'runs from createRun')
       // addNewExpendable('')
     }
   }
@@ -535,13 +572,6 @@
     $expandCollapse.var = !$expandCollapse.var
   }
 
-  // function resentHide() {
-  //   runs = runs.map(run => {
-  //     run.showContextMenu = false
-  //     return run
-  //   })
-  // }
-
   function showMenu(e, run) {
     $pos = { x: e.clientX, y: e.pageY }
     resetHide()
@@ -585,7 +615,7 @@
    * @param runToDelete run to delete
    */
   function deleteRun(runToDelete: Run): void {
-    const name = runToDelete.name
+    const name = runToDelete.confPath
 
     //delete results
     $verificationResults = $verificationResults.filter(vr => {
@@ -602,11 +632,15 @@
       return run !== runToDelete
     })
     namesMap.delete(name)
-
-    if (output && output.runName === name) {
+    console.log(output, output.runName, '========')
+    if (output && outputRunName === name) {
       clearOutput()
     }
     runsCounter--
+    if (!runs.length && !children.length) {
+      deleteJobList(title, path)
+    }
+    console.log('current situation', $jobLists)
   }
 
   function clearOutput() {
@@ -620,69 +654,62 @@
    * @param newName new name for the run and conf
    */
   function renameRun(oldName: string, newName: string): void {
+    console.log(oldName, newName, namesMap)
     // rename existing run
     if (oldName) {
       // the renamed run should have the same verification results, if they exist
-      let oldResult = $verificationResults.find(vr => vr.name === oldName)
-      if (oldResult) {
-        let newResult: Verification = {
-          name: newName,
-          contract: oldResult.contract,
-          spec: oldResult.spec,
-          jobs: oldResult.jobs,
-        }
-        $verificationResults = $verificationResults.filter(vr => {
-          return vr.name !== oldName
-        })
-        $verificationResults.push(newResult)
-      }
-
       const curRun = runs.find(singleRun => {
         return singleRun.name === newName
       })
 
-      // new path creation
-      const newPathArr = curRun.confPath.split('/')
-      newPathArr[newPathArr.length - 1] = newPathArr[
-        newPathArr.length - 1
-      ].replace(oldName, newName)
-      const newPath = newPathArr.join('/')
+      const oldPath = curRun.confPath.replace(
+        newName + '.conf',
+        oldName + '.conf',
+      )
+      console.log('======old path', oldPath)
+
+      $verificationResults = $verificationResults.map(vr => {
+        console.log('name from vr name annoyhign', vr.name)
+        if (vr.name === oldPath) {
+          vr.name = curRun.confPath
+        }
+        return vr
+      })
 
       const oldConfNameMap: JobNameMap = {
-        confPath: curRun.confPath,
+        confPath: oldPath,
         displayName: namesMap.get(oldName),
       }
       const newConfNameMap: JobNameMap = {
-        confPath: newPath,
+        confPath: curRun.confPath,
         displayName: namesMap.get(newName),
       }
-      rename(oldConfNameMap, newConfNameMap)
+
       namesMap.delete(oldName)
       runs = runs.filter(run => {
         return run.name !== oldName
       })
+
+      rename(oldConfNameMap, newConfNameMap)
       focusedRun = newConfNameMap.confPath
     }
     // rename new run
     else {
+      const titleToUse = title === 'JOB LIST' ? '' : title
+      const newPath = `${path + titleToUse}/certora/conf/${newName}.conf`
       const jobNameMap: JobNameMap = {
-        confPath: `${path + title}/certora/conf/${newName}.conf'`,
+        confPath: newPath,
         displayName: namesMap.get(newName),
       }
-
       runs = runs.map(run => {
-        console.log(run, 'wtf run')
         if (run.name === newName) {
-          run.confPath = `${path + title}/certora/conf/${newName}.conf'`
+          run.confPath = newPath
         }
         return run
       })
-      console.log(runs, 'runs from rename')
-      console.log('look at me im a new name', jobNameMap, namesMap)
       openSettings(jobNameMap)
-      focusedRun = jobNameMap.confPath
+      focusedRun = newPath
     }
-    // focusedRun = newName
   }
 
   /**
@@ -788,14 +815,15 @@
       return vr.name !== getFileName(JobNameMap.confPath)
     })
 
-    if (output && output.runName === run.name) {
-      clearOutput()
-    }
+    // if (output && output.runName === run.name) {
+    //   clearOutput()
+    // }
 
     const shouldRunNext = runningScripts.every(rs => {
       return rs.uploaded === true
     })
     //if there are no running scripts => runNext
+    console.log('run next?', runningScripts.length, shouldRunNext, index)
     if ((!runningScripts.length || shouldRunNext) && index === 0) {
       runNext()
     }
@@ -811,6 +839,7 @@
       $verificationResults = $verificationResults.filter(vr => {
         return vr.name !== getFileName(curRun.confPath)
       })
+      runs = setStatus(curRun.confPath, Status.running)
       runScript(curRun)
     }
   }
@@ -820,39 +849,6 @@
    */
   function getFileName(confFile: string): string {
     return confFile.split('/').pop().replace('.conf', '')
-  }
-
-  function createActions() {
-    if (runsCounter) {
-      return [
-        {
-          title: 'Run All',
-          icon: 'run-all',
-          onClick: runAll,
-          disabled: runs.length === 0,
-        },
-        {
-          title: 'Create New Job From Existing File',
-          icon: 'new-file',
-          onClick: uploadConf,
-        },
-        {
-          title: 'Create New Job',
-          icon: 'diff-added',
-          onClick: createRun,
-        },
-        {
-          title: $expandCollapse.title,
-          icon: $expandCollapse.icon,
-          onClick: expandCollapseAll,
-          disabled:
-            $verificationResults.find(vr => {
-              return vr.name === title
-            }) !== undefined,
-        },
-      ]
-    }
-    return []
   }
 </script>
 
@@ -901,31 +897,13 @@
             }}
           >
             <NewRun
-              pathToConf={runs[index].confPath}
               editFunc={() => editRun(runs[index])}
               deleteFunc={() => askToDeleteThis(runs[index])}
               deleteRun={() => deleteRun(runs[index])}
               {renameRun}
               duplicateFunc={duplicateRun}
               runFunc={() => run(runs[index])}
-              status={runs[index].status}
               {newFetchOutput}
-              nowRunning={(runningScripts.find(
-                rs => rs.confFile === runs[index].confPath,
-              ) !== undefined ||
-                (pendingQueue.find(
-                  rs => rs.confPath === runs[index].confPath,
-                ) !== undefined &&
-                  pendingQueueCounter > 0)) &&
-                $verificationResults.find(
-                  vr => runs[index].confPath === vr.name,
-                ) === undefined}
-              isPending={pendingQueue.find(
-                rs => rs.confPath === runs[index].confPath,
-              ) !== undefined && pendingQueueCounter > 0}
-              expandedState={$verificationResults.find(
-                vr => vr.name === runs[index].confPath,
-              ) !== undefined}
               pendingStopFunc={() => {
                 pendingStopFunc(runs[index])
               }}
@@ -939,34 +917,43 @@
                 stopScript(runs[index].id, modal)
               }}
               inactiveSelected={focusedRun}
-              {setStatus}
               vrLink={runs[index].vrLink}
               pos={$pos}
+              {resetHide}
+              bind:status={runs[index].status}
               bind:hide={runs[index].showContextMenu}
               bind:namesMap
               bind:runName={runs[index].name}
+              bind:pathToConf={runs[index].confPath}
               bind:isExpanded={runs[index].isExpanded}
             />
           </li>
         {/each}
       </ul>
-      {#each children as child, index}
-        <svelte:self
-          {resetHide}
-          bind:path={child.path}
-          bind:title={child.title}
-          bind:runs={child.runs}
-          bind:namesMap={child.namesMap}
-          bind:children={child.children}
-          level={level + 10}
-          bind:activateExpandCollapse={child.activateExpandCollapse}
-          bind:isExpanded={child.isExpanded}
-          bind:focusedRun
-          bind:output
-          bind:runningScripts
-          bind:pendingQueue
-        />
-      {/each}
+      <div
+        on:contextmenu|stopPropagation|preventDefault={() => {
+          resetHide()
+        }}
+      >
+        {#each children as child, index}
+          <svelte:self
+            {resetHide}
+            {deleteJobList}
+            bind:path={child.path}
+            bind:title={child.title}
+            bind:runs={child.runs}
+            bind:namesMap={child.namesMap}
+            bind:children={child.children}
+            level={level + 10}
+            bind:output
+            bind:activateExpandCollapse={child.activateExpandCollapse}
+            bind:isExpanded={child.isExpanded}
+            bind:focusedRun
+            bind:runningScripts
+            bind:pendingQueue
+          />
+        {/each}
+      </div>
     </Pane>
   </div>
 </div>

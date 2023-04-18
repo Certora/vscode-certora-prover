@@ -43,19 +43,19 @@
     vr: Verification,
   ) => void
 
-  export let expandedState = false
-  export let nowRunning = false
+  export let status: Status
 
-  export let isPending = false
+  let expandedState = false
+  $: status === Status.incompleteResults || status === Status.success
+    ? (expandedState = true)
+    : (expandedState = false)
 
   export let pendingStopFunc: () => void
   export let runningStopFunc: () => void
 
+  export let resetHide: () => void
+
   export let inactiveSelected: string = ''
-
-  export let setStatus: (name: string, status: Status) => void
-
-  export let status: Status
 
   export let vrLink = ''
 
@@ -137,7 +137,7 @@
   }
 
   function renameDuplicate(name: string, counter: number): string {
-    return name + ' (' + counter.toString() + ')'
+    return `${name} ${counter.toString()}`
   }
 
   function spacesToUnderscores(name: string): string {
@@ -153,8 +153,13 @@
     if (!e.currentTarget.value) {
       return
     }
+    const oldName = runName
     runName = e.currentTarget.value
     titleHandle()
+    pathToConf = pathToConf.replace(
+      spacesToUnderscores(oldName) + '.conf',
+      spacesToUnderscores(runName) + '.conf',
+    )
     // in rename mode we rename
     if (e.currentTarget.value) {
       renameRun(beforeRename, spacesToUnderscores(runName))
@@ -167,19 +172,6 @@
   function setRename(): void {
     $renameJob = true
     beforeRename = runName
-  }
-
-  /**
-   * returns the status for a run that was just ran
-   */
-  function getRunStatus(): Status {
-    if (isPending) {
-      statusChange(Status.pending)
-    } else if (nowRunning) {
-      console.log('now running!')
-      statusChange(Status.running)
-    }
-    return status
   }
 
   /**
@@ -281,7 +273,7 @@
     }
     if (
       $verificationResults.find(vr => {
-        return vr.name === runName
+        return vr.name === pathToConf
       }) !== undefined
     ) {
       actions.push({
@@ -296,28 +288,19 @@
   }
 
   /**
-   * change run status
-   * @param newStatus status to change to
-   */
-  function statusChange(newStatus: Status): void {
-    status = newStatus
-    setStatus(runName, newStatus)
-  }
-
-  /**
    * stops a pending run
    */
   function pendingRunStop(): void {
-    statusChange(Status.ready)
+    status = Status.ready
     pendingStopFunc()
-    isPending = false
+    // isPending = false
   }
 
   /**
    * creates 'stop' action according to run status
    */
   function createActionsForRunningScript(): Action[] {
-    if (isPending) {
+    if (status === Status.pending) {
       return [
         {
           title: 'Edit',
@@ -331,7 +314,7 @@
         },
       ]
     }
-    if (nowRunning) {
+    if (status === Status.running) {
       return [
         {
           title: 'Edit',
@@ -407,8 +390,8 @@
         on:change={onChange}
       />
     </div>
-  {:else if !nowRunning}
-    {#key [status, inactiveSelected]}
+  {:else if !(status === Status.running || status === Status.pending)}
+    {#key [inactiveSelected]}
       <div class="results" on:click={onClick}>
         <Pane
           title={namesMap.get(runName)}
@@ -428,7 +411,9 @@
             {#if vr.name === pathToConf}
               <li
                 class="tree"
-                on:contextmenu|stopPropagation|preventDefault={() => null}
+                on:contextmenu|stopPropagation|preventDefault={() => {
+                  resetHide()
+                }}
               >
                 <Tree
                   runDisplayName={namesMap.get(runName)}
@@ -450,12 +435,14 @@
     {#key [vrLink]}
       <div
         class="running"
-        on:contextmenu|stopPropagation|preventDefault={() => null}
+        on:contextmenu|stopPropagation|preventDefault={() => {
+          resetHide()
+        }}
       >
         <Pane
           title={namesMap.get(runName)}
           actions={createActionsForRunningScript()}
-          status={getRunStatus()}
+          {status}
           showExpendIcon={false}
           fixedActions={createFixedActions()}
         />

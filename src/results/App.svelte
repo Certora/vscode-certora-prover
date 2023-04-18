@@ -50,13 +50,12 @@
     verificationResults,
   } from './store/store'
   import JobList from './components/JobList.svelte'
+  import ResultsOutput from './components/ResultsOutput.svelte'
 
-  // export const hide = writable([])
-  export const pos = writable({ x: 0, y: 0 })
   export const focusedRun = writable('')
 
   let output: Output
-  let outputRunName: string
+  // let outputRunName: string
   let selectedCalltraceFunction: CallTraceFunction
 
   let runningScripts: { pid: number; confFile: string; uploaded: boolean }[] =
@@ -64,14 +63,16 @@
   let pendingQueue: JobNameMap[] = []
   let pendingQueueCounter = 0
 
-  function selectCalltraceFunction(e: CustomEvent<CallTraceFunction>) {
-    selectedCalltraceFunction = e.detail
-  }
+  let workspaceDirPath
 
-  function clearOutput() {
-    if (output) output = undefined
-    if (selectedCalltraceFunction) selectedCalltraceFunction = undefined
-  }
+  // function selectCalltraceFunction(e: CustomEvent<CallTraceFunction>) {
+  //   selectedCalltraceFunction = e.detail
+  // }
+
+  // function clearOutput() {
+  //   if (output) output = undefined
+  //   if (selectedCalltraceFunction) selectedCalltraceFunction = undefined
+  // }
 
   const listener = (e: MessageEvent<EventsFromExtension>) => {
     switch (e.data.type) {
@@ -82,6 +83,15 @@
           info: e.data.payload,
         })
         runNext()
+        break
+      }
+      case EventTypesFromExtension.EmptyWorkspace: {
+        log({
+          action: 'Received "empty-workspace" command',
+          source: Sources.ResultsWebview,
+          info: e.data.payload,
+        })
+        workspaceDirPath = e.data.payload
         break
       }
       case EventTypesFromExtension.RunningScriptChanged: {
@@ -110,22 +120,22 @@
             (e.data.payload.variables && e.data.payload.variables.length))
         ) {
           output = e.data.payload
-          output.runName = outputRunName
+          // output.runName = outputRunName
         }
         break
       }
-      case EventTypesFromExtension.ClearAllJobs: {
-        log({
-          action: 'Received "clear-all-jobs" command',
-          source: Sources.ResultsWebview,
-          info: {
-            current$verificationResults: $verificationResults,
-          },
-        })
-        if ($verificationResults.length) $verificationResults = []
-        clearOutput()
-        break
-      }
+      // case EventTypesFromExtension.ClearAllJobs: {
+      //   log({
+      //     action: 'Received "clear-all-jobs" command',
+      //     source: Sources.ResultsWebview,
+      //     info: {
+      //       current$verificationResults: $verificationResults,
+      //     },
+      //   })
+      //   if ($verificationResults.length) $verificationResults = []
+      //   clearOutput()
+      //   break
+      // }
       case EventTypesFromExtension.FocusChanged: {
         log({
           action: 'Received "focus-changed" command',
@@ -169,8 +179,14 @@
             curJobList = jl
           }
         })
-        console.log(curJobList, curPath, 'coming from new-job')
 
+        if (
+          curJobList.runs.find(run => {
+            return run.confPath === newJobToCreate.confPath
+          })
+        )
+          return
+        console.log(curJobList, curPath, 'coming from new-job')
         let curStatus: Status = newJobToCreate.allowRun
           ? Status.ready
           : Status.missingSettings
@@ -319,8 +335,26 @@
    * adds a new run to runs array and increase the counter
    * @param run new run. if doest exists - creates a new run object
    */
-  function createRun(run?: Run): void {
+  function createRun(): void {
     // todo: create new job list with a new run from scratch
+    const newRun: Run = {
+      id: 0,
+      name: '',
+      confPath: '',
+      status: Status.missingSettings,
+      showContextMenu: false,
+      isExpanded: false,
+    }
+    const singleJobList: jobList = {
+      runs: [newRun],
+      title: 'JOB LIST',
+      path: workspaceDirPath,
+      namesMap: new Map(),
+      children: [],
+      isExpanded: true,
+      activateExpandCollapse: false,
+    }
+    $jobLists.push(singleJobList)
   }
 
   /**
@@ -344,16 +378,57 @@
     return confFile.split('/').pop().replace('.conf', '')
   }
 
+  // todo: decide what to do with this
+  /**
+   * deletes a job list by title and path
+   * @param title string
+   * @param path string
+   */
+  function deleteJobList(title: string, path: string) {
+    // console.log($jobLists, 'job lists===')
+    // // $jobLists = $jobLists.filter(jl => {return jl.path !== path && jl.title !== title})
+    // $jobLists.filter(jl=>{return jl.children.length > 0})
+    // console.log($jobLists, 'job lists===2')
+    // if (!$jobLists.length) return
+    // // look for parent job list
+    // const pathArr = path.replace(workspaceDirPath, '').split('/')
+    // let jobListArr: jobList[] = [$jobLists[0]]
+    // let curJobList: jobList = $jobLists[0]
+    // let index = 0
+    // while(index < pathArr.length) {
+    //   // curJobList = $jobLists[index]
+    //   // if (!curJobList || !curJobList.children) break
+    //   curJobList.children.forEach(child => {
+    //     if (jobListArr.includes(child)){
+    //       return
+    //     }
+    //     if (child.title == pathArr[index + 1]) {
+    //       curJobList = child
+    //       jobListArr.push(curJobList)
+    //     }
+    //   })
+    //   index +=1
+    // }
+    // jobListArr = jobListArr.reverse().map(jl => {
+    //   console.log('jl from map', jl)
+    //   jl.children = jl.children.filter(child => {return child.title !== title})
+    //   if (!jl.children.length) {
+    //     title = jl.title
+    //   }
+    //   return jl
+    // })
+    // if (!$jobLists[0].children.length) {
+    //   $jobLists.filter(jl=>{return jl.children.length > 0})
+    // }
+    // console.log(curJobList, index, '======')
+    // console.log($jobLists, 'JOB LISTSTSTSTS')
+    // todo: tell the backend to delete the listener
+  }
+
   onMount(() => {
     window.addEventListener('message', listener)
-    // $expandables.push({
-    //   title: 'JOB LIST',
-    //   isExpanded: true,
-    //   tree: [],
-    // })
-    // if (!runs.length) {
     initResults()
-    // }
+    console.log('app updated')
   })
 
   onDestroy(() => {
@@ -376,7 +451,7 @@
   }
 </script>
 
-{#if $jobLists.length === 0}
+{#if !$jobLists.length}
   <div class="zero-state">
     <div class="command">
       <h3 class="command-description">Welcome To Certora Prover IDE</h3>
@@ -397,9 +472,14 @@
     </div>
   </div>
 {:else}
-  <div>
+  <div
+    on:contextmenu|stopPropagation|preventDefault={() => {
+      resetHide()
+    }}
+  >
     <JobList
       {resetHide}
+      {deleteJobList}
       bind:path={$jobLists[0].path}
       bind:title={$jobLists[0].title}
       bind:runs={$jobLists[0].runs}
@@ -408,60 +488,14 @@
       bind:activateExpandCollapse={$jobLists[0].activateExpandCollapse}
       bind:isExpanded={$jobLists[0].isExpanded}
       bind:focusedRun={$focusedRun}
-      bind:output
       bind:runningScripts
       bind:pendingQueue
+      bind:output
     />
   </div>
 {/if}
 <!-- todo: handle output -->
-{#if output}
-  {#if output.variables && output.variables.length}
-    <Pane
-      title={`${output.treeViewPath.ruleName} variables`}
-      actions={[
-        {
-          title: 'Close Output',
-          icon: 'close',
-          onClick: clearOutput,
-        },
-      ]}
-    >
-      <CodeItemList codeItems={output.variables} />
-    </Pane>
-  {/if}
-  {#if output.callTrace && Object.keys(output.callTrace).length}
-    <Pane title={`CALL TRACE`}>
-      <Tree
-        runDisplayName=""
-        data={{
-          type: TreeType.Calltrace,
-          tree: [output.callTrace],
-        }}
-        on:selectCalltraceFunction={selectCalltraceFunction}
-      />
-    </Pane>
-  {/if}
-  {#if selectedCalltraceFunction && selectedCalltraceFunction.variables && selectedCalltraceFunction.variables.length}
-    <Pane title={`${selectedCalltraceFunction.name} variables`}>
-      <CodeItemList codeItems={selectedCalltraceFunction.variables} />
-    </Pane>
-  {/if}
-  {#if output.callResolutionWarnings && output.callResolutionWarnings.length}
-    <Pane title={`Contract call resolution warnings`}>
-      {#each output.callResolutionWarnings as resolution}
-        <ContractCallResolution contractCallResolution={resolution} />
-      {/each}
-    </Pane>
-  {/if}
-  {#if output.callResolution && output.callResolution.length}
-    <Pane title={`Contract call resolution`}>
-      {#each output.callResolution as resolution}
-        <ContractCallResolution contractCallResolution={resolution} />
-      {/each}
-    </Pane>
-  {/if}
-{/if}
+<ResultsOutput bind:output bind:selectedCalltraceFunction />
 
 <style lang="postcss">
   :global(body) {
