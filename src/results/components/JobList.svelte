@@ -3,12 +3,10 @@
   import { writable } from 'svelte/store'
   import {
     askToDeleteJob,
-    deleteConf,
     duplicate,
     editConfFile,
     enableEdit,
     getOutput,
-    initResults,
     openSettings,
     removeScript,
     rename,
@@ -16,7 +14,7 @@
     stopScript,
     uploadConf,
   } from '../extension-actions'
-  import { expandables, jobLists, verificationResults } from '../store/store'
+  import { expandables, verificationResults } from '../store/store'
   import {
     Assert,
     CallTraceFunction,
@@ -65,7 +63,6 @@
 
   export let level = 0
 
-  // export const hide = writable([])
   export const pos = writable({ x: 0, y: 0 })
 
   export const expandCollapse = writable({
@@ -85,15 +82,6 @@
 
   onMount(() => {
     window.addEventListener('message', listener)
-    console.log('job list updated', title)
-    // if (
-    //   runs.length &&
-    //   !$verificationResults.find(vr => {
-    //     return vr.name === '' //todo = ?
-    //   })
-    // ) {
-    //   initResults()
-    // }
   })
 
   const listener = (e: MessageEvent<EventsFromExtension>) => {
@@ -114,7 +102,6 @@
         const run = runs.find(run => {
           return run.confPath === vrName
         })
-        console.log('run?', run, 'runs;', runs)
         const runName = run?.name
         const confPath = run?.confPath
         if (!run || !runName || !confPath) return
@@ -194,7 +181,6 @@
         const curRun = runs.find(run => {
           return run.confPath === runPath
         })
-        console.log(curRun, 'cur run from allow run', runPath)
         // don't change status of running job
         if (
           !curRun ||
@@ -254,19 +240,18 @@
         runs = setStatus(e.data.payload, Status.settingsError)
         break
       }
-      //todo: clear results vs delete results?
       case EventTypesFromExtension.clearResults: {
         log({
           action: 'Received "clear-results" command',
           source: Sources.ResultsWebview,
           info: e.data.payload,
         })
-        const name = getFileName(e.data.payload)
+        const name = e.data.payload
         $verificationResults = $verificationResults.filter(vr => {
           return vr.name !== name
         })
         runs = runs.map(run => {
-          if (run.name === name) {
+          if (run.confPath === name) {
             run.status = Status.ready
           }
           return run
@@ -313,7 +298,6 @@
           source: Sources.ResultsWebview,
           info: e.data.payload,
         })
-        // runningScripts = e.data.payload
         if (!e.data.payload || !e.data.payload.length) return
         runs = runs.map(r => {
           runningScripts.forEach(rs => {
@@ -355,8 +339,6 @@
           }
           return run
         })
-        // when we receive the results of the last run, we run the next job!
-        // runNext()
         break
       }
       case EventTypesFromExtension.DeleteJob: {
@@ -372,7 +354,6 @@
         })
         if (runToDelete !== undefined) {
           deleteRun(runToDelete)
-          console.log('run was deleted:', runs, namesMap, runsCounter)
         }
         break
       }
@@ -506,14 +487,11 @@
    * @param run new run. if doest exists - creates a new run object
    */
   function createRun(run?: Run): void {
-    // $hide.push(true)
     if (run) {
       if (!run.status) {
         run.status = Status.missingSettings
       }
       runsCounter = runs.push(run)
-      // addNewExpendable(namesMap.get(run.name))
-      console.log(runs, 'runs from createRun1')
     } else {
       // don't create more than one new run while in rename state
       if (runs.find(r => r.name === '')) return
@@ -526,27 +504,27 @@
         isExpanded: false,
       }
       runsCounter = runs.push(newRun)
-      // addNewExpendable('')
     }
-  }
-
-  function addNewExpendable(title: string) {
-    $expandables = [
-      ...$expandables,
-      {
-        title: title,
-        isExpanded: true,
-        tree: [],
-      },
-    ]
   }
 
   /**
    * operates the expand / collapse functionality
    */
   function expandCollapseAll() {
-    console.log('expandCollapseAll from', title)
     activateExpandCollapse = false
+    if (
+      !(
+        children.length ||
+        (runs.length &&
+          runs.find(run => {
+            return (
+              run.status === Status.success ||
+              run.status === Status.incompleteResults
+            )
+          }))
+      )
+    )
+      return
     if (runs.length) {
       runs = runs.map(run => {
         if (!run.isExpanded && $expandCollapse.var) run.isExpanded = true
@@ -584,13 +562,6 @@
   }
 
   function editRun(run: Run): void {
-    console.log(
-      namesMap,
-      'from edit run',
-      namesMap.get(run.name),
-      run.name,
-      run.confPath,
-    )
     const jobNameMap: JobNameMap = {
       confPath: run.confPath,
       displayName: namesMap.get(run.name),
@@ -631,8 +602,7 @@
     runs = runs.filter(run => {
       return run !== runToDelete
     })
-    namesMap.delete(name)
-    console.log(output, output.runName, '========')
+    namesMap.delete(runToDelete.name)
     if (output && outputRunName === name) {
       clearOutput()
     }
@@ -640,7 +610,6 @@
     if (!runs.length && !children.length) {
       deleteJobList(title, path)
     }
-    console.log('current situation', $jobLists)
   }
 
   function clearOutput() {
@@ -666,10 +635,8 @@
         newName + '.conf',
         oldName + '.conf',
       )
-      console.log('======old path', oldPath)
 
       $verificationResults = $verificationResults.map(vr => {
-        console.log('name from vr name annoyhign', vr.name)
         if (vr.name === oldPath) {
           vr.name = curRun.confPath
         }
@@ -815,9 +782,9 @@
       return vr.name !== getFileName(JobNameMap.confPath)
     })
 
-    // if (output && output.runName === run.name) {
-    //   clearOutput()
-    // }
+    if (output && outputRunName === run.name) {
+      clearOutput()
+    }
 
     const shouldRunNext = runningScripts.every(rs => {
       return rs.uploaded === true
@@ -881,10 +848,16 @@
           title: $expandCollapse.title,
           icon: $expandCollapse.icon,
           onClick: expandCollapseAll,
-          disabled:
-            $verificationResults.find(vr => {
-              return vr.name === title
-            }) !== undefined,
+          disabled: !(
+            children.length ||
+            (runs.length &&
+              runs.find(run => {
+                return (
+                  run.status === Status.success ||
+                  run.status === Status.incompleteResults
+                )
+              }))
+          ),
         },
       ]}
       bind:isExpanded

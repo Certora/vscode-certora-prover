@@ -6,12 +6,7 @@ import { Writable, writable } from 'svelte/store'
 import type { jobList, Verification } from '../types'
 
 export const expandables = writable([])
-// export const expandCollapse = writable({
-//   title: 'Expand All',
-//   icon: 'expand-all',
-//   var: true,
-//   hasResults: false,
-// })
+
 export const verificationResults: Writable<Verification[]> = writable([])
 
 // todo: job list is a pane level?

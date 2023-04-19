@@ -6,49 +6,21 @@
    *-------------------------------------------------------------------------------------------- */
 
   import { onMount, onDestroy } from 'svelte'
-  import Pane from './components/Pane.svelte'
-  import CodeItemList from './components/CodeItemList.svelte'
-  import Tree from './components/Tree.svelte'
-  import ContractCallResolution from './components/ContractCallResolution.svelte'
-  import {
-    runScript,
-    stopScript,
-    openSettings,
-    getOutput,
-    editConfFile,
-    deleteConf,
-    duplicate,
-    removeScript,
-    askToDeleteJob,
-    initResults,
-    uploadConf,
-    enableEdit,
-    rename,
-  } from './extension-actions'
-  import { smartMergeVerificationResult } from './utils/mergeResults'
+  import { runScript, initResults, uploadConf } from './extension-actions'
   import { log, Sources } from './utils/log'
   import {
-    Assert,
     Output,
     EventsFromExtension,
-    Rule,
-    Verification,
     Run,
     JobNameMap,
     Status,
-    CONF_DIRECTORY,
     jobList,
     ConfToCreate,
   } from './types'
-  import { TreeType, CallTraceFunction, EventTypesFromExtension } from './types'
+  import { CallTraceFunction, EventTypesFromExtension } from './types'
 
   import { writable } from 'svelte/store'
-  import {
-    expandables,
-    // expandCollapse,
-    jobLists,
-    verificationResults,
-  } from './store/store'
+  import { jobLists, verificationResults } from './store/store'
   import JobList from './components/JobList.svelte'
   import ResultsOutput from './components/ResultsOutput.svelte'
 
@@ -64,15 +36,6 @@
   let pendingQueueCounter = 0
 
   let workspaceDirPath
-
-  // function selectCalltraceFunction(e: CustomEvent<CallTraceFunction>) {
-  //   selectedCalltraceFunction = e.detail
-  // }
-
-  // function clearOutput() {
-  //   if (output) output = undefined
-  //   if (selectedCalltraceFunction) selectedCalltraceFunction = undefined
-  // }
 
   const listener = (e: MessageEvent<EventsFromExtension>) => {
     switch (e.data.type) {
@@ -124,18 +87,6 @@
         }
         break
       }
-      // case EventTypesFromExtension.ClearAllJobs: {
-      //   log({
-      //     action: 'Received "clear-all-jobs" command',
-      //     source: Sources.ResultsWebview,
-      //     info: {
-      //       current$verificationResults: $verificationResults,
-      //     },
-      //   })
-      //   if ($verificationResults.length) $verificationResults = []
-      //   clearOutput()
-      //   break
-      // }
       case EventTypesFromExtension.FocusChanged: {
         log({
           action: 'Received "focus-changed" command',
@@ -336,7 +287,6 @@
    * @param run new run. if doest exists - creates a new run object
    */
   function createRun(): void {
-    // todo: create new job list with a new run from scratch
     const newRun: Run = {
       id: 0,
       name: '',
@@ -366,6 +316,15 @@
       pendingQueueCounter--
       $verificationResults = $verificationResults.filter(vr => {
         return vr.name !== getFileName(curRun.confPath)
+      })
+      // status change
+      $jobLists = $jobLists.map(jl => {
+        jl.runs.forEach(run => {
+          if (run.confPath === curRun.confPath) {
+            run.status = Status.running
+          }
+        })
+        return jl
       })
       runScript(curRun)
     }
@@ -494,7 +453,6 @@
     />
   </div>
 {/if}
-<!-- todo: handle output -->
 <ResultsOutput bind:output bind:selectedCalltraceFunction />
 
 <style lang="postcss">

@@ -288,15 +288,6 @@
   }
 
   /**
-   * stops a pending run
-   */
-  function pendingRunStop(): void {
-    status = Status.ready
-    pendingStopFunc()
-    // isPending = false
-  }
-
-  /**
    * creates 'stop' action according to run status
    */
   function createActionsForRunningScript(): Action[] {
@@ -310,7 +301,7 @@
         {
           title: 'Stop',
           icon: 'stop-circle',
-          onClick: pendingRunStop,
+          onClick: pendingStopFunc,
         },
       ]
     }

@@ -19,6 +19,10 @@ import {
 } from './types'
 import { checkDir } from './utils/checkDir'
 
+// all directory watchers will ne added to this array so we can delete them later
+const watchers: vscode.FileSystemWatcher[] = []
+let pathToCopyConfTo = ''
+
 export function activate(context: vscode.ExtensionContext): void {
   /**
    * opens the settings webview. only called once, when a new run is created
@@ -27,20 +31,11 @@ export function activate(context: vscode.ExtensionContext): void {
    * @returns null
    */
   async function showSettings(name: JobNameMap) {
-    // const path = vscode.workspace.workspaceFolders?.[0]?.uri.path
-    // if (!path) return
     const confFileDefault: ConfFile = getDefaultSettings()
     try {
-      // const basePath = vscode.workspace.workspaceFolders?.[0]
-      // if (!basePath) return
       const encoder = new TextEncoder()
       const content = encoder.encode(JSON.stringify(confFileDefault))
-      // const fileArr = name.confPath.split('/')
-      // const fileName = fileArr.pop()
-      // const pathWithoutCertoraDir = fileArr.join('/')
       const path = vscode.Uri.parse(name.confPath)
-      // name.confPath = path.path
-      console.log('path from show settings', path)
       await vscode.workspace.fs.writeFile(path, content)
     } catch (e) {
       console.log('[INNER ERROR - CREATE NEW CONF]')
@@ -301,11 +296,7 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   async function runScript(name: JobNameMap): Promise<void> {
-    // SettingsPanel.removePanel(name.displayName)
     SettingsPanel.disableForm(name.displayName)
-    // const confFile = vscode.Uri.parse(name.confPath)
-    // add hidden flags
-    // const path = vscode.workspace.workspaceFolders?.[0].uri.path || ''
     const confUri = vscode.Uri.parse(name.confPath)
     try {
       const content = await readConf(confUri)
@@ -337,10 +328,13 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   function getConfUri(name: string): vscode.Uri | void {
-    const path = vscode.workspace.workspaceFolders?.[0]
+    let path = vscode.workspace.workspaceFolders?.[0]?.uri
+    if (pathToCopyConfTo) {
+      path = vscode.Uri.parse(pathToCopyConfTo)
+    }
     if (!path) return
     const confFile = getConfFilePath(name)
-    const confFileUri = vscode.Uri.joinPath(path.uri, confFile)
+    const confFileUri = vscode.Uri.joinPath(path, confFile)
     return confFileUri
   }
 
@@ -403,10 +397,12 @@ export function activate(context: vscode.ExtensionContext): void {
    * run the shell script in [file] with --build_only flag
    * @param file shell script file
    */
-  async function convertShToConf(file: vscode.Uri): Promise<void> {
-    const path = vscode.workspace.workspaceFolders?.[0]
-    if (!path) return
+  async function convertShToConf(
+    file: vscode.Uri,
+    basePath: string,
+  ): Promise<void> {
     // write build_only to sh
+    pathToCopyConfTo = basePath
     let strContent = await readShFile(file)
     // clean content from comments:
     const strArr = strContent.split('\n')
@@ -434,9 +430,11 @@ export function activate(context: vscode.ExtensionContext): void {
         const encoder = new TextEncoder()
         const content = encoder.encode(strContent)
         const newPath =
-          path?.uri.path +
+          basePath +
           CERTORA_INNER_DIR_BUILD +
-          getFileName(file.path, '.sh')
+          getFileName(file.path, '.sh') +
+          '.sh'
+        console.log(newPath, 'new path uri ======')
         const newPathUri = vscode.Uri.parse(newPath)
         await vscode.workspace.fs.writeFile(newPathUri, content)
         await scriptRunner.buildSh(newPath)
@@ -452,17 +450,21 @@ export function activate(context: vscode.ExtensionContext): void {
    * watch the .certora_internal directory to look for conf that were only build not ran
    * than create conf files for them
    */
-  function watchForBuilds(): void {
-    const path = vscode.workspace.workspaceFolders?.[0]
+  function watchForBuilds(basePath?: string): void {
+    let path = vscode.workspace.workspaceFolders?.[0]?.uri?.path
+    if (basePath) {
+      path = basePath
+    }
     if (!path) return
     try {
-      const internalUri = vscode.Uri.parse(path.uri.path + CERTORA_INNER_DIR)
+      const internalUri = vscode.Uri.parse(path + CERTORA_INNER_DIR)
       const fileSystemWatcher = vscode.workspace.createFileSystemWatcher(
         new vscode.RelativePattern(internalUri, '**/.last_confs**/*.conf'),
       )
       fileSystemWatcher.onDidCreate(async file => {
         await copyCreatedConf(file)
       })
+      watchers.push(fileSystemWatcher)
     } catch (e) {
       console.log('ERROR:', e, '[internal error from  the file system watcher]')
     }
@@ -480,6 +482,7 @@ export function activate(context: vscode.ExtensionContext): void {
       if ('staging' in jsonContent && jsonContent.staging === '') {
         jsonContent.staging = 'master'
       }
+      console.log(newConfFileUri, 'new conf file uri from copy =======')
       if (newConfFileUri) {
         const encoder = new TextEncoder()
         const content = encoder.encode(JSON.stringify(jsonContent, null, 2))
@@ -499,9 +502,8 @@ export function activate(context: vscode.ExtensionContext): void {
         type: 'empty-workspace',
         payload: path.uri.path,
       })
-      // watchForBuilds()
+      watchForBuilds()
 
-      // wip: get the paths to the conf files for the dir structure
       const confFilesDirs = await vscode.workspace.findFiles(
         '**/*certora/conf/**',
         '**/.certora_internal/**',
@@ -529,6 +531,7 @@ export function activate(context: vscode.ExtensionContext): void {
         )
         if (!pathsToWatch.includes(confDirectoryToWatch.path)) {
           createConfWatcher(confDirectoryToWatch)
+          watchForBuilds(al.confPath.split(CONF_DIRECTORY_NAME)[0])
         }
         pathsToWatch.push(confDirectoryToWatch.path)
       })
@@ -545,6 +548,10 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   }
 
+  /**
+   * Create a watcher for a certora/conf directory
+   * @param directoryToWatch uri of directory to create a watcher for
+   */
   function createConfWatcher(directoryToWatch: vscode.Uri) {
     try {
       const fileSystemWatcher = vscode.workspace.createFileSystemWatcher(
@@ -568,6 +575,7 @@ export function activate(context: vscode.ExtensionContext): void {
           payload: nameToRemove,
         })
       })
+      watchers.push(fileSystemWatcher)
     } catch (e) {
       console.log('ERROR:', e, '[internal error from  the file system watcher]')
     }
@@ -683,8 +691,6 @@ export function activate(context: vscode.ExtensionContext): void {
    * browse for conf files, and than copy these files into [CONF_DIRECTORY]
    */
   async function uploadConf(path: string): Promise<void> {
-    // const path = vscode.workspace.workspaceFolders?.[0]
-    // if (!path) return
     if (!path || path === '') {
       const path = vscode.workspace.workspaceFolders?.[0].uri.path
     }
@@ -713,7 +719,7 @@ export function activate(context: vscode.ExtensionContext): void {
           await vscode.workspace.fs.copy(fileUri, target, { overwrite: true })
           // else if file endswith .sh
         } else {
-          await convertShToConf(fileUri)
+          await convertShToConf(fileUri, path)
         }
       } catch (e) {
         console.log("Could'nt copy file", fileUri.path, '\nERROR:', e)
@@ -828,4 +834,8 @@ export function activate(context: vscode.ExtensionContext): void {
 
 /** deactivate - to be used in the future maybe */
 // eslint-disable-next-line @typescript-eslint/no-empty-function
-export function deactivate(): void {}
+export function deactivate(): void {
+  watchers.forEach(watcher => {
+    watcher.dispose()
+  })
+}
