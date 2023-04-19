@@ -834,7 +834,7 @@
           title: 'Create New Job From Existing File',
           icon: 'new-file',
           onClick: () => {
-            uploadConf(path + title)
+            uploadConf(path + (title === 'JOB LIST' ? '' : title))
           },
         },
         {

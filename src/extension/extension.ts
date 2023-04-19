@@ -260,7 +260,6 @@ export function activate(context: vscode.ExtensionContext): void {
 
         try {
           const newConfFileUri = vscode.Uri.parse(duplicated.confPath)
-          console.log(newConfFileUri, 'NEW CONF FILE URI')
           if (newConfFileUri) {
             const encoder = new TextEncoder()
             const content = encoder.encode(
@@ -323,7 +322,6 @@ export function activate(context: vscode.ExtensionContext): void {
         `Can't read conf file: ${name.confPath} \nError: ${e}`,
       )
     }
-    console.log(confUri.path, 'from run script')
     scriptRunner.run(confUri.path)
   }
 
@@ -434,10 +432,9 @@ export function activate(context: vscode.ExtensionContext): void {
           CERTORA_INNER_DIR_BUILD +
           getFileName(file.path, '.sh') +
           '.sh'
-        console.log(newPath, 'new path uri ======')
         const newPathUri = vscode.Uri.parse(newPath)
         await vscode.workspace.fs.writeFile(newPathUri, content)
-        await scriptRunner.buildSh(newPath)
+        await scriptRunner.buildSh(newPath, basePath)
         return
       }
     }
@@ -482,7 +479,6 @@ export function activate(context: vscode.ExtensionContext): void {
       if ('staging' in jsonContent && jsonContent.staging === '') {
         jsonContent.staging = 'master'
       }
-      console.log(newConfFileUri, 'new conf file uri from copy =======')
       if (newConfFileUri) {
         const encoder = new TextEncoder()
         const content = encoder.encode(JSON.stringify(jsonContent, null, 2))
@@ -509,29 +505,22 @@ export function activate(context: vscode.ExtensionContext): void {
         '**/.certora_internal/**',
       )
 
-      console.log(confFilesDirs, 'from find files')
-
       const fileObjects = confFilesDirs.map(async file => {
         return await createFileObject(file)
       })
 
       const awaitedList = await Promise.all(fileObjects)
-      console.log(awaitedList, 'awaited list')
       if (!awaitedList || !awaitedList.length) return
       sendFilesToCreateJobs(awaitedList)
       getLastResults(awaitedList)
       const pathsToWatch: string[] = []
       awaitedList.forEach(al => {
-        console.log(
-          'path to watch',
-          al.confPath.split(CONF_DIRECTORY_NAME)[0] + CONF_DIRECTORY_NAME,
-        )
         const confDirectoryToWatch = vscode.Uri.parse(
           al.confPath.split(CONF_DIRECTORY_NAME)[0] + CONF_DIRECTORY_NAME,
         )
         if (!pathsToWatch.includes(confDirectoryToWatch.path)) {
           createConfWatcher(confDirectoryToWatch)
-          watchForBuilds(al.confPath.split(CONF_DIRECTORY_NAME)[0])
+          watchForBuilds(al.confPath.split('/' + CONF_DIRECTORY)[0])
         }
         pathsToWatch.push(confDirectoryToWatch.path)
       })

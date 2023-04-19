@@ -92,8 +92,11 @@ export class ScriptRunner {
     }
   }
 
-  public async buildSh(shFile: string): Promise<boolean> {
-    const path = workspace.workspaceFolders?.[0]
+  public async buildSh(shFile: string, basePath?: string): Promise<boolean> {
+    let path = workspace.workspaceFolders?.[0]?.uri
+    if (basePath) {
+      path = Uri.parse(basePath)
+    }
     if (!path) {
       await window.showErrorMessage(
         'Failed to build ' +
@@ -103,7 +106,7 @@ export class ScriptRunner {
       return false
     }
     this.script = spawn(`sh`, [shFile], {
-      cwd: path.uri.fsPath,
+      cwd: path.fsPath,
     })
     if (!this.script) {
       await window.showErrorMessage(

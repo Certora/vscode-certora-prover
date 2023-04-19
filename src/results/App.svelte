@@ -83,7 +83,6 @@
             (e.data.payload.variables && e.data.payload.variables.length))
         ) {
           output = e.data.payload
-          // output.runName = outputRunName
         }
         break
       }
