@@ -20,7 +20,7 @@
   import { CallTraceFunction, EventTypesFromExtension } from './types'
 
   import { writable } from 'svelte/store'
-  import { jobLists, verificationResults } from './store/store'
+  import { CERTORA_CONF, jobLists, verificationResults } from './store/store'
   import JobList from './components/JobList.svelte'
   import ResultsOutput from './components/ResultsOutput.svelte'
 
@@ -117,31 +117,59 @@
         const newJobToCreate = e.data.payload
         const pathArr = newJobToCreate.confPath
           .replace(newJobToCreate.workspaceFolder, '')
+          .split(CERTORA_CONF)[0]
           .split('/')
-          .filter(f => f)
+          .filter(f => f && f !== 'undefined')
           .reverse()
         let curPath = newJobToCreate.workspaceFolder + '/' + pathArr.pop()
         let curJobList = $jobLists[0]
         $jobLists.forEach((jl, index) => {
-          console.log(jl.path + jl.title, curPath)
+          // console.log(jl.path + jl.title, curPath)
           if (jl.path + jl.title === curPath) {
             curPath += '/' + pathArr.pop()
             curJobList = jl
           }
         })
-
+        const tempArr = curPath
+          .split(CERTORA_CONF)[0]
+          .split('/')
+          .filter(f => f && f !== 'undefined')
+        // if there is no job list object for this new run
+        if (curJobList.title !== tempArr[tempArr.length - 1]) {
+          console.log(tempArr, 'GOAL NEFESH')
+          let curIndex = -1
+          tempArr.forEach((item, index) => {
+            if (item === curJobList.title) {
+              curIndex = index
+            }
+            if (curIndex > -1 && index > curIndex) {
+              const newJobList: jobList = {
+                runs: [],
+                namesMap: new Map(),
+                path: curPath.split(item)[0],
+                title: item,
+                isExpanded: false,
+                children: [],
+                activateExpandCollapse: false,
+              }
+              curJobList.children.push(newJobList)
+              $jobLists.push(newJobList)
+              curJobList = newJobList
+            }
+          })
+        }
         if (
           curJobList.runs.find(run => {
             return run.confPath === newJobToCreate.confPath
           })
         )
           return
-        console.log(curJobList, curPath, 'coming from new-job')
+        // console.log(curJobList, curPath, 'coming from new-job')
         let curStatus: Status = newJobToCreate.allowRun
           ? Status.ready
           : Status.missingSettings
         const newRunName = newJobToCreate.confPath
-          .split('/certora/conf/')[1]
+          .split(CERTORA_CONF)[1]
           .replace('.conf', '')
         const newRun: Run = {
           id: curJobList.runs.length,
@@ -153,6 +181,7 @@
         }
         curJobList.runs.push(newRun)
         curJobList.namesMap.set(newRun.name, newRun.name.replaceAll('_', ' '))
+        curJobList.isExpanded = true
         $jobLists = $jobLists
         break
       }
@@ -181,7 +210,7 @@
           showContextMenu: false,
           isExpanded: false,
         }
-        if (file.confPath.split('/certora/conf/')[0] === file.workspaceFolder) {
+        if (file.confPath.split(CERTORA_CONF)[0] === file.workspaceFolder) {
           return newRun
         }
       })
@@ -209,7 +238,7 @@
     confList.forEach((file, index) => {
       const relativePath = file.confPath
         .replace(file.workspaceFolder, '')
-        .split('certora/conf')[0]
+        .split(CERTORA_CONF)[0]
       const pathArr = relativePath.split('/').filter(item => item)
 
       // create dir structure

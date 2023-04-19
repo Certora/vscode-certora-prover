@@ -13,6 +13,7 @@ import {
   JobNameMap,
   EventFromSettingsWebview,
   NewForm,
+  CONF_DIRECTORY,
 } from './types'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 
@@ -41,7 +42,7 @@ export class SettingsPanel {
       this._panel.webview,
       extensionUri,
     )
-    const pathToUse = confFileName.split('/certora/conf/')[0]
+    const pathToUse = confFileName.split(CONF_DIRECTORY)[0]
     this.watcher = new SmartContractsFilesWatcher(vscode.Uri.parse(pathToUse))
     this.watcher.init(this._panel.webview, vscode.Uri.parse(pathToUse))
     if (editConfFile) {
@@ -74,7 +75,7 @@ export class SettingsPanel {
               source: Sources.Extension,
             })
             if (confFileName) {
-              const pathToUse = confFileName.split('/certora/conf/')[0]
+              const pathToUse = confFileName.split(CONF_DIRECTORY)[0]
               this.watcher.init(
                 this._panel.webview,
                 vscode.Uri.parse(pathToUse),

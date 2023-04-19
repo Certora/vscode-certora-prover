@@ -3,7 +3,7 @@
  *-------------------------------------------------------------------------------------------- */
 
 export const CONF_DIRECTORY_NAME = 'certora/conf'
-export const CONF_DIRECTORY = 'certora/conf/'
+export const CONF_DIRECTORY = '/certora/conf/'
 export const SH_DIRECTORY_NAME = 'certora/scripts'
 export const SH_DIRECTORY = 'certora/scripts/'
 export const CERTORA_INNER_DIR = '/.certora_internal/'

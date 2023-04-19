@@ -14,7 +14,11 @@
     stopScript,
     uploadConf,
   } from '../extension-actions'
-  import { expandables, verificationResults } from '../store/store'
+  import {
+    CERTORA_CONF,
+    expandables,
+    verificationResults,
+  } from '../store/store'
   import {
     Assert,
     CallTraceFunction,
@@ -195,7 +199,6 @@
             return vr.name === runPath
           }) !== undefined
         ) {
-          console.log('found results!')
           newStatus = Status.success
         }
         runs = setStatus(runPath, newStatus)
@@ -663,7 +666,7 @@
     // rename new run
     else {
       const titleToUse = title === 'JOB LIST' ? '' : title
-      const newPath = `${path + titleToUse}/certora/conf/${newName}.conf`
+      const newPath = `${path + titleToUse}${CERTORA_CONF}${newName}.conf`
       const jobNameMap: JobNameMap = {
         confPath: newPath,
         displayName: namesMap.get(newName),

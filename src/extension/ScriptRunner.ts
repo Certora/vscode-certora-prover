@@ -6,7 +6,12 @@ import { spawn, exec, ChildProcessWithoutNullStreams } from 'child_process'
 import { ScriptProgressLongPolling } from './ScriptProgressLongPolling'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { getProgressUrl } from './utils/getProgressUrl'
-import { Job, CERTORA_INNER_DIR, LOG_DIRECTORY_DEFAULT } from './types'
+import {
+  Job,
+  CERTORA_INNER_DIR,
+  LOG_DIRECTORY_DEFAULT,
+  CONF_DIRECTORY,
+} from './types'
 import { PostProblems } from './PostProblems'
 import fetch from 'node-fetch'
 import * as os from 'os'
@@ -158,7 +163,7 @@ export class ScriptRunner {
   public run(confFile: string): void {
     PostProblems.resetDiagnosticCollection()
 
-    const path = confFile.split('/certora/conf/')[0]
+    const path = confFile.split(CONF_DIRECTORY)[0]
 
     const ts = Date.now()
     const channel = window.createOutputChannel(

@@ -494,6 +494,9 @@ export function activate(context: vscode.ExtensionContext): void {
     // todo: do we rather look for any certora/conf dir and open empty job lists?
     const path = vscode.workspace.workspaceFolders?.[0]
     if (path) {
+      // todo: watch the entire filesystem for new certora/conf directories with conf files
+      createWorkspaceConfWatcher(path.uri)
+
       resultsWebviewProvider.postMessage<string>({
         type: 'empty-workspace',
         payload: path.uri.path,
@@ -501,7 +504,7 @@ export function activate(context: vscode.ExtensionContext): void {
       watchForBuilds()
 
       const confFilesDirs = await vscode.workspace.findFiles(
-        '**/*certora/conf/**',
+        `**/*${CONF_DIRECTORY}**`,
         '**/.certora_internal/**',
       )
 
@@ -510,7 +513,10 @@ export function activate(context: vscode.ExtensionContext): void {
       })
 
       const awaitedList = await Promise.all(fileObjects)
+
       if (!awaitedList || !awaitedList.length) return
+
+      // from here on it's only if we already have conf files in the workspace
       sendFilesToCreateJobs(awaitedList)
       getLastResults(awaitedList)
       const pathsToWatch: string[] = []
@@ -519,8 +525,8 @@ export function activate(context: vscode.ExtensionContext): void {
           al.confPath.split(CONF_DIRECTORY_NAME)[0] + CONF_DIRECTORY_NAME,
         )
         if (!pathsToWatch.includes(confDirectoryToWatch.path)) {
-          createConfWatcher(confDirectoryToWatch)
-          watchForBuilds(al.confPath.split('/' + CONF_DIRECTORY)[0])
+          // createConfWatcher(confDirectoryToWatch)
+          watchForBuilds(al.confPath.split(CONF_DIRECTORY)[0])
         }
         pathsToWatch.push(confDirectoryToWatch.path)
       })
@@ -533,7 +539,47 @@ export function activate(context: vscode.ExtensionContext): void {
         path.uri,
         CONF_DIRECTORY_NAME,
       )
-      createConfWatcher(confDirectoryToWatch)
+      // createConfWatcher(confDirectoryToWatch)
+    }
+  }
+
+  /**
+   * Create a watcher for a certora/conf directory
+   * @param directoryToWatch uri of directory to create a watcher for
+   */
+  function createWorkspaceConfWatcher(directoryToWatch: vscode.Uri) {
+    try {
+      const fileSystemWatcher = vscode.workspace.createFileSystemWatcher(
+        new vscode.RelativePattern(
+          directoryToWatch,
+          `**/*${CONF_DIRECTORY}**/*.conf`,
+        ),
+      )
+      fileSystemWatcher.onDidCreate(async file => {
+        const fileObj: ConfToCreate = await createFileObject(file)
+        resultsWebviewProvider.postMessage<ConfToCreate>({
+          type: 'new-job',
+          payload: fileObj,
+        })
+        // todo: create watcher for the new dir
+        const pathsToWatch = fileObj.confPath.split(CONF_DIRECTORY)[0]
+        watchForBuilds(pathsToWatch)
+      })
+      // vscode asks to delete a conf file before is it deleted to avoid mistakes,
+      // so I think deleting the job with it is a good idea
+      fileSystemWatcher.onDidDelete(file => {
+        const nameToRemove = getFileName(
+          vscode.workspace.asRelativePath(file.path),
+        )
+        resultsWebviewProvider.postMessage<string>({
+          type: 'delete-job',
+          payload: nameToRemove,
+        })
+        // todo: what happens when a dir is empty?
+      })
+      watchers.push(fileSystemWatcher)
+    } catch (e) {
+      console.log('ERROR:', e, '[internal error from  the file system watcher]')
     }
   }
 
@@ -568,7 +614,6 @@ export function activate(context: vscode.ExtensionContext): void {
     } catch (e) {
       console.log('ERROR:', e, '[internal error from  the file system watcher]')
     }
-    // TODO: save listeners in an object to delete them when the job list gets deleted
   }
 
   /**
@@ -633,7 +678,7 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   function getLastResultsUri(filePath: string) {
-    const path = vscode.Uri.parse(filePath.split('/certora/conf/')[0])
+    const path = vscode.Uri.parse(filePath.split(CONF_DIRECTORY)[0])
     if (!path) return
     return vscode.Uri.parse(path.path + CERTORA_INNER_DIR + 'last_results')
   }
