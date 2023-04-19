@@ -16,6 +16,7 @@
   } from '../extension-actions'
   import {
     CERTORA_CONF,
+    JOB_LIST,
     expandables,
     verificationResults,
   } from '../store/store'
@@ -64,8 +65,6 @@
   let outputRunName: string
 
   let selectedCalltraceFunction: CallTraceFunction
-
-  export let level = 0
 
   export const pos = writable({ x: 0, y: 0 })
 
@@ -665,7 +664,7 @@
     }
     // rename new run
     else {
-      const titleToUse = title === 'JOB LIST' ? '' : title
+      const titleToUse = title === JOB_LIST ? '' : title
       const newPath = `${path + titleToUse}${CERTORA_CONF}${newName}.conf`
       const jobNameMap: JobNameMap = {
         confPath: newPath,
@@ -823,7 +822,7 @@
 </script>
 
 <div>
-  <div style="margin-left:{level}px;">
+  <div>
     <Pane
       {title}
       fixedActions={[
@@ -837,7 +836,7 @@
           title: 'Create New Job From Existing File',
           icon: 'new-file',
           onClick: () => {
-            uploadConf(path + (title === 'JOB LIST' ? '' : title))
+            uploadConf(path + (title === JOB_LIST ? '' : title))
           },
         },
         {
@@ -865,7 +864,10 @@
       ]}
       bind:isExpanded
     >
-      <ul class="running-scripts">
+      <ul
+        class={'running-scripts ' +
+          (title === JOB_LIST ? 'invisible-border' : '')}
+      >
         {#each Array(runsCounter) as _, index (index)}
           <li
             on:contextmenu|stopPropagation|preventDefault={e => {
@@ -907,6 +909,8 @@
         {/each}
       </ul>
       <div
+        class={'running-scripts ' +
+          (title === JOB_LIST ? 'invisible-border' : '')}
         on:contextmenu|stopPropagation|preventDefault={() => {
           resetHide()
         }}
@@ -920,7 +924,6 @@
             bind:runs={child.runs}
             bind:namesMap={child.namesMap}
             bind:children={child.children}
-            level={level + 10}
             bind:output
             bind:activateExpandCollapse={child.activateExpandCollapse}
             bind:isExpanded={child.isExpanded}
@@ -963,7 +966,14 @@
 
   .running-scripts {
     padding: 0;
-    margin: 0;
+    margin-left: 10px;
+    margin-top: 0;
+    margin-bottom: 0;
     list-style-type: none;
+    border-left: 1px solid rgb(255 255 255 / 20%);
+  }
+
+  .invisible-border {
+    border-color: transparent;
   }
 </style>

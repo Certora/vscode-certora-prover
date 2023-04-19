@@ -6,6 +6,7 @@ import { Writable, writable } from 'svelte/store'
 import type { jobList, Verification } from '../types'
 
 export const CERTORA_CONF = '/certora/conf/'
+export const JOB_LIST = 'JOB LIST'
 
 export const expandables = writable([])
 

@@ -20,7 +20,12 @@
   import { CallTraceFunction, EventTypesFromExtension } from './types'
 
   import { writable } from 'svelte/store'
-  import { CERTORA_CONF, jobLists, verificationResults } from './store/store'
+  import {
+    CERTORA_CONF,
+    JOB_LIST,
+    jobLists,
+    verificationResults,
+  } from './store/store'
   import JobList from './components/JobList.svelte'
   import ResultsOutput from './components/ResultsOutput.svelte'
 
@@ -220,7 +225,7 @@
 
     const singleJobList: jobList = {
       runs: workspaceDirList,
-      title: 'JOB LIST',
+      title: JOB_LIST,
       path: confList[0].workspaceFolder,
       namesMap: new Map(),
       children: [],
@@ -325,7 +330,7 @@
     }
     const singleJobList: jobList = {
       runs: [newRun],
-      title: 'JOB LIST',
+      title: JOB_LIST,
       path: workspaceDirPath,
       namesMap: new Map(),
       children: [],
