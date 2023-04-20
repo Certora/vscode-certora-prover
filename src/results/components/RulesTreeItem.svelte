@@ -116,8 +116,8 @@
             },
           ]
         : []}
-      initialExpandedState={rule.isExpanded || false}
-      bind:isExpanded={rule.isExpanded}
+      initialExpandedState={child.isExpanded || false}
+      bind:isExpanded={child.isExpanded}
       on:fetchOutput
     />
   {/each}
@@ -140,8 +140,8 @@
             },
           ]
         : []}
-      initialExpandedState={rule.isExpanded || false}
-      bind:isExpanded={rule.isExpanded}
+      initialExpandedState={child.isExpanded || false}
+      bind:isExpanded={child.isExpanded}
       on:fetchOutput
     />
   {/each}
