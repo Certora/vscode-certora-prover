@@ -287,6 +287,16 @@
         })
         const runName = e.data.payload
         runs = setStatus(runName, Status.unableToRun)
+        if (
+          runs.find(run => {
+            return run.confPath === runName
+          })
+        ) {
+          enableEdit({
+            confPath: runName,
+            displayName: namesMap.get(getFileName(runName)),
+          })
+        }
         break
       }
       case EventTypesFromExtension.RunJob: {
