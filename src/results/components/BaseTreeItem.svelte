@@ -6,7 +6,7 @@
   import Toolbar from './Toolbar.svelte'
   import type { Action } from '../types'
 
-  export let hasChildren: boolean
+  export let hasChildren: boolean = true
   export let label: string
   export let setSize: number
   export let posInset: number

@@ -14,12 +14,7 @@
     stopScript,
     uploadConf,
   } from '../extension-actions'
-  import {
-    CERTORA_CONF,
-    JOB_LIST,
-    expandables,
-    verificationResults,
-  } from '../store/store'
+  import { CERTORA_CONF, JOB_LIST, verificationResults } from '../store/store'
   import {
     Assert,
     CallTraceFunction,
@@ -68,20 +63,37 @@
 
   export const pos = writable({ x: 0, y: 0 })
 
+  const EXPAND_TITLE = 'Expand All'
+  const EXPAND_ICON = 'expand-all'
+  const COLLAPSE_TITLE = 'Collapse All'
+  const COLLAPSE_ICON = 'collapse-all'
+
   export const expandCollapse = writable({
-    title: 'Expand All',
-    icon: 'expand-all',
-    var: true,
-    hasResults: false,
+    title: COLLAPSE_TITLE,
+    icon: COLLAPSE_ICON,
   })
 
-  export let activateExpandCollapse
+  $: children.every(child => {
+    return child.isExpanded
+  }) &&
+  runs.every(run => {
+    return run.isExpanded
+  })
+    ? setExpandCollapse(COLLAPSE_TITLE, COLLAPSE_ICON)
+    : null
+  $: children.every(child => {
+    return !child.isExpanded
+  }) &&
+  runs.every(run => {
+    return !run.isExpanded
+  })
+    ? setExpandCollapse(EXPAND_TITLE, EXPAND_ICON)
+    : null
 
-  $: activateExpandCollapse ? expandCollapseAll() : null
-
-  $: $verificationResults.length
-    ? ($expandCollapse.hasResults = true)
-    : ($expandCollapse.hasResults = false)
+  function setExpandCollapse(title: string, icon: string) {
+    $expandCollapse.title = title
+    $expandCollapse.icon = icon
+  }
 
   onMount(() => {
     window.addEventListener('message', listener)
@@ -120,7 +132,7 @@
         )
         $verificationResults = $verificationResults
 
-        updateExpendablesFromResults()
+        // updateExpendablesFromResults()
 
         const thisRun = e.data.payload
         if (!thisRun.jobEnded) {
@@ -134,7 +146,6 @@
         if (e.data.payload.jobStatus === 'SUCCEEDED') {
           if (runName && confPath) {
             removeScript(runName)
-            // runs = setStatus(runName, Status.success)
             setStoppedJobStatus(confPath)
           }
         }
@@ -365,32 +376,6 @@
   }
 
   /**
-   * updated the results tree expand values according to results
-   */
-  function updateExpendablesFromResults() {
-    $verificationResults.forEach(vr => {
-      return vr.jobs.forEach(job => {
-        const temp = job.verificationProgress.rules.map(rule => {
-          return {
-            title: rule.name,
-            isExpanded: false,
-            tree: [],
-          }
-        })
-        $expandables = $expandables.map(element => {
-          if (
-            element.title === namesMap.get(job.runName) &&
-            !element.tree.length
-          ) {
-            element.tree = temp
-          }
-          return element
-        })
-      })
-    })
-  }
-
-  /**
    * when a job was cancel from outside sources
    * @param jobName the name of the job that was canceled
    */
@@ -513,43 +498,39 @@
    * operates the expand / collapse functionality
    */
   function expandCollapseAll() {
-    activateExpandCollapse = false
     if (
-      !(
-        children.length ||
-        (runs.length &&
-          runs.find(run => {
-            return (
-              run.status === Status.success ||
-              run.status === Status.incompleteResults
-            )
-          }))
-      )
+      !children.length &&
+      !runs.find(run => {
+        return (
+          run.status === Status.success ||
+          run.status === Status.incompleteResults
+        )
+      })
     )
       return
     if (runs.length) {
       runs = runs.map(run => {
-        if (!run.isExpanded && $expandCollapse.var) run.isExpanded = true
-        if (run.isExpanded && !$expandCollapse.var) run.isExpanded = false
+        if (!run.isExpanded && $expandCollapse.title === EXPAND_TITLE)
+          run.isExpanded = true
+        if (run.isExpanded && $expandCollapse.title === COLLAPSE_TITLE)
+          run.isExpanded = false
         return run
       })
     }
     if (children.length) {
       children = children.map(child => {
-        if (!child.isExpanded && $expandCollapse.var) {
+        if (!child.isExpanded && $expandCollapse.title === EXPAND_TITLE) {
           child.isExpanded = true
-          child.activateExpandCollapse = true
         }
-        if (child.isExpanded && !$expandCollapse.var) {
+        if (child.isExpanded && $expandCollapse.title === COLLAPSE_TITLE) {
           child.isExpanded = false
-          child.activateExpandCollapse = true
         }
         return child
       })
     }
-    $expandCollapse.title = $expandCollapse.var ? 'Collapse All' : 'Expand All'
-    $expandCollapse.icon = $expandCollapse.var ? 'collapse-all' : 'expand-all'
-    $expandCollapse.var = !$expandCollapse.var
+    $expandCollapse.title === EXPAND_TITLE
+      ? setExpandCollapse(COLLAPSE_TITLE, COLLAPSE_ICON)
+      : setExpandCollapse(EXPAND_TITLE, EXPAND_ICON)
   }
 
   function showMenu(e, run) {
@@ -925,7 +906,6 @@
             bind:namesMap={child.namesMap}
             bind:children={child.children}
             bind:output
-            bind:activateExpandCollapse={child.activateExpandCollapse}
             bind:isExpanded={child.isExpanded}
             bind:focusedRun
             bind:runningScripts

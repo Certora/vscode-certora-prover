@@ -8,8 +8,6 @@
   import TreeIcon from './TreeIcon.svelte'
   import { navigateToCode } from '../extension-actions'
   import { Action, Rule, Assert, RuleStatuses } from '../types'
-  import { writable } from 'svelte/store'
-  import { expandables } from '../store/store'
 
   export let rule: Rule = null
   export let assert: Assert = null
@@ -19,7 +17,6 @@
   export let level = 1
   export let duplicateFunc = null
   export let initialExpandedState: boolean = false
-  export let runDisplayName
   export let jobEnded: boolean = false
 
   const dispatch = createEventDispatcher<{ fetchOutput: Assert | Rule }>()
@@ -37,7 +34,7 @@
     ? `${assert.status}-assert-message.svg`
     : `unknown-assert-message.svg`
 
-  let isExpanded = writable(initialExpandedState)
+  export let isExpanded = initialExpandedState
 
   function duplicateRule() {
     if (allowDuplicate) {
@@ -61,30 +58,20 @@
   {posInset}
   {level}
   {actions}
-  hasChildren={rule?.children.length !== 0 || rule?.asserts.length !== 0}
-  bind:isExpanded={$isExpanded}
+  hasChildren={rule &&
+    (rule?.children.length !== 0 || rule?.asserts.length !== 0)}
+  bind:isExpanded
   on:click={() => {
     if (assert) {
       dispatch('fetchOutput', assert)
       return
     }
 
-    if (!$isExpanded && rule) {
+    if (!isExpanded && rule) {
       dispatch('fetchOutput', rule)
     }
 
-    $isExpanded = !$isExpanded
-    $expandables = $expandables.map(element => {
-      if (element.title === runDisplayName && element.tree.length) {
-        element.tree = element.tree.map(treeItem => {
-          if (treeItem.title === rule.name) {
-            treeItem.isExpanded = $isExpanded
-          }
-          return treeItem
-        })
-      }
-      return element
-    })
+    isExpanded = !isExpanded
   }}
 >
   <TreeIcon
@@ -110,7 +97,7 @@
   </div>
 </BaseTreeItem>
 
-{#if $isExpanded && rule?.children.length}
+{#if isExpanded && rule?.children.length}
   {#each rule.children as child, i}
     <svelte:self
       rule={child}
@@ -129,11 +116,13 @@
             },
           ]
         : []}
+      initialExpandedState={rule.isExpanded || false}
+      bind:isExpanded={rule.isExpanded}
       on:fetchOutput
     />
   {/each}
 {/if}
-{#if $isExpanded && rule?.asserts.length}
+{#if isExpanded && rule?.asserts.length}
   {#each rule.asserts as child, i}
     <svelte:self
       assert={child}
@@ -151,6 +140,8 @@
             },
           ]
         : []}
+      initialExpandedState={rule.isExpanded || false}
+      bind:isExpanded={rule.isExpanded}
       on:fetchOutput
     />
   {/each}

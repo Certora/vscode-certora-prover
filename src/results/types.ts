@@ -38,6 +38,7 @@ export type Assert = {
   jumpToDefinition: JumpToDefinition[]
   output: string | null | string[]
   jobId: string | null
+  isExpanded?: boolean
 }
 
 // output can be either a string of a path or array of strings of path
@@ -51,6 +52,7 @@ export type Rule = {
   duration: number
   output: string | null | string[]
   jobId: string | null
+  isExpanded?: boolean
 }
 
 export type Tree = {
@@ -299,5 +301,5 @@ export type jobList = {
   title: string
   isExpanded: boolean
   children: jobList[]
-  activateExpandCollapse: boolean
+  // activateExpandCollapse: boolean
 }

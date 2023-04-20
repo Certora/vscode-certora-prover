@@ -155,7 +155,7 @@
                 title: item,
                 isExpanded: false,
                 children: [],
-                activateExpandCollapse: false,
+                // activateExpandCollapse: false,
               }
               curJobList.children.push(newJobList)
               $jobLists.push(newJobList)
@@ -230,7 +230,7 @@
       namesMap: new Map(),
       children: [],
       isExpanded: true,
-      activateExpandCollapse: false,
+      // activateExpandCollapse: false,
     }
     console.log(confList)
 
@@ -255,7 +255,7 @@
           namesMap: new Map(),
           children: [],
           isExpanded: true,
-          activateExpandCollapse: false,
+          // activateExpandCollapse: false,
         }
         $jobLists = $jobLists.map(jl => {
           if (
@@ -335,7 +335,7 @@
       namesMap: new Map(),
       children: [],
       isExpanded: true,
-      activateExpandCollapse: false,
+      // activateExpandCollapse: false,
     }
     $jobLists.push(singleJobList)
   }
@@ -477,7 +477,6 @@
       bind:runs={$jobLists[0].runs}
       bind:namesMap={$jobLists[0].namesMap}
       bind:children={$jobLists[0].children}
-      bind:activateExpandCollapse={$jobLists[0].activateExpandCollapse}
       bind:isExpanded={$jobLists[0].isExpanded}
       bind:focusedRun={$focusedRun}
       bind:runningScripts

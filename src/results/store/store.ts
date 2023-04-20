@@ -8,8 +8,6 @@ import type { jobList, Verification } from '../types'
 export const CERTORA_CONF = '/certora/conf/'
 export const JOB_LIST = 'JOB LIST'
 
-export const expandables = writable([])
-
 export const verificationResults: Writable<Verification[]> = writable([])
 
 // todo: job list is a pane level?

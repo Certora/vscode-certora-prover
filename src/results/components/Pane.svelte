@@ -6,7 +6,6 @@
   import Toolbar from './Toolbar.svelte'
   import { Action, Status } from '../types'
   import { getIconPath } from '../utils/getIconPath'
-  import { expandables } from '../store/store'
 
   export let title: string
   export let actions: Action[] = []
@@ -39,19 +38,6 @@
     [Status.settingsError, statusIcons.settingsError],
   ])
 
-  // add to expandables
-  if (
-    $expandables.find(element => {
-      return element.title === title
-    }) === undefined
-  ) {
-    $expandables.push({
-      title: title,
-      isExpanded: false,
-      tree: [],
-    })
-  }
-
   /**
    * panel class can change the panels cursor and show if its selected
    */
@@ -78,33 +64,14 @@
     }
     return className
   }
-
-  function toggleExpand() {
-    // if (
-    //   $expandables.find(element => {
-    //     return element.title === title
-    //   }) === undefined
-    // ) {
-    //   $expandables.push({
-    //     title: title,
-    //     isExpanded: false,
-    //     tree: [],
-    //   })
-    // }
-    // $expandables = $expandables.map(element => {
-    //   if (element.title === title) {
-    //     element.isExpanded = !element.isExpanded
-    //   }
-    //   return element
-    // })
-    isExpanded = !isExpanded
-  }
 </script>
 
 <div class="pane" class:expanded={isExpanded} id={title}>
   <div
     class={getPaneClassName()}
-    on:click={toggleExpand}
+    on:click={() => {
+      isExpanded = !isExpanded
+    }}
     tabindex="0"
     role="button"
     aria-label={`${title} section`}
