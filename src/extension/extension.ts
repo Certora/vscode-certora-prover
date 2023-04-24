@@ -22,6 +22,7 @@ import { checkDir } from './utils/checkDir'
 // all directory watchers will ne added to this array so we can delete them later
 const watchers: vscode.FileSystemWatcher[] = []
 let pathToCopyConfTo = ''
+let confFiles: vscode.Uri[] = []
 
 export function activate(context: vscode.ExtensionContext): void {
   /**
@@ -491,12 +492,10 @@ export function activate(context: vscode.ExtensionContext): void {
    * all conf files in the conf folder will become jobs!
    */
   async function createInitialJobs(): Promise<void> {
-    // todo: do we rather look for any certora/conf dir and open empty job lists?
     const path = vscode.workspace.workspaceFolders?.[0]
     if (path) {
-      // todo: watch the entire filesystem for new certora/conf directories with conf files
+      // watch the entire filesystem for new certora/conf directories with conf files
       createWorkspaceConfWatcher(path.uri)
-
       resultsWebviewProvider.postMessage<string>({
         type: 'empty-workspace',
         payload: path.uri.path,
@@ -507,6 +506,8 @@ export function activate(context: vscode.ExtensionContext): void {
         `**/*${CONF_DIRECTORY}**`,
         '**/.certora_internal/**',
       )
+
+      confFiles = confFilesDirs
 
       const fileObjects = confFilesDirs.map(async file => {
         return await createFileObject(file)
@@ -525,21 +526,10 @@ export function activate(context: vscode.ExtensionContext): void {
           al.confPath.split(CONF_DIRECTORY_NAME)[0] + CONF_DIRECTORY_NAME,
         )
         if (!pathsToWatch.includes(confDirectoryToWatch.path)) {
-          // createConfWatcher(confDirectoryToWatch)
           watchForBuilds(al.confPath.split(CONF_DIRECTORY)[0])
         }
         pathsToWatch.push(confDirectoryToWatch.path)
       })
-    }
-    // users can copy conf files to the conf folder and it will create a job!
-    // they can also copy files to the script directory and create conf files from them!
-
-    if (path) {
-      const confDirectoryToWatch = vscode.Uri.joinPath(
-        path.uri,
-        CONF_DIRECTORY_NAME,
-      )
-      // createConfWatcher(confDirectoryToWatch)
     }
   }
 
@@ -548,72 +538,92 @@ export function activate(context: vscode.ExtensionContext): void {
    * @param directoryToWatch uri of directory to create a watcher for
    */
   function createWorkspaceConfWatcher(directoryToWatch: vscode.Uri) {
+    // create certora/conf for the workspace directory if there is no certora/conf with conf file in the workspace
     try {
-      const fileSystemWatcher = vscode.workspace.createFileSystemWatcher(
-        new vscode.RelativePattern(
-          directoryToWatch,
-          `**/*${CONF_DIRECTORY}**/*.conf`,
-        ),
+      const fileSystemWatcher1 = vscode.workspace.createFileSystemWatcher(
+        new vscode.RelativePattern(directoryToWatch, `**/*`),
       )
-      fileSystemWatcher.onDidCreate(async file => {
-        const fileObj: ConfToCreate = await createFileObject(file)
-        resultsWebviewProvider.postMessage<ConfToCreate>({
-          type: 'new-job',
-          payload: fileObj,
+      fileSystemWatcher1.onDidCreate(async file => {
+        console.log(file, 'file was created! from new watcher')
+        const confFilesDirs = await vscode.workspace.findFiles(
+          `**/*${CONF_DIRECTORY}**`,
+          '**/.certora_internal/**',
+        )
+        console.log(confFilesDirs, confFiles, 'files from workspaceee')
+        const val: boolean = checkIfFilesChanges(confFilesDirs)
+        if (val) {
+          console.log(val)
+          return
+        }
+        console.log('conf files after change', confFiles)
+        const fileObjects = confFilesDirs.map(async file => {
+          return await createFileObject(file)
         })
-        // todo: create watcher for the new dir
+
+        const awaitedList = await Promise.all(fileObjects)
+
+        if (!awaitedList || !awaitedList.length) return
+        sendFilesToCreateJobs(awaitedList)
+        const listOfNewJobs = awaitedList.filter(job => {
+          return !confFiles.find(cf => {
+            return cf.path === job.confPath
+          })
+        })
+        getLastResults(listOfNewJobs)
+        confFiles = confFilesDirs
+        const fileObj: ConfToCreate = await createFileObject(file)
         const pathsToWatch = fileObj.confPath.split(CONF_DIRECTORY)[0]
+        // todo: handle watchForBuild watcher with regards to the current job list
+        // right now if we rename a dir with sub dir it only watches the up most dir
+        console.log(pathsToWatch, '====path to watch====')
         watchForBuilds(pathsToWatch)
       })
       // vscode asks to delete a conf file before is it deleted to avoid mistakes,
       // so I think deleting the job with it is a good idea
-      fileSystemWatcher.onDidDelete(file => {
-        const nameToRemove = getFileName(
-          vscode.workspace.asRelativePath(file.path),
+      fileSystemWatcher1.onDidDelete(async file => {
+        console.log(file, 'file was deleted! from new watcher')
+        const confFilesDirs = await vscode.workspace.findFiles(
+          `**/*${CONF_DIRECTORY}**`,
+          '**/.certora_internal/**',
         )
-        resultsWebviewProvider.postMessage<string>({
-          type: 'delete-job',
-          payload: nameToRemove,
+        console.log(confFilesDirs, 'files from workspaceee')
+        const val: boolean = checkIfFilesChanges(confFilesDirs)
+        if (val) {
+          console.log(val)
+          return
+        }
+        confFiles = confFilesDirs
+        console.log('conf files after change', confFiles)
+        const fileObjects = confFilesDirs.map(async file => {
+          return await createFileObject(file)
         })
-        // todo: what happens when a dir is empty?
+
+        const awaitedList = await Promise.all(fileObjects)
+
+        if (!awaitedList || !awaitedList.length) return
+        sendFilesToCreateJobs(awaitedList)
       })
-      watchers.push(fileSystemWatcher)
+
+      watchers.push(fileSystemWatcher1)
     } catch (e) {
       console.log('ERROR:', e, '[internal error from  the file system watcher]')
     }
   }
 
-  /**
-   * Create a watcher for a certora/conf directory
-   * @param directoryToWatch uri of directory to create a watcher for
-   */
-  function createConfWatcher(directoryToWatch: vscode.Uri) {
-    try {
-      const fileSystemWatcher = vscode.workspace.createFileSystemWatcher(
-        new vscode.RelativePattern(directoryToWatch, '**/*.conf'),
-      )
-      fileSystemWatcher.onDidCreate(async file => {
-        const fileObj: ConfToCreate = await createFileObject(file)
-        resultsWebviewProvider.postMessage<ConfToCreate>({
-          type: 'new-job',
-          payload: fileObj,
-        })
-      })
-      // vscode asks to delete a conf file before is it deleted to avoid mistakes,
-      // so I think deleting the job with it is a good idea
-      fileSystemWatcher.onDidDelete(file => {
-        const nameToRemove = getFileName(
-          vscode.workspace.asRelativePath(file.path),
-        )
-        resultsWebviewProvider.postMessage<string>({
-          type: 'delete-job',
-          payload: nameToRemove,
-        })
-      })
-      watchers.push(fileSystemWatcher)
-    } catch (e) {
-      console.log('ERROR:', e, '[internal error from  the file system watcher]')
+  function checkIfFilesChanges(confFilesDirs: vscode.Uri[]): boolean {
+    if (confFiles.length !== confFilesDirs.length) return false
+    confFilesDirs = confFilesDirs.sort((cfd1, cfd2) => {
+      return cfd1.path > cfd2.path ? 1 : -1
+    })
+    confFiles = confFiles.sort((cfd1, cfd2) => {
+      return cfd1.path > cfd2.path ? 1 : -1
+    })
+    for (let i = 0; i < confFiles.length; i++) {
+      if (confFiles[i].path !== confFilesDirs[i].path) {
+        return false
+      }
     }
+    return true
   }
 
   /**
@@ -717,6 +727,51 @@ export function activate(context: vscode.ExtensionContext): void {
             }
           })
         })
+      }
+    })
+  }
+
+  async function uploadDir(path: string): Promise<void> {
+    if (!path || path === '') {
+      const path = vscode.workspace.workspaceFolders?.[0].uri.path
+    }
+    // select a directory from the finder
+    const options: vscode.OpenDialogOptions = {
+      canSelectMany: false,
+      canSelectFolders: true,
+      openLabel: 'Open',
+      defaultUri: vscode.Uri.parse(path),
+      filters: {
+        'File type': [''],
+      },
+    }
+    // create a certora/conf/newJob.conf file in it with the default settings
+    const files = await vscode.window.showOpenDialog(options)
+    files?.map(async fileUri => {
+      try {
+        // console.log(fileUri.path, '=========')
+        // create content for the conf file
+        const jobNameMap: JobNameMap = {
+          confPath: fileUri.path + CONF_DIRECTORY + 'untitled.conf',
+          displayName: 'untitled',
+        }
+        // create conf file
+        await showSettings(jobNameMap)
+
+        // let target
+        // if (fileName?.endsWith('.conf')) {
+        //   const target = vscode.Uri.joinPath(
+        //     vscode.Uri.parse(path),
+        //     CONF_DIRECTORY_NAME,
+        //     fileName,
+        //   )
+        //   await vscode.workspace.fs.copy(fileUri, target, { overwrite: true })
+        //   // else if file endswith .sh
+        // } else {
+        //   await convertShToConf(fileUri, path)
+        // }
+      } catch (e) {
+        console.log("Could'nt copy file", fileUri.path, '\nERROR:', e)
       }
     })
   }
@@ -839,6 +894,7 @@ export function activate(context: vscode.ExtensionContext): void {
   resultsWebviewProvider.askToDeleteJob = askToDeleteJob
   resultsWebviewProvider.createInitialJobs = createInitialJobs
   resultsWebviewProvider.uploadConf = uploadConf
+  resultsWebviewProvider.uploadDir = uploadDir
   resultsWebviewProvider.enableEdit = enableEdit
   resultsWebviewProvider.rename = rename
   resultsWebviewProvider.clearResults = askToDeleteResults

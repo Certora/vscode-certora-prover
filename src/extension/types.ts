@@ -220,6 +220,7 @@ export enum CommandFromResultsWebview {
   EnableEdit = 'enable-edit',
   Rename = 'rename',
   ClearResults = 'clear-results',
+  UploadDir = 'upload-dir',
 }
 
 export enum CommandFromSettingsWebview {
@@ -286,6 +287,10 @@ export type EventFromResultsWebview =
     }
   | {
       command: CommandFromResultsWebview.UploadConf
+      payload: string
+    }
+  | {
+      command: CommandFromResultsWebview.UploadDir
       payload: string
     }
   | {

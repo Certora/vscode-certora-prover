@@ -23,6 +23,18 @@ enum Commands {
   EnableEdit = 'enable-edit',
   Rename = 'rename',
   ClearResults = 'clear-results',
+  UploadDir = 'upload-dir',
+}
+
+export function UploadDir(path: string): void {
+  log({
+    action: 'Send "upload-dir" command',
+    source: Sources.ResultsWebview,
+  })
+  vscode.postMessage({
+    command: Commands.UploadDir,
+    payload: path,
+  })
 }
 
 export function enableEdit(name: JobNameMap): void {
@@ -36,7 +48,7 @@ export function enableEdit(name: JobNameMap): void {
   })
 }
 
-export function clearResults(name: string) {
+export function clearResults(name: string): void {
   log({
     action: 'Send "clear-results" command',
     source: Sources.ResultsWebview,

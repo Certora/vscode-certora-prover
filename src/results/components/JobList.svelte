@@ -2,6 +2,7 @@
   import { onMount } from 'svelte'
   import { writable } from 'svelte/store'
   import {
+    UploadDir,
     askToDeleteJob,
     duplicate,
     editConfFile,
@@ -39,7 +40,6 @@
   export let isExpanded
 
   export let resetHide
-  export let deleteJobList
 
   export let runs: Run[] = []
   export let namesMap: Map<string, string> = new Map()
@@ -89,6 +89,97 @@
   })
     ? setExpandCollapse(EXPAND_TITLE, EXPAND_ICON)
     : null
+
+  let actions = updateActions()
+
+  /**
+   * create actions according to the job list role
+   */
+  function updateActions() {
+    if (title === JOB_LIST) {
+      return [
+        {
+          title: 'Run All',
+          icon: 'run-all',
+          onClick: runAll,
+          disabled: runs.length === 0,
+        },
+        {
+          title: 'Open Dir',
+          icon: 'file-directory-create',
+          onClick: () => {
+            UploadDir(path + (title === JOB_LIST ? '' : title))
+          },
+        },
+        {
+          title: 'Create New Job From Existing File',
+          icon: 'new-file',
+          onClick: () => {
+            uploadConf(path + (title === JOB_LIST ? '' : title))
+          },
+        },
+        {
+          title: 'Create New Job',
+          icon: 'diff-added',
+          onClick: () => {
+            createRun()
+          },
+        },
+        {
+          title: $expandCollapse.title,
+          icon: $expandCollapse.icon,
+          onClick: expandCollapseAll,
+          disabled: !(
+            children.length ||
+            (runs.length &&
+              runs.find(run => {
+                return (
+                  run.status === Status.success ||
+                  run.status === Status.incompleteResults
+                )
+              }))
+          ),
+        },
+      ]
+    }
+    return [
+      {
+        title: 'Run All',
+        icon: 'run-all',
+        onClick: runAll,
+        disabled: runs.length === 0,
+      },
+      {
+        title: 'Create New Job From Existing File',
+        icon: 'new-file',
+        onClick: () => {
+          uploadConf(path + (title === JOB_LIST ? '' : title))
+        },
+      },
+      {
+        title: 'Create New Job',
+        icon: 'diff-added',
+        onClick: () => {
+          createRun()
+        },
+      },
+      {
+        title: $expandCollapse.title,
+        icon: $expandCollapse.icon,
+        onClick: expandCollapseAll,
+        disabled: !(
+          children.length ||
+          (runs.length &&
+            runs.find(run => {
+              return (
+                run.status === Status.success ||
+                run.status === Status.incompleteResults
+              )
+            }))
+        ),
+      },
+    ]
+  }
 
   function setExpandCollapse(title: string, icon: string) {
     $expandCollapse.title = title
@@ -164,11 +255,12 @@
           source: Sources.ResultsWebview,
           info: e.data.payload,
         })
+        // console.log('script stopped', e.data.payload, runs)
         const pid = e.data.payload
         const curRun = runs.find(run => run.id === pid)
 
         if (curRun !== undefined) {
-          const runName = curRun.name
+          const runName = curRun.confPath
           if (
             curRun.status === Status.running ||
             curRun.status === Status.pending
@@ -348,20 +440,17 @@
           if (rs.pid === curPid) {
             rs.uploaded = true
             confToEnable.confPath = rs.confFile
-            confToEnable.displayName = namesMap.get(
-              getFileName(confToEnable.confPath),
-            )
-            if (confToEnable.displayName) enableEdit(confToEnable)
           }
           return rs
         })
-        runningScripts = runningScripts
         runs = runs.map(run => {
           if (run.id === curPid) {
             run.vrLink = vrLink
+            confToEnable.displayName = namesMap.get(run.name)
           }
           return run
         })
+        if (confToEnable.displayName) enableEdit(confToEnable)
         break
       }
       case EventTypesFromExtension.DeleteJob: {
@@ -425,7 +514,7 @@
       return rq.confPath !== run.confPath
     })
     $verificationResults = $verificationResults.filter(vr => {
-      return vr.name !== run.name
+      return vr.name !== run.confPath
     })
     pendingQueueCounter--
     runs = setStatus(run.confPath, Status.ready)
@@ -579,6 +668,7 @@
    * @param runToDelete run to delete
    */
   function deleteRun(runToDelete: Run): void {
+    console.log(runToDelete.confPath, 'from delete run')
     const name = runToDelete.confPath
 
     //delete results
@@ -600,9 +690,6 @@
       clearOutput()
     }
     runsCounter--
-    if (!runs.length && !children.length) {
-      deleteJobList(title, path)
-    }
   }
 
   function clearOutput() {
@@ -772,7 +859,7 @@
     runs = setStatus(JobNameMap.confPath, Status.pending)
     pendingQueueCounter++
     $verificationResults = $verificationResults.filter(vr => {
-      return vr.name !== getFileName(JobNameMap.confPath)
+      return vr.name !== JobNameMap.confPath
     })
 
     if (output && outputRunName === run.name) {
@@ -797,9 +884,10 @@
       let curRun = pendingQueue.shift()
       pendingQueueCounter--
       $verificationResults = $verificationResults.filter(vr => {
-        return vr.name !== getFileName(curRun.confPath)
+        return vr.name !== curRun.confPath
       })
       runs = setStatus(curRun.confPath, Status.running)
+      // if (curRun.displayName) enableEdit(curRun)
       runScript(curRun)
     }
   }
@@ -814,47 +902,7 @@
 
 <div>
   <div>
-    <Pane
-      {title}
-      fixedActions={[
-        {
-          title: 'Run All',
-          icon: 'run-all',
-          onClick: runAll,
-          disabled: runs.length === 0,
-        },
-        {
-          title: 'Create New Job From Existing File',
-          icon: 'new-file',
-          onClick: () => {
-            uploadConf(path + (title === JOB_LIST ? '' : title))
-          },
-        },
-        {
-          title: 'Create New Job',
-          icon: 'diff-added',
-          onClick: () => {
-            createRun()
-          },
-        },
-        {
-          title: $expandCollapse.title,
-          icon: $expandCollapse.icon,
-          onClick: expandCollapseAll,
-          disabled: !(
-            children.length ||
-            (runs.length &&
-              runs.find(run => {
-                return (
-                  run.status === Status.success ||
-                  run.status === Status.incompleteResults
-                )
-              }))
-          ),
-        },
-      ]}
-      bind:isExpanded
-    >
+    <Pane {title} {actions} bind:isExpanded>
       <ul
         class={'running-scripts ' +
           (title === JOB_LIST ? 'invisible-border' : '')}
@@ -909,7 +957,6 @@
         {#each children as child, index}
           <svelte:self
             {resetHide}
-            {deleteJobList}
             bind:path={child.path}
             bind:title={child.title}
             bind:runs={child.runs}

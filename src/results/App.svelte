@@ -28,6 +28,7 @@
   } from './store/store'
   import JobList from './components/JobList.svelte'
   import ResultsOutput from './components/ResultsOutput.svelte'
+  import { children } from 'svelte/internal'
 
   export const focusedRun = writable('')
 
@@ -107,92 +108,176 @@
           info: e.data.payload,
         })
         // when we get the last results we don't want to create new job items
-        if ($jobLists.length) return
+        if (!$jobLists.length) {
+          createInitialJobs(e.data.payload)
+        } else {
+          changeJobs(e.data.payload)
+        }
 
-        createInitialJobs(e.data.payload)
-        break
-      }
-      case EventTypesFromExtension.newJob: {
-        log({
-          action: 'Received "new-job" command',
-          source: Sources.ResultsWebview,
-          info: e.data.payload,
-        })
-        // when we get the last results we don't want to create new job items
-        const newJobToCreate = e.data.payload
-        const pathArr = newJobToCreate.confPath
-          .replace(newJobToCreate.workspaceFolder, '')
-          .split(CERTORA_CONF)[0]
-          .split('/')
-          .filter(f => f && f !== 'undefined')
-          .reverse()
-        let curPath = newJobToCreate.workspaceFolder + '/' + pathArr.pop()
-        let curJobList = $jobLists[0]
-        $jobLists.forEach((jl, index) => {
-          // console.log(jl.path + jl.title, curPath)
-          if (jl.path + jl.title === curPath) {
-            curPath += '/' + pathArr.pop()
-            curJobList = jl
-          }
-        })
-        const tempArr = curPath
-          .split(CERTORA_CONF)[0]
-          .split('/')
-          .filter(f => f && f !== 'undefined')
-        // if there is no job list object for this new run
-        if (curJobList.title !== tempArr[tempArr.length - 1]) {
-          console.log(tempArr, 'GOAL NEFESH')
-          let curIndex = -1
-          tempArr.forEach((item, index) => {
-            if (item === curJobList.title) {
-              curIndex = index
-            }
-            if (curIndex > -1 && index > curIndex) {
-              const newJobList: jobList = {
-                runs: [],
-                namesMap: new Map(),
-                path: curPath.split(item)[0],
-                title: item,
-                isExpanded: false,
-                children: [],
-                // activateExpandCollapse: false,
-              }
-              curJobList.children.push(newJobList)
-              $jobLists.push(newJobList)
-              curJobList = newJobList
-            }
-          })
-        }
-        if (
-          curJobList.runs.find(run => {
-            return run.confPath === newJobToCreate.confPath
-          })
-        )
-          return
-        // console.log(curJobList, curPath, 'coming from new-job')
-        let curStatus: Status = newJobToCreate.allowRun
-          ? Status.ready
-          : Status.missingSettings
-        const newRunName = newJobToCreate.confPath
-          .split(CERTORA_CONF)[1]
-          .replace('.conf', '')
-        const newRun: Run = {
-          id: curJobList.runs.length,
-          name: newRunName,
-          confPath: newJobToCreate.confPath,
-          status: curStatus,
-          showContextMenu: false,
-          isExpanded: false,
-        }
-        curJobList.runs.push(newRun)
-        curJobList.namesMap.set(newRun.name, newRun.name.replaceAll('_', ' '))
-        curJobList.isExpanded = true
-        $jobLists = $jobLists
         break
       }
       default:
         break
     }
+  }
+
+  /**
+   * delete job lists and jobs from [jobLists] recursively
+   * @param jl jl to delete recursively from
+   * @param confList files that were deleted
+   */
+  function recursiveDeleteJob(jl: jobList, confList: ConfToCreate[]) {
+    jl.runs = jl.runs.filter(run => {
+      return confList.find(cl => {
+        return cl.confPath === run.confPath
+      })
+    })
+    jl.children = jl.children.filter(child => {
+      return child.children.length || child.runs.length
+    })
+    jl.children.forEach(child => {
+      recursiveDeleteJob(child, confList)
+    })
+    jl.children = jl.children.filter(child => {
+      return child.children.length || child.runs.length
+    })
+    return jl
+  }
+
+  // todo: improve this code so it will look nicer
+  /**
+   * add lists and jobs to the filesystem structure
+   * @param addedFiles files to add
+   */
+  function addLists(addedFiles: ConfToCreate[]) {
+    addedFiles.forEach((file, index) => {
+      const relativePath = file.confPath
+        .replace(file.workspaceFolder, '')
+        .split(CERTORA_CONF)[0]
+      const pathArr = relativePath.split('/').filter(item => item)
+
+      // create dir structure
+      pathArr.forEach((item, index) => {
+        let itemJobList: jobList = {
+          runs: [],
+          title: item,
+          path: file.confPath.split(item)[0],
+          namesMap: new Map(),
+          children: [],
+          isExpanded: true,
+        }
+
+        $jobLists = $jobLists.map(jl => {
+          if (
+            !jl.children.find(child => {
+              return child.title === item && child.path === itemJobList.path
+            })
+          ) {
+            // either add to the JOB LIST (workspace folder) or to the directory that is before this one in the path
+            if (index === 0 && jl.path === workspaceDirPath) {
+              jl.children.push(itemJobList)
+            } else if (
+              jl.title === pathArr[index - 1] &&
+              jl.path === itemJobList.path.split(pathArr[index - 1])[0]
+            ) {
+              jl.children.push(itemJobList)
+            }
+          }
+          return jl
+        })
+        // add to the job list (todo: delete this?)
+        if (
+          !$jobLists.find(jobList => {
+            return jobList.title === item && jobList.path === itemJobList.path
+          })
+        ) {
+          $jobLists.push(itemJobList)
+        }
+      })
+
+      const fileName = getFileName(file.confPath)
+      let curStatus = Status.missingSettings
+      if (file.allowRun) {
+        curStatus = Status.ready
+      }
+
+      const newRun: Run = {
+        id: index,
+        name: fileName,
+        confPath: file.confPath,
+        status: curStatus,
+        showContextMenu: false,
+        isExpanded: false,
+      }
+      // todo: running scripts / verification results by id?
+      // const curRunningScript = runningScripts.find(rs => {return rs.confFile === file.confPath})
+      // const curResults = $verificationResults.find(vr=>{return vr.name === file.confPath})
+      // if (curRunningScript){
+      //   newRun.id = curRunningScript.pid
+      //   if (curResults){
+      //     newRun.status = Status.incompleteResults
+      //   }
+      //   else {
+      //     newRun.status = Status.running
+      //   }
+      // }
+      // const curPending = pendingQueue.find(ps => {return ps.confPath === file.confPath})
+      // if (curPending){
+      //   newRun.status = Status.pending
+      // }
+      // if (curResults && !curRunningScript) {
+      //   newRun.status = Status.success
+      // }
+
+      $jobLists = $jobLists.map(jl => {
+        if (
+          jl.title === pathArr[pathArr.length - 1] &&
+          jl.path === file.confPath.split(pathArr[pathArr.length - 1])[0]
+        ) {
+          jl.runs.push(newRun)
+          jl.namesMap.set(newRun.name, newRun.name.replaceAll('_', ' '))
+        }
+        return jl
+      })
+    })
+  }
+
+  /**
+   * when the filesystem was change so we need to change the job structure
+   * @param data new data
+   */
+  function changeJobs(data: ConfToCreate[]) {
+    const confList: ConfToCreate[] = data.sort((item1, item2) => {
+      return item1.confPath > item2.confPath ? 1 : -1
+    })
+
+    // handle deleted files
+    $jobLists = $jobLists.map(jl => {
+      return recursiveDeleteJob(jl, confList)
+    })
+
+    $jobLists = $jobLists.filter(jl => {
+      return jl.children.length || jl.runs.length
+    })
+    console.log('missing files', $jobLists)
+
+    // handle added files
+    let addedFiles = confList.filter(conf => {
+      let val = true
+      for (let i = 0; i < $jobLists.length; i++) {
+        if (
+          $jobLists[i].runs.find(run => {
+            return run.confPath === conf.confPath
+          })
+        ) {
+          val = false
+        }
+      }
+      return val
+    })
+    console.log(addedFiles, 'added files', $jobLists)
+
+    addLists(addedFiles)
   }
 
   function createInitialJobs(data: ConfToCreate[]) {
@@ -230,9 +315,7 @@
       namesMap: new Map(),
       children: [],
       isExpanded: true,
-      // activateExpandCollapse: false,
     }
-    console.log(confList)
 
     workspaceDirList.forEach(wdl => {
       singleJobList.namesMap.set(wdl.name, wdl.name.replaceAll('_', ' '))
@@ -240,78 +323,8 @@
 
     $jobLists.push(singleJobList)
 
-    confList.forEach((file, index) => {
-      const relativePath = file.confPath
-        .replace(file.workspaceFolder, '')
-        .split(CERTORA_CONF)[0]
-      const pathArr = relativePath.split('/').filter(item => item)
+    addLists(confList)
 
-      // create dir structure
-      pathArr.forEach((item, index) => {
-        const itemJobList: jobList = {
-          runs: [],
-          title: item,
-          path: file.confPath.split(item)[0],
-          namesMap: new Map(),
-          children: [],
-          isExpanded: true,
-          // activateExpandCollapse: false,
-        }
-        $jobLists = $jobLists.map(jl => {
-          if (
-            !jl.children.find(child => {
-              return child.title === item && child.path === itemJobList.path
-            })
-          ) {
-            // either add to the JOB LIST (workspace folder) or to the directory that is before this one in the path
-            if (index === 0 && jl.path === confList[0].workspaceFolder) {
-              jl.children.push(itemJobList)
-            } else if (
-              jl.title === pathArr[index - 1] &&
-              jl.path === itemJobList.path.split(pathArr[index - 1])[0]
-            ) {
-              jl.children.push(itemJobList)
-            }
-          }
-          return jl
-        })
-        // add to the job list (todo: delete this?)
-        if (
-          !$jobLists.find(jobList => {
-            return jobList.title === item && jobList.path === itemJobList.path
-          })
-        ) {
-          console.log(itemJobList, 'add outside condition')
-          $jobLists.push(itemJobList)
-        }
-      })
-
-      console.log('job list after arr foreach', $jobLists)
-
-      const fileName = getFileName(file.confPath)
-      let curStatus = Status.missingSettings
-      if (file.allowRun) {
-        curStatus = Status.ready
-      }
-      const newRun: Run = {
-        id: index,
-        name: fileName,
-        confPath: file.confPath,
-        status: curStatus,
-        showContextMenu: false,
-        isExpanded: false,
-      }
-      $jobLists = $jobLists.map(jl => {
-        if (
-          jl.title === pathArr[pathArr.length - 1] &&
-          jl.path === file.confPath.split(pathArr[pathArr.length - 1])[0]
-        ) {
-          jl.runs.push(newRun)
-          jl.namesMap.set(newRun.name, newRun.name.replaceAll('_', ' '))
-        }
-        return jl
-      })
-    })
     console.log('JOB LISTS', $jobLists)
   }
 
@@ -348,7 +361,7 @@
       let curRun = pendingQueue.shift()
       pendingQueueCounter--
       $verificationResults = $verificationResults.filter(vr => {
-        return vr.name !== getFileName(curRun.confPath)
+        return vr.name !== curRun.confPath
       })
       // status change
       $jobLists = $jobLists.map(jl => {
@@ -368,53 +381,6 @@
    */
   function getFileName(confFile: string): string {
     return confFile.split('/').pop().replace('.conf', '')
-  }
-
-  // todo: decide what to do with this
-  /**
-   * deletes a job list by title and path
-   * @param title string
-   * @param path string
-   */
-  function deleteJobList(title: string, path: string) {
-    // console.log($jobLists, 'job lists===')
-    // // $jobLists = $jobLists.filter(jl => {return jl.path !== path && jl.title !== title})
-    // $jobLists.filter(jl=>{return jl.children.length > 0})
-    // console.log($jobLists, 'job lists===2')
-    // if (!$jobLists.length) return
-    // // look for parent job list
-    // const pathArr = path.replace(workspaceDirPath, '').split('/')
-    // let jobListArr: jobList[] = [$jobLists[0]]
-    // let curJobList: jobList = $jobLists[0]
-    // let index = 0
-    // while(index < pathArr.length) {
-    //   // curJobList = $jobLists[index]
-    //   // if (!curJobList || !curJobList.children) break
-    //   curJobList.children.forEach(child => {
-    //     if (jobListArr.includes(child)){
-    //       return
-    //     }
-    //     if (child.title == pathArr[index + 1]) {
-    //       curJobList = child
-    //       jobListArr.push(curJobList)
-    //     }
-    //   })
-    //   index +=1
-    // }
-    // jobListArr = jobListArr.reverse().map(jl => {
-    //   console.log('jl from map', jl)
-    //   jl.children = jl.children.filter(child => {return child.title !== title})
-    //   if (!jl.children.length) {
-    //     title = jl.title
-    //   }
-    //   return jl
-    // })
-    // if (!$jobLists[0].children.length) {
-    //   $jobLists.filter(jl=>{return jl.children.length > 0})
-    // }
-    // console.log(curJobList, index, '======')
-    // console.log($jobLists, 'JOB LISTSTSTSTS')
-    // todo: tell the backend to delete the listener
   }
 
   onMount(() => {
@@ -471,7 +437,6 @@
   >
     <JobList
       {resetHide}
-      {deleteJobList}
       bind:path={$jobLists[0].path}
       bind:title={$jobLists[0].title}
       bind:runs={$jobLists[0].runs}

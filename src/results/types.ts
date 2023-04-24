@@ -185,7 +185,6 @@ export enum EventTypesFromExtension {
   UploadingFiles = 'run-next',
   ScriptStopped = 'script-stopped',
   InitialJobs = 'initial-jobs',
-  newJob = 'new-job',
   DeleteJob = 'delete-job',
   RunJob = 'run-job',
   SettingsError = 'settings-error',
@@ -257,17 +256,9 @@ export type EventsFromExtension =
       payload: ConfToCreate[]
     }
   | {
-      type: EventTypesFromExtension.newJob
-      payload: ConfToCreate
-    }
-  | {
       type: EventTypesFromExtension.DeleteJob
       payload: string
     }
-  // | {
-  //     type: EventTypesFromExtension.DeleteResults
-  //     payload: string
-  //   }
   | {
       type: EventTypesFromExtension.RunJob
       payload: string
@@ -301,5 +292,4 @@ export type jobList = {
   title: string
   isExpanded: boolean
   children: jobList[]
-  // activateExpandCollapse: boolean
 }
