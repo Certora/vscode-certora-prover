@@ -13,9 +13,10 @@ export function getProgressUrl(text: string): string | null {
   console.log(urlMatches, 'urlMatch')
 
   if (urlMatches) {
-    const url = urlMatches[1]
-    console.log(url, 'urlMatch2')
-    return url.includes('output') ? url.replace('output', 'progress') : null
+    const url = urlMatches.find(url => {
+      return url.includes('output')
+    })
+    return url?.includes('output') ? url.replace('output', 'progress') : null
   }
   return null
 }
