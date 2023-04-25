@@ -549,13 +549,14 @@ export function activate(context: vscode.ExtensionContext): void {
           `**/*${CONF_DIRECTORY}**`,
           '**/.certora_internal/**',
         )
-        console.log(confFilesDirs, confFiles, 'files from workspaceee')
+        // console.log(confFilesDirs, confFiles, 'files from workspaceee')
+        // console.log('conf files before change', confFiles)
         const val: boolean = checkIfFilesChanges(confFilesDirs)
         if (val) {
           console.log(val)
           return
         }
-        console.log('conf files after change', confFiles)
+        // console.log('conf files after change', confFiles)
         const fileObjects = confFilesDirs.map(async file => {
           return await createFileObject(file)
         })
@@ -564,12 +565,14 @@ export function activate(context: vscode.ExtensionContext): void {
 
         if (!awaitedList || !awaitedList.length) return
         sendFilesToCreateJobs(awaitedList)
-        const listOfNewJobs = awaitedList.filter(job => {
-          return !confFiles.find(cf => {
-            return cf.path === job.confPath
-          })
-        })
-        getLastResults(listOfNewJobs)
+        // const listOfNewJobs = awaitedList.filter(job => {
+        //   console.log(confFiles, job.confPath, 'do we have this already?')
+        //   return !confFiles.find(cf => {
+        //     return cf.path === job.confPath
+        //   })
+        // })
+        // console.log(listOfNewJobs, '======')
+        // getLastResults(listOfNewJobs)
         confFiles = confFilesDirs
         const fileObj: ConfToCreate = await createFileObject(file)
         const pathsToWatch = fileObj.confPath.split(CONF_DIRECTORY)[0]
@@ -593,7 +596,7 @@ export function activate(context: vscode.ExtensionContext): void {
           return
         }
         confFiles = confFilesDirs
-        console.log('conf files after change', confFiles)
+        // console.log('conf files after change', confFiles)
         const fileObjects = confFilesDirs.map(async file => {
           return await createFileObject(file)
         })
@@ -898,6 +901,7 @@ export function activate(context: vscode.ExtensionContext): void {
   resultsWebviewProvider.enableEdit = enableEdit
   resultsWebviewProvider.rename = rename
   resultsWebviewProvider.clearResults = askToDeleteResults
+  resultsWebviewProvider.getLastResults = getLastResults
 
   const scriptRunner = new ScriptRunner(resultsWebviewProvider)
 

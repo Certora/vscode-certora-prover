@@ -5,7 +5,7 @@
  *-------------------------------------------------------------------------------------------- */
 
 import { log, Sources } from './utils/log'
-import type { JobNameMap, JumpToDefinition } from './types'
+import type { ConfToCreate, JobNameMap, JumpToDefinition } from './types'
 
 enum Commands {
   StopScript = 'stop-script',
@@ -24,6 +24,18 @@ enum Commands {
   Rename = 'rename',
   ClearResults = 'clear-results',
   UploadDir = 'upload-dir',
+  GetLastResults = 'get-last-results',
+}
+
+export function getLastResults(files: ConfToCreate[]): void {
+  log({
+    action: 'Send "get-last-results" command',
+    source: Sources.ResultsWebview,
+  })
+  vscode.postMessage({
+    command: Commands.GetLastResults,
+    payload: files,
+  })
 }
 
 export function UploadDir(path: string): void {

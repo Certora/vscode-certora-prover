@@ -223,8 +223,6 @@
         )
         $verificationResults = $verificationResults
 
-        // updateExpendablesFromResults()
-
         const thisRun = e.data.payload
         if (!thisRun.jobEnded) {
           runs = setStatus(confPath, Status.incompleteResults)
@@ -255,7 +253,6 @@
           source: Sources.ResultsWebview,
           info: e.data.payload,
         })
-        // console.log('script stopped', e.data.payload, runs)
         const pid = e.data.payload
         const curRun = runs.find(run => run.id === pid)
 
@@ -265,7 +262,15 @@
             curRun.status === Status.running ||
             curRun.status === Status.pending
           ) {
-            runs = setStatus(runName, Status.ready)
+            if (
+              $verificationResults.find(vr => {
+                return vr.name === curRun.confPath
+              })
+            ) {
+              runs = setStatus(runName, Status.success)
+            } else {
+              runs = setStatus(runName, Status.ready)
+            }
           } else if (curRun.status === Status.incompleteResults) {
             setStoppedJobStatus(runName)
           }
@@ -495,7 +500,7 @@
           runs = setStatus(jobName, Status.success)
         } else if (
           runs.find(run => {
-            return run.name === jobName
+            return run.confPath === jobName
           })?.status === Status.running
         ) {
           runs = setStatus(jobName, Status.unableToRun)
@@ -513,10 +518,18 @@
     pendingQueue = pendingQueue.filter(rq => {
       return rq.confPath !== run.confPath
     })
-    $verificationResults = $verificationResults.filter(vr => {
-      return vr.name !== run.confPath
-    })
+    // $verificationResults = $verificationResults.filter(vr => {
+    //   return vr.name !== run.confPath
+    // })
     pendingQueueCounter--
+    if (
+      $verificationResults.find(vr => {
+        return vr.name === run.confPath
+      })
+    ) {
+      runs = setStatus(run.confPath, Status.success)
+      return
+    }
     runs = setStatus(run.confPath, Status.ready)
   }
 
@@ -668,7 +681,7 @@
    * @param runToDelete run to delete
    */
   function deleteRun(runToDelete: Run): void {
-    console.log(runToDelete.confPath, 'from delete run')
+    // console.log(runToDelete.confPath, 'from delete run')
     const name = runToDelete.confPath
 
     //delete results
@@ -858,9 +871,9 @@
     pendingQueue.push(JobNameMap)
     runs = setStatus(JobNameMap.confPath, Status.pending)
     pendingQueueCounter++
-    $verificationResults = $verificationResults.filter(vr => {
-      return vr.name !== JobNameMap.confPath
-    })
+    // $verificationResults = $verificationResults.filter(vr => {
+    //   return vr.name !== JobNameMap.confPath
+    // })
 
     if (output && outputRunName === run.name) {
       clearOutput()
@@ -883,9 +896,9 @@
     if (pendingQueue.length) {
       let curRun = pendingQueue.shift()
       pendingQueueCounter--
-      $verificationResults = $verificationResults.filter(vr => {
-        return vr.name !== curRun.confPath
-      })
+      // $verificationResults = $verificationResults.filter(vr => {
+      //   return vr.name !== curRun.confPath
+      // })
       runs = setStatus(curRun.confPath, Status.running)
       // if (curRun.displayName) enableEdit(curRun)
       runScript(curRun)

@@ -204,6 +204,12 @@ export type NewForm = {
   checkMyInputs: boolean
 }
 
+export type ConfToCreate = {
+  confPath: string
+  allowRun: number
+  workspaceFolder: string
+}
+
 export enum CommandFromResultsWebview {
   NavigateToCode = 'navigate-to-code',
   StopScript = 'stop-script',
@@ -221,6 +227,7 @@ export enum CommandFromResultsWebview {
   Rename = 'rename',
   ClearResults = 'clear-results',
   UploadDir = 'upload-dir',
+  GetLastResults = 'get-last-results',
 }
 
 export enum CommandFromSettingsWebview {
@@ -272,6 +279,10 @@ export type EventFromResultsWebview =
     }
   | {
       command: CommandFromResultsWebview.InitResults
+    }
+  | {
+      command: CommandFromResultsWebview.GetLastResults
+      payload: ConfToCreate[]
     }
   | {
       command: CommandFromResultsWebview.Duplicate
@@ -335,12 +346,6 @@ export type Topic = {
 
 export type ResourceError = {
   topics: Topic[]
-}
-
-export type ConfToCreate = {
-  confPath: string
-  allowRun: number
-  workspaceFolder: string
 }
 
 // wip: recursive object for a dir?

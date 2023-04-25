@@ -14,6 +14,7 @@ import {
   CommandFromResultsWebview,
   EventFromResultsWebview,
   JobNameMap,
+  ConfToCreate,
 } from './types'
 
 export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
@@ -44,6 +45,8 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   public removeScript: null | ((name: string) => void) = null
   public clearResults: null | ((name: string) => void) = null
 
+  public getLastResults: null | ((files: ConfToCreate[]) => void) = null
+
   constructor(private readonly _extensionUri: vscode.Uri) {
     this._extensionUri = _extensionUri
   }
@@ -66,6 +69,16 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
             })
             if (typeof this.createInitialJobs === 'function') {
               this.createInitialJobs()
+            }
+            break
+          case CommandFromResultsWebview.GetLastResults:
+            log({
+              action: 'Received "get-last-results" command',
+              source: Sources.Extension,
+              info: e.payload,
+            })
+            if (typeof this.getLastResults === 'function') {
+              this.getLastResults(e.payload)
             }
             break
           case CommandFromResultsWebview.ClearResults:

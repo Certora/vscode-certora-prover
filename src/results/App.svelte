@@ -6,7 +6,12 @@
    *-------------------------------------------------------------------------------------------- */
 
   import { onMount, onDestroy } from 'svelte'
-  import { runScript, initResults, uploadConf } from './extension-actions'
+  import {
+    runScript,
+    initResults,
+    uploadConf,
+    getLastResults,
+  } from './extension-actions'
   import { log, Sources } from './utils/log'
   import {
     Output,
@@ -278,6 +283,7 @@
     console.log(addedFiles, 'added files', $jobLists)
 
     addLists(addedFiles)
+    getLastResults(addedFiles)
   }
 
   function createInitialJobs(data: ConfToCreate[]) {
