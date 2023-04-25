@@ -502,10 +502,27 @@ export function activate(context: vscode.ExtensionContext): void {
       })
       watchForBuilds()
 
-      const confFilesDirs = await vscode.workspace.findFiles(
+      let confFilesDirs = await vscode.workspace.findFiles(
         `**/*${CONF_DIRECTORY}**`,
         '**/.certora_internal/**',
       )
+
+      console.log(confFilesDirs, 'initial conf file dir')
+
+      if (!confFilesDirs || !confFilesDirs.length) {
+        const confDirectoryPath = path.uri.path + '/' + CONF_DIRECTORY
+        const confDirectoryUri = vscode.Uri.parse(confDirectoryPath)
+        const checked = await checkDir(confDirectoryUri)
+        if (!checked) return
+        const confFilesFromDir = await vscode.workspace.fs.readDirectory(
+          confDirectoryUri,
+        )
+        confFilesDirs = confFilesFromDir.map(conf => {
+          return vscode.Uri.parse(path.uri.path + CONF_DIRECTORY + conf[0])
+        })
+        console.log(confFilesDirs, 'initial conf file dir3')
+      }
+      console.log(confFilesDirs, 'initial conf file dir2')
 
       confFiles = confFilesDirs
 
@@ -721,6 +738,10 @@ export function activate(context: vscode.ExtensionContext): void {
               )
               const job: Job = jsonContent.data
               job.runName = file.confPath
+              job.verificationReportLink = job.progressUrl.replace(
+                'progress',
+                'output',
+              )
               if (job) {
                 resultsWebviewProvider.postMessage<Job>({
                   type: 'receive-new-job-result',

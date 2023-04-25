@@ -211,6 +211,12 @@
         const runName = run?.name
         const confPath = run?.confPath
         if (!run || !runName || !confPath) return
+        runs = runs.map(r => {
+          if (r.confPath === vrName) {
+            r.id = pid
+          }
+          return r
+        })
         setVerificationReportLink(pid, e.data.payload.verificationReportLink)
         if (e.data.payload.jobStatus === 'FAILED') {
           setStoppedJobStatus(confPath)
@@ -234,6 +240,14 @@
 
         if (e.data.payload.jobStatus === 'SUCCEEDED') {
           if (runName && confPath) {
+            //   if (!run.vrLink) {
+            //   runs = runs.map(r => {
+            //     if (r.confPath === confPath) {
+            //       r.vrLink = thisRun.progressUrl.replace('progress', 'output')
+            //     }
+            //     return r
+            //   })
+            // }
             removeScript(runName)
             setStoppedJobStatus(confPath)
           }
