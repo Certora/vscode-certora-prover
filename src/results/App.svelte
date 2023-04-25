@@ -181,6 +181,14 @@
 
         if (e.data.payload.jobStatus === 'SUCCEEDED') {
           if (runName) {
+            if (!run.vrLink) {
+              runs = runs.map(r => {
+                if (r.name === runName) {
+                  r.vrLink = thisRun.progressUrl.replace('progress', 'output')
+                }
+                return r
+              })
+            }
             removeScript(runName)
             // runs = setStatus(runName, Status.success)
             setStoppedJobStatus(runName)
