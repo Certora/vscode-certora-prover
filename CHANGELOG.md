@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+### 0.1.6 (2023-04-27)
+
+## Features
+
+* Save last rule report link of a job run ([#97](https://github.com/Certora/vscode-certora-prover/pull/97))
+
 ### 0.1.4 (2023-04-02)
 
 ## Features
