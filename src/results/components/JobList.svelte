@@ -205,6 +205,7 @@
         })
         const pid = e.data.payload.pid
         const vrName = e.data.payload.runName
+        const curReportLink = e.data.payload.verificationReportLink
         const run = runs.find(run => {
           return run.confPath === vrName
         })
@@ -214,10 +215,11 @@
         runs = runs.map(r => {
           if (r.confPath === vrName) {
             r.id = pid
+            r.vrLink = curReportLink
           }
           return r
         })
-        setVerificationReportLink(pid, e.data.payload.verificationReportLink)
+        console.log(runs, 'runs after update')
         if (e.data.payload.jobStatus === 'FAILED') {
           setStoppedJobStatus(confPath)
           return
@@ -239,19 +241,7 @@
         }
 
         if (e.data.payload.jobStatus === 'SUCCEEDED') {
-          // console.log(runName, confPath, 'what are these?1')
           if (runName && confPath) {
-            // console.log(runName, confPath, 'what are these?', runs)
-            //   if (!run.vrLink) {
-            //     console.log('no vr link')
-            //   runs = runs.map(r => {
-            //     if (r.confPath === confPath) {
-            //       // r.vrLink = thisRun.progressUrl.replace('progress', 'output')
-            //       console.log('vr link update', title, r)
-            //     }
-            //     return r
-            //   })
-            // }
             removeScript(runName)
             setStoppedJobStatus(confPath)
           }
