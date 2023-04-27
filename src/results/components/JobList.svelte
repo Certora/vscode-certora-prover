@@ -928,42 +928,42 @@
         class={'running-scripts ' +
           (title === JOB_LIST ? 'invisible-border' : '')}
       >
-        {#each Array(runsCounter) as _, index (index)}
+        {#each runs as obj, index}
           <li
             on:contextmenu|stopPropagation|preventDefault={e => {
-              showMenu(e, runs[index])
+              showMenu(e, obj)
             }}
           >
             <NewRun
-              editFunc={() => editRun(runs[index])}
-              deleteFunc={() => askToDeleteThis(runs[index])}
-              deleteRun={() => deleteRun(runs[index])}
+              editFunc={() => editRun(obj)}
+              deleteFunc={() => askToDeleteThis(obj)}
+              deleteRun={() => deleteRun(obj)}
               {renameRun}
               duplicateFunc={duplicateRun}
-              runFunc={() => run(runs[index])}
+              runFunc={() => run(obj)}
               {newFetchOutput}
               pendingStopFunc={() => {
-                pendingStopFunc(runs[index])
+                pendingStopFunc(obj)
               }}
               runningStopFunc={() => {
                 enableEdit({
-                  confPath: runs[index].confPath,
-                  displayName: namesMap.get(runs[index].name),
+                  confPath: obj.confPath,
+                  displayName: namesMap.get(obj.name),
                 })
-                runs[index].vrLink = ''
-                const modal = runs[index].status !== Status.running
-                stopScript(runs[index].id, modal)
+                obj.vrLink = ''
+                const modal = obj.status !== Status.running
+                stopScript(obj.id, modal)
               }}
               inactiveSelected={focusedRun}
-              vrLink={runs[index].vrLink}
+              vrLink={obj.vrLink}
               pos={$pos}
               {resetHide}
-              bind:status={runs[index].status}
-              bind:hide={runs[index].showContextMenu}
+              bind:status={obj.status}
+              bind:hide={obj.showContextMenu}
               bind:namesMap
-              bind:runName={runs[index].name}
-              bind:pathToConf={runs[index].confPath}
-              bind:isExpanded={runs[index].isExpanded}
+              bind:runName={obj.name}
+              bind:pathToConf={obj.confPath}
+              bind:isExpanded={obj.isExpanded}
             />
           </li>
         {/each}
