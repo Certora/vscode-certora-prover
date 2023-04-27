@@ -8,7 +8,7 @@
   import { navigateToCode } from '../extension-actions'
   import type { Rule, CallTraceFunction } from '../types'
   import { TreeType } from '../types'
-  export let runDisplayName
+  // export let runDisplayName // todo: delete?
   export let jobEnded: boolean = false
   export let data:
     | {

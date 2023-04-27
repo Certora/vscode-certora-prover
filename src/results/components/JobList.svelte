@@ -239,11 +239,15 @@
         }
 
         if (e.data.payload.jobStatus === 'SUCCEEDED') {
+          // console.log(runName, confPath, 'what are these?1')
           if (runName && confPath) {
+            // console.log(runName, confPath, 'what are these?', runs)
             //   if (!run.vrLink) {
+            //     console.log('no vr link')
             //   runs = runs.map(r => {
             //     if (r.confPath === confPath) {
-            //       r.vrLink = thisRun.progressUrl.replace('progress', 'output')
+            //       // r.vrLink = thisRun.progressUrl.replace('progress', 'output')
+            //       console.log('vr link update', title, r)
             //     }
             //     return r
             //   })
@@ -587,12 +591,12 @@
    * @param link to verification report of run [runName]
    */
   function setVerificationReportLink(pid: number, link: string) {
-    runs.forEach(run => {
+    runs = runs.map(run => {
       if (run.id === pid) {
         run.vrLink = link
       }
+      return run
     })
-    runs = runs
   }
 
   /**
