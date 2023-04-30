@@ -33,9 +33,11 @@
   } from './store/store'
   import JobList from './components/JobList.svelte'
   import ResultsOutput from './components/ResultsOutput.svelte'
-  import { children } from 'svelte/internal'
+  import { bind } from 'svelte/internal'
 
   export const focusedRun = writable('')
+
+  export let outputRunName: string = ''
 
   let output: Output
   // let outputRunName: string
@@ -241,6 +243,15 @@
         ) {
           jl.runs.push(newRun)
           jl.namesMap.set(newRun.name, newRun.name.replaceAll('_', ' '))
+        } else if (
+          jl.title === JOB_LIST &&
+          file.confPath.split(CERTORA_CONF)[0] === workspaceDirPath &&
+          !jl.runs.find(r => {
+            return r.confPath === file.confPath
+          })
+        ) {
+          jl.runs.push(newRun)
+          jl.namesMap.set(newRun.name, newRun.name.replaceAll('_', ' '))
         }
         return jl
       })
@@ -443,6 +454,7 @@
   >
     <JobList
       {resetHide}
+      bind:outputRunName
       bind:path={$jobLists[0].path}
       bind:title={$jobLists[0].title}
       bind:runs={$jobLists[0].runs}
@@ -456,7 +468,11 @@
     />
   </div>
 {/if}
-<ResultsOutput bind:output bind:selectedCalltraceFunction />
+<ResultsOutput
+  pathToCode={outputRunName.split(CERTORA_CONF)[0]}
+  bind:output
+  bind:selectedCalltraceFunction
+/>
 
 <style lang="postcss">
   :global(body) {

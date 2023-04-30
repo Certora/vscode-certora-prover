@@ -502,27 +502,12 @@ export function activate(context: vscode.ExtensionContext): void {
       })
       watchForBuilds()
 
-      let confFilesDirs = await vscode.workspace.findFiles(
-        `**/*${CONF_DIRECTORY}**`,
+      const confFilesDirs = await vscode.workspace.findFiles(
+        `**/*${CONF_DIRECTORY_NAME}/**`,
         '**/.certora_internal/**',
       )
 
       console.log(confFilesDirs, 'initial conf file dir')
-
-      if (!confFilesDirs || !confFilesDirs.length) {
-        const confDirectoryPath = path.uri.path + '/' + CONF_DIRECTORY
-        const confDirectoryUri = vscode.Uri.parse(confDirectoryPath)
-        const checked = await checkDir(confDirectoryUri)
-        if (!checked) return
-        const confFilesFromDir = await vscode.workspace.fs.readDirectory(
-          confDirectoryUri,
-        )
-        confFilesDirs = confFilesFromDir.map(conf => {
-          return vscode.Uri.parse(path.uri.path + CONF_DIRECTORY + conf[0])
-        })
-        console.log(confFilesDirs, 'initial conf file dir3')
-      }
-      console.log(confFilesDirs, 'initial conf file dir2')
 
       confFiles = confFilesDirs
 
@@ -556,17 +541,18 @@ export function activate(context: vscode.ExtensionContext): void {
    */
   function createWorkspaceConfWatcher(directoryToWatch: vscode.Uri) {
     // create certora/conf for the workspace directory if there is no certora/conf with conf file in the workspace
+    console.log(directoryToWatch)
     try {
       const fileSystemWatcher1 = vscode.workspace.createFileSystemWatcher(
         new vscode.RelativePattern(directoryToWatch, `**/*`),
       )
       fileSystemWatcher1.onDidCreate(async file => {
-        console.log(file, 'file was created! from new watcher')
+        console.log(file, 'file was created! from new watcher', file)
         const confFilesDirs = await vscode.workspace.findFiles(
-          `**/*${CONF_DIRECTORY}**`,
+          `**/*${CONF_DIRECTORY_NAME}/**`,
           '**/.certora_internal/**',
         )
-        // console.log(confFilesDirs, confFiles, 'files from workspaceee')
+        console.log(confFilesDirs, confFiles, 'files from workspaceee')
         // console.log('conf files before change', confFiles)
         const val: boolean = checkIfFilesChanges(confFilesDirs)
         if (val) {
@@ -603,7 +589,7 @@ export function activate(context: vscode.ExtensionContext): void {
       fileSystemWatcher1.onDidDelete(async file => {
         console.log(file, 'file was deleted! from new watcher')
         const confFilesDirs = await vscode.workspace.findFiles(
-          `**/*${CONF_DIRECTORY}**`,
+          `**/*${CONF_DIRECTORY_NAME}/**`,
           '**/.certora_internal/**',
         )
         console.log(confFilesDirs, 'files from workspaceee')

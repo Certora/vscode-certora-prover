@@ -96,7 +96,7 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
               source: Sources.Extension,
               info: e.payload,
             })
-            navigateToCode(e.payload)
+            navigateToCode(e.payload.jumpToDefinition, e.payload.path)
             break
           case CommandFromResultsWebview.StopScript:
             log({

@@ -17,7 +17,7 @@
   } from '../types'
   import Pane from './Pane.svelte'
   import Tree from './Tree.svelte'
-  import { verificationResults } from '../store/store'
+  import { CERTORA_CONF, verificationResults } from '../store/store'
   import { writable } from 'svelte/store'
   import { clearResults } from '../extension-actions'
 
@@ -407,7 +407,7 @@
                 }}
               >
                 <Tree
-                  runDisplayName={namesMap.get(runName)}
+                  pathToCode={vr.name.split(CERTORA_CONF)[0]}
                   data={{
                     type: TreeType.Rules,
                     tree: retrieveRules(vr.jobs),

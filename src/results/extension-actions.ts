@@ -207,18 +207,21 @@ export function rename(oldName: JobNameMap, newName: JobNameMap): void {
   })
 }
 
-export function navigateToCode(jumpToDefinition: JumpToDefinition[]): void {
+export function navigateToCode(
+  jumpToDefinition: JumpToDefinition[],
+  path: string,
+): void {
   log({
     action: 'Send "navigate-to-code" command',
     source: Sources.ResultsWebview,
-    info: jumpToDefinition,
+    info: { jumpToDefinition: jumpToDefinition, path: path },
   })
 
   if (!jumpToDefinition.length) return
 
   vscode.postMessage({
     command: Commands.NavigateToCode,
-    payload: jumpToDefinition,
+    payload: { jumpToDefinition: jumpToDefinition, path: path },
   })
 }
 

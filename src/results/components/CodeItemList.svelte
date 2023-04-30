@@ -8,6 +8,7 @@
   import type { SourceVariable } from '../types'
 
   export let codeItems: SourceVariable[] = []
+  export let pathToCode: string
 
   $: variables = codeItems.map(variablesAdapter)
 </script>
@@ -16,6 +17,7 @@
   {#each variables as variable}
     <li>
       <CodeItem
+        {pathToCode}
         name={variable.name}
         value={variable.value}
         jumpToDefinition={variable.jumpToDefinition}

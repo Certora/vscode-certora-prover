@@ -5,8 +5,11 @@
 import * as vscode from 'vscode'
 import type { JumpToDefinition } from '../types'
 
+// todo: add path to spec instead of base path (for multiple dir option)
+
 export async function navigateToCode(
   jumpToDefinition: JumpToDefinition[],
+  path: string,
 ): Promise<void> {
   try {
     const jtd = jumpToDefinition.map(item => ({
@@ -14,8 +17,7 @@ export async function navigateToCode(
       line: item.line - 1,
       col: item.col - 1,
     }))
-    const base = vscode.workspace.workspaceFolders?.[0].uri
-
+    const base = vscode.Uri.parse(path)
     if (!base) return
 
     const documentsToUpdateFocus: {

@@ -8,8 +8,8 @@
   import { navigateToCode } from '../extension-actions'
   import type { Rule, CallTraceFunction } from '../types'
   import { TreeType } from '../types'
-  // export let runDisplayName // todo: delete?
   export let jobEnded: boolean = false
+  export let pathToCode: string
   export let data:
     | {
         type: TreeType.Rules
@@ -27,6 +27,7 @@
     {#each data.tree as rule, i}
       <RulesTreeItem
         {rule}
+        {pathToCode}
         initialExpandedState={rule.isExpanded || false}
         setSize={data.tree.length}
         posInset={i + 1}
@@ -36,7 +37,7 @@
                 title: 'Go to code',
                 icon: 'go-to-file',
                 onClick: () => {
-                  navigateToCode(rule.jumpToDefinition)
+                  navigateToCode(rule.jumpToDefinition, pathToCode)
                 },
               },
             ]
@@ -60,7 +61,7 @@
                 title: 'Go to code',
                 icon: 'go-to-file',
                 onClick: () => {
-                  navigateToCode(callTraceFunction.jumpToDefinition)
+                  navigateToCode(callTraceFunction.jumpToDefinition, pathToCode)
                 },
               },
             ]

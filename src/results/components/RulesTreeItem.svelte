@@ -18,6 +18,7 @@
   export let duplicateFunc = null
   export let initialExpandedState: boolean = false
   export let jobEnded: boolean = false
+  export let pathToCode: string
 
   const dispatch = createEventDispatcher<{ fetchOutput: Assert | Rule }>()
   $: jobEnded && rule?.status && rule.status === RuleStatuses.Running
@@ -102,6 +103,7 @@
     <svelte:self
       rule={child}
       {jobEnded}
+      {pathToCode}
       level={level + 1}
       setSize={rule.children.length}
       posInset={i}
@@ -111,7 +113,7 @@
               title: 'Go to code',
               icon: 'go-to-file',
               onClick: () => {
-                navigateToCode(child.jumpToDefinition)
+                navigateToCode(child.jumpToDefinition, pathToCode)
               },
             },
           ]
@@ -135,7 +137,7 @@
               title: 'Go to code',
               icon: 'go-to-file',
               onClick: () => {
-                navigateToCode(child.jumpToDefinition)
+                navigateToCode(child.jumpToDefinition, pathToCode)
               },
             },
           ]

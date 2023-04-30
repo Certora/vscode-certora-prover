@@ -57,7 +57,7 @@
 
   // bind output
   export let output: Output
-  let outputRunName: string
+  export let outputRunName: string
 
   let selectedCalltraceFunction: CallTraceFunction
 
@@ -928,42 +928,42 @@
         class={'running-scripts ' +
           (title === JOB_LIST ? 'invisible-border' : '')}
       >
-        {#each runs as obj, index}
+        {#each Array(runsCounter) as _, index (index)}
           <li
             on:contextmenu|stopPropagation|preventDefault={e => {
-              showMenu(e, obj)
+              showMenu(e, runs[index])
             }}
           >
             <NewRun
-              editFunc={() => editRun(obj)}
-              deleteFunc={() => askToDeleteThis(obj)}
-              deleteRun={() => deleteRun(obj)}
+              editFunc={() => editRun(runs[index])}
+              deleteFunc={() => askToDeleteThis(runs[index])}
+              deleteRun={() => deleteRun(runs[index])}
               {renameRun}
               duplicateFunc={duplicateRun}
-              runFunc={() => run(obj)}
+              runFunc={() => run(runs[index])}
               {newFetchOutput}
               pendingStopFunc={() => {
-                pendingStopFunc(obj)
+                pendingStopFunc(runs[index])
               }}
               runningStopFunc={() => {
                 enableEdit({
-                  confPath: obj.confPath,
-                  displayName: namesMap.get(obj.name),
+                  confPath: runs[index].confPath,
+                  displayName: namesMap.get(runs[index].name),
                 })
-                obj.vrLink = ''
-                const modal = obj.status !== Status.running
-                stopScript(obj.id, modal)
+                runs[index].vrLink = ''
+                const modal = runs[index].status !== Status.running
+                stopScript(runs[index].id, modal)
               }}
               inactiveSelected={focusedRun}
-              vrLink={obj.vrLink}
+              vrLink={runs[index].vrLink}
               pos={$pos}
               {resetHide}
-              bind:status={obj.status}
-              bind:hide={obj.showContextMenu}
+              bind:status={runs[index].status}
+              bind:hide={runs[index].showContextMenu}
               bind:namesMap
-              bind:runName={obj.name}
-              bind:pathToConf={obj.confPath}
-              bind:isExpanded={obj.isExpanded}
+              bind:runName={runs[index].name}
+              bind:pathToConf={runs[index].confPath}
+              bind:isExpanded={runs[index].isExpanded}
             />
           </li>
         {/each}

@@ -239,7 +239,7 @@ export enum CommandFromSettingsWebview {
 export type EventFromResultsWebview =
   | {
       command: CommandFromResultsWebview.NavigateToCode
-      payload: JumpToDefinition[]
+      payload: { jumpToDefinition: JumpToDefinition[]; path: string }
     }
   | {
       command: CommandFromResultsWebview.StopScript

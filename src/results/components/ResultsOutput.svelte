@@ -15,6 +15,7 @@
 
   export let output
   export let selectedCalltraceFunction
+  export let pathToCode
 
   function selectCalltraceFunction(e: CustomEvent<CallTraceFunction>) {
     selectedCalltraceFunction = e.detail
@@ -65,13 +66,13 @@
         },
       ]}
     >
-      <CodeItemList codeItems={output.variables} />
+      <CodeItemList codeItems={output.variables} {pathToCode} />
     </Pane>
   {/if}
   {#if output.callTrace && Object.keys(output.callTrace).length}
     <Pane title={`CALL TRACE`}>
       <Tree
-        runDisplayName=""
+        {pathToCode}
         data={{
           type: TreeType.Calltrace,
           tree: [output.callTrace],
@@ -82,20 +83,29 @@
   {/if}
   {#if selectedCalltraceFunction && selectedCalltraceFunction.variables && selectedCalltraceFunction.variables.length}
     <Pane title={`${selectedCalltraceFunction.name} variables`}>
-      <CodeItemList codeItems={selectedCalltraceFunction.variables} />
+      <CodeItemList
+        codeItems={selectedCalltraceFunction.variables}
+        {pathToCode}
+      />
     </Pane>
   {/if}
   {#if output.callResolutionWarnings && output.callResolutionWarnings.length}
     <Pane title={`Contract call resolution warnings`}>
       {#each output.callResolutionWarnings as resolution}
-        <ContractCallResolution contractCallResolution={resolution} />
+        <ContractCallResolution
+          contractCallResolution={resolution}
+          {pathToCode}
+        />
       {/each}
     </Pane>
   {/if}
   {#if output.callResolution && output.callResolution.length}
     <Pane title={`Contract call resolution`}>
       {#each output.callResolution as resolution}
-        <ContractCallResolution contractCallResolution={resolution} />
+        <ContractCallResolution
+          contractCallResolution={resolution}
+          {pathToCode}
+        />
       {/each}
     </Pane>
   {/if}
