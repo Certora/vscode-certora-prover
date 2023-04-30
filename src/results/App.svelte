@@ -202,6 +202,7 @@
         }
       })
 
+      // add jobs
       const fileName = getFileName(file.confPath)
       let curStatus = Status.missingSettings
       if (file.allowRun) {
@@ -216,25 +217,6 @@
         showContextMenu: false,
         isExpanded: false,
       }
-      // todo: running scripts / verification results by id?
-      // const curRunningScript = runningScripts.find(rs => {return rs.confFile === file.confPath})
-      // const curResults = $verificationResults.find(vr=>{return vr.name === file.confPath})
-      // if (curRunningScript){
-      //   newRun.id = curRunningScript.pid
-      //   if (curResults){
-      //     newRun.status = Status.incompleteResults
-      //   }
-      //   else {
-      //     newRun.status = Status.running
-      //   }
-      // }
-      // const curPending = pendingQueue.find(ps => {return ps.confPath === file.confPath})
-      // if (curPending){
-      //   newRun.status = Status.pending
-      // }
-      // if (curResults && !curRunningScript) {
-      //   newRun.status = Status.success
-      // }
 
       $jobLists = $jobLists.map(jl => {
         if (

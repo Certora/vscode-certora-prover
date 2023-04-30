@@ -219,7 +219,6 @@
           }
           return r
         })
-        console.log(runs, 'runs after update')
         if (e.data.payload.jobStatus === 'FAILED') {
           setStoppedJobStatus(confPath)
           return
@@ -576,20 +575,6 @@
   }
 
   /**
-   * set vrLink of the run with name [runName] to [link]
-   * @param runName name of the run to update
-   * @param link to verification report of run [runName]
-   */
-  function setVerificationReportLink(pid: number, link: string) {
-    runs = runs.map(run => {
-      if (run.id === pid) {
-        run.vrLink = link
-      }
-      return run
-    })
-  }
-
-  /**
    * adds a new run to runs array and increase the counter
    * @param run new run. if doest exists - creates a new run object
    */
@@ -689,7 +674,6 @@
    * @param runToDelete run to delete
    */
   function deleteRun(runToDelete: Run): void {
-    // console.log(runToDelete.confPath, 'from delete run')
     const name = runToDelete.confPath
 
     //delete results
@@ -724,7 +708,6 @@
    * @param newName new name for the run and conf
    */
   function renameRun(oldName: string, newName: string): void {
-    console.log(oldName, newName, namesMap)
     // rename existing run
     if (oldName) {
       // the renamed run should have the same verification results, if they exist
@@ -891,7 +874,6 @@
       return rs.uploaded === true
     })
     //if there are no running scripts => runNext
-    console.log('run next?', runningScripts.length, shouldRunNext, index)
     if ((!runningScripts.length || shouldRunNext) && index === 0) {
       runNext()
     }
@@ -955,9 +937,9 @@
                 stopScript(runs[index].id, modal)
               }}
               inactiveSelected={focusedRun}
-              vrLink={runs[index].vrLink}
               pos={$pos}
               {resetHide}
+              bind:vrLink={runs[index].vrLink}
               bind:status={runs[index].status}
               bind:hide={runs[index].showContextMenu}
               bind:namesMap

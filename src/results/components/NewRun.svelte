@@ -382,7 +382,7 @@
       />
     </div>
   {:else if !(status === Status.running || status === Status.pending)}
-    {#key [inactiveSelected]}
+    {#key [inactiveSelected, vrLink]}
       <div class="results" on:click={onClick}>
         <Pane
           title={namesMap.get(runName)}

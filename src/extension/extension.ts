@@ -553,13 +553,11 @@ export function activate(context: vscode.ExtensionContext): void {
           '**/.certora_internal/**',
         )
         console.log(confFilesDirs, confFiles, 'files from workspaceee')
-        // console.log('conf files before change', confFiles)
         const val: boolean = checkIfFilesChanges(confFilesDirs)
         if (val) {
           console.log(val)
           return
         }
-        // console.log('conf files after change', confFiles)
         const fileObjects = confFilesDirs.map(async file => {
           return await createFileObject(file)
         })
@@ -568,21 +566,18 @@ export function activate(context: vscode.ExtensionContext): void {
 
         if (!awaitedList || !awaitedList.length) return
         sendFilesToCreateJobs(awaitedList)
-        // const listOfNewJobs = awaitedList.filter(job => {
-        //   console.log(confFiles, job.confPath, 'do we have this already?')
-        //   return !confFiles.find(cf => {
-        //     return cf.path === job.confPath
-        //   })
-        // })
-        // console.log(listOfNewJobs, '======')
-        // getLastResults(listOfNewJobs)
+
+        const newDirs = awaitedList.filter(dir => {
+          return dir.confPath.startsWith(file.path)
+        })
+
+        newDirs.forEach(dir => {
+          const pathsToWatch = dir.confPath.split(CONF_DIRECTORY)[0]
+          console.log(pathsToWatch, '====path to watch====')
+          watchForBuilds(pathsToWatch)
+        })
+
         confFiles = confFilesDirs
-        const fileObj: ConfToCreate = await createFileObject(file)
-        const pathsToWatch = fileObj.confPath.split(CONF_DIRECTORY)[0]
-        // todo: handle watchForBuild watcher with regards to the current job list
-        // right now if we rename a dir with sub dir it only watches the up most dir
-        console.log(pathsToWatch, '====path to watch====')
-        watchForBuilds(pathsToWatch)
       })
       // vscode asks to delete a conf file before is it deleted to avoid mistakes,
       // so I think deleting the job with it is a good idea

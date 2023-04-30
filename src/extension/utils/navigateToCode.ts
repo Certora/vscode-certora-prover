@@ -5,8 +5,6 @@
 import * as vscode from 'vscode'
 import type { JumpToDefinition } from '../types'
 
-// todo: add path to spec instead of base path (for multiple dir option)
-
 export async function navigateToCode(
   jumpToDefinition: JumpToDefinition[],
   path: string,
