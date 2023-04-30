@@ -374,6 +374,7 @@
           info: e.data.payload,
         })
         const runName = e.data.payload
+        removeScript(runName)
         runs = setStatus(runName, Status.unableToRun)
         break
       }

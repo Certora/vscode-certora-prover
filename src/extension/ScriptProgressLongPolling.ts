@@ -62,7 +62,6 @@ export class ScriptProgressLongPolling {
     callback: (data: Job) => void,
   ): Promise<void> {
     try {
-      console.log(confPath, 'url from polling')
       const { data } = await axios.get<ProgressResponse>(url)
       const dataToUI = await this.prepareDataToUI(data, url)
 
