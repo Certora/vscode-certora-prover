@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+### 0.1.7 ()
+
+## Bug Fixes
+
+* When prover is unavailable, show in the ui that the job failed ([#98](https://github.com/Certora/vscode-certora-prover/pull/98))
+
 ### 0.1.6 (2023-04-27)
 
 ## Features
