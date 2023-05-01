@@ -90,10 +90,8 @@ export class ScriptProgressLongPolling {
         dataToUI
       ) {
         callback(dataToUI)
-        this.rerun(url, confPath, callback)
-      } else {
-        this.rerun(url, confPath, callback)
       }
+      this.rerun(url, confPath, callback)
     } catch (e) {
       this.resultsWebviewProvider.postMessage({
         type: 'parse-error',
