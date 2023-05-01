@@ -190,7 +190,6 @@
               })
             }
             removeScript(runName)
-            // runs = setStatus(runName, Status.success)
             setStoppedJobStatus(runName)
           }
         }
@@ -374,6 +373,7 @@
           info: e.data.payload,
         })
         const runName = e.data.payload
+        removeScript(runName)
         runs = setStatus(runName, Status.unableToRun)
         break
       }
@@ -561,18 +561,22 @@
         runs = setStatus(jobName, Status.unableToRun)
         return
       }
-      $verificationResults.forEach(vr => {
+      $verificationResults = $verificationResults.map(vr => {
         if (vr.name === jobName) {
           runs = setStatus(jobName, Status.success)
-        } else if (
-          runs.find(run => {
-            return run.name === jobName
-          })?.status === Status.running
+          return vr
+        }
+        const curRun = runs.find(run => {
+          return run.name === jobName
+        })
+        if (
+          curRun?.status === Status.running ||
+          curRun?.status === Status.ready
         ) {
           runs = setStatus(jobName, Status.unableToRun)
         }
+        return vr
       })
-      $verificationResults = $verificationResults
       return
     }
   }

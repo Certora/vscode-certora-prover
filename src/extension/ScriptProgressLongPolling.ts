@@ -7,15 +7,22 @@ import axios from 'axios'
 import type { Job, ProgressResponse } from './types'
 import { getCreationTimeUrl } from './utils/getProgressUrl'
 import type { CreationTime } from '../results/types'
+import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 
 export class ScriptProgressLongPolling {
+  private readonly resultsWebviewProvider: ResultsWebviewProvider
+  constructor(resultsWebviewProvider: ResultsWebviewProvider) {
+    this.resultsWebviewProvider = resultsWebviewProvider
+  }
+
   private async rerun(
     url: string,
+    confPath: string,
     callback: (data: Job) => void,
     ms = 5000,
   ): Promise<void> {
     await new Promise(resolve => setTimeout(resolve, ms))
-    this.run(url, callback)
+    this.run(url, confPath, callback)
   }
 
   private async prepareDataToUI(
@@ -49,7 +56,11 @@ export class ScriptProgressLongPolling {
     }
   }
 
-  public async run(url: string, callback: (data: Job) => void): Promise<void> {
+  public async run(
+    url: string,
+    confPath: string,
+    callback: (data: Job) => void,
+  ): Promise<void> {
     try {
       const { data } = await axios.get<ProgressResponse>(url)
       const dataToUI = await this.prepareDataToUI(data, url)
@@ -79,11 +90,13 @@ export class ScriptProgressLongPolling {
         dataToUI
       ) {
         callback(dataToUI)
-        this.rerun(url, callback)
-      } else {
-        this.rerun(url, callback)
       }
+      this.rerun(url, confPath, callback)
     } catch (e) {
+      this.resultsWebviewProvider.postMessage({
+        type: 'parse-error',
+        payload: confPath,
+      })
       window.showErrorMessage(
         `Certora verification service is currently unavailable. Please, try again later. ${e}`,
       )

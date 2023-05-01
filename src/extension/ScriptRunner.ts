@@ -30,9 +30,9 @@ export class ScriptRunner {
   private logFiles: Uri[] = []
 
   constructor(resultsWebviewProvider: ResultsWebviewProvider) {
-    this.polling = new ScriptProgressLongPolling()
     this.resultsWebviewProvider = resultsWebviewProvider
     this.resultsWebviewProvider.stopScript = this.stop
+    this.polling = new ScriptProgressLongPolling(this.resultsWebviewProvider)
   }
 
   private getConfFileName(path: string): string {
@@ -218,7 +218,7 @@ export class ScriptRunner {
       const confFileName = this.getConfFileName(confFile).replace('.conf', '')
 
       if (progressUrl) {
-        await this.polling.run(progressUrl, async data => {
+        await this.polling.run(progressUrl, confFileName, async data => {
           data.pid = pid
           data.runName = confFileName
           await this.saveLastResults(path.uri, confFile, data)
