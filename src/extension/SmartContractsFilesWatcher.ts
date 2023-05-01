@@ -50,7 +50,7 @@ export class SmartContractsFilesWatcher {
 
     if (path) {
       this.files = this.files.filter(file => {
-        return file.path.includes(path.path)
+        return file.path.startsWith(path.path + '/')
       })
     }
 

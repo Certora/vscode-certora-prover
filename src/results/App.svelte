@@ -157,6 +157,7 @@
    * @param addedFiles files to add
    */
   function addLists(addedFiles: ConfToCreate[]) {
+    // let tempJobLists = []
     addedFiles.forEach((file, index) => {
       const relativePath = file.confPath
         .replace(file.workspaceFolder, '')
@@ -175,34 +176,36 @@
         }
 
         $jobLists = $jobLists.map(jl => {
-          if (
-            !jl.children.find(child => {
-              return child.title === item && child.path === itemJobList.path
-            })
-          ) {
-            // either add to the JOB LIST (workspace folder) or to the directory that is before this one in the path
-            if (index === 0 && jl.path === workspaceDirPath) {
-              jl.children.push(itemJobList)
-            } else if (
-              jl.title === pathArr[index - 1] &&
-              jl.path === itemJobList.path.split(pathArr[index - 1])[0]
-            ) {
-              jl.children.push(itemJobList)
-            }
-          }
+          // if (
+          //   !jl.children.find(child => {
+          //     return child.title === item && child.path === itemJobList.path
+          //   })
+          // ) {
+          //   // either add to the JOB LIST (workspace folder) or to the directory that is before this one in the path
+          //   if (index === 0 && jl.path === workspaceDirPath) {
+          //     jl.children.push(itemJobList)
+          //   } else if (
+          //     jl.title === pathArr[index - 1] &&
+          //     jl.path === itemJobList.path.split(pathArr[index - 1])[0]
+          //   ) {
+          //     jl.children.push(itemJobList)
+          //   }
+          // }
+          jl = recursivelyAddJobLists(itemJobList, jl, index, pathArr)
           return jl
         })
         // add to the job list (todo: delete this?)
-        if (
-          !$jobLists.find(jobList => {
-            return jobList.title === item && jobList.path === itemJobList.path
-          })
-        ) {
-          $jobLists.push(itemJobList)
-        }
+        // if (
+        //   !$jobLists.find(jobList => {
+        //     return jobList.title === item && jobList.path === itemJobList.path
+        //   })
+        // ) {
+        // console.log(itemJobList, 'from the later addition')
+        // tempJobLists.push(itemJobList)
+        // }
       })
 
-      // add jobs
+      // add jobs (todo: add jobs recursively to the dir structure)
       const fileName = getFileName(file.confPath)
       let curStatus = Status.missingSettings
       if (file.allowRun) {
@@ -219,25 +222,101 @@
       }
 
       $jobLists = $jobLists.map(jl => {
-        if (
-          jl.title === pathArr[pathArr.length - 1] &&
-          jl.path === file.confPath.split(pathArr[pathArr.length - 1])[0]
-        ) {
-          jl.runs.push(newRun)
-          jl.namesMap.set(newRun.name, newRun.name.replaceAll('_', ' '))
-        } else if (
-          jl.title === JOB_LIST &&
-          file.confPath.split(CERTORA_CONF)[0] === workspaceDirPath &&
-          !jl.runs.find(r => {
-            return r.confPath === file.confPath
-          })
-        ) {
-          jl.runs.push(newRun)
-          jl.namesMap.set(newRun.name, newRun.name.replaceAll('_', ' '))
-        }
+        // if (
+        //   jl.title === pathArr[pathArr.length - 1] &&
+        //   jl.path === file.confPath.split(pathArr[pathArr.length - 1])[0]
+        // ) {
+        //   jl.runs.push(newRun)
+        //   jl.namesMap.set(newRun.name, newRun.name.replaceAll('_', ' '))
+        // } else if (
+        //   jl.title === JOB_LIST &&
+        //   file.confPath.split(CERTORA_CONF)[0] === workspaceDirPath &&
+        //   !jl.runs.find(r => {
+        //     return r.confPath === file.confPath
+        //   })
+        // ) {
+        //   jl.runs.push(newRun)
+        //   jl.namesMap.set(newRun.name, newRun.name.replaceAll('_', ' '))
+        // }
+        jl = recursivelyAddJob(newRun, jl, pathArr[pathArr.length - 1])
         return jl
       })
     })
+  }
+
+  function recursivelyAddJobLists(
+    childJL: jobList,
+    parentJL: jobList,
+    index: number,
+    pathArr: string[],
+  ) {
+    if (
+      !parentJL.children.find(child => {
+        return child.title === childJL.title && child.path === childJL.path
+      })
+    ) {
+      // either add to the JOB LIST (workspace folder) or to the directory that is before this one in the path
+      if (index === 0 && parentJL.path === workspaceDirPath) {
+        parentJL.children.push(childJL)
+        parentJL.children = parentJL.children.sort((item1, item2) => {
+          return item1.title > item2.title ? 1 : -1
+        })
+      } else if (
+        parentJL.title === pathArr[index - 1] &&
+        parentJL.path === childJL.path.split(pathArr[index - 1])[0]
+      ) {
+        parentJL.children.push(childJL)
+        parentJL.children = parentJL.children.sort((item1, item2) => {
+          return item1.title > item2.title ? 1 : -1
+        })
+      } else {
+        parentJL.children.forEach(child => {
+          recursivelyAddJobLists(childJL, child, index, pathArr)
+        })
+      }
+    }
+    return parentJL
+  }
+
+  /**
+   * either add job to the job list that represents the directory the conf file of the job is in,
+   * or add it to the workspace directory
+   * @param newRun
+   * @param jl
+   * @param lastArrItem pathArr[pathArr.length - 1]
+   */
+  function recursivelyAddJob(newRun: Run, jl: jobList, lastArrItem: string) {
+    // console.log('recursively add', newRun, jl, lastArrItem)
+    if (
+      jl.title === lastArrItem &&
+      jl.path === newRun.confPath.split(lastArrItem)[0]
+    ) {
+      jl.runs.push(newRun)
+      jl.namesMap.set(newRun.name, newRun.name.replaceAll('_', ' '))
+      // console.log('job lists update recursively', $jobLists)
+      jl.runs = jl.runs.sort((item1, item2) => {
+        return item1.confPath > item2.confPath ? 1 : -1
+      })
+    } else if (
+      jl.title === JOB_LIST &&
+      newRun.confPath.split(CERTORA_CONF)[0] === workspaceDirPath &&
+      !jl.runs.find(r => {
+        return r.confPath === newRun.confPath
+      })
+    ) {
+      jl.runs.push(newRun)
+      jl.namesMap.set(newRun.name, newRun.name.replaceAll('_', ' '))
+      jl.runs = jl.runs.sort((item1, item2) => {
+        return item1.confPath > item2.confPath ? 1 : -1
+      })
+      // console.log('job lists update recursively', $jobLists)
+    } else {
+      //recursively look for job lists
+      jl.children.forEach(child => {
+        recursivelyAddJob(newRun, child, lastArrItem)
+      })
+    }
+    return jl
   }
 
   /**
@@ -261,22 +340,38 @@
 
     // handle added files
     let addedFiles = confList.filter(conf => {
-      let val = true
-      for (let i = 0; i < $jobLists.length; i++) {
-        if (
-          $jobLists[i].runs.find(run => {
-            return run.confPath === conf.confPath
-          })
-        ) {
-          val = false
-        }
-      }
-      return val
+      // console.log(recursivelyLookForConfFiles(conf, $jobLists[0]), 'helpppp')
+      return recursivelyLookForConfFiles(conf, $jobLists[0])
     })
     console.log(addedFiles, 'added files', $jobLists)
 
     addLists(addedFiles)
     getLastResults(addedFiles)
+  }
+
+  /**
+   * return true if the conf doesn't exists in the job list filesystem (tree)
+   * @param conf to search in the filesystem
+   * @param jl root of the filesystem
+   */
+  function recursivelyLookForConfFiles(conf: ConfToCreate, jl: jobList) {
+    const jlToSearch = [jl]
+    while (jlToSearch.length) {
+      let tempJL = jlToSearch.pop()
+      if (
+        tempJL.runs.find(run => {
+          return run.confPath === conf.confPath
+        })
+      ) {
+        return false
+      }
+      if (tempJL.children) {
+        tempJL.children.forEach(child => {
+          jlToSearch.push(child)
+        })
+      }
+    }
+    return true
   }
 
   function createInitialJobs(data: ConfToCreate[]) {
@@ -307,6 +402,7 @@
 
     console.log('workspace files', workspaceDirList)
 
+    // create root job list
     const singleJobList: jobList = {
       runs: workspaceDirList,
       title: JOB_LIST,

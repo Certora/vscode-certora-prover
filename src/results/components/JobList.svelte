@@ -905,7 +905,11 @@
 
 <div>
   <div>
-    <Pane {title} {actions} bind:isExpanded>
+    <Pane
+      title={title === JOB_LIST ? `${title} (${path.split('/').pop()})` : title}
+      {actions}
+      bind:isExpanded
+    >
       <ul
         class={'running-scripts ' +
           (title === JOB_LIST ? 'invisible-border' : '')}
