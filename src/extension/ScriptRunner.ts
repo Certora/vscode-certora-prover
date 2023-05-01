@@ -163,9 +163,13 @@ export class ScriptRunner {
     const channel = window.createOutputChannel(
       `Certora IDE - ${confFile}-${ts}`,
     )
-    this.script = spawn(`certoraRun`, [confFile], {
-      cwd: path.uri.fsPath,
-    })
+    this.script = spawn(
+      `certoraRun`,
+      ['--run_source', 'VSCODE', '--send_only', confFile],
+      {
+        cwd: path.uri.fsPath,
+      },
+    )
 
     if (!this.script) return
 
