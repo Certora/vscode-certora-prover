@@ -33,7 +33,6 @@
   } from './store/store'
   import JobList from './components/JobList.svelte'
   import ResultsOutput from './components/ResultsOutput.svelte'
-  import { bind } from 'svelte/internal'
 
   export const focusedRun = writable('')
 
@@ -151,13 +150,11 @@
     return jl
   }
 
-  // todo: improve this code so it will look nicer
   /**
    * add lists and jobs to the filesystem structure
    * @param addedFiles files to add
    */
   function addLists(addedFiles: ConfToCreate[]) {
-    // let tempJobLists = []
     addedFiles.forEach((file, index) => {
       const relativePath = file.confPath
         .replace(file.workspaceFolder, '')
@@ -176,36 +173,11 @@
         }
 
         $jobLists = $jobLists.map(jl => {
-          // if (
-          //   !jl.children.find(child => {
-          //     return child.title === item && child.path === itemJobList.path
-          //   })
-          // ) {
-          //   // either add to the JOB LIST (workspace folder) or to the directory that is before this one in the path
-          //   if (index === 0 && jl.path === workspaceDirPath) {
-          //     jl.children.push(itemJobList)
-          //   } else if (
-          //     jl.title === pathArr[index - 1] &&
-          //     jl.path === itemJobList.path.split(pathArr[index - 1])[0]
-          //   ) {
-          //     jl.children.push(itemJobList)
-          //   }
-          // }
           jl = recursivelyAddJobLists(itemJobList, jl, index, pathArr)
           return jl
         })
-        // add to the job list (todo: delete this?)
-        // if (
-        //   !$jobLists.find(jobList => {
-        //     return jobList.title === item && jobList.path === itemJobList.path
-        //   })
-        // ) {
-        // console.log(itemJobList, 'from the later addition')
-        // tempJobLists.push(itemJobList)
-        // }
       })
 
-      // add jobs (todo: add jobs recursively to the dir structure)
       const fileName = getFileName(file.confPath)
       let curStatus = Status.missingSettings
       if (file.allowRun) {
@@ -222,22 +194,6 @@
       }
 
       $jobLists = $jobLists.map(jl => {
-        // if (
-        //   jl.title === pathArr[pathArr.length - 1] &&
-        //   jl.path === file.confPath.split(pathArr[pathArr.length - 1])[0]
-        // ) {
-        //   jl.runs.push(newRun)
-        //   jl.namesMap.set(newRun.name, newRun.name.replaceAll('_', ' '))
-        // } else if (
-        //   jl.title === JOB_LIST &&
-        //   file.confPath.split(CERTORA_CONF)[0] === workspaceDirPath &&
-        //   !jl.runs.find(r => {
-        //     return r.confPath === file.confPath
-        //   })
-        // ) {
-        //   jl.runs.push(newRun)
-        //   jl.namesMap.set(newRun.name, newRun.name.replaceAll('_', ' '))
-        // }
         jl = recursivelyAddJob(newRun, jl, pathArr[pathArr.length - 1])
         return jl
       })
@@ -286,14 +242,12 @@
    * @param lastArrItem pathArr[pathArr.length - 1]
    */
   function recursivelyAddJob(newRun: Run, jl: jobList, lastArrItem: string) {
-    // console.log('recursively add', newRun, jl, lastArrItem)
     if (
       jl.title === lastArrItem &&
       jl.path === newRun.confPath.split(lastArrItem)[0]
     ) {
       jl.runs.push(newRun)
       jl.namesMap.set(newRun.name, newRun.name.replaceAll('_', ' '))
-      // console.log('job lists update recursively', $jobLists)
       jl.runs = jl.runs.sort((item1, item2) => {
         return item1.confPath > item2.confPath ? 1 : -1
       })
@@ -309,7 +263,6 @@
       jl.runs = jl.runs.sort((item1, item2) => {
         return item1.confPath > item2.confPath ? 1 : -1
       })
-      // console.log('job lists update recursively', $jobLists)
     } else {
       //recursively look for job lists
       jl.children.forEach(child => {
@@ -340,7 +293,6 @@
 
     // handle added files
     let addedFiles = confList.filter(conf => {
-      // console.log(recursivelyLookForConfFiles(conf, $jobLists[0]), 'helpppp')
       return recursivelyLookForConfFiles(conf, $jobLists[0])
     })
     console.log(addedFiles, 'added files', $jobLists)
@@ -443,7 +395,6 @@
       namesMap: new Map(),
       children: [],
       isExpanded: true,
-      // activateExpandCollapse: false,
     }
     $jobLists.push(singleJobList)
   }
@@ -457,15 +408,6 @@
       pendingQueueCounter--
       $verificationResults = $verificationResults.filter(vr => {
         return vr.name !== curRun.confPath
-      })
-      // status change
-      $jobLists = $jobLists.map(jl => {
-        jl.runs.forEach(run => {
-          if (run.confPath === curRun.confPath) {
-            run.status = Status.running
-          }
-        })
-        return jl
       })
       runScript(curRun)
     }
@@ -490,12 +432,20 @@
 
   function resetHide() {
     $jobLists = $jobLists.map(jl => {
-      jl.runs = jl.runs.map(run => {
-        run.showContextMenu = false
-        return run
-      })
+      jl = recursivelyHideMenu(jl)
       return jl
     })
+  }
+
+  function recursivelyHideMenu(jl: jobList) {
+    jl.runs = jl.runs.map(run => {
+      run.showContextMenu = false
+      return run
+    })
+    jl.children = jl.children.map(child => {
+      return recursivelyHideMenu(child)
+    })
+    return jl
   }
 
   window.onclick = function (event) {

@@ -10,5 +10,4 @@ export const JOB_LIST = 'JOB LIST'
 
 export const verificationResults: Writable<Verification[]> = writable([])
 
-// todo: job list is a pane level?
 export const jobLists: Writable<jobList[]> = writable([])

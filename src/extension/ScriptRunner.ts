@@ -35,9 +35,9 @@ export class ScriptRunner {
   private logFiles: Uri[] = []
 
   constructor(resultsWebviewProvider: ResultsWebviewProvider) {
-    this.polling = new ScriptProgressLongPolling()
     this.resultsWebviewProvider = resultsWebviewProvider
     this.resultsWebviewProvider.stopScript = this.stop
+    this.polling = new ScriptProgressLongPolling(this.resultsWebviewProvider)
   }
 
   private getConfFileName(path: string): string {
@@ -169,9 +169,14 @@ export class ScriptRunner {
     const channel = window.createOutputChannel(
       `Certora IDE - ${confFile}-${ts}`,
     )
-    this.script = spawn(`certoraRun`, [confFile], {
-      cwd: path,
-    })
+
+    this.script = spawn(
+      `certoraRun`,
+      ['--run_source', 'VSCODE', '--send_only', confFile],
+      {
+        cwd: path,
+      },
+    )
 
     if (!this.script) return
 
@@ -217,10 +222,10 @@ export class ScriptRunner {
 
       const progressUrl = getProgressUrl(str)
 
-      // const confFileName = this.getConfFileName(confFile).replace('.conf', '')
+      const confFileName = this.getConfFileName(confFile).replace('.conf', '')
 
       if (progressUrl) {
-        await this.polling.run(progressUrl, async data => {
+        await this.polling.run(progressUrl, confFileName, async data => {
           data.pid = pid
           data.runName = confFile
           await this.saveLastResults(Uri.parse(path), confFile, data)

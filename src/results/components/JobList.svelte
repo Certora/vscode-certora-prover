@@ -91,6 +91,8 @@
     : null
 
   let actions = updateActions()
+  // update actions to change the expand-collapse action icon
+  $: $expandCollapse ? (actions = updateActions()) : null
 
   /**
    * create actions according to the job list role
@@ -240,10 +242,8 @@
         }
 
         if (e.data.payload.jobStatus === 'SUCCEEDED') {
-          if (runName && confPath) {
-            removeScript(runName)
-            setStoppedJobStatus(confPath)
-          }
+          removeScript(confPath)
+          setStoppedJobStatus(confPath)
         }
         log({
           action: 'After Smart merge current results with new result',
@@ -430,6 +430,7 @@
           runningScripts.forEach(rs => {
             if (r.confPath === rs.confFile) {
               r.id = rs.pid
+              r.status = Status.running
             }
           })
           return r
@@ -458,6 +459,7 @@
         runs = runs.map(run => {
           if (run.id === curPid) {
             run.vrLink = vrLink
+            // run.status = Status.running
             confToEnable.displayName = namesMap.get(run.name)
           }
           return run
@@ -502,18 +504,22 @@
         runs = setStatus(jobName, Status.unableToRun)
         return
       }
-      $verificationResults.forEach(vr => {
+      $verificationResults = $verificationResults.map(vr => {
         if (vr.name === jobName) {
           runs = setStatus(jobName, Status.success)
-        } else if (
-          runs.find(run => {
-            return run.confPath === jobName
-          })?.status === Status.running
+          return vr
+        }
+        const curRun = runs.find(run => {
+          return run.confPath === jobName
+        })
+        if (
+          curRun?.status === Status.running ||
+          curRun?.status === Status.ready
         ) {
           runs = setStatus(jobName, Status.unableToRun)
         }
+        return vr
       })
-      $verificationResults = $verificationResults
       return
     }
   }
@@ -862,9 +868,6 @@
     pendingQueue.push(JobNameMap)
     runs = setStatus(JobNameMap.confPath, Status.pending)
     pendingQueueCounter++
-    // $verificationResults = $verificationResults.filter(vr => {
-    //   return vr.name !== JobNameMap.confPath
-    // })
 
     if (output && outputRunName === run.name) {
       clearOutput()
@@ -886,11 +889,7 @@
     if (pendingQueue.length) {
       let curRun = pendingQueue.shift()
       pendingQueueCounter--
-      // $verificationResults = $verificationResults.filter(vr => {
-      //   return vr.name !== curRun.confPath
-      // })
       runs = setStatus(curRun.confPath, Status.running)
-      // if (curRun.displayName) enableEdit(curRun)
       runScript(curRun)
     }
   }
