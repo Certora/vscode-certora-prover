@@ -314,6 +314,11 @@
         ) {
           newStatus = Status.success
         }
+        if (
+          runs.find(run => run.name === runName)?.status === Status.jobFailed
+        ) {
+          return
+        }
         runs = setStatus(runName, newStatus)
         break
       }
@@ -374,7 +379,7 @@
         })
         const runName = e.data.payload
         removeScript(runName)
-        runs = setStatus(runName, Status.unableToRun)
+        runs = setStatus(runName, Status.jobFailed)
         break
       }
       case EventTypesFromExtension.InitialJobs: {
@@ -558,7 +563,7 @@
           return vr.name === jobName
         })
       ) {
-        runs = setStatus(jobName, Status.unableToRun)
+        runs = setStatus(jobName, Status.jobFailed)
         return
       }
       $verificationResults = $verificationResults.map(vr => {
@@ -573,7 +578,7 @@
           curRun?.status === Status.running ||
           curRun?.status === Status.ready
         ) {
-          runs = setStatus(jobName, Status.unableToRun)
+          runs = setStatus(jobName, Status.jobFailed)
         }
         return vr
       })

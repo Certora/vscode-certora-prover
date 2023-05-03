@@ -415,7 +415,7 @@
           inactiveSelected={runName === inactiveSelected}
           runFunc={status === Status.ready ||
           status === Status.success ||
-          status === Status.unableToRun
+          status === Status.jobFailed
             ? runFunc
             : null}
         >

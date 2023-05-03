@@ -264,7 +264,7 @@ export enum Status {
   running = 'Running',
   pending = 'Pending',
   success = 'Ready Success',
-  unableToRun = 'Unable To Run',
+  jobFailed = 'Job Failed',
   incompleteResults = 'Incomplete Results',
   settingsError = 'Settings Error',
 }

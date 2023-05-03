@@ -33,7 +33,7 @@
     [Status.ready, statusIcons.ready],
     [Status.pending, statusIcons.pending],
     [Status.success, statusIcons.success],
-    [Status.unableToRun, statusIcons.unableToRun],
+    [Status.jobFailed, statusIcons.unableToRun],
     [Status.incompleteResults, statusIcons.running],
     [Status.settingsError, statusIcons.settingsError],
   ])
