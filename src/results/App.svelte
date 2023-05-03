@@ -286,16 +286,10 @@
       return recursiveDeleteJob(jl, confList)
     })
 
-    $jobLists = $jobLists.filter(jl => {
-      return jl.children.length || jl.runs.length
-    })
-    console.log('missing files', $jobLists)
-
     // handle added files
     let addedFiles = confList.filter(conf => {
       return recursivelyLookForConfFiles(conf, $jobLists[0])
     })
-    console.log(addedFiles, 'added files', $jobLists)
 
     addLists(addedFiles)
     getLastResults(addedFiles)
@@ -423,7 +417,6 @@
   onMount(() => {
     window.addEventListener('message', listener)
     initResults()
-    console.log('app updated')
   })
 
   onDestroy(() => {
@@ -450,7 +443,6 @@
 
   window.onclick = function (event) {
     resetHide()
-    console.log('click on webview')
   }
 </script>
 

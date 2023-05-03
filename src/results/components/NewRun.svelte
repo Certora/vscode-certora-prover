@@ -432,7 +432,9 @@
       >
         <Pane
           title={namesMap.get(runName)}
-          actions={createActionsForRunningScript()}
+          actions={status
+            ? createActionsForRunningScript()
+            : createActionsForRunningScript()}
           {status}
           showExpendIcon={false}
           fixedActions={createFixedActions()}

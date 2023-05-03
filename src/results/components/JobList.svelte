@@ -261,7 +261,9 @@
           info: e.data.payload,
         })
         const pid = e.data.payload
-        const curRun = runs.find(run => run.id === pid)
+        const curRun = runs.find(run => {
+          return run.id === pid
+        })
 
         if (curRun !== undefined) {
           const runName = curRun.confPath
@@ -281,11 +283,10 @@
           } else if (curRun.status === Status.incompleteResults) {
             setStoppedJobStatus(runName)
           }
+          runningScripts = runningScripts.filter(rs => {
+            return rs.pid !== pid
+          })
         }
-
-        runningScripts = runningScripts.filter(rs => {
-          return rs.pid !== pid
-        })
         break
       }
       case EventTypesFromExtension.AllowRun: {
@@ -553,7 +554,7 @@
    * @returns new list of runs after change
    */
   function setStatus(runConfPath: string, value: Status): Run[] {
-    runs.forEach(run => {
+    runs = runs.map(run => {
       if (
         (run.confPath === runConfPath || run.name === runConfPath) &&
         !(
@@ -564,6 +565,7 @@
       ) {
         run.status = value
       }
+      return run
     })
     return runs
   }
@@ -573,7 +575,9 @@
    */
   function runAll(): void {
     const jobsToRun = runs.filter(singleRun => {
-      return singleRun.status === Status.ready
+      return (
+        singleRun.status === Status.ready || singleRun.status === Status.success
+      )
     })
     jobsToRun.forEach((job, index) => {
       run(job, index)
@@ -890,6 +894,12 @@
       let curRun = pendingQueue.shift()
       pendingQueueCounter--
       runs = setStatus(curRun.confPath, Status.running)
+      runs = runs.map(run => {
+        if (run.confPath === curRun.confPath) {
+          run.vrLink = ''
+        }
+        return run
+      })
       runScript(curRun)
     }
   }
@@ -935,7 +945,6 @@
                   confPath: runs[index].confPath,
                   displayName: namesMap.get(runs[index].name),
                 })
-                runs[index].vrLink = ''
                 const modal = runs[index].status !== Status.running
                 stopScript(runs[index].id, modal)
               }}
