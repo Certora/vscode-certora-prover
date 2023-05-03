@@ -916,7 +916,8 @@
   <div>
     <Pane
       title={title === JOB_LIST ? `${title} (${path.split('/').pop()})` : title}
-      {actions}
+      actions={title === JOB_LIST ? [] : actions}
+      fixedActions={title === JOB_LIST ? actions : []}
       bind:isExpanded
     >
       <ul
