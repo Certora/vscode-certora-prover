@@ -28,6 +28,8 @@ export class ScriptRunner {
   private script: ChildProcessWithoutNullStreams | null = null
   private runningScripts: RunningScript[] = []
   private logFiles: Uri[] = []
+  private cliVersion = ''
+  private errorMsg = ''
 
   constructor(resultsWebviewProvider: ResultsWebviewProvider) {
     this.resultsWebviewProvider = resultsWebviewProvider
@@ -147,6 +149,32 @@ export class ScriptRunner {
     return link.split('?anonymousKey')[0].replace(regExp, '').split('/')[1]
   }
 
+  private checkVersion(confFile: string) {
+    const versionScript = spawn(`certoraRun`, ['--version'], {
+      cwd: workspace.workspaceFolders?.[0].uri.fsPath,
+    })
+
+    const { pid } = versionScript
+
+    versionScript.stdout.on('data', async data => {
+      const str = data.toString() as string
+      this.cliVersion = str
+    })
+
+    versionScript.on('error', async err => {
+      console.log(err)
+      this.resultsWebviewProvider.postMessage({
+        type: 'parse-error',
+        payload: this.getConfFileName(confFile).replace('.conf', ''),
+      })
+      await window.showErrorMessage(
+        `Command not found: certoraRun. Please make sure certora cli is installed.`,
+      )
+    })
+    if (pid) return true
+    return false
+  }
+
   /**
    * runs certoraRun command with the content of the [confFile]
    * @param confFile path to conf file
@@ -158,6 +186,7 @@ export class ScriptRunner {
     const path = workspace.workspaceFolders?.[0]
 
     if (!path) return
+    if (!this.checkVersion(confFile)) return
 
     const ts = Date.now()
     const channel = window.createOutputChannel(
@@ -172,6 +201,8 @@ export class ScriptRunner {
     )
 
     if (!this.script) return
+
+    this.errorMsg = ''
 
     const { pid } = this.script
     this.addRunningScript(confFile, pid)
@@ -235,9 +266,27 @@ export class ScriptRunner {
       }
     })
 
+    // when there was an error that prevented the prover from running
     this.script.on('error', async err => {
-      console.error(err, 'this is an error from the script')
+      // my internal log
+      console.log(err, 'this is an error from the script')
       this.removeRunningScript(pid)
+      this.resultsWebviewProvider.postMessage({
+        type: 'parse-error',
+        payload: this.getConfFileName(confFile).replace('.conf', ''),
+      })
+      await window.showErrorMessage(
+        'Job failed before running certora-cli.\n CERTORA-CLI VERSION:',
+        this.cliVersion,
+      )
+    })
+
+    // create error message if needed
+    this.script.stderr.on('data', async (data: any) => {
+      const str = data.toString() as string
+      if (str) {
+        this.errorMsg += str
+      }
     })
 
     this.script.on('close', async code => {
@@ -261,6 +310,15 @@ export class ScriptRunner {
           type: 'parse-error',
           payload: this.getConfFileName(confFile).replace('.conf', ''),
         })
+        await window.showErrorMessage(
+          `Job ended with exit code ${code}. \n${
+            this.errorMsg.length > 300
+              ? `ERROR: ${this.errorMsg.slice(0, 300)}...`
+              : this.errorMsg
+              ? `ERROR: ${this.errorMsg}`
+              : ''
+          } CERTORA-CLI VERSION: ${this.cliVersion}`,
+        )
       }
     })
   }

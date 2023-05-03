@@ -307,7 +307,7 @@ export type EventFromSettingsWebview =
 
 export type ConfFile = {
   files?: string[]
-  verify?: [string]
+  verify?: string[] | string
   solc?: string
   link?: string[]
   settings?: string[]
