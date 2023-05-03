@@ -200,8 +200,6 @@ export function activate(context: vscode.ExtensionContext): void {
     oldName: JobNameMap,
     newName: JobNameMap,
   ): Promise<void> {
-    // const path = vscode.workspace.workspaceFolders?.[0]
-    // if (!path) return
     const oldConf = vscode.Uri.parse(oldName.confPath)
     const newConf = vscode.Uri.parse(newName.confPath)
     try {
@@ -482,16 +480,12 @@ export function activate(context: vscode.ExtensionContext): void {
         '**/.certora_internal/**',
       )
 
-      console.log(confFilesDirs, 'initial conf file dir')
-
       confFiles = confFilesDirs
 
       const fileObjects = confFilesDirs.map(async file => {
         return await createFileObject(file)
       })
-
       const awaitedList = await Promise.all(fileObjects)
-
       if (!awaitedList || !awaitedList.length) return
 
       // from here on it's only if we already have conf files in the workspace
@@ -516,23 +510,17 @@ export function activate(context: vscode.ExtensionContext): void {
    */
   function createWorkspaceConfWatcher(directoryToWatch: vscode.Uri) {
     // create certora/conf for the workspace directory if there is no certora/conf with conf file in the workspace
-    console.log(directoryToWatch)
     try {
       const fileSystemWatcher1 = vscode.workspace.createFileSystemWatcher(
         new vscode.RelativePattern(directoryToWatch, `**/*`),
       )
       fileSystemWatcher1.onDidCreate(async file => {
-        console.log(file, 'file was created! from new watcher', file)
         const confFilesDirs = await vscode.workspace.findFiles(
           `**/*${CONF_DIRECTORY_NAME}/**`,
           '**/.certora_internal/**',
         )
-        console.log(confFilesDirs, confFiles, 'files from workspaceee')
         const val: boolean = checkIfFilesChanges(confFilesDirs)
-        if (val) {
-          console.log(val)
-          return
-        }
+        if (val) return
         const fileObjects = confFilesDirs.map(async file => {
           return await createFileObject(file)
         })
@@ -548,7 +536,6 @@ export function activate(context: vscode.ExtensionContext): void {
 
         newDirs.forEach(dir => {
           const pathsToWatch = dir.confPath.split(CONF_DIRECTORY)[0]
-          console.log(pathsToWatch, '====path to watch====')
           watchForBuilds(pathsToWatch)
         })
 
@@ -557,19 +544,13 @@ export function activate(context: vscode.ExtensionContext): void {
       // vscode asks to delete a conf file before is it deleted to avoid mistakes,
       // so I think deleting the job with it is a good idea
       fileSystemWatcher1.onDidDelete(async file => {
-        console.log(file, 'file was deleted! from new watcher')
         const confFilesDirs = await vscode.workspace.findFiles(
           `**/*${CONF_DIRECTORY_NAME}/**`,
           '**/.certora_internal/**',
         )
-        console.log(confFilesDirs, 'files from workspaceee')
         const val: boolean = checkIfFilesChanges(confFilesDirs)
-        if (val) {
-          console.log(val)
-          return
-        }
+        if (val) return
         confFiles = confFilesDirs
-        // console.log('conf files after change', confFiles)
         const fileObjects = confFilesDirs.map(async file => {
           return await createFileObject(file)
         })
@@ -724,7 +705,6 @@ export function activate(context: vscode.ExtensionContext): void {
     const files = await vscode.window.showOpenDialog(options)
     files?.map(async fileUri => {
       try {
-        // console.log(fileUri.path, '=========')
         // create content for the conf file
         const jobNameMap: JobNameMap = {
           confPath: fileUri.path + CONF_DIRECTORY + 'untitled.conf',
@@ -732,19 +712,6 @@ export function activate(context: vscode.ExtensionContext): void {
         }
         // create conf file
         await showSettings(jobNameMap)
-
-        // let target
-        // if (fileName?.endsWith('.conf')) {
-        //   const target = vscode.Uri.joinPath(
-        //     vscode.Uri.parse(path),
-        //     CONF_DIRECTORY_NAME,
-        //     fileName,
-        //   )
-        //   await vscode.workspace.fs.copy(fileUri, target, { overwrite: true })
-        //   // else if file endswith .sh
-        // } else {
-        //   await convertShToConf(fileUri, path)
-        // }
       } catch (e) {
         console.log("Could'nt copy file", fileUri.path, '\nERROR:', e)
       }
@@ -755,9 +722,6 @@ export function activate(context: vscode.ExtensionContext): void {
    * browse for conf files, and than copy these files into [CONF_DIRECTORY]
    */
   async function uploadConf(path: string): Promise<void> {
-    if (!path || path === '') {
-      const path = vscode.workspace.workspaceFolders?.[0].uri.path
-    }
     // cannot select many because .sh files handling is an asynchronous build
     const options: vscode.OpenDialogOptions = {
       canSelectMany: false,
@@ -833,7 +797,7 @@ export function activate(context: vscode.ExtensionContext): void {
         })
       } catch (e) {
         // can't delete results file
-        // console.log('CANNOT DELETE FILE', e)
+        console.error('CANNOT DELETE FILE', e)
       }
     }
   }
@@ -898,7 +862,7 @@ export function activate(context: vscode.ExtensionContext): void {
   )
 }
 
-/** deactivate - to be used in the future maybe */
+/** deactivate - get rid of all the watchers */
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 export function deactivate(): void {
   watchers.forEach(watcher => {

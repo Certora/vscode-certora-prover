@@ -1,16 +1,10 @@
 /* ---------------------------------------------------------------------------------------------
- *  Gets the progress url / creation time url, by string processsing.
+ *  Gets the progress url / creation time url, by string processing.
  *-------------------------------------------------------------------------------------------- */
 
 export function getProgressUrl(text: string): string | null {
-  // if (!text.includes('You can follow up on the status:')) {
-  //   return null
-  // }
-
   const urlRegex = /(https?:\/\/[^\s]+)/g
   const urlMatches = text.match(urlRegex)
-
-  console.log(urlMatches, 'urlMatch')
 
   if (urlMatches) {
     const url = urlMatches.find(url => {

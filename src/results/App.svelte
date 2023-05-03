@@ -346,8 +346,6 @@
       })
       .filter(f => f)
 
-    console.log('workspace files', workspaceDirList)
-
     // create root job list
     const singleJobList: jobList = {
       runs: workspaceDirList,
@@ -365,8 +363,6 @@
     $jobLists.push(singleJobList)
 
     addLists(confList)
-
-    console.log('JOB LISTS', $jobLists)
   }
 
   /**
