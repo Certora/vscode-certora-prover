@@ -56,8 +56,12 @@
   let outputRunName: string
   let selectedCalltraceFunction: CallTraceFunction
 
-  let runningScripts: { pid: number; confFile: string; uploaded: boolean }[] =
-    []
+  let runningScripts: {
+    pid: number
+    confFile: string
+    uploaded: boolean
+    logFile?: string
+  }[] = []
   let runs: Run[] = []
   let pendingQueue: JobNameMap[] = []
   let pendingQueueCounter = 0
@@ -378,6 +382,15 @@
           info: e.data.payload,
         })
         const runName = e.data.payload
+        const curRun = runs.find(run => {
+          return run.name === runName
+        })
+        if (curRun && !curRun.vrLink) {
+          const curScript = runningScripts.find(rs => {
+            return getFileName(rs.confFile) === curRun.name
+          })
+          console.log(curScript?.logFile, 'do we have a script??')
+        }
         removeScript(runName)
         runs = setStatus(runName, Status.jobFailed)
         break
