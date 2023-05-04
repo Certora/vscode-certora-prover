@@ -482,6 +482,10 @@
         if (runToDelete !== undefined) {
           deleteRun(runToDelete)
         }
+        // no empty children!!
+        children = children.filter(js => {
+          return js.children.length || js.runs.length
+        })
         break
       }
       default:

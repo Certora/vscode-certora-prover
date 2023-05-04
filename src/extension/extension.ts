@@ -797,7 +797,7 @@ export function activate(context: vscode.ExtensionContext): void {
         })
       } catch (e) {
         // can't delete results file
-        console.error('CANNOT DELETE FILE', e)
+        console.log('CANNOT DELETE FILE', e)
       }
     }
   }

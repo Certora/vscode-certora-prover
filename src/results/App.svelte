@@ -80,6 +80,10 @@
         if (!e.data.payload.length) {
           runNext()
         }
+        // no empty job list
+        $jobLists = $jobLists.filter(js => {
+          return js.children.length || js.runs.length
+        })
         break
       }
       case EventTypesFromExtension.SetOutput: {
