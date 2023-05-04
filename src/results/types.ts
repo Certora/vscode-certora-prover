@@ -197,7 +197,12 @@ export type EventsFromExtension =
     }
   | {
       type: EventTypesFromExtension.RunningScriptChanged
-      payload: { pid: number; confFile: string; uploaded: boolean }[]
+      payload: {
+        pid: number
+        confFile: string
+        uploaded: boolean
+        logFile?: string
+      }[]
     }
   | {
       type: EventTypesFromExtension.SetOutput
