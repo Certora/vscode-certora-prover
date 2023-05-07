@@ -25,6 +25,17 @@ enum Commands {
   ClearResults = 'clear-results',
   UploadDir = 'upload-dir',
   GetLastResults = 'get-last-results',
+  GetDirs = 'get-dirs',
+}
+
+export function getDirs(): void {
+  log({
+    action: 'Send "get-dirs" command',
+    source: Sources.ResultsWebview,
+  })
+  vscode.postMessage({
+    command: Commands.GetDirs,
+  })
 }
 
 export function getLastResults(files: ConfToCreate[]): void {
@@ -38,14 +49,14 @@ export function getLastResults(files: ConfToCreate[]): void {
   })
 }
 
-export function UploadDir(path: string): void {
+export function UploadDir(path: string, createConf?: boolean): void {
   log({
     action: 'Send "upload-dir" command',
     source: Sources.ResultsWebview,
   })
   vscode.postMessage({
     command: Commands.UploadDir,
-    payload: path,
+    payload: { path: path, createConf: createConf },
   })
 }
 

@@ -31,7 +31,11 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   public askToDeleteJob: null | ((name: JobNameMap) => void) = null
   public createInitialJobs: null | (() => Promise<void>) = null
   public uploadConf: null | ((path: string) => Promise<void>) = null
-  public uploadDir: null | ((path: string) => Promise<void>) = null
+  public getDirs: null | (() => Promise<void>) = null
+  public uploadDir:
+    | null
+    | ((path: string, createConf?: boolean) => Promise<void>) = null
+
   public duplicate:
     | null
     | ((
@@ -88,6 +92,15 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
             })
             if (typeof this.clearResults === 'function') {
               this.clearResults(e.payload)
+            }
+            break
+          case CommandFromResultsWebview.GetDirs:
+            log({
+              action: 'Received "get-dirs" command',
+              source: Sources.Extension,
+            })
+            if (typeof this.getDirs === 'function') {
+              this.getDirs()
             }
             break
           case CommandFromResultsWebview.NavigateToCode:
@@ -216,7 +229,7 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
               info: e.payload,
             })
             if (typeof this.uploadDir === 'function') {
-              this.uploadDir(e.payload)
+              this.uploadDir(e.payload.path, e.payload.createConf)
             }
             break
           case CommandFromResultsWebview.EnableEdit:

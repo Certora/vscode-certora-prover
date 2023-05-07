@@ -228,6 +228,8 @@ export enum CommandFromResultsWebview {
   ClearResults = 'clear-results',
   UploadDir = 'upload-dir',
   GetLastResults = 'get-last-results',
+  OpenBrowser = 'open-browser',
+  GetDirs = 'get-dirs',
 }
 
 export enum CommandFromSettingsWebview {
@@ -281,6 +283,9 @@ export type EventFromResultsWebview =
       command: CommandFromResultsWebview.InitResults
     }
   | {
+      command: CommandFromResultsWebview.GetDirs
+    }
+  | {
       command: CommandFromResultsWebview.GetLastResults
       payload: ConfToCreate[]
     }
@@ -302,11 +307,15 @@ export type EventFromResultsWebview =
     }
   | {
       command: CommandFromResultsWebview.UploadDir
-      payload: string
+      payload: { path: string; createConf: boolean }
     }
   | {
       command: CommandFromResultsWebview.Rename
       payload: { oldName: JobNameMap; newName: JobNameMap }
+    }
+  | {
+      command: CommandFromSettingsWebview.OpenBrowser
+      payload: { fileType: string; index: number }
     }
 
 export type EventFromSettingsWebview =

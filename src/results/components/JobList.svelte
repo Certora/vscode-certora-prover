@@ -110,7 +110,7 @@
           title: 'Open Dir',
           icon: 'file-directory-create',
           onClick: () => {
-            UploadDir(path + (title === JOB_LIST ? '' : title))
+            UploadDir(path + (title === JOB_LIST ? '' : title), true)
           },
         },
         {

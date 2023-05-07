@@ -190,12 +190,18 @@ export enum EventTypesFromExtension {
   SettingsError = 'settings-error',
   clearResults = 'clear-results',
   EmptyWorkspace = 'empty-workspace',
+  GetDirChoice = 'get-dir-choice',
+  FilesFromWorkspace = 'files-from-workspace',
 }
 
 export type EventsFromExtension =
   | {
       type: EventTypesFromExtension.ReceiveNewJobResult
       payload: Job
+    }
+  | {
+      type: EventTypesFromExtension.FilesFromWorkspace
+      payload: string[]
     }
   | {
       type: EventTypesFromExtension.RunningScriptChanged
@@ -233,6 +239,10 @@ export type EventsFromExtension =
     }
   | {
       type: EventTypesFromExtension.clearResults
+      payload: string
+    }
+  | {
+      type: EventTypesFromExtension.GetDirChoice
       payload: string
     }
   | {

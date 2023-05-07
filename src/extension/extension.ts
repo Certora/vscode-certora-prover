@@ -486,7 +486,7 @@ export function activate(context: vscode.ExtensionContext): void {
         return await createFileObject(file)
       })
       const awaitedList = await Promise.all(fileObjects)
-      if (!awaitedList || !awaitedList.length) return
+      if (!awaitedList || !awaitedList.length) return // todo: send files to the picker and then return
 
       // from here on it's only if we already have conf files in the workspace
       sendFilesToCreateJobs(awaitedList)
@@ -687,10 +687,12 @@ export function activate(context: vscode.ExtensionContext): void {
     })
   }
 
-  async function uploadDir(path: string): Promise<void> {
-    if (!path || path === '') {
-      const path = vscode.workspace.workspaceFolders?.[0].uri.path
-    }
+  /**
+   * upload dir from the browser
+   * @param path path of the directory to open in the browser
+   * @param createConf if true: create conf file in this dir, otherwise: send dir path to the results webview
+   */
+  async function uploadDir(path: string, createConf?: boolean): Promise<void> {
     // select a directory from the finder
     const options: vscode.OpenDialogOptions = {
       canSelectMany: false,
@@ -705,13 +707,20 @@ export function activate(context: vscode.ExtensionContext): void {
     const files = await vscode.window.showOpenDialog(options)
     files?.map(async fileUri => {
       try {
-        // create content for the conf file
-        const jobNameMap: JobNameMap = {
-          confPath: fileUri.path + CONF_DIRECTORY + 'untitled.conf',
-          displayName: 'untitled',
-        }
         // create conf file
-        await showSettings(jobNameMap)
+        if (createConf) {
+          // create content for the conf file
+          const jobNameMap: JobNameMap = {
+            confPath: fileUri.path + CONF_DIRECTORY + 'untitled.conf',
+            displayName: 'untitled',
+          }
+          await showSettings(jobNameMap)
+        } else {
+          resultsWebviewProvider.postMessage({
+            type: 'get-dir-choice',
+            payload: fileUri.path,
+          })
+        }
       } catch (e) {
         console.log("Could'nt copy file", fileUri.path, '\nERROR:', e)
       }
@@ -802,6 +811,36 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   }
 
+  async function getDirs(): Promise<void> {
+    const path = vscode.workspace.workspaceFolders?.[0]?.uri
+    if (!path) return
+
+    const filesDirs = await vscode.workspace.findFiles(
+      `**/*`,
+      '**/*{.certora_config,.git,.github,.gitignore,emv-*,**/emv-*,.certora_config,.certora_sources,.certora_internal,.ts,.js,certora,lib,config,/.}',
+    )
+    console.log(filesDirs)
+    const strDirs = filesDirs.map(file => {
+      const tempArr = file.path.split('/')
+      return file.path.replace(tempArr[tempArr.length - 1], '')
+    })
+    strDirs.push(path.path)
+    const processedStrDirs = strDirs
+      .filter((file, pos) => {
+        return strDirs.indexOf(file) === pos
+      })
+      .sort((item1, item2) => {
+        if (item1.length > item2.length) {
+          return 1
+        }
+        return -1
+      })
+    resultsWebviewProvider.postMessage({
+      type: 'files-from-workspace',
+      payload: processedStrDirs,
+    })
+  }
+
   function openExtensionSettings() {
     vscode.commands.executeCommand(
       'workbench.action.openSettings',
@@ -838,6 +877,7 @@ export function activate(context: vscode.ExtensionContext): void {
   resultsWebviewProvider.rename = rename
   resultsWebviewProvider.clearResults = askToDeleteResults
   resultsWebviewProvider.getLastResults = getLastResults
+  resultsWebviewProvider.getDirs = getDirs
 
   const scriptRunner = new ScriptRunner(resultsWebviewProvider)
 

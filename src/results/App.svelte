@@ -6,11 +6,15 @@
    *-------------------------------------------------------------------------------------------- */
 
   import { onMount, onDestroy } from 'svelte'
+  import Select from 'svelte-select'
   import {
     runScript,
     initResults,
     uploadConf,
     getLastResults,
+    UploadDir,
+    getDirs,
+    openSettings,
   } from './extension-actions'
   import { log, Sources } from './utils/log'
   import {
@@ -23,7 +27,10 @@
     ConfToCreate,
   } from './types'
   import { CallTraceFunction, EventTypesFromExtension } from './types'
-
+  import CustomItem from './components/CustomItem.svelte'
+  import CustomList from './components/CustomList.svelte'
+  import ClearIcon from './components/ClearIcon.svelte'
+  import Icon from './components/Icon.svelte'
   import { writable } from 'svelte/store'
   import {
     CERTORA_CONF,
@@ -33,6 +40,7 @@
   } from './store/store'
   import JobList from './components/JobList.svelte'
   import ResultsOutput from './components/ResultsOutput.svelte'
+  import { manageFiles } from './utils/refreshFiles'
 
   export const focusedRun = writable('')
 
@@ -47,7 +55,7 @@
   let pendingQueue: JobNameMap[] = []
   let pendingQueueCounter = 0
 
-  let workspaceDirPath
+  let workspaceDirPath = ''
 
   const listener = (e: MessageEvent<EventsFromExtension>) => {
     switch (e.data.type) {
@@ -124,6 +132,35 @@
           changeJobs(e.data.payload)
         }
 
+        break
+      }
+      case EventTypesFromExtension.GetDirChoice: {
+        log({
+          action: 'Received "get-dir-choice" command',
+          source: Sources.ResultsWebview,
+          info: e.data.payload,
+        })
+        updateChosenFile(e.data.payload)
+        break
+      }
+      case EventTypesFromExtension.FilesFromWorkspace: {
+        log({
+          action: 'Received "files-from-workspace" command',
+          source: Sources.ResultsWebview,
+          info: e.data.payload,
+        })
+        const tempFiles = e.data.payload
+        const processedFiles = tempFiles.map(file => {
+          const tempArr = file.split('/').filter(item => item)
+          const label = tempArr[tempArr.length - 1]
+          return {
+            value: file,
+            path: file.replace(label + '/', ''),
+            label: label,
+          }
+        })
+        allFiles = processedFiles
+        filteredFiles = processedFiles
         break
       }
       default:
@@ -374,23 +411,12 @@
    * @param run new run. if doest exists - creates a new run object
    */
   function createRun(): void {
-    const newRun: Run = {
-      id: 0,
-      name: '',
-      confPath: '',
-      status: Status.missingSettings,
-      showContextMenu: false,
-      isExpanded: false,
+    let path = JSON.parse(JSON.stringify($chosenFile))?.value || $chosenFile
+    const jobNameMap: JobNameMap = {
+      displayName: 'untitled',
+      confPath: `${path}${CERTORA_CONF}untitled.conf`.replace('//', '/'),
     }
-    const singleJobList: jobList = {
-      runs: [newRun],
-      title: JOB_LIST,
-      path: workspaceDirPath,
-      namesMap: new Map(),
-      children: [],
-      isExpanded: true,
-    }
-    $jobLists.push(singleJobList)
+    openSettings(jobNameMap)
   }
 
   /**
@@ -417,6 +443,7 @@
   onMount(() => {
     window.addEventListener('message', listener)
     initResults()
+    getDirs()
   })
 
   onDestroy(() => {
@@ -444,6 +471,55 @@
   window.onclick = function (event) {
     resetHide()
   }
+
+  let infoObjArr = {
+    mainFile: {
+      infoText: 'pick directory to start from',
+    },
+  }
+
+  function loadFilesFolder(fileType, index) {
+    UploadDir(workspaceDirPath, false)
+  }
+
+  let filter = ''
+  let disableButtons = writable(false)
+  let allFiles = []
+  let filteredFiles = []
+  let isSolidityListOpen = false
+  let solidityIconsObj = {
+    selected: isSolidityListOpen,
+    loadFilesFolder: loadFilesFolder,
+    fileType: '',
+    ifoText: infoObjArr.mainFile.infoText,
+  }
+  let maxFiles = 15
+  let filterCountObj = {
+    allFiles: filteredFiles.length,
+    filesShowing: maxFiles,
+  }
+  $: (filter || !filteredFiles.length) &&
+    (filteredFiles = manageFiles(filter, filterCountObj, allFiles))
+  function handleSelectSol(e) {
+    console.log(e.detail.value, 'this is the chosen file')
+    updateChosenFile(e.detail.value)
+  }
+  let chosenFile = writable('')
+
+  $: workspaceDirPath && updateChosenFile(workspaceDirPath)
+
+  function updateChosenFile(dir: string) {
+    $chosenFile = dir
+    if (!$chosenFile.startsWith(workspaceDirPath)) {
+      $disableButtons = true
+      return
+    }
+    $disableButtons = false
+  }
+
+  function handleClear(e) {
+    updateChosenFile('')
+  }
 </script>
 
 {#if !$jobLists.length}
@@ -456,14 +532,44 @@
 
   <div class="zero-state">
     <div class="command">
+      <div class="command-description">Choose a directory</div>
+      <div class="dark_input">
+        <Select
+          itemFilter={(label, filterText, option) => {
+            return option
+          }}
+          bind:filterText={filter}
+          items={filteredFiles}
+          listOpen={isSolidityListOpen}
+          iconProps={solidityIconsObj}
+          Item={CustomItem}
+          {Icon}
+          {ClearIcon}
+          on:select={handleSelectSol}
+          on:clear={e => handleClear(e)}
+          placeholder="Type to filter..."
+          bind:value={$chosenFile}
+          List={CustomList}
+        />
+      </div>
+      <div style="margin-bottom:25px;" />
       <div class="command-description">Create your first job</div>
-      <vscode-button class="command-button" on:click={() => createRun()}>
-        Configure New Job
-      </vscode-button>
+      <button
+        class="command-button"
+        disabled={$disableButtons}
+        on:click={() => createRun()}
+      >
+        Create New Job
+      </button>
       <div class="command-description">Or</div>
-      <vscode-button class="command-button" on:click={() => uploadConf('')}>
-        Upload Configuration File
-      </vscode-button>
+      <button
+        class="command-button"
+        disabled={$disableButtons}
+        on:click={() =>
+          uploadConf(JSON.parse(JSON.stringify($chosenFile)).value)}
+      >
+        Create New Job From Existing File
+      </button>
     </div>
   </div>
 {:else}
@@ -533,13 +639,138 @@
       line-height: 16px;
     }
     .command-button {
-      width: 230px;
+      width: 250px;
       height: 30px;
       margin-bottom: 10px;
       line-height: 16px;
       display: flex;
       justify-content: center;
       align-items: center;
+      color: rgb(255, 255, 255);
+      background-color: var(--vscode-button-background);
+      box-sizing: border-box;
+      border-style: solid;
+      border-color: var(--vscode-button-background);
+      border-radius: 2px;
+      text-align: center;
+      &:hover {
+        background-color: var(--vscode-button-hoverBackground);
+        border-color: var(--vscode-button-hoverBackground);
+        cursor: pointer;
+      }
+      &:disabled {
+        cursor: default;
+        opacity: 65%;
+        &:hover {
+          background-color: var(--vscode-button-background);
+          border-color: var(--vscode-button-background);
+        }
+      }
     }
+    :global(.dark_input) {
+      /* https://www.npmjs.com/package/svelte-select */
+      /* https://github.com/rob-balfre/svelte-select/blob/master/docs/theming_variables.md */
+      --background: var(--vscode-input-background);
+      --borderRadius: 0;
+      --borderFocusColor: var(--vscode-inputValidation-infoBorder);
+      --borderHoverColor: var(--vscode-inputValidation-infoBorder);
+      --border: 1px solid transparent;
+
+      --selectedItemPadding: 0 10px 0 8px;
+      /* from dev tools */
+      --inputColor: var(--vscode-input-foreground);
+      --placeholderColor: var(--vscode-input-placeholderForeground);
+      --placeholderOpacity: 1;
+      --height: 30px;
+      --inputPadding: 6px 52px 6px 4px;
+      --inputFontSize: 13px;
+      --inputLetterSpacing: initial;
+      --padding: 6px 4px;
+      --internalPadding: 0;
+      --inputLetterSpacing: inherit;
+      /* drop down open */
+      --listBackground: var(--vscode-editorSuggestWidget-background);
+      --itemHoverBG: var(--vscode-editorSuggestWidget-border);
+      --itemHoverColor: var(--vscode-editorSuggestWidget-foreground);
+      --itemColor: var(--vscode-editorSuggestWidget-foreground);
+      --listShadow: 0;
+      --listBorderRadius: 0;
+      --itemFirstBorderRadius: 0;
+      --itemPadding: 0 2px 0 16px;
+
+      --selectedItemPadding: 0;
+      --listLeft: -2px;
+      /* slected active */
+      --itemIsActiveBG: var(--vscode-editorSuggestWidget-selectedBackground);
+      --itemISActiveColor: var(--vscode-editorSuggestWidget-selectedForeground);
+      /* close icon */
+      --clearSelectRight: 52px;
+      --clearSelectTop: 0;
+      --clearSelectBottom: 0;
+      --clearSelectWidth: 20px;
+      --clearSelectFocusColor: var(--vscode-input-foreground);
+      --inputColor: var(--vscode-input-foreground);
+    }
+
+    :global(.selectContainer) {
+      gap: 24px;
+    }
+    :global(.selectContainer > input) {
+      box-sizing: border-box;
+    }
+
+    :global(.dark_input .item) {
+      position: relative;
+      padding-left: 22px;
+    }
+    :global(.dark_input .item:before) {
+      content: '\ea7b';
+      font-family: 'codicon';
+      position: absolute;
+      top: 0;
+      left: 2px;
+    }
+    :global(.dark_input .clearSelect) {
+      display: flex !important;
+    }
+
+    /* error msg div */
+    :global(.input_error_message) {
+      background: var(--vscode-debugExceptionWidget-border);
+      border: 1px solid var(--vscode-editorError-foreground);
+      border-radius: 4px;
+      padding: 6px 8px;
+      margin-top: 8px;
+      display: flex;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 15px;
+      position: absolute;
+      width: -webkit-fill-available;
+      z-index: 2;
+    }
+
+    :global(.input_error_message i) {
+      margin: auto 8px auto 0;
+    }
+    :global(.input_error_message a) {
+      margin-left: auto;
+    }
+  }
+  /* global close icon */
+  :global(.codicon-close, .codicon-info, .codicon-trash) {
+    border-radius: 5px;
+    padding: -5px;
+  }
+  :global(.codicon-close:hover, .codicon-info:hover, .codicon-trash:hover) {
+    cursor: pointer;
+    background-color: rgba(90, 93, 94, 0.31);
+  }
+
+  :global(button:hover, input:hover) {
+    cursor: pointer;
+  }
+  :global(.vscode-high-contrast-light .dark_input) {
+    --itemHoverColor: white !important;
   }
 </style>
