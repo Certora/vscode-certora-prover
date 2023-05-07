@@ -141,7 +141,7 @@
     selected: isSolidityListOpen,
     loadFilesFolder: loadFilesFolder,
     fileType: 'sol',
-    ifoText: infoObjArr.mainFile.infoText,
+    infoText: infoObjArr.mainFile.infoText,
     infoLink: infoObjArr.mainFile.infoLink,
   }
   // maxFiles to display in input (limit the amount of files we display in the input drop),

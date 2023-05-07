@@ -474,7 +474,13 @@
 
   let infoObjArr = {
     mainFile: {
-      infoText: 'pick directory to start from',
+      infoText: 'Pick directory to start from',
+      invalid: false,
+    },
+    error: {
+      infoText:
+        'Please choose a directory located inside the current open workspace',
+      invalid: true,
     },
   }
 
@@ -491,7 +497,8 @@
     selected: isSolidityListOpen,
     loadFilesFolder: loadFilesFolder,
     fileType: '',
-    ifoText: infoObjArr.mainFile.infoText,
+    infoText: infoObjArr.mainFile.infoText,
+    invalid: false,
   }
   let maxFiles = 15
   let filterCountObj = {
@@ -501,7 +508,6 @@
   $: (filter || !filteredFiles.length) &&
     (filteredFiles = manageFiles(filter, filterCountObj, allFiles))
   function handleSelectSol(e) {
-    console.log(e.detail.value, 'this is the chosen file')
     updateChosenFile(e.detail.value)
   }
   let chosenFile = writable('')
@@ -511,10 +517,14 @@
   function updateChosenFile(dir: string) {
     $chosenFile = dir
     if (!$chosenFile.startsWith(workspaceDirPath)) {
+      solidityIconsObj.infoText = infoObjArr.error.infoText
+      solidityIconsObj.invalid = true
       $disableButtons = true
       return
     }
     $disableButtons = false
+    solidityIconsObj.infoText = infoObjArr.mainFile.infoText
+    solidityIconsObj.invalid = false
   }
 
   function handleClear(e) {
@@ -730,6 +740,7 @@
       top: 0;
       left: 2px;
     }
+
     :global(.dark_input .clearSelect) {
       display: flex !important;
     }

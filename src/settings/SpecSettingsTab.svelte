@@ -163,7 +163,7 @@
     selected: isSpecListOpen,
     loadFilesFolder: loadFilesFolder,
     fileType: 'spec',
-    ifoText: infoObjArr.specFile.infoText,
+    infoText: infoObjArr.specFile.infoText,
     infoLink: infoObjArr.specFile.infoLink,
   }
 </script>

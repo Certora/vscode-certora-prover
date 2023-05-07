@@ -35,11 +35,22 @@
     ;(showInfo = false), (mouse_is_on_show_info = false)
   }}
 >
-  <p>
-    {$$props.ifoText}
-  </p>
-  <!-- <a href={$$props.infoLink}>link to documentation</a> -->
+  {#if !$$props.invalid}
+    <p>
+      {$$props.infoText}
+    </p>
+  {/if}
 </div>
+{#if $$props.invalid}
+  <div style="margin-top:20px; margin-left:-4px;">
+    <div class={$$props.invalid ? 'input_error_message' : ''}>
+      {#if $$props.invalid}
+        <i class={'codicon codicon-warning'} />
+      {/if}
+      {$$props.infoText}
+    </div>
+  </div>
+{/if}
 
 <style>
   .codicon {

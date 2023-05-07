@@ -36,7 +36,7 @@
   }}
 >
   <p>
-    {$$props.ifoText}
+    {$$props.infoText}
   </p>
   <a href={$$props.infoLink}>link to documentation</a>
 </div>

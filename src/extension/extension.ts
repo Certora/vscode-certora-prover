@@ -811,6 +811,10 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   }
 
+  /**
+   * get all the dirs in the workspace that are usual dirs to put conf files in
+   * @returns array of staring (paths)
+   */
   async function getDirs(): Promise<void> {
     const path = vscode.workspace.workspaceFolders?.[0]?.uri
     if (!path) return
@@ -819,7 +823,6 @@ export function activate(context: vscode.ExtensionContext): void {
       `**/*`,
       '**/*{.certora_config,.git,.github,.gitignore,emv-*,**/emv-*,.certora_config,.certora_sources,.certora_internal,.ts,.js,certora,lib,config,/.}',
     )
-    console.log(filesDirs)
     const strDirs = filesDirs.map(file => {
       const tempArr = file.path.split('/')
       return file.path.replace(tempArr[tempArr.length - 1], '')
