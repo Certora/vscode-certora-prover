@@ -475,12 +475,10 @@
   let infoObjArr = {
     mainFile: {
       infoText: 'Pick directory to start from',
-      invalid: false,
     },
     error: {
       infoText:
         'Please choose a directory located inside the current open workspace',
-      invalid: true,
     },
   }
 
@@ -498,6 +496,7 @@
     loadFilesFolder: loadFilesFolder,
     fileType: '',
     infoText: infoObjArr.mainFile.infoText,
+    errorText: infoObjArr.error.infoText,
     invalid: false,
   }
   let maxFiles = 15
@@ -517,13 +516,11 @@
   function updateChosenFile(dir: string) {
     $chosenFile = dir
     if (!$chosenFile.startsWith(workspaceDirPath)) {
-      solidityIconsObj.infoText = infoObjArr.error.infoText
       solidityIconsObj.invalid = true
       $disableButtons = true
       return
     }
     $disableButtons = false
-    solidityIconsObj.infoText = infoObjArr.mainFile.infoText
     solidityIconsObj.invalid = false
   }
 
@@ -562,7 +559,7 @@
           List={CustomList}
         />
       </div>
-      <div style="margin-bottom:25px;" />
+      <div style="margin-bottom:55px;" />
       <div class="command-description">Create your first job</div>
       <button
         class="command-button"

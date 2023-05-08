@@ -27,6 +27,7 @@
     <i class="codicon codicon-folder-opened" />
   </button>
 </div>
+
 <div
   class="showtxt"
   class:hovering={showInfo}
@@ -35,11 +36,9 @@
     ;(showInfo = false), (mouse_is_on_show_info = false)
   }}
 >
-  {#if !$$props.invalid}
-    <p>
-      {$$props.infoText}
-    </p>
-  {/if}
+  <p>
+    {$$props.infoText}
+  </p>
 </div>
 {#if $$props.invalid}
   <div style="margin-top:20px; margin-left:-4px;">
@@ -47,7 +46,7 @@
       {#if $$props.invalid}
         <i class={'codicon codicon-warning'} />
       {/if}
-      {$$props.infoText}
+      {$$props.errorText}
     </div>
   </div>
 {/if}
