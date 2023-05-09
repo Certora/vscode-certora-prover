@@ -40,14 +40,14 @@
   import JobList from './components/JobList.svelte'
   import ResultsOutput from './components/ResultsOutput.svelte'
   import { manageFiles } from './utils/refreshFiles'
-  import CodeItem from './components/CodeItem.svelte'
+
+  const BROWSE = 'Browse...'
 
   export const focusedRun = writable('')
 
   export let outputRunName: string = ''
 
   let output: Output
-  // let outputRunName: string
   let selectedCalltraceFunction: CallTraceFunction
 
   let runningScripts: { pid: number; confFile: string; uploaded: boolean }[] =
@@ -160,9 +160,9 @@
           }
         })
         const browseItem = {
-          value: 'Browse...',
-          path: 'Browse...',
-          label: 'Browse...',
+          value: BROWSE,
+          path: BROWSE,
+          label: BROWSE,
         }
         processedFiles = [browseItem, ...processedFiles]
         allFiles = processedFiles
@@ -418,10 +418,6 @@
    */
   function createRun(): void {
     let path = JSON.parse(JSON.stringify($chosenFile))?.value || $chosenFile
-    // const jobNameMap: JobNameMap = {
-    //   displayName: '',
-    //   confPath: `${path}${CERTORA_CONF}untitled.conf`.replace('//', '/'),
-    // }
 
     const confToCreate: ConfToCreate = {
       confPath: `${path}${CERTORA_CONF}.conf`.replace('//', '/'),
@@ -429,7 +425,6 @@
       workspaceFolder: workspaceDirPath,
     }
     createInitialJobs([confToCreate])
-    // openSettings(jobNameMap)
   }
 
   /**
@@ -516,7 +511,7 @@
   $: (filter || !filteredFiles.length) &&
     (filteredFiles = manageFiles(filter, filterCountObj, allFiles))
   function handleSelectSol(e) {
-    if (e.detail.value === 'Browse...') {
+    if (e.detail.value === BROWSE) {
       loadFilesFolder()
       return
     }
