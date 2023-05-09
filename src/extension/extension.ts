@@ -525,10 +525,6 @@ export function activate(context: vscode.ExtensionContext): void {
         if (!awaitedList || !awaitedList.length) return
         sendFilesToCreateJobs(awaitedList)
 
-        const newDirs = awaitedList.filter(dir => {
-          return dir.confPath.startsWith(file.path)
-        })
-
         confFiles = confFilesDirs
       })
       // vscode asks to delete a conf file before is it deleted to avoid mistakes,

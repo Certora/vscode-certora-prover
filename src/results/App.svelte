@@ -89,9 +89,9 @@
           runNext()
         }
         // no empty job list
-        $jobLists = $jobLists.filter(js => {
-          return js.children.length || js.runs.length
-        })
+        if (!$jobLists[0]?.children.length && !$jobLists[0]?.children.length) {
+          $jobLists = []
+        }
         break
       }
       case EventTypesFromExtension.SetOutput: {
