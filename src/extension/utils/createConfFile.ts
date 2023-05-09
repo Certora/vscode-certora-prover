@@ -240,10 +240,6 @@ export function newFormToConf(newForm: NewForm): string {
     )
   }
 
-  if (newForm.specObj.sendOnly) {
-    config.send_only = setAdditionalSetting(newForm.specObj.sendOnly.toString())
-  }
-
   if (newForm.specObj.duration) {
     config.smt_timeout = setAdditionalSetting(newForm.specObj.duration)
   }
@@ -293,8 +289,10 @@ export async function createConfFile(
 ): Promise<void> {
   try {
     const basePath = workspace.workspaceFolders?.[0]
-
     if (!basePath) return
+    formData.specObj.properties = formData.specObj.properties.filter(prop => {
+      return prop.name !== ''
+    })
 
     const encoder = new TextEncoder()
     const convertedData = newFormToConf(formData)
