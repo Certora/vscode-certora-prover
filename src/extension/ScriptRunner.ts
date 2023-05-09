@@ -132,7 +132,7 @@ export class ScriptRunner {
 
   private getRuleReportLink(str: string) {
     const pattern =
-      'https://(prover|vaas-stg).certora.com/output/[a-zA-Z0-9/?=]+'
+      'https://(prover|vaas-stg).certora.com/(output|jobStatus)/[a-zA-Z0-9/?=]+'
     const vrLinkRegExp = new RegExp(pattern)
     const vrLink = vrLinkRegExp.exec(str)
     return vrLink
@@ -144,7 +144,7 @@ export class ScriptRunner {
    * @returns job id (string)
    */
   private getJobId(link: string): string {
-    const pattern = 'https://(prover|vaas-stg).certora.com/output/'
+    const pattern = 'https://(prover|vaas-stg).certora.com/(output|jobStatus)/'
     const regExp = new RegExp(pattern)
     return link.split('?anonymousKey')[0].replace(regExp, '').split('/')[1]
   }
@@ -232,8 +232,10 @@ export class ScriptRunner {
         }
       }
       const vrLink = this.getRuleReportLink(str)
-
       if (vrLink) {
+        if (vrLink[0].includes('jobStatus')) {
+          vrLink[0] = vrLink[0].replace('jobStatus', 'output')
+        }
         this.runningScripts = this.runningScripts.map(rs => {
           if (rs.pid === pid) {
             rs.vrLink = vrLink[0]
@@ -373,7 +375,7 @@ export class ScriptRunner {
       }
 
       fetch(
-        scriptToStop.vrLink?.split('/output/')[0] +
+        scriptToStop.vrLink?.split('/(output|jobStatus)/')[0] +
           '/cancel/' +
           scriptToStop.jobId,
         requestOptions,
