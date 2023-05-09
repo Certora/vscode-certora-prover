@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+### 0.1.8 ()
+
+### Bug Fixes
+
+* The extension wont add nonsense filed to the conf ([#101](https://github.com/Certora/vscode-certora-prover/pull/101))
+* Duplicate button works on jobs that were converted from shell scripts ([#101](https://github.com/Certora/vscode-certora-prover/pull/101))
+
 ### 0.1.7 (2023-05-01)
 
 ## Bug Fixes
