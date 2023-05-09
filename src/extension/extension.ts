@@ -294,7 +294,7 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   async function runScript(name: JobNameMap): Promise<void> {
-    SettingsPanel.disableForm(name.displayName)
+    SettingsPanel.disableForm(name.confPath)
     const confUri = vscode.Uri.parse(name.confPath)
     scriptRunner.run(confUri.path)
   }
@@ -349,7 +349,7 @@ export function activate(context: vscode.ExtensionContext): void {
     }
     await clearResults(name.confPath)
 
-    SettingsPanel.removePanel(name.displayName)
+    SettingsPanel.removePanel(name.confPath)
     scriptRunner.removeRunningScriptByName(name.confPath)
   }
 
@@ -406,10 +406,14 @@ export function activate(context: vscode.ExtensionContext): void {
           CERTORA_INNER_DIR_BUILD +
           getFileName(file.path, '.sh') +
           '.sh'
-        const newPathUri = vscode.Uri.parse(newPath)
-        await vscode.workspace.fs.writeFile(newPathUri, content)
-        await scriptRunner.buildSh(newPath, basePath)
-        return
+        try {
+          const newPathUri = vscode.Uri.parse(newPath)
+          await vscode.workspace.fs.writeFile(newPathUri, content)
+          await scriptRunner.buildSh(newPath, basePath)
+          return
+        } catch (e) {
+          console.log(e)
+        }
       }
     }
     vscode.window.showErrorMessage(
@@ -421,14 +425,9 @@ export function activate(context: vscode.ExtensionContext): void {
    * watch the .certora_internal directory to look for conf that were only build not ran
    * than create conf files for them
    */
-  function watchForBuilds(basePath?: string): void {
-    let path = vscode.workspace.workspaceFolders?.[0]?.uri?.path
-    if (basePath) {
-      path = basePath
-    }
-    if (!path) return
+  function watchForBuilds(basePath: string): void {
     try {
-      const internalUri = vscode.Uri.parse(path + CERTORA_INNER_DIR)
+      const internalUri = vscode.Uri.parse(basePath + CERTORA_INNER_DIR)
       const fileSystemWatcher = vscode.workspace.createFileSystemWatcher(
         new vscode.RelativePattern(internalUri, '**/.last_confs**/*.conf'),
       )
@@ -473,7 +472,6 @@ export function activate(context: vscode.ExtensionContext): void {
         type: 'empty-workspace',
         payload: path.uri.path,
       })
-      watchForBuilds()
 
       const confFilesDirs = await vscode.workspace.findFiles(
         `**/*${CONF_DIRECTORY_NAME}/**`,
@@ -486,7 +484,7 @@ export function activate(context: vscode.ExtensionContext): void {
         return await createFileObject(file)
       })
       const awaitedList = await Promise.all(fileObjects)
-      if (!awaitedList || !awaitedList.length) return // todo: send files to the picker and then return
+      if (!awaitedList || !awaitedList.length) return
 
       // from here on it's only if we already have conf files in the workspace
       sendFilesToCreateJobs(awaitedList)
@@ -496,9 +494,6 @@ export function activate(context: vscode.ExtensionContext): void {
         const confDirectoryToWatch = vscode.Uri.parse(
           al.confPath.split(CONF_DIRECTORY_NAME)[0] + CONF_DIRECTORY_NAME,
         )
-        if (!pathsToWatch.includes(confDirectoryToWatch.path)) {
-          watchForBuilds(al.confPath.split(CONF_DIRECTORY)[0])
-        }
         pathsToWatch.push(confDirectoryToWatch.path)
       })
     }
@@ -532,11 +527,6 @@ export function activate(context: vscode.ExtensionContext): void {
 
         const newDirs = awaitedList.filter(dir => {
           return dir.confPath.startsWith(file.path)
-        })
-
-        newDirs.forEach(dir => {
-          const pathsToWatch = dir.confPath.split(CONF_DIRECTORY)[0]
-          watchForBuilds(pathsToWatch)
         })
 
         confFiles = confFilesDirs
@@ -704,15 +694,50 @@ export function activate(context: vscode.ExtensionContext): void {
       },
     }
     // create a certora/conf/newJob.conf file in it with the default settings
+    const confName = 'untitled'
     const files = await vscode.window.showOpenDialog(options)
     files?.map(async fileUri => {
       try {
         // create conf file
         if (createConf) {
           // create content for the conf file
+          const checkForUntitledConfs = await vscode.workspace.fs.readDirectory(
+            vscode.Uri.parse(fileUri.path + CONF_DIRECTORY),
+          )
+          // here we check to make sure we are not creating a file that already exists
+          const reg = /untitled_(\d+)/i
+          const untitledAmount = checkForUntitledConfs
+            .filter(file => {
+              return reg.exec(file[0]) || file[0] === 'untitled.conf'
+            })
+            .sort((item1, item2) => {
+              if (item1[0].length > item2[0].length) return 1
+              if (item1[0].length < item2[0].length) return -1
+              if (item1[0] > item2[0]) return 1
+              return -1
+            })
+          let oldNumber = 0
+          if (untitledAmount?.length) {
+            const lastConfName = untitledAmount[untitledAmount.length - 1][0]
+            oldNumber = parseInt(lastConfName.split('_')[1]) || 0
+          }
+          console.log(
+            checkForUntitledConfs,
+            untitledAmount.map(f => {
+              return f[0]
+            }),
+            oldNumber,
+            'you used to be alright - what happend?',
+          )
           const jobNameMap: JobNameMap = {
-            confPath: fileUri.path + CONF_DIRECTORY + 'untitled.conf',
-            displayName: 'untitled',
+            confPath:
+              fileUri.path +
+              CONF_DIRECTORY +
+              confName +
+              (oldNumber || untitledAmount?.length
+                ? `_${(oldNumber + 1).toString()}.conf`
+                : '.conf'),
+            displayName: confName,
           }
           await showSettings(jobNameMap)
         } else {
@@ -722,9 +747,22 @@ export function activate(context: vscode.ExtensionContext): void {
           })
         }
       } catch (e) {
-        console.log("Could'nt copy file", fileUri.path, '\nERROR:', e)
+        console.log(
+          "Could'nt copy file",
+          fileUri.path + '/' + confName + '.conf',
+          '\nERROR:',
+          e,
+        )
       }
     })
+    // if the browser was canceled in [!createConf] mode -
+    // return empty path for error handling in the results part (front)
+    if (!files && !createConf) {
+      resultsWebviewProvider.postMessage({
+        type: 'get-dir-choice',
+        payload: '',
+      })
+    }
   }
 
   /**
@@ -756,10 +794,16 @@ export function activate(context: vscode.ExtensionContext): void {
           await vscode.workspace.fs.copy(fileUri, target, { overwrite: true })
           // else if file endswith .sh
         } else {
+          let pathsToWatch = path
+          if (pathsToWatch.endsWith('/')) {
+            pathsToWatch = path.slice(0, path.length - 1)
+          }
+          watchForBuilds(pathsToWatch)
           await convertShToConf(fileUri, path)
         }
       } catch (e) {
         console.log("Could'nt copy file", fileUri.path, '\nERROR:', e)
+        vscode.window.showErrorMessage(`Can't read conf file: ${fileUri.path}.`)
       }
     })
   }

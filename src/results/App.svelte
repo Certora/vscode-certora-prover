@@ -14,7 +14,6 @@
     getLastResults,
     UploadDir,
     getDirs,
-    openSettings,
   } from './extension-actions'
   import { log, Sources } from './utils/log'
   import {
@@ -41,6 +40,7 @@
   import JobList from './components/JobList.svelte'
   import ResultsOutput from './components/ResultsOutput.svelte'
   import { manageFiles } from './utils/refreshFiles'
+  import CodeItem from './components/CodeItem.svelte'
 
   export const focusedRun = writable('')
 
@@ -150,15 +150,21 @@
           info: e.data.payload,
         })
         const tempFiles = e.data.payload
-        const processedFiles = tempFiles.map(file => {
+        let processedFiles = tempFiles.map(file => {
           const tempArr = file.split('/').filter(item => item)
           const label = tempArr[tempArr.length - 1]
           return {
             value: file,
-            path: file.replace(label + '/', ''),
-            label: label,
+            path: label,
+            label: tempArr.join('/'),
           }
         })
+        const browseItem = {
+          value: 'Browse...',
+          path: 'Browse...',
+          label: 'Browse...',
+        }
+        processedFiles = [browseItem, ...processedFiles]
         allFiles = processedFiles
         filteredFiles = processedFiles
         break
@@ -412,11 +418,18 @@
    */
   function createRun(): void {
     let path = JSON.parse(JSON.stringify($chosenFile))?.value || $chosenFile
-    const jobNameMap: JobNameMap = {
-      displayName: 'untitled',
-      confPath: `${path}${CERTORA_CONF}untitled.conf`.replace('//', '/'),
+    // const jobNameMap: JobNameMap = {
+    //   displayName: '',
+    //   confPath: `${path}${CERTORA_CONF}untitled.conf`.replace('//', '/'),
+    // }
+
+    const confToCreate: ConfToCreate = {
+      confPath: `${path}${CERTORA_CONF}.conf`.replace('//', '/'),
+      allowRun: 0,
+      workspaceFolder: workspaceDirPath,
     }
-    openSettings(jobNameMap)
+    createInitialJobs([confToCreate])
+    // openSettings(jobNameMap)
   }
 
   /**
@@ -473,16 +486,12 @@
   }
 
   let infoObjArr = {
-    mainFile: {
-      infoText: 'Pick directory to start from',
-    },
-    error: {
-      infoText:
-        'Please choose a directory located inside the current open workspace',
-    },
+    infoText: 'Pick directory to start from',
+    errorText:
+      'Please choose a directory located inside the current open workspace',
   }
 
-  function loadFilesFolder(fileType, index) {
+  function loadFilesFolder() {
     UploadDir(workspaceDirPath, false)
   }
 
@@ -495,8 +504,8 @@
     selected: isSolidityListOpen,
     loadFilesFolder: loadFilesFolder,
     fileType: '',
-    infoText: infoObjArr.mainFile.infoText,
-    errorText: infoObjArr.error.infoText,
+    infoText: infoObjArr.infoText,
+    errorText: infoObjArr.errorText,
     invalid: false,
   }
   let maxFiles = 15
@@ -507,6 +516,10 @@
   $: (filter || !filteredFiles.length) &&
     (filteredFiles = manageFiles(filter, filterCountObj, allFiles))
   function handleSelectSol(e) {
+    if (e.detail.value === 'Browse...') {
+      loadFilesFolder()
+      return
+    }
     updateChosenFile(e.detail.value)
   }
   let chosenFile = writable('')
@@ -573,7 +586,9 @@
         class="command-button"
         disabled={$disableButtons}
         on:click={() =>
-          uploadConf(JSON.parse(JSON.stringify($chosenFile)).value)}
+          uploadConf(
+            JSON.parse(JSON.stringify($chosenFile)).value || $chosenFile,
+          )}
       >
         Create New Job From Existing File
       </button>

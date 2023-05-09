@@ -35,30 +35,6 @@
     }
     itemClasses = classes.join(' ')
   }
-  let stringShrink = function (path) {
-    let splittedArr = path.split('/')
-    splittedArr = splittedArr.map(str => {
-      if (str.length < 15) return str
-      return `${
-        str.charAt(0) + str.charAt(1) + str.charAt(2) + str.charAt(3)
-      }...${
-        str.charAt(str.length - 4) +
-        str.charAt(str.length - 3) +
-        str.charAt(str.length - 2) +
-        str.charAt(str.length - 1)
-      }`
-    })
-
-    if (splittedArr.length > 2) {
-      return `.../${splittedArr[splittedArr.length - 2]}/${
-        splittedArr[splittedArr.length - 1]
-      }`
-    }
-    return `.../${splittedArr[splittedArr.length - 1]}`
-  }
-
-  let showInfo = false
-  let mouse_is_on_show_info = false
 </script>
 
 <div class="item {itemClasses}" class:sticky={!item.value}>
@@ -67,7 +43,7 @@
   </span>
   <span>
     {#if item.value !== 'Browse...'}
-      {stringShrink(item.path)}
+      {item.path}
     {:else}
       {item.path}
     {/if}
