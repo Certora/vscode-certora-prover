@@ -183,6 +183,7 @@
     "@vscode/codicons": "^0.0.26",
     "@vscode/webview-ui-toolkit": "^1.0.0",
     "axios": "^0.24.0",
+    "eslint-plugin-svelte": "^2.27.4",
     "form-data": "^4.0.0",
     "lodash.uniqby": "^4.7.0",
     "nanoid": "^3.1.30",
