@@ -387,6 +387,7 @@
           showContextMenu: false,
           isExpanded: false,
         }
+
         if (file.confPath.split(CERTORA_CONF)[0] === file.workspaceFolder) {
           return newRun
         }
