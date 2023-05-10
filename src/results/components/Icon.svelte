@@ -96,10 +96,10 @@
     z-index: 3;
     /* color: var(--dropdown-text-color); */
   }
-  .showtxt a {
+  /* .showtxt a {
     margin-top: 8px;
     text-decoration: none;
-  }
+  } */
   .showtxt p {
     margin: 0;
   }

@@ -98,22 +98,8 @@
    * create actions according to the job list role
    */
   function updateActions() {
-    if (title === JOB_LIST) {
-      return [
-        {
-          title: 'Run All',
-          icon: 'run-all',
-          onClick: runAll,
-          disabled: runs.length === 0,
-        },
-        {
-          title: 'Open Dir',
-          icon: 'file-directory-create',
-          onClick: () => {
-            UploadDir(path + (title === JOB_LIST ? '' : title), true)
-          },
-        },
-        {
+    let actions = [
+            {
           title: 'Create New Job From Existing File',
           icon: 'new-file',
           onClick: () => {
@@ -142,45 +128,26 @@
               }))
           ),
         },
-      ]
+    ]
+    if (title === JOB_LIST) {
+      const additionalAction = {
+          title: 'Open Dir',
+          icon: 'file-directory-create',
+          onClick: () => {
+            UploadDir(path + (title === JOB_LIST ? '' : title), true)
+          },
+        }
+      actions = [additionalAction, ...actions]
     }
-    return [
-      {
+    if (runs.length) {
+      const runAllAction = {
         title: 'Run All',
         icon: 'run-all',
         onClick: runAll,
-        disabled: runs.length === 0,
-      },
-      {
-        title: 'Create New Job From Existing File',
-        icon: 'new-file',
-        onClick: () => {
-          uploadConf(path + (title === JOB_LIST ? '' : title))
-        },
-      },
-      {
-        title: 'Create New Job',
-        icon: 'diff-added',
-        onClick: () => {
-          createRun()
-        },
-      },
-      {
-        title: $expandCollapse.title,
-        icon: $expandCollapse.icon,
-        onClick: expandCollapseAll,
-        disabled: !(
-          children.length ||
-          (runs.length &&
-            runs.find(run => {
-              return (
-                run.status === Status.success ||
-                run.status === Status.incompleteResults
-              )
-            }))
-        ),
-      },
-    ]
+      }
+      actions = [runAllAction, ...actions]
+    }
+    return actions
   }
 
   function setExpandCollapse(title: string, icon: string) {
