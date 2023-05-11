@@ -697,9 +697,12 @@ export function activate(context: vscode.ExtensionContext): void {
         // create conf file
         if (createConf) {
           // create content for the conf file
+          const pathUri = vscode.Uri.parse(fileUri.path + CONF_DIRECTORY)
+          if (!(await checkDir(pathUri))) return
           const checkForUntitledConfs = await vscode.workspace.fs.readDirectory(
-            vscode.Uri.parse(fileUri.path + CONF_DIRECTORY),
+            pathUri,
           )
+
           // here we check to make sure we are not creating a file that already exists
           const reg = /untitled_(\d+)/i
           const untitledAmount = checkForUntitledConfs
@@ -717,23 +720,19 @@ export function activate(context: vscode.ExtensionContext): void {
             const lastConfName = untitledAmount[untitledAmount.length - 1][0]
             oldNumber = parseInt(lastConfName.split('_')[1]) || 0
           }
-          console.log(
-            checkForUntitledConfs,
-            untitledAmount.map(f => {
-              return f[0]
-            }),
-            oldNumber,
-            'you used to be alright - what happend?',
-          )
+          const fileNameAddition =
+            oldNumber || untitledAmount?.length
+              ? `_${(oldNumber + 1).toString()}`
+              : ''
+          const displayName = confName + fileNameAddition
           const jobNameMap: JobNameMap = {
             confPath:
               fileUri.path +
               CONF_DIRECTORY +
               confName +
-              (oldNumber || untitledAmount?.length
-                ? `_${(oldNumber + 1).toString()}.conf`
-                : '.conf'),
-            displayName: confName,
+              fileNameAddition +
+              '.conf',
+            displayName: displayName,
           }
           await showSettings(jobNameMap)
         } else {
