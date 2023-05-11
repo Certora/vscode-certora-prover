@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+### 0.1.8 ()
+
+## Features
+
+* New additions to "Job Failed" status, including a button to the log file
+
 ### 0.1.7 (2023-05-01)
 
 ## Bug Fixes
