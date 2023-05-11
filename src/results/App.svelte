@@ -60,7 +60,6 @@
     pid: number
     confFile: string
     uploaded: boolean
-    logFile?: string
   }[] = []
   let runs: Run[] = []
   let pendingQueue: JobNameMap[] = []
@@ -381,15 +380,18 @@
           source: Sources.ResultsWebview,
           info: e.data.payload,
         })
-        const runName = e.data.payload
+        const runName = e.data.payload.confFile
         const curRun = runs.find(run => {
           return run.name === runName
         })
         if (curRun && !curRun.vrLink) {
-          const curScript = runningScripts.find(rs => {
-            return getFileName(rs.confFile) === curRun.name
+          const logFile = e.data.payload.logFile
+          runs = runs.map(r => {
+            if (r.name === runName) {
+              r.vrLink = logFile
+            }
+            return r
           })
-          console.log(curScript?.logFile, 'do we have a script??')
         }
         removeScript(runName)
         runs = setStatus(runName, Status.jobFailed)
@@ -948,7 +950,7 @@
               }}
               inactiveSelected={$focusedRun}
               {setStatus}
-              vrLink={runs[index].vrLink}
+              bind:vrLink={runs[index].vrLink}
               hide={$hide[index]}
               pos={$pos}
               bind:runName={runs[index].name}

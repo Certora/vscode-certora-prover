@@ -18,7 +18,6 @@ type RunningScript = {
   uploaded: boolean
   jobId?: string
   vrLink?: string
-  logFile?: string // so we could link the log file if a job fails early
 }
 
 const re = /(\033)|(\[33m)|(\[32m)|(\[31m)|(\[0m)/g
@@ -74,12 +73,7 @@ export class ScriptRunner {
     if (this.logFiles.find(lf => lf.path === logFilePath.path) === undefined) {
       this.logFiles.push(logFilePath)
     }
-    this.runningScripts = this.runningScripts.map(rs => {
-      if (rs.confFile === pathToConfFile) {
-        rs.logFile = logFilePath.path
-      }
-      return rs
-    })
+
     const encoder = new TextEncoder()
     const content = encoder.encode(str)
     let file
@@ -264,9 +258,22 @@ export class ScriptRunner {
         this.removeRunningScript(pid)
         // when there is a parse error, post it to PROBLEMS and send 'parse-error' to results
         PostProblems.postProblems(confFile)
+
+        const curLog = await this.getLogFilePath(confFile, ts)
+        let curLogStr = ''
+        if (curLog) {
+          try {
+            // check if file curLog exists
+            await workspace.fs.stat(curLog)
+            curLogStr = curLog.path
+          } catch (e) {}
+        }
         this.resultsWebviewProvider.postMessage({
           type: 'parse-error',
-          payload: this.getConfFileName(confFile).replace('.conf', ''),
+          payload: {
+            confFile: this.getConfFileName(confFile).replace('.conf', ''),
+            logFile: curLogStr,
+          },
         })
       }
     })
@@ -392,12 +399,10 @@ export class ScriptRunner {
   }
 
   private async addRunningScript(confFile: string, pid: number): Promise<void> {
-    const logPath = await this.getLogFilePath(confFile, 0)
     this.runningScripts.push({
       confFile,
       pid,
       uploaded: false,
-      logFile: logPath?.path || '',
     })
     this.sendRunningScriptsToWebview()
   }

@@ -201,7 +201,6 @@ export type EventsFromExtension =
         pid: number
         confFile: string
         uploaded: boolean
-        logFile?: string
       }[]
     }
   | {
@@ -220,7 +219,7 @@ export type EventsFromExtension =
     }
   | {
       type: EventTypesFromExtension.ParseError
-      payload: string
+      payload: { confFile: string; logFile: string }
     }
   | {
       type: EventTypesFromExtension.AllowRun

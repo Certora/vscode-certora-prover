@@ -23,6 +23,18 @@ enum Commands {
   EnableEdit = 'enable-edit',
   Rename = 'rename',
   ClearResults = 'clear-results',
+  OpenLogFile = 'open-log-file',
+}
+
+export function openLogFile(logFile: string): void {
+  log({
+    action: 'Send "open-log-file" command',
+    source: Sources.ResultsWebview,
+  })
+  vscode.postMessage({
+    command: Commands.OpenLogFile,
+    payload: logFile,
+  })
 }
 
 export function enableEdit(name: JobNameMap): void {

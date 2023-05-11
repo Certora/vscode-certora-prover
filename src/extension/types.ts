@@ -220,6 +220,7 @@ export enum CommandFromResultsWebview {
   EnableEdit = 'enable-edit',
   Rename = 'rename',
   ClearResults = 'clear-results',
+  OpenLogFile = 'open-log-file',
 }
 
 export enum CommandFromSettingsWebview {
@@ -247,6 +248,10 @@ export type EventFromResultsWebview =
     }
   | {
       command: CommandFromResultsWebview.GetOutput
+      payload: string
+    }
+  | {
+      command: CommandFromResultsWebview.OpenLogFile
       payload: string
     }
   | {
