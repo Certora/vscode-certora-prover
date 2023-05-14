@@ -398,7 +398,6 @@
           return run.name === runName
         })
         if (curRun && logFile) {
-          // const logFile = e.data.payload.logFile
           runs = runs.map(r => {
             if (r.name === runName) {
               r.vrLink = logFile
