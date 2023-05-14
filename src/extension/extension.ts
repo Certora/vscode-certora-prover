@@ -549,7 +549,9 @@ export function activate(context: vscode.ExtensionContext): void {
           const encoder = new TextEncoder()
           const content = encoder.encode(JSON.stringify(confFile, null, 2))
           await vscode.workspace.fs.writeFile(file, content)
-        } catch (e) {}
+        } catch (e) {
+          console.log('[Inner Error] Failed to write file:', e)
+        }
       }
       if (
         confFile.files !== undefined &&
