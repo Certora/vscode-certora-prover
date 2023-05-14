@@ -555,7 +555,8 @@ export function activate(context: vscode.ExtensionContext): void {
         confFile.files !== undefined &&
         confFile.verify !== undefined &&
         confFile.files?.length &&
-        confFile.verify?.length &&
+        // verify is not an empty array and not an empty string
+        (confFile.verify?.length || confFile.verify !== '') &&
         confFile.solc
       ) {
         fileObj.allowRun = 1
