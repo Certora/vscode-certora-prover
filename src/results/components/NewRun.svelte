@@ -235,7 +235,6 @@
       goToRuleReportAction.disabled = false
       if (vrLink.endsWith('.log')) {
         // change the action to open log
-        goToRuleReportAction.icon = 'debug-console'
         goToRuleReportAction.title = 'Open Log File'
         goToRuleReportAction.link = ''
         goToRuleReportAction.onClick = () => {
