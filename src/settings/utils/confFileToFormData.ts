@@ -223,8 +223,6 @@ function processSpecAttributes(confFile: ConfFile, specObj: SpecObj) {
       specObj.ruleSanity = true
       specObj.advancedSanity = true
     }
-    specObj.sendOnly = true
-    specObj.runSource = 'VSCODE'
   }
 
   const additionalSettings = getAdditionalSettings(confFile)
