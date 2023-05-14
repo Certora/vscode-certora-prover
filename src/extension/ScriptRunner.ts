@@ -28,6 +28,8 @@ export class ScriptRunner {
   private script: ChildProcessWithoutNullStreams | null = null
   private runningScripts: RunningScript[] = []
   private logFiles: Uri[] = []
+  private cliVersion = ''
+  private errorMsg = ''
 
   constructor(resultsWebviewProvider: ResultsWebviewProvider) {
     this.resultsWebviewProvider = resultsWebviewProvider
@@ -102,10 +104,10 @@ export class ScriptRunner {
       )
       return false
     }
-    this.script = spawn(`sh`, [shFile], {
+    const shScript = spawn(`sh`, [shFile], {
       cwd: path.uri.fsPath,
     })
-    if (!this.script) {
+    if (!shScript) {
       await window.showErrorMessage(
         'Failed to build ' +
           this.getConfFileName(shFile) +
@@ -113,7 +115,7 @@ export class ScriptRunner {
       )
       return false
     }
-    this.script.stderr.on('data', async (data: any) => {
+    shScript.stderr.on('data', async (data: any) => {
       const str = data.toString() as string
       if (str) {
         await window.showErrorMessage(
@@ -128,23 +130,46 @@ export class ScriptRunner {
     return true
   }
 
-  private getRuleReportLink(str: string) {
-    const pattern =
-      'https://(prover|vaas-stg).certora.com/output/[a-zA-Z0-9/?=]+'
-    const vrLinkRegExp = new RegExp(pattern)
-    const vrLink = vrLinkRegExp.exec(str)
-    return vrLink
-  }
-
   /**
    * get the job id from the link to the verification report
    * @param link link to the verification report (string)
    * @returns job id (string)
    */
   private getJobId(link: string): string {
-    const pattern = 'https://(prover|vaas-stg).certora.com/output/'
+    const pattern = 'https://(prover|vaas-stg).certora.com/(output|jobStatus)/'
     const regExp = new RegExp(pattern)
     return link.split('?anonymousKey')[0].replace(regExp, '').split('/')[1]
+  }
+
+  /**
+   * check the cli-version
+   * @param confFile path to conf file (string)
+   * @returns true if cli version is found, false otherwise
+   */
+  private checkVersion(confFile: string) {
+    const versionScript = spawn(`certoraRun`, ['--version'], {
+      cwd: workspace.workspaceFolders?.[0].uri.fsPath,
+    })
+
+    const { pid } = versionScript
+
+    versionScript.stdout.on('data', async data => {
+      const str = data.toString() as string
+      this.cliVersion = str
+    })
+
+    versionScript.on('error', async err => {
+      console.log(err)
+      this.resultsWebviewProvider.postMessage({
+        type: 'parse-error',
+        payload: this.getConfFileName(confFile).replace('.conf', ''),
+      })
+      await window.showErrorMessage(
+        `Command not found: certoraRun. Please make sure certora cli is installed.`,
+      )
+    })
+    if (pid) return true
+    return false
   }
 
   /**
@@ -158,6 +183,7 @@ export class ScriptRunner {
     const path = workspace.workspaceFolders?.[0]
 
     if (!path) return
+    if (!this.checkVersion(confFile)) return
 
     const ts = Date.now()
     const channel = window.createOutputChannel(
@@ -173,6 +199,8 @@ export class ScriptRunner {
 
     if (!this.script) return
 
+    this.errorMsg = ''
+
     const { pid } = this.script
     this.addRunningScript(confFile, pid)
 
@@ -183,33 +211,7 @@ export class ScriptRunner {
       this.log(str, confFile, ts)
       // parse errors are shown in an error message.
       if (str.includes('CRITICAL')) {
-        // the use of [action] is necessary to add the button that opens the log file
-        const action = await window.showErrorMessage(
-          str.slice(0, 300) + '...',
-          'Open Execution Log File',
-        )
-        if (action === 'Open Execution Log File') {
-          const logFilePath = await this.getLogFilePath(confFile, ts)
-          if (logFilePath !== undefined) {
-            try {
-              const document = await workspace.openTextDocument(logFilePath)
-              await window.showTextDocument(document)
-            } catch (e) {
-              console.log('ERROR: ', e, '[Internal error from extension]')
-            }
-          }
-        }
-      }
-      const vrLink = this.getRuleReportLink(str)
-
-      if (vrLink) {
-        this.runningScripts = this.runningScripts.map(rs => {
-          if (rs.pid === pid) {
-            rs.vrLink = vrLink[0]
-            rs.jobId = this.getJobId(vrLink[0])
-          }
-          return rs
-        })
+        await this.errorMsgWithLogAction(str, confFile, ts)
       }
       channel.appendLine(str)
 
@@ -235,23 +237,77 @@ export class ScriptRunner {
       }
     })
 
+    // when there was an error that prevented the prover from running
     this.script.on('error', async err => {
-      console.error(err, 'this is an error from the script')
+      // my internal log
+      console.log(err, 'this is an error from the cli')
       this.removeRunningScript(pid)
+      this.resultsWebviewProvider.postMessage({
+        type: 'parse-error',
+        payload: this.getConfFileName(confFile).replace('.conf', ''),
+      })
+      await window.showErrorMessage(
+        'Job failed before running certora-cli.\n CERTORA-CLI VERSION:',
+        this.cliVersion,
+      )
+    })
+
+    // create error message if needed
+    this.script.stderr.on('data', async (data: any) => {
+      const str = data.toString() as string
+      if (str) {
+        this.errorMsg += str
+      }
     })
 
     this.script.on('close', async code => {
-      let vrLink
-      this.runningScripts = this.runningScripts.map(rs => {
-        if (rs.pid === pid) {
-          rs.uploaded = true
-          vrLink = rs.vrLink
+      const innerLinkFiles = await workspace.findFiles(
+        '**/*{.vscode_extension_info.json}',
+        '{.certora_config,.git,emv-*,**/emv-*,**/*.certora_config,**/*.certora_sources}/**',
+      )
+      let vrLink = ''
+      if (innerLinkFiles?.length) {
+        const sortedFiles = innerLinkFiles.sort((uri1, uri2) => {
+          return uri1.path > uri2.path ? -1 : 1
+        })
+        const lastFileByDate = sortedFiles[0]
+        const decoder = new TextDecoder()
+        const jsonContent = JSON.parse(
+          decoder.decode(await workspace.fs.readFile(lastFileByDate)),
+        )
+        vrLink = jsonContent.verification_report_url
+        if (vrLink) {
+          if (vrLink.includes('jobStatus')) {
+            vrLink = vrLink.replace('jobStatus', 'output')
+          }
+          this.runningScripts = this.runningScripts.map(rs => {
+            if (rs.pid === pid) {
+              rs.vrLink = vrLink
+              rs.jobId = this.getJobId(vrLink)
+              rs.uploaded = true
+            }
+            return rs
+          })
         }
-        return rs
-      })
+      }
+
+      if (!vrLink) {
+        // no connection to the prover
+        this.removeRunningScript(pid)
+        this.resultsWebviewProvider.postMessage({
+          type: 'parse-error',
+          payload: this.getConfFileName(confFile).replace('.conf', ''),
+        })
+        await this.errorMsgWithLogAction(
+          `Lost connection to certora prover, this job's information can be found in the log file.`,
+          confFile,
+          ts,
+        )
+      }
+
       this.resultsWebviewProvider.postMessage<{ pid: number; vrLink: string }>({
         type: 'run-next',
-        payload: { pid: pid, vrLink: vrLink !== undefined ? vrLink : '' },
+        payload: { pid: pid, vrLink: vrLink },
       })
       if (code === 1) {
         this.removeRunningScript(pid)
@@ -261,6 +317,15 @@ export class ScriptRunner {
           type: 'parse-error',
           payload: this.getConfFileName(confFile).replace('.conf', ''),
         })
+        await window.showErrorMessage(
+          `Job ended with exit code ${code}. \n${
+            this.errorMsg.length > 300
+              ? `ERROR: ${this.errorMsg.slice(0, 300)}...`
+              : this.errorMsg
+              ? `ERROR: ${this.errorMsg}`
+              : ''
+          } CERTORA-CLI VERSION: ${this.cliVersion}`,
+        )
       }
     })
   }
@@ -297,6 +362,35 @@ export class ScriptRunner {
     }
   }
 
+  /**
+   * show informative message with link to the log file
+   * @param strMsg message
+   * @param confFile link to conf file (string)
+   * @param ts timestamp (number)
+   */
+  private async errorMsgWithLogAction(
+    strMsg: string,
+    confFile: string,
+    ts: number,
+  ) {
+    const maxLength = 500
+    const action = await window.showErrorMessage(
+      strMsg.length > maxLength ? strMsg.slice(0, maxLength) + '...' : strMsg,
+      'Open Execution Log File',
+    )
+    if (action === 'Open Execution Log File') {
+      const logFilePath = await this.getLogFilePath(confFile, ts)
+      if (logFilePath !== undefined) {
+        try {
+          const document = await workspace.openTextDocument(logFilePath)
+          await window.showTextDocument(document)
+        } catch (e) {
+          console.log('ERROR: ', e, '[Internal error from extension]')
+        }
+      }
+    }
+  }
+
   private stopUploadedScript(scriptToStop: RunningScript) {
     try {
       const certoraKey = process.env.CERTORAKEY?.toString() || ''
@@ -315,7 +409,7 @@ export class ScriptRunner {
       }
 
       fetch(
-        scriptToStop.vrLink?.split('/output/')[0] +
+        scriptToStop.vrLink?.split('/(output|jobStatus)/')[0] +
           '/cancel/' +
           scriptToStop.jobId,
         requestOptions,

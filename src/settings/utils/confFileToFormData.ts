@@ -243,9 +243,14 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
     // look for main contract
     const mainFile = confFile.files.find(file => {
       const contract = getContractNameFromFile(file)
-      const mainContract = confFile.verify
-        ? confFile.verify[0].split(':')[0]
-        : ''
+      // verify is either an array or a string
+      let mainContract = ''
+      if (Array.isArray(confFile.verify)) {
+        mainContract = confFile.verify ? confFile.verify[0].split(':')[0] : ''
+      } else if (typeof confFile.verify === 'string') {
+        mainContract = confFile.verify ? confFile.verify.split(':')[0] : ''
+      }
+
       return contract === mainContract
     })
     if (mainFile) {
@@ -263,30 +268,33 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
       }
     }
   }
-
+  // confFile.verify can either be an array or a string
+  let mainContractName, specFile
   if (Array.isArray(confFile.verify) && confFile.verify.length === 1) {
     const verifyStr = confFile.verify[0] as string
-    const [mainContractName, specFile] = verifyStr.split(':')
-
-    if (mainContractName) {
-      form.solidityObj.mainContract = mainContractName
-    }
-    if (specFile) {
-      const fileArr = specFile.split('/')
-      const labelTypeArr = fileArr.pop().split('.')
-      const label = labelTypeArr[0]
-      const path = fileArr.join('/') || ''
-      const type = '.' + labelTypeArr[1]
-      const fileInFormat = {
-        value: specFile,
-        label: label,
-        path: path,
-        type: type,
-      }
-      form.specObj.specFile = fileInFormat
-    }
+    ;[mainContractName, specFile] = verifyStr.split(':')
+  } else if (typeof confFile.verify === 'string') {
+    const verifyStr = confFile.verify
+    ;[mainContractName, specFile] = verifyStr.split(':')
   }
 
+  if (mainContractName) {
+    form.solidityObj.mainContract = mainContractName
+  }
+  if (specFile) {
+    const fileArr = specFile.split('/')
+    const labelTypeArr = fileArr.pop().split('.')
+    const label = labelTypeArr[0]
+    const path = fileArr.join('/') || ''
+    const type = '.' + labelTypeArr[1]
+    const fileInFormat = {
+      value: specFile,
+      label: label,
+      path: path,
+      type: type,
+    }
+    form.specObj.specFile = fileInFormat
+  }
   processSolidityAttributes(confFile, form.solidityObj)
   processSpecAttributes(confFile, form.specObj)
 
