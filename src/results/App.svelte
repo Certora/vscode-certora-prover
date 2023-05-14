@@ -317,8 +317,10 @@
         ) {
           newStatus = Status.success
         }
+        const curRun = runs.find(run => run.name === runName)
         if (
-          runs.find(run => run.name === runName)?.status === Status.jobFailed
+          curRun?.status === Status.jobFailed ||
+          curRun?.status === Status.incompleteResults
         ) {
           return
         }
@@ -332,6 +334,11 @@
           info: e.data.payload,
         })
         // status is changed to 'finish setup' when job isn't allowed to run
+        const curName = e.data.payload
+        const curRun = runs.find(r => {
+          return r.name === curName
+        })
+        if (curRun?.status === Status.incompleteResults) return
         runs = setStatus(e.data.payload, Status.missingSettings)
         break
       }
@@ -342,6 +349,11 @@
           info: e.data.payload,
         })
         // status is changed to 'finish setup' when job isn't allowed to run
+        const curName = e.data.payload
+        const curRun = runs.find(r => {
+          return r.name === curName
+        })
+        if (curRun?.status === Status.incompleteResults) return
         runs = setStatus(e.data.payload, Status.settingsError)
         break
       }
@@ -381,11 +393,12 @@
           info: e.data.payload,
         })
         const runName = e.data.payload.confFile
+        const logFile = e.data.payload.logFile
         const curRun = runs.find(run => {
           return run.name === runName
         })
-        if (curRun && !curRun.vrLink) {
-          const logFile = e.data.payload.logFile
+        if (curRun && logFile) {
+          // const logFile = e.data.payload.logFile
           runs = runs.map(r => {
             if (r.name === runName) {
               r.vrLink = logFile
@@ -919,7 +932,7 @@
               {renameRun}
               duplicateFunc={duplicateRun}
               runFunc={() => run(runs[index])}
-              status={runs[index].status}
+              bind:status={runs[index].status}
               {newFetchOutput}
               nowRunning={(runningScripts.find(
                 rs => getFileName(rs.confFile) === runs[index].name,
