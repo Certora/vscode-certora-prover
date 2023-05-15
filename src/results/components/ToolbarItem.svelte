@@ -24,6 +24,8 @@
     <div
       class="action-label {disabled
         ? 'disabled'
+        : icon === 'file-symlink-file'
+        ? 'active active-log'
         : 'active'} codicon codicon-action codicon-{icon} "
       role="button"
       {title}
@@ -74,6 +76,10 @@
     &:hover {
       background-color: rgb(184 184 184 / 31%);
     }
+  }
+
+  .active-log {
+    color: #c04040;
   }
 
   .disabled {

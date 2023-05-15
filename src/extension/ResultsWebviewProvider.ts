@@ -39,6 +39,7 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
       ) => void) = null
 
   public runScript: null | ((name: JobNameMap) => void) = null
+  public openLogFile: null | ((logFile: string) => Promise<void>) = null
   public enableEdit: null | ((name: JobNameMap) => void) = null
   public removeScript: null | ((name: string) => void) = null
   public clearResults: null | ((name: string) => void) = null
@@ -65,6 +66,16 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
             })
             if (typeof this.createInitialJobs === 'function') {
               this.createInitialJobs()
+            }
+            break
+          case CommandFromResultsWebview.OpenLogFile:
+            log({
+              action: 'Received "open-log-file" command',
+              source: Sources.Extension,
+              info: e.payload,
+            })
+            if (typeof this.openLogFile === 'function') {
+              this.openLogFile(e.payload)
             }
             break
           case CommandFromResultsWebview.ClearResults:

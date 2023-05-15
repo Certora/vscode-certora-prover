@@ -19,7 +19,7 @@
   import Tree from './Tree.svelte'
   import { verificationResults } from '../store/store'
   import { writable } from 'svelte/store'
-  import { clearResults } from '../extension-actions'
+  import { clearResults, openLogFile } from '../extension-actions'
 
   export let editFunc: () => void
   export let deleteFunc: () => void
@@ -223,15 +223,24 @@
    */
   function createFixedActions(): Action[] {
     let actions: Action[] = []
-    let goToRuleReportAction = {
+    let goToRuleReportAction: Action = {
       title: 'Go To Rule Report',
       icon: 'file-symlink-file',
       link: vrLink,
       disabled: true,
+      onClick: null,
     }
     if (vrLink) {
       goToRuleReportAction.link = vrLink
       goToRuleReportAction.disabled = false
+      if (vrLink.endsWith('.log')) {
+        // change the action to open log
+        goToRuleReportAction.title = 'Open Log File'
+        goToRuleReportAction.link = ''
+        goToRuleReportAction.onClick = () => {
+          openLogFile(vrLink)
+        }
+      }
     }
     actions.push(goToRuleReportAction)
     return actions
@@ -415,7 +424,7 @@
           inactiveSelected={runName === inactiveSelected}
           runFunc={status === Status.ready ||
           status === Status.success ||
-          status === Status.unableToRun
+          status === Status.jobFailed
             ? runFunc
             : null}
         >

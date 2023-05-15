@@ -266,12 +266,9 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
       }
     }
   }
-  // confFile.verify can either be an array or a string
+
   let mainContractName, specFile
-  if (Array.isArray(confFile.verify) && confFile.verify.length === 1) {
-    const verifyStr = confFile.verify[0] as string
-    ;[mainContractName, specFile] = verifyStr.split(':')
-  } else if (typeof confFile.verify === 'string') {
+  if (typeof confFile.verify === 'string') {
     const verifyStr = confFile.verify
     ;[mainContractName, specFile] = verifyStr.split(':')
   }

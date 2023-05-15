@@ -60,6 +60,13 @@ export class ScriptRunner {
       LOG_DIRECTORY_DEFAULT,
       `${this.getConfFileName(pathToConfFile)}-${ts}.log`,
     )
+
+    try {
+      // check if file curLog exists
+      await workspace.fs.stat(logFilePath)
+    } catch (e) {
+      return
+    }
     return logFilePath
   }
 
@@ -75,6 +82,7 @@ export class ScriptRunner {
     if (this.logFiles.find(lf => lf.path === logFilePath.path) === undefined) {
       this.logFiles.push(logFilePath)
     }
+
     const encoder = new TextEncoder()
     const content = encoder.encode(str)
     let file
@@ -136,7 +144,7 @@ export class ScriptRunner {
    * @returns job id (string)
    */
   private getJobId(link: string): string {
-    const pattern = 'https://(prover|vaas-stg).certora.com/(output|jobStatus)/'
+    const pattern = 'https://(prover|vaas-stg).certora.com/output/'
     const regExp = new RegExp(pattern)
     return link.split('?anonymousKey')[0].replace(regExp, '').split('/')[1]
   }
@@ -146,7 +154,7 @@ export class ScriptRunner {
    * @param confFile path to conf file (string)
    * @returns true if cli version is found, false otherwise
    */
-  private checkVersion(confFile: string) {
+  private checkCliVersion(confFile: string) {
     const versionScript = spawn(`certoraRun`, ['--version'], {
       cwd: workspace.workspaceFolders?.[0].uri.fsPath,
     })
@@ -162,7 +170,10 @@ export class ScriptRunner {
       console.log(err)
       this.resultsWebviewProvider.postMessage({
         type: 'parse-error',
-        payload: this.getConfFileName(confFile).replace('.conf', ''),
+        payload: {
+          confFile: this.getConfFileName(confFile).replace('.conf', ''),
+          logFile: '',
+        },
       })
       await window.showErrorMessage(
         `Command not found: certoraRun. Please make sure certora cli is installed.`,
@@ -183,7 +194,7 @@ export class ScriptRunner {
     const path = workspace.workspaceFolders?.[0]
 
     if (!path) return
-    if (!this.checkVersion(confFile)) return
+    if (!this.checkCliVersion(confFile)) return
 
     const ts = Date.now()
     const channel = window.createOutputChannel(
@@ -244,7 +255,10 @@ export class ScriptRunner {
       this.removeRunningScript(pid)
       this.resultsWebviewProvider.postMessage({
         type: 'parse-error',
-        payload: this.getConfFileName(confFile).replace('.conf', ''),
+        payload: {
+          confFile: this.getConfFileName(confFile).replace('.conf', ''),
+          logFile: '',
+        },
       })
       await window.showErrorMessage(
         'Job failed before running certora-cli.\n CERTORA-CLI VERSION:',
@@ -277,9 +291,6 @@ export class ScriptRunner {
         )
         vrLink = jsonContent.verification_report_url
         if (vrLink) {
-          if (vrLink.includes('jobStatus')) {
-            vrLink = vrLink.replace('jobStatus', 'output')
-          }
           this.runningScripts = this.runningScripts.map(rs => {
             if (rs.pid === pid) {
               rs.vrLink = vrLink
@@ -294,10 +305,6 @@ export class ScriptRunner {
       if (!vrLink) {
         // no connection to the prover
         this.removeRunningScript(pid)
-        this.resultsWebviewProvider.postMessage({
-          type: 'parse-error',
-          payload: this.getConfFileName(confFile).replace('.conf', ''),
-        })
         await this.errorMsgWithLogAction(
           `Lost connection to certora prover, this job's information can be found in the log file.`,
           confFile,
@@ -313,9 +320,14 @@ export class ScriptRunner {
         this.removeRunningScript(pid)
         // when there is a parse error, post it to PROBLEMS and send 'parse-error' to results
         PostProblems.postProblems(confFile)
+
+        const curLog = await this.getLogFilePath(confFile, ts)
         this.resultsWebviewProvider.postMessage({
           type: 'parse-error',
-          payload: this.getConfFileName(confFile).replace('.conf', ''),
+          payload: {
+            confFile: this.getConfFileName(confFile).replace('.conf', ''),
+            logFile: curLog?.path || '',
+          },
         })
         await window.showErrorMessage(
           `Job ended with exit code ${code}. \n${
@@ -409,7 +421,7 @@ export class ScriptRunner {
       }
 
       fetch(
-        scriptToStop.vrLink?.split('/(output|jobStatus)/')[0] +
+        scriptToStop.vrLink?.split('/output/')[0] +
           '/cancel/' +
           scriptToStop.jobId,
         requestOptions,
@@ -478,7 +490,7 @@ export class ScriptRunner {
     this.removeRunningScript(pid)
   }
 
-  private addRunningScript(confFile: string, pid: number): void {
+  private async addRunningScript(confFile: string, pid: number): Promise<void> {
     this.runningScripts.push({
       confFile,
       pid,

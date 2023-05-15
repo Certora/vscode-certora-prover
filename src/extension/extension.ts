@@ -549,7 +549,9 @@ export function activate(context: vscode.ExtensionContext): void {
           const encoder = new TextEncoder()
           const content = encoder.encode(JSON.stringify(confFile, null, 2))
           await vscode.workspace.fs.writeFile(file, content)
-        } catch (e) {}
+        } catch (e) {
+          console.log('[Inner Error] Failed to write file:', e)
+        }
       }
       if (
         confFile.files !== undefined &&
@@ -701,6 +703,22 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   }
 
+  /**
+   * open the log file
+   * @param logFile string path to log file
+   */
+  async function openLogFile(logFile: string): Promise<void> {
+    try {
+      const logUri = vscode.Uri.parse(logFile)
+      const document = await vscode.workspace.openTextDocument(logUri)
+      await vscode.window.showTextDocument(document)
+    } catch (e) {
+      vscode.window.showErrorMessage(
+        `Can't read log file: ${logFile}. Error: ${e}`,
+      )
+    }
+  }
+
   function openExtensionSettings() {
     vscode.commands.executeCommand(
       'workbench.action.openSettings',
@@ -735,6 +753,7 @@ export function activate(context: vscode.ExtensionContext): void {
   resultsWebviewProvider.enableEdit = enableEdit
   resultsWebviewProvider.rename = rename
   resultsWebviewProvider.clearResults = askToDeleteResults
+  resultsWebviewProvider.openLogFile = openLogFile
 
   const scriptRunner = new ScriptRunner(resultsWebviewProvider)
 

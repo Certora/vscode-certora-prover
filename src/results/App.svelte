@@ -56,8 +56,11 @@
   let outputRunName: string
   let selectedCalltraceFunction: CallTraceFunction
 
-  let runningScripts: { pid: number; confFile: string; uploaded: boolean }[] =
-    []
+  let runningScripts: {
+    pid: number
+    confFile: string
+    uploaded: boolean
+  }[] = []
   let runs: Run[] = []
   let pendingQueue: JobNameMap[] = []
   let pendingQueueCounter = 0
@@ -314,6 +317,13 @@
         ) {
           newStatus = Status.success
         }
+        const curRun = runs.find(run => run.name === runName)
+        if (
+          curRun?.status === Status.jobFailed ||
+          curRun?.status === Status.incompleteResults
+        ) {
+          return
+        }
         runs = setStatus(runName, newStatus)
         break
       }
@@ -324,6 +334,11 @@
           info: e.data.payload,
         })
         // status is changed to 'finish setup' when job isn't allowed to run
+        const curName = e.data.payload
+        const curRun = runs.find(r => {
+          return r.name === curName
+        })
+        if (curRun?.status === Status.incompleteResults) return
         runs = setStatus(e.data.payload, Status.missingSettings)
         break
       }
@@ -334,6 +349,11 @@
           info: e.data.payload,
         })
         // status is changed to 'finish setup' when job isn't allowed to run
+        const curName = e.data.payload
+        const curRun = runs.find(r => {
+          return r.name === curName
+        })
+        if (curRun?.status === Status.incompleteResults) return
         runs = setStatus(e.data.payload, Status.settingsError)
         break
       }
@@ -372,9 +392,21 @@
           source: Sources.ResultsWebview,
           info: e.data.payload,
         })
-        const runName = e.data.payload
+        const runName = e.data.payload.confFile
+        const logFile = e.data.payload.logFile
+        const curRun = runs.find(run => {
+          return run.name === runName
+        })
+        if (curRun && logFile) {
+          runs = runs.map(r => {
+            if (r.name === runName) {
+              r.vrLink = logFile
+            }
+            return r
+          })
+        }
         removeScript(runName)
-        runs = setStatus(runName, Status.unableToRun)
+        runs = setStatus(runName, Status.jobFailed)
         break
       }
       case EventTypesFromExtension.InitialJobs: {
@@ -558,7 +590,7 @@
           return vr.name === jobName
         })
       ) {
-        runs = setStatus(jobName, Status.unableToRun)
+        runs = setStatus(jobName, Status.jobFailed)
         return
       }
       $verificationResults = $verificationResults.map(vr => {
@@ -573,7 +605,7 @@
           curRun?.status === Status.running ||
           curRun?.status === Status.ready
         ) {
-          runs = setStatus(jobName, Status.unableToRun)
+          runs = setStatus(jobName, Status.jobFailed)
         }
         return vr
       })
@@ -899,7 +931,7 @@
               {renameRun}
               duplicateFunc={duplicateRun}
               runFunc={() => run(runs[index])}
-              status={runs[index].status}
+              bind:status={runs[index].status}
               {newFetchOutput}
               nowRunning={(runningScripts.find(
                 rs => getFileName(rs.confFile) === runs[index].name,
@@ -930,7 +962,7 @@
               }}
               inactiveSelected={$focusedRun}
               {setStatus}
-              vrLink={runs[index].vrLink}
+              bind:vrLink={runs[index].vrLink}
               hide={$hide[index]}
               pos={$pos}
               bind:runName={runs[index].name}
