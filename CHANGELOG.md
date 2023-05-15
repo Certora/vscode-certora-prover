@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-### 0.1.8 (2023-05-14)
+### 0.1.8 (2023-05-15)
 
 ### Bug Fixes
 
