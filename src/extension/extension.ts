@@ -851,6 +851,7 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   /**
+
    * get all the dirs in the workspace that are usual dirs to put conf files in
    * @returns array of staring (paths)
    */

@@ -115,7 +115,6 @@ export class ScriptRunner {
       )
       return false
     }
-
     const shScript = spawn(`sh`, [shFile], {
       cwd: path.fsPath,
     })
@@ -284,7 +283,6 @@ export class ScriptRunner {
 
     this.script.on('close', async code => {
       const vrLink = await this.getVrLink(confFile, pid)
-
       this.resultsWebviewProvider.postMessage<{ pid: number; vrLink: string }>({
         type: 'run-next',
         payload: { pid: pid, vrLink: vrLink || '' },

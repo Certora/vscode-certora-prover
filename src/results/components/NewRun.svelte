@@ -22,7 +22,6 @@
   import { clearResults, openLogFile } from '../extension-actions'
 
   export let pathToConf: string
-
   export let editFunc: () => void
   export let deleteFunc: () => void
   export let deleteRun: () => void
