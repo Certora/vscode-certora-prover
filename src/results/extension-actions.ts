@@ -26,6 +26,7 @@ enum Commands {
   UploadDir = 'upload-dir',
   GetLastResults = 'get-last-results',
   GetDirs = 'get-dirs',
+  OpenLogFile = 'open-log-file',
 }
 
 export function getDirs(): void {
@@ -57,6 +58,17 @@ export function UploadDir(path: string, createConf?: boolean): void {
   vscode.postMessage({
     command: Commands.UploadDir,
     payload: { path: path, createConf: createConf },
+  })
+}
+
+export function openLogFile(logFile: string): void {
+  log({
+    action: 'Send "open-log-file" command',
+    source: Sources.ResultsWebview,
+  })
+  vscode.postMessage({
+    command: Commands.OpenLogFile,
+    payload: logFile,
   })
 }
 

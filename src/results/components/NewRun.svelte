@@ -19,7 +19,7 @@
   import Tree from './Tree.svelte'
   import { CERTORA_CONF, verificationResults } from '../store/store'
   import { writable } from 'svelte/store'
-  import { clearResults } from '../extension-actions'
+  import { clearResults, openLogFile } from '../extension-actions'
 
   export let pathToConf: string
 
@@ -187,7 +187,7 @@
   }
 
   /**
-   * creates actions for the missingSettings, ready and unableToRun statuses.
+   * creates actions for the missingSettings, ready and jobFailed statuses.
    * the actions are: rename, edit, delete, duplicate, and if possible: run
    */
   function createActions(): Action[] {
@@ -214,27 +214,36 @@
   }
 
   /**
-   * creates actions for the missingSettings, ready and unableToRun statuses.
+   * creates actions for the missingSettings, ready and jobFailed statuses.
    * the actions are: rename, edit, delete, duplicate, and if possible: run
    */
   function createFixedActions(): Action[] {
     let actions: Action[] = []
-    let goToRuleReportAction = {
+    let goToRuleReportAction: Action = {
       title: 'Go To Rule Report',
       icon: 'file-symlink-file',
       link: vrLink,
       disabled: true,
+      onClick: null,
     }
     if (vrLink) {
       goToRuleReportAction.link = vrLink
       goToRuleReportAction.disabled = false
+      if (vrLink.endsWith('.log')) {
+        // change the action to open log
+        goToRuleReportAction.title = 'Open Log File'
+        goToRuleReportAction.link = ''
+        goToRuleReportAction.onClick = () => {
+          openLogFile(vrLink)
+        }
+      }
     }
     actions.push(goToRuleReportAction)
     return actions
   }
 
   /**
-   * creates actions for the missingSettings, ready and unableToRun statuses.
+   * creates actions for the missingSettings, ready and jobFailed statuses.
    * the actions are: rename, edit, delete, duplicate, and if possible: run
    */
   function createActionsForContextMenu(): Action[] {
@@ -393,7 +402,7 @@
           inactiveSelected={pathToConf === inactiveSelected}
           runFunc={status === Status.ready ||
           status === Status.success ||
-          status === Status.unableToRun
+          status === Status.jobFailed
             ? runFunc
             : null}
           bind:isExpanded

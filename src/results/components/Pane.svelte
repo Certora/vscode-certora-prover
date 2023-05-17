@@ -22,7 +22,7 @@
     running: 'running-rule-status.svg',
     pending: 'pending.svg',
     success: 'rerun-success.svg',
-    unableToRun: 'unable-to-run.svg',
+    jobFailed: 'unable-to-run.svg',
     settingsError: 'error-rule-status.svg',
   }
 
@@ -33,7 +33,7 @@
     [Status.ready, statusIcons.ready],
     [Status.pending, statusIcons.pending],
     [Status.success, statusIcons.success],
-    [Status.unableToRun, statusIcons.unableToRun],
+    [Status.jobFailed, statusIcons.jobFailed],
     [Status.incompleteResults, statusIcons.running],
     [Status.settingsError, statusIcons.settingsError],
   ])

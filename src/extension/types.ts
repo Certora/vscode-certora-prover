@@ -230,6 +230,7 @@ export enum CommandFromResultsWebview {
   GetLastResults = 'get-last-results',
   OpenBrowser = 'open-browser',
   GetDirs = 'get-dirs',
+  OpenLogFile = 'open-log-file',
 }
 
 export enum CommandFromSettingsWebview {
@@ -257,6 +258,10 @@ export type EventFromResultsWebview =
     }
   | {
       command: CommandFromResultsWebview.GetOutput
+      payload: string
+    }
+  | {
+      command: CommandFromResultsWebview.OpenLogFile
       payload: string
     }
   | {
@@ -333,7 +338,7 @@ export type EventFromSettingsWebview =
 
 export type ConfFile = {
   files?: string[]
-  verify?: [string]
+  verify?: string
   solc?: string
   link?: string[]
   settings?: string[]

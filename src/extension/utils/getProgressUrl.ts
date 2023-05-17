@@ -10,7 +10,11 @@ export function getProgressUrl(text: string): string | null {
     const url = urlMatches.find(url => {
       return url.includes('output')
     })
-    return url?.includes('output') ? url.replace('output', 'progress') : null
+    if (url?.includes('output')) {
+      return url.replace('output', 'progress')
+    } else if (url?.includes('jobStatus')) {
+      return url.replace('jobStatus', 'progress')
+    }
   }
   return null
 }
