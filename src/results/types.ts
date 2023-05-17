@@ -205,7 +205,11 @@ export type EventsFromExtension =
     }
   | {
       type: EventTypesFromExtension.RunningScriptChanged
-      payload: { pid: number; confFile: string; uploaded: boolean }[]
+      payload: {
+        pid: number
+        confFile: string
+        uploaded: boolean
+      }[]
     }
   | {
       type: EventTypesFromExtension.SetOutput
@@ -223,7 +227,7 @@ export type EventsFromExtension =
     }
   | {
       type: EventTypesFromExtension.ParseError
-      payload: string
+      payload: { confFile: string; logFile: string }
     }
   | {
       type: EventTypesFromExtension.EmptyWorkspace
@@ -280,7 +284,7 @@ export enum Status {
   running = 'Running',
   pending = 'Pending',
   success = 'Ready Success',
-  unableToRun = 'Unable To Run',
+  jobFailed = 'Job Failed',
   incompleteResults = 'Incomplete Results',
   settingsError = 'Settings Error',
 }

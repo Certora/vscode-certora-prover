@@ -95,7 +95,7 @@ export class ScriptProgressLongPolling {
     } catch (e) {
       this.resultsWebviewProvider.postMessage({
         type: 'parse-error',
-        payload: confPath,
+        payload: { confFile: confPath, logFile: '' },
       })
       window.showErrorMessage(
         `Certora verification service is currently unavailable. Please, try again later. ${e}`,

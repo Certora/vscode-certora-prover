@@ -99,44 +99,44 @@
    */
   function updateActions() {
     let actions = [
-            {
-          title: 'Create New Job From Existing File',
-          icon: 'new-file',
-          onClick: () => {
-            uploadConf(path + (title === JOB_LIST ? '' : title))
-          },
+      {
+        title: 'Create New Job From Existing File',
+        icon: 'new-file',
+        onClick: () => {
+          uploadConf(path + (title === JOB_LIST ? '' : title))
         },
-        {
-          title: 'Create New Job',
-          icon: 'diff-added',
-          onClick: () => {
-            createRun()
-          },
+      },
+      {
+        title: 'Create New Job',
+        icon: 'diff-added',
+        onClick: () => {
+          createRun()
         },
-        {
-          title: $expandCollapse.title,
-          icon: $expandCollapse.icon,
-          onClick: expandCollapseAll,
-          disabled: !(
-            children.length ||
-            (runs.length &&
-              runs.find(run => {
-                return (
-                  run.status === Status.success ||
-                  run.status === Status.incompleteResults
-                )
-              }))
-          ),
-        },
+      },
+      {
+        title: $expandCollapse.title,
+        icon: $expandCollapse.icon,
+        onClick: expandCollapseAll,
+        disabled: !(
+          children.length ||
+          (runs.length &&
+            runs.find(run => {
+              return (
+                run.status === Status.success ||
+                run.status === Status.incompleteResults
+              )
+            }))
+        ),
+      },
     ]
     if (title === JOB_LIST) {
       const additionalAction = {
-          title: 'Open Dir',
-          icon: 'file-directory-create',
-          onClick: () => {
-            UploadDir(path + (title === JOB_LIST ? '' : title), true)
-          },
-        }
+        title: 'Open Dir',
+        icon: 'file-directory-create',
+        onClick: () => {
+          UploadDir(path + (title === JOB_LIST ? '' : title), true)
+        },
+      }
       actions = [additionalAction, ...actions]
     }
     if (runs.length) {
@@ -182,7 +182,7 @@
         const confPath = run?.confPath
         if (!run || !runName || !confPath) return
         runs = runs.map(r => {
-          if (r.confPath === vrName) {
+          if (r.confPath === confPath) {
             r.id = pid
             r.vrLink = curReportLink
           }
@@ -283,6 +283,12 @@
         ) {
           newStatus = Status.success
         }
+        if (
+          curRun?.status === Status.jobFailed ||
+          curRun?.status === Status.incompleteResults
+        ) {
+          return
+        }
         runs = setStatus(runPath, newStatus)
         break
       }
@@ -300,7 +306,9 @@
         })
         if (
           curRun &&
-          (curRun.status === Status.pending || curRun.status === Status.running)
+          (curRun.status === Status.pending ||
+            curRun.status === Status.running ||
+            curRun.status === Status.incompleteResults)
         )
           return
         runs = setStatus(e.data.payload, Status.missingSettings)
@@ -319,7 +327,9 @@
         })
         if (
           curRun &&
-          (curRun.status === Status.pending || curRun.status === Status.running)
+          (curRun.status === Status.pending ||
+            curRun.status === Status.running ||
+            curRun.status === Status.incompleteResults)
         )
           return
         runs = setStatus(e.data.payload, Status.settingsError)
@@ -357,18 +367,25 @@
           source: Sources.ResultsWebview,
           info: e.data.payload,
         })
-        const runName = e.data.payload
-        runs = setStatus(runName, Status.unableToRun)
-        if (
-          runs.find(run => {
-            return run.confPath === runName
-          })
-        ) {
-          enableEdit({
-            confPath: runName,
-            displayName: namesMap.get(getFileName(runName)),
+        const runPath = e.data.payload.confFile
+        const logFile = e.data.payload.logFile
+        const curRun = runs.find(run => {
+          return run.confPath === runPath
+        })
+        if (curRun && logFile) {
+          runs = runs.map(r => {
+            if (r.confPath === runPath) {
+              r.vrLink = logFile
+            }
+            return r
           })
         }
+        enableEdit({
+          confPath: runPath,
+          displayName: namesMap.get(getFileName(runPath)),
+        })
+        removeScript(runPath)
+        runs = setStatus(runPath, Status.jobFailed)
         break
       }
       case EventTypesFromExtension.RunJob: {
@@ -398,7 +415,9 @@
           runningScripts.forEach(rs => {
             if (r.confPath === rs.confFile) {
               r.id = rs.pid
-              r.status = Status.running
+              if (r.status !== Status.incompleteResults) {
+                runs = setStatus(r.confPath, Status.running)
+              }
             }
           })
           return r
@@ -473,7 +492,7 @@
           return vr.name === jobName
         })
       ) {
-        runs = setStatus(jobName, Status.unableToRun)
+        runs = setStatus(jobName, Status.jobFailed)
         return
       }
       $verificationResults = $verificationResults.map(vr => {
@@ -488,7 +507,7 @@
           curRun?.status === Status.running ||
           curRun?.status === Status.ready
         ) {
-          runs = setStatus(jobName, Status.unableToRun)
+          runs = setStatus(jobName, Status.jobFailed)
         }
         return vr
       })
@@ -503,9 +522,6 @@
     pendingQueue = pendingQueue.filter(rq => {
       return rq.confPath !== run.confPath
     })
-    // $verificationResults = $verificationResults.filter(vr => {
-    //   return vr.name !== run.confPath
-    // })
     pendingQueueCounter--
     if (
       $verificationResults.find(vr => {
@@ -525,9 +541,9 @@
    * @returns new list of runs after change
    */
   function setStatus(runConfPath: string, value: Status): Run[] {
-    runs = runs.map(run => {
+    runs.forEach(run => {
       if (
-        (run.confPath === runConfPath || run.name === runConfPath) &&
+        run.confPath === runConfPath &&
         !(
           run.status === Status.success &&
           value !== Status.pending &&
@@ -759,7 +775,11 @@
 
     // the status of the new run cannot be 'success' (haven't run yet => no results)
     let newStatus = toDuplicate.status
-    if (newStatus === Status.success) {
+    if (
+      newStatus !== Status.ready &&
+      newStatus !== Status.missingSettings &&
+      newStatus !== Status.settingsError
+    ) {
       newStatus = Status.ready
     }
 

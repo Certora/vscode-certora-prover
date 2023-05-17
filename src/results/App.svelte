@@ -52,6 +52,7 @@
 
   let runningScripts: { pid: number; confFile: string; uploaded: boolean }[] =
     []
+
   let pendingQueue: JobNameMap[] = []
   let pendingQueueCounter = 0
 

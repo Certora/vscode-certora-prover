@@ -39,7 +39,7 @@ export abstract class PostProblems {
    * @returns an empty promise
    */
   public static async postProblems(confFile: string): Promise<void> {
-    const path = await getInternalDirPath()
+    const path = await getInternalDirPath(confFile)
     if (path) {
       const resourceErrorsFile = Uri.joinPath(path, 'resource_errors.json')
       if (resourceErrorsFile) {

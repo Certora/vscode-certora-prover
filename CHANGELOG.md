@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+### 0.1.8 (2023-05-15)
+
+### Bug Fixes
+
+* Removed unnecessary flags from conf files ([#101](https://github.com/Certora/vscode-certora-prover/pull/101))
+* Duplicate button also works on jobs that were converted from shell scripts ([#101](https://github.com/Certora/vscode-certora-prover/pull/101))
+## Features
+
+* Compatibility with the latest certora-cli version ([#100](https://github.com/Certora/vscode-certora-prover/pull/100))
+* Error handling for when a job failed because of system incompatibility issues ([#100](https://github.com/Certora/vscode-certora-prover/pull/100))
+* New additions to "Job Failed" status, including a button to the log file ([#102](https://github.com/Certora/vscode-certora-prover/pull/102))
+
 ### 0.1.7 (2023-05-01)
 
 ## Bug Fixes

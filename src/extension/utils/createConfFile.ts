@@ -5,10 +5,11 @@
 import { workspace, Uri, window } from 'vscode'
 import { log, Sources } from './log'
 import { CONF_DIRECTORY_NAME, NewForm, SolidityObj } from '../types'
+import { spawn } from 'child_process'
 
 type ConfFile = {
   files?: string[]
-  verify?: string[]
+  verify?: string[] | string
   solc?: string
   link?: string[]
   settings?: string[]
@@ -150,9 +151,16 @@ export function newFormToConf(newForm: NewForm): string {
   if (!Array.isArray(config.files)) config.files = []
 
   if (newForm.specObj.specFile && newForm.solidityObj.mainContract) {
-    config.verify = [
-      `${newForm.solidityObj.mainContract}:${newForm.specObj.specFile.value}`,
-    ]
+    // verify is an array in the old version, string in the new one
+    const oldCliVersion = false
+
+    if (oldCliVersion) {
+      config.verify = [
+        `${newForm.solidityObj.mainContract}:${newForm.specObj.specFile.value}`,
+      ]
+    } else {
+      config.verify = `${newForm.solidityObj.mainContract}:${newForm.specObj.specFile.value}`
+    }
   }
 
   if (newForm.solidityObj.mainFile) {
@@ -240,10 +248,6 @@ export function newFormToConf(newForm: NewForm): string {
     )
   }
 
-  if (newForm.specObj.sendOnly) {
-    config.send_only = setAdditionalSetting(newForm.specObj.sendOnly.toString())
-  }
-
   if (newForm.specObj.duration) {
     config.smt_timeout = setAdditionalSetting(newForm.specObj.duration)
   }
@@ -293,8 +297,10 @@ export async function createConfFile(
 ): Promise<void> {
   try {
     const basePath = workspace.workspaceFolders?.[0]
-
     if (!basePath) return
+    formData.specObj.properties = formData.specObj.properties.filter(prop => {
+      return prop.name !== ''
+    })
 
     const encoder = new TextEncoder()
     const convertedData = newFormToConf(formData)

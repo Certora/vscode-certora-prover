@@ -22,7 +22,6 @@ export class SettingsPanel {
   private readonly _panel: vscode.WebviewPanel
   private _disposables: vscode.Disposable[] = []
   private watcher: SmartContractsFilesWatcher
-  // private editConfFile?: ConfFile
   private confFilePath: string
   private static allPanels: SettingsPanel[] = []
   private static resultsWebviewProvider: ResultsWebviewProvider
@@ -52,7 +51,6 @@ export class SettingsPanel {
         type: 'edit-conf-file',
         payload: { confFile: editConfFile, runName: name },
       })
-      // this.editConfFile = editConfFile
     }
 
     this._panel.onDidChangeViewState(e => {
