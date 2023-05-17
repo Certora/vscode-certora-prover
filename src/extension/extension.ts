@@ -475,7 +475,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
       const confFilesDirs = await vscode.workspace.findFiles(
         `**/*${CONF_DIRECTORY_NAME}/**`,
-        '**/.certora_internal/**',
+        '**/*{node_modules,.certora_config,.git,.github,.gitignore,emv-*,**/emv-*,.certora_config,.certora_sources,.certora_internal,.ts,.js,lib,config,/.}',
       )
 
       confFiles = confFilesDirs
@@ -512,7 +512,7 @@ export function activate(context: vscode.ExtensionContext): void {
       fileSystemWatcher1.onDidCreate(async file => {
         const confFilesDirs = await vscode.workspace.findFiles(
           `**/*${CONF_DIRECTORY_NAME}/**`,
-          '**/.certora_internal/**',
+          '**/{.certora_internal,node_modules}/**',
         )
         const val: boolean = checkIfFilesChanges(confFilesDirs)
         if (val) return
@@ -532,7 +532,7 @@ export function activate(context: vscode.ExtensionContext): void {
       fileSystemWatcher1.onDidDelete(async file => {
         const confFilesDirs = await vscode.workspace.findFiles(
           `**/*${CONF_DIRECTORY_NAME}/**`,
-          '**/.certora_internal/**',
+          '**/{.certora_internal,node_modules}/**',
         )
         const val: boolean = checkIfFilesChanges(confFilesDirs)
         if (val) return
@@ -860,7 +860,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
     const filesDirs = await vscode.workspace.findFiles(
       `**/*`,
-      '**/*{.certora_config,.git,.github,.gitignore,emv-*,**/emv-*,.certora_config,.certora_sources,.certora_internal,.ts,.js,certora,lib,config,/.}',
+      '**/*{node_modules,.certora_config,.git,.github,.gitignore,emv-*,**/emv-*,.certora_config,.certora_sources,.certora_internal,.ts,.js,certora,lib,config,/.}',
     )
     const strDirs = filesDirs.map(file => {
       const tempArr = file.path.split('/')
