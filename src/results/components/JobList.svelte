@@ -891,6 +891,9 @@
         }
         return run
       })
+      //   $verificationResults = $verificationResults.filter(vr => {
+      //   return vr.name !== curRun.confPath
+      // })
       runScript(curRun)
     }
   }

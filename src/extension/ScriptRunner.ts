@@ -11,7 +11,6 @@ import {
   CERTORA_INNER_DIR,
   LOG_DIRECTORY_DEFAULT,
   CONF_DIRECTORY,
-  // CONF_DIRECTORY,
 } from './types'
 import { PostProblems } from './PostProblems'
 import fetch from 'node-fetch'
@@ -193,10 +192,7 @@ export class ScriptRunner {
    */
   public run(confFile: string): void {
     PostProblems.resetDiagnosticCollection()
-
-    //     const path = confFile.split(CONF_DIRECTORY)[0]
     const path = workspace.workspaceFolders?.[0]
-
     if (!path) return
     if (!this.checkCliVersion(confFile)) return
 
@@ -230,29 +226,6 @@ export class ScriptRunner {
         await this.errorMsgWithLogAction(str, confFile, ts)
       }
       channel.appendLine(str)
-
-      const vrLink = (await this.getVrLink(confFile, pid)) || ''
-
-      const progressUrl = getProgressUrl(vrLink)
-
-      const confFileName = confFile
-
-      if (progressUrl) {
-        await this.polling.run(progressUrl, confFileName, async data => {
-          data.pid = pid
-          data.runName = confFile
-          await this.saveLastResults(path.uri, confFile, data)
-          this.runningScripts.forEach(rs => {
-            if (rs && rs.pid === pid && rs.vrLink) {
-              data.verificationReportLink = rs.vrLink
-              this.resultsWebviewProvider.postMessage<Job>({
-                type: 'receive-new-job-result',
-                payload: data,
-              })
-            }
-          })
-        })
-      }
     })
 
     // when there was an error that prevented the prover from running
@@ -283,6 +256,28 @@ export class ScriptRunner {
 
     this.script.on('close', async code => {
       const vrLink = await this.getVrLink(confFile, pid)
+      if (vrLink) {
+        // this handles the results - moved here because we get the link from the
+        // inner files, not from the log
+        const progressUrl = getProgressUrl(vrLink)
+        const confFileName = confFile
+        if (progressUrl) {
+          await this.polling.run(progressUrl, confFileName, async data => {
+            data.pid = pid
+            data.runName = confFile
+            await this.saveLastResults(path.uri, confFile, data)
+            this.runningScripts.forEach(rs => {
+              if (rs && rs.pid === pid && rs.vrLink) {
+                data.verificationReportLink = rs.vrLink
+                this.resultsWebviewProvider.postMessage<Job>({
+                  type: 'receive-new-job-result',
+                  payload: data,
+                })
+              }
+            })
+          })
+        }
+      }
       this.resultsWebviewProvider.postMessage<{ pid: number; vrLink: string }>({
         type: 'run-next',
         payload: { pid: pid, vrLink: vrLink || '' },
@@ -314,6 +309,12 @@ export class ScriptRunner {
     })
   }
 
+  /**
+   * get the rule report link from the inner file
+   * @param confFile path to current conf file
+   * @param pid process id
+   * @returns link to rule report (string path)
+   */
   private async getVrLink(confFile: string, pid: number) {
     const innerLinkFiles = await workspace.findFiles(
       '**/*{.vscode_extension_info.json}',
