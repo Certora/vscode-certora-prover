@@ -541,7 +541,9 @@
 {#if !$jobLists.length}
   <div class="zero-state">
     <div class="command">
-      <h3 class="command-description">Welcome To Certora Prover IDE</h3>
+      <h3 class="command-description">
+        Welcome To Certora Prover IDE - NEW PR
+      </h3>
       <div class="command-description">Verify your smart contract</div>
     </div>
   </div>
