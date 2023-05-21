@@ -222,8 +222,11 @@ export class ScriptRunner {
       str = str.replace(re, '')
       this.log(str, confFile, ts)
       // parse errors are shown in an error message.
-      if (str.includes('CRITICAL')) {
-        await this.errorMsgWithLogAction(str, confFile, ts)
+      const critical = 'CRITICAL:'
+      if (str.includes(critical)) {
+        const strMsgArr = str.split(critical)
+        const strMsg = critical + strMsgArr[strMsgArr.length - 1]
+        await this.errorMsgWithLogAction(strMsg, confFile, ts)
       }
       channel.appendLine(str)
     })
