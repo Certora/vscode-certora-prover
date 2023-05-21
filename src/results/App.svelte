@@ -89,7 +89,11 @@
           runNext()
         }
         // no empty job list
-        if (!$jobLists[0]?.children.length && !$jobLists[0]?.children.length) {
+        if (
+          !$jobLists[0]?.children?.length &&
+          !$jobLists[0]?.children?.length &&
+          !$jobLists[0]?.runs?.length
+        ) {
           $jobLists = []
         }
         break
@@ -131,7 +135,7 @@
         } else {
           changeJobs(e.data.payload)
         }
-
+        console.log('JOB LISTS!!!', $jobLists)
         break
       }
       case EventTypesFromExtension.GetDirChoice: {
@@ -186,13 +190,13 @@
       })
     })
     jl.children = jl.children.filter(child => {
-      return child.children.length || child.runs.length
+      return child.children?.length || child.runs?.length
     })
     jl.children.forEach(child => {
       recursiveDeleteJob(child, confList)
     })
     jl.children = jl.children.filter(child => {
-      return child.children.length || child.runs.length
+      return child.children?.length || child.runs?.length
     })
     return jl
   }
@@ -352,7 +356,7 @@
     while (jlToSearch.length) {
       let tempJL = jlToSearch.pop()
       if (
-        tempJL.runs.find(run => {
+        tempJL?.runs.find(run => {
           return run.confPath === conf.confPath
         })
       ) {
