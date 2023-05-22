@@ -192,8 +192,13 @@ export class ScriptRunner {
    */
   public run(confFile: string): void {
     PostProblems.resetDiagnosticCollection()
-    const path = workspace.workspaceFolders?.[0]
-    if (!path) return
+
+    const path = Uri.parse(
+      confFile
+        .replace(this.getConfFileName(confFile), '')
+        .replace(CONF_DIRECTORY, ''),
+    )
+
     if (!this.checkCliVersion(confFile)) return
 
     const ts = Date.now()
@@ -205,7 +210,7 @@ export class ScriptRunner {
       `certoraRun`,
       ['--run_source', 'VSCODE', '--send_only', confFile],
       {
-        cwd: path.uri.fsPath,
+        cwd: path.fsPath,
       },
     )
 
@@ -268,7 +273,7 @@ export class ScriptRunner {
           await this.polling.run(progressUrl, confFileName, async data => {
             data.pid = pid
             data.runName = confFile
-            await this.saveLastResults(path.uri, confFile, data)
+            await this.saveLastResults(path, confFile, data)
             this.runningScripts.forEach(rs => {
               if (rs && rs.pid === pid && rs.vrLink) {
                 data.verificationReportLink = rs.vrLink
