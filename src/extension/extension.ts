@@ -430,7 +430,7 @@ export function activate(context: vscode.ExtensionContext): void {
     try {
       const internalUri = vscode.Uri.parse(basePath + CERTORA_INNER_DIR)
       const fileSystemWatcher = vscode.workspace.createFileSystemWatcher(
-        new vscode.RelativePattern(internalUri, '**/.last_confs**/*.conf'),
+        new vscode.RelativePattern(internalUri, '**/*run.conf'),
       )
       fileSystemWatcher.onDidCreate(async file => {
         await copyCreatedConf(file)
@@ -446,9 +446,23 @@ export function activate(context: vscode.ExtensionContext): void {
     const jsonContent = JSON.parse(strContent)
     if (jsonContent && jsonContent.build_only) {
       delete jsonContent.build_only
+      let strName = ''
+      if (jsonContent.msg) strName = jsonContent.msg
+      else if (typeof jsonContent.verify === 'string') {
+        strName = jsonContent.verify
+      } else {
+        strName = jsonContent.verify[0]
+      }
+      let dateTimeToUse = ''
+      const pathArr = file.path.split('/')
+      const dateTimeReg = /^[0-9_]+$/i
+      const dateTimeStr = pathArr.find(str => {
+        return dateTimeReg.exec(str)
+      })
+
+      if (dateTimeStr) dateTimeToUse = dateTimeStr
       const newConfFileUri = getConfUri(
-        jsonContent.verify[0].split(':')[0] +
-          getFileName(file.path).replace('last_conf', ''),
+        `${strName.split(':')[0]}_${dateTimeToUse}`,
       )
       if ('staging' in jsonContent && jsonContent.staging === '') {
         jsonContent.staging = 'master'
