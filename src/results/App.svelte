@@ -726,7 +726,7 @@
       --itemIsActiveBG: var(--vscode-editorSuggestWidget-selectedBackground);
       --itemISActiveColor: var(--vscode-editorSuggestWidget-selectedForeground);
       /* close icon */
-      --clearSelectRight: 52px;
+      --clearSelectRight: 60px;
       --clearSelectTop: 0;
       --clearSelectBottom: 0;
       --clearSelectWidth: 20px;
@@ -783,11 +783,12 @@
   /* global close icon */
   :global(.codicon-close, .codicon-info, .codicon-trash) {
     border-radius: 5px;
-    padding: -5px;
+    padding: 2px;
   }
   :global(.codicon-close:hover, .codicon-info:hover, .codicon-trash:hover) {
     cursor: pointer;
     background-color: rgba(90, 93, 94, 0.31);
+    color: var(--vscode-input-foreground);
   }
 
   :global(button:hover, input:hover) {

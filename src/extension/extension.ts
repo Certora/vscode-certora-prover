@@ -426,6 +426,7 @@ export function activate(context: vscode.ExtensionContext): void {
    * than create conf files for them
    */
   function watchForBuilds(basePath: string): void {
+    console.log('watch for builds:', basePath)
     try {
       const internalUri = vscode.Uri.parse(basePath + CERTORA_INNER_DIR)
       const fileSystemWatcher = vscode.workspace.createFileSystemWatcher(
