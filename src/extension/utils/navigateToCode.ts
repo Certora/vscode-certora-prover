@@ -12,8 +12,8 @@ export async function navigateToCode(
   try {
     const jtd = jumpToDefinition.map(item => ({
       ...item,
-      line: item.line - 1,
-      col: item.col - 1,
+      line: item.line,
+      col: item.col,
     }))
     const base = vscode.Uri.parse(path)
     if (!base) return
@@ -51,7 +51,7 @@ export async function navigateToCode(
             const range = new vscode.Range(line, col, line, col)
             editor.selection = new vscode.Selection(line, col, line, col)
             editor.revealRange(
-              range.with(new vscode.Position(Math.max(line - 1, 0), col)),
+              range.with(new vscode.Position(Math.max(line - 1, 1), col)),
               vscode.TextEditorRevealType.InCenterIfOutsideViewport,
             )
           }
@@ -74,7 +74,7 @@ export async function navigateToCode(
       })
 
       editor.revealRange(
-        range.with(new vscode.Position(Math.max(line - 1, 0), col)),
+        range.with(new vscode.Position(Math.max(line - 1, 1), col)),
         vscode.TextEditorRevealType.InCenterIfOutsideViewport,
       )
     }
