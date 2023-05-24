@@ -252,7 +252,6 @@ export class ScriptRunner {
     // when there was an error that prevented the prover from running
     this.script.on('error', async err => {
       // my internal log
-      // todo ignore?
       console.log(err)
       this.removeRunningScript(pid)
       this.resultsWebviewProvider.postMessage({
