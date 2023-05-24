@@ -18,6 +18,9 @@ import {
   Job,
 } from './types'
 import { checkDir } from './utils/checkDir'
+import { Run } from '../results/types'
+import { getProgressUrl } from './utils/getProgressUrl'
+import { ScriptProgressLongPolling } from './ScriptProgressLongPolling'
 
 export function activate(context: vscode.ExtensionContext): void {
   /**
@@ -618,9 +621,15 @@ export function activate(context: vscode.ExtensionContext): void {
               const job: Job = jsonContent.data
               job.runName = name
               if (job) {
-                resultsWebviewProvider.postMessage<Job>({
-                  type: 'receive-new-job-result',
-                  payload: job,
+                const polling = new ScriptProgressLongPolling(
+                  resultsWebviewProvider,
+                )
+                await polling.run(job.progressUrl, name, async data => {
+                  data.runName = name
+                  resultsWebviewProvider.postMessage<Job>({
+                    type: 'receive-new-job-result',
+                    payload: data,
+                  })
                 })
               }
             }
