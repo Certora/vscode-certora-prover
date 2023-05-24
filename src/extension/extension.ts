@@ -449,8 +449,14 @@ export function activate(context: vscode.ExtensionContext): void {
     const jsonContent = JSON.parse(strContent)
     if (jsonContent && jsonContent.build_only) {
       delete jsonContent.build_only
+      let verifyStr = ''
+      if (typeof jsonContent.verify === 'string') {
+        verifyStr = jsonContent.verify
+      } else {
+        verifyStr = jsonContent.verify[0]
+      }
       const newConfFileUri = getConfUri(
-        jsonContent.verify[0].split(':')[0] +
+        verifyStr.split(':')[0] +
           getFileName(file.path).replace('last_conf', ''),
       )
       if ('staging' in jsonContent && jsonContent.staging === '') {
@@ -558,7 +564,7 @@ export function activate(context: vscode.ExtensionContext): void {
         confFile.verify !== undefined &&
         confFile.files?.length &&
         // verify is not an empty array and not an empty string
-        (confFile.verify?.length || confFile.verify !== '') &&
+        confFile.verify?.length &&
         confFile.solc
       ) {
         fileObj.allowRun = 1

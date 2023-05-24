@@ -5,11 +5,11 @@
 import { workspace, Uri, window } from 'vscode'
 import { log, Sources } from './log'
 import { CONF_DIRECTORY_NAME, NewForm, SolidityObj } from '../types'
-import { spawn } from 'child_process'
+import { cliVersion } from '../ScriptRunner'
 
 type ConfFile = {
   files?: string[]
-  verify?: string[] | string
+  verify?: string | string[]
   solc?: string
   link?: string[]
   settings?: string[]
@@ -152,7 +152,7 @@ export function newFormToConf(newForm: NewForm): string {
 
   if (newForm.specObj.specFile && newForm.solidityObj.mainContract) {
     // verify is an array in the old version, string in the new one
-    const oldCliVersion = false
+    const oldCliVersion = cliVersion === 1
 
     if (oldCliVersion) {
       config.verify = [

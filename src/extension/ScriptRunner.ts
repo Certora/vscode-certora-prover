@@ -12,6 +12,8 @@ import fetch from 'node-fetch'
 import * as os from 'os'
 import { getInternalDirPath } from './utils/getRunInternalInfo'
 
+export let cliVersion = 1
+
 type RunningScript = {
   pid: number
   confFile: string
@@ -40,6 +42,12 @@ export class ScriptRunner {
   private getConfFileName(path: string): string {
     const splittedPathToConfFile = path.split('/')
     return splittedPathToConfFile[splittedPathToConfFile.length - 1]
+  }
+
+  private getUrlReg(): RegExp {
+    const pattern =
+      'https://(prover|vaas-stg).certora.com/output/[a-zA-Z0-9/?=]+'
+    return new RegExp(pattern)
   }
 
   private async getLogFilePath(pathToConfFile: string, ts: number) {
@@ -144,8 +152,7 @@ export class ScriptRunner {
    * @returns job id (string)
    */
   private getJobId(link: string): string {
-    const pattern = 'https://(prover|vaas-stg).certora.com/output/'
-    const regExp = new RegExp(pattern)
+    const regExp = this.getUrlReg()
     return link.split('?anonymousKey')[0].replace(regExp, '').split('/')[1]
   }
 
@@ -164,6 +171,7 @@ export class ScriptRunner {
     versionScript.stdout.on('data', async data => {
       const str = data.toString() as string
       this.cliVersion = str
+      cliVersion = str.includes('certora-cli-') ? 2 : 1
     })
 
     versionScript.on('error', async err => {
@@ -226,32 +234,26 @@ export class ScriptRunner {
       }
       channel.appendLine(str)
 
-      const progressUrl = getProgressUrl(str)
-
-      const confFileName = this.getConfFileName(confFile).replace('.conf', '')
-
-      if (progressUrl) {
-        await this.polling.run(progressUrl, confFileName, async data => {
-          data.pid = pid
-          data.runName = confFileName
-          await this.saveLastResults(path.uri, confFile, data)
-          this.runningScripts.forEach(rs => {
-            if (rs && rs.pid === pid && rs.vrLink) {
-              data.verificationReportLink = rs.vrLink
-              this.resultsWebviewProvider.postMessage<Job>({
-                type: 'receive-new-job-result',
-                payload: data,
-              })
+      // look for url in the logs for cli version 1
+      if (cliVersion === 1) {
+        const regExp = this.getUrlReg()
+        const curLink = regExp.exec(str)
+        if (curLink) {
+          this.runningScripts = this.runningScripts.map(rs => {
+            if (rs.pid === pid) {
+              rs.vrLink = curLink[0]
             }
+            return rs
           })
-        })
+        }
       }
     })
 
     // when there was an error that prevented the prover from running
     this.script.on('error', async err => {
       // my internal log
-      console.log(err, 'this is an error from the cli')
+      // todo ignore?
+      console.log(err)
       this.removeRunningScript(pid)
       this.resultsWebviewProvider.postMessage({
         type: 'parse-error',
@@ -275,11 +277,20 @@ export class ScriptRunner {
     })
 
     this.script.on('close', async code => {
+      let vrLink = ''
+      if (cliVersion === 1) {
+        const curRunningScript = this.runningScripts.find(rs => {
+          return rs.pid === pid
+        })
+        if (curRunningScript?.vrLink) {
+          vrLink = curRunningScript.vrLink
+        }
+      }
       const innerLinkFiles = await workspace.findFiles(
         '**/*{.vscode_extension_info.json}',
         '{.certora_config,.git,emv-*,**/emv-*,**/*.certora_config,**/*.certora_sources}/**',
       )
-      let vrLink = ''
+
       if (innerLinkFiles?.length) {
         const sortedFiles = innerLinkFiles.sort((uri1, uri2) => {
           return uri1.path > uri2.path ? -1 : 1
@@ -301,6 +312,29 @@ export class ScriptRunner {
           })
         }
       }
+
+      const progressUrl = getProgressUrl(vrLink)
+
+      const confFileName = this.getConfFileName(confFile).replace('.conf', '')
+
+      if (progressUrl) {
+        await this.polling.run(progressUrl, confFileName, async data => {
+          data.pid = pid
+          data.runName = confFileName
+          await this.saveLastResults(path.uri, confFile, data)
+          this.runningScripts.forEach(rs => {
+            if (rs && rs.pid === pid && rs.vrLink) {
+              data.verificationReportLink = rs.vrLink
+              this.resultsWebviewProvider.postMessage<Job>({
+                type: 'receive-new-job-result',
+                payload: data,
+              })
+            }
+          })
+        })
+      }
+
+      console.log(vrLink, cliVersion, 'right now this is data2')
 
       if (!vrLink) {
         // no connection to the prover
