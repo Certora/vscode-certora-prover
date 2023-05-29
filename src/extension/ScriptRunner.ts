@@ -183,7 +183,6 @@ export class ScriptRunner {
       const str = data.toString() as string
       this.cliVersion = str
       cliVersion = this.whichVersion(str)
-      console.log('which version?', cliVersion)
     })
 
     versionScript.on('error', async err => {
@@ -328,6 +327,20 @@ export class ScriptRunner {
       const confFileName = this.getConfFileName(confFile).replace('.conf', '')
 
       if (progressUrl) {
+        await this.saveLastResults(path.uri, confFile, {
+          progressUrl: progressUrl,
+          jobId: '',
+          jobStatus: '',
+          jobEnded: false,
+          cloudErrorMessages: [],
+          verificationProgress: {
+            spec: '',
+            contract: '',
+            rules: [],
+            timestamp: 0,
+          },
+          creationTime: '',
+        })
         await this.polling.run(progressUrl, confFileName, async data => {
           data.pid = pid
           data.runName = confFileName
