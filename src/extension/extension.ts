@@ -437,7 +437,7 @@ export function activate(context: vscode.ExtensionContext): void {
     try {
       const internalUri = vscode.Uri.parse(path.uri.path + CERTORA_INNER_DIR)
       const fileSystemWatcher = vscode.workspace.createFileSystemWatcher(
-        new vscode.RelativePattern(internalUri, '**/.last_confs**/*.conf'),
+        new vscode.RelativePattern(internalUri, '**/*.conf'),
       )
       fileSystemWatcher.onDidCreate(async file => {
         await copyCreatedConf(file)
@@ -458,10 +458,13 @@ export function activate(context: vscode.ExtensionContext): void {
       } else {
         verifyStr = jsonContent.verify[0]
       }
-      const newConfFileUri = getConfUri(
-        verifyStr.split(':')[0] +
-          getFileName(file.path).replace('last_conf', ''),
-      )
+      const reg = /^[0-9_]+$/i
+      const pathArr = file.path.split('/')
+      const dateAndTime =
+        pathArr.find(item => {
+          return reg.exec(item)
+        }) || ''
+      const newConfFileUri = getConfUri(verifyStr.split(':')[0] + dateAndTime)
       if ('staging' in jsonContent && jsonContent.staging === '') {
         jsonContent.staging = 'master'
       }
