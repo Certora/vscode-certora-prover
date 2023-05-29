@@ -157,6 +157,17 @@ export class ScriptRunner {
   }
 
   /**
+   * return the cvl version number
+   * @param str
+   */
+  private whichVersion(str: string): number {
+    if (str.includes('certora-cli-')) return 2
+    const versionReg = /certora-cli 4.*/i
+    if (versionReg.exec(str)) return 2
+    return 1
+  }
+
+  /**
    * check the cli-version
    * @param confFile path to conf file (string)
    * @returns true if cli version is found, false otherwise
@@ -171,7 +182,8 @@ export class ScriptRunner {
     versionScript.stdout.on('data', async data => {
       const str = data.toString() as string
       this.cliVersion = str
-      cliVersion = str.includes('certora-cli-') ? 2 : 1
+      cliVersion = this.whichVersion(str)
+      console.log('which version?', cliVersion)
     })
 
     versionScript.on('error', async err => {
@@ -235,17 +247,15 @@ export class ScriptRunner {
       channel.appendLine(str)
 
       // look for url in the logs for cli version 1
-      if (cliVersion === 1) {
-        const regExp = this.getUrlReg()
-        const curLink = regExp.exec(str)
-        if (curLink) {
-          this.runningScripts = this.runningScripts.map(rs => {
-            if (rs.pid === pid) {
-              rs.vrLink = curLink[0]
-            }
-            return rs
-          })
-        }
+      const regExp = this.getUrlReg()
+      const curLink = regExp.exec(str)
+      if (curLink) {
+        this.runningScripts = this.runningScripts.map(rs => {
+          if (rs.pid === pid) {
+            rs.vrLink = curLink[0]
+          }
+          return rs
+        })
       }
     })
 
@@ -284,31 +294,32 @@ export class ScriptRunner {
         if (curRunningScript?.vrLink) {
           vrLink = curRunningScript.vrLink
         }
-      }
-      const innerLinkFiles = await workspace.findFiles(
-        '**/*{.vscode_extension_info.json}',
-        '{.certora_config,.git,emv-*,**/emv-*,**/*.certora_config,**/*.certora_sources}/**',
-      )
-
-      if (innerLinkFiles?.length) {
-        const sortedFiles = innerLinkFiles.sort((uri1, uri2) => {
-          return uri1.path > uri2.path ? -1 : 1
-        })
-        const lastFileByDate = sortedFiles[0]
-        const decoder = new TextDecoder()
-        const jsonContent = JSON.parse(
-          decoder.decode(await workspace.fs.readFile(lastFileByDate)),
+      } else if (cliVersion === 2) {
+        const innerLinkFiles = await workspace.findFiles(
+          '**/*{.vscode_extension_info.json}',
+          '{.certora_config,.git,emv-*,**/emv-*,**/*.certora_config,**/*.certora_sources}/**',
         )
-        vrLink = jsonContent.verification_report_url
-        if (vrLink) {
-          this.runningScripts = this.runningScripts.map(rs => {
-            if (rs.pid === pid) {
-              rs.vrLink = vrLink
-              rs.jobId = this.getJobId(vrLink)
-              rs.uploaded = true
-            }
-            return rs
+
+        if (innerLinkFiles?.length) {
+          const sortedFiles = innerLinkFiles.sort((uri1, uri2) => {
+            return uri1.path > uri2.path ? -1 : 1
           })
+          const lastFileByDate = sortedFiles[0]
+          const decoder = new TextDecoder()
+          const jsonContent = JSON.parse(
+            decoder.decode(await workspace.fs.readFile(lastFileByDate)),
+          )
+          vrLink = jsonContent.verification_report_url
+          if (vrLink) {
+            this.runningScripts = this.runningScripts.map(rs => {
+              if (rs.pid === pid) {
+                rs.vrLink = vrLink
+                rs.jobId = this.getJobId(vrLink)
+                rs.uploaded = true
+              }
+              return rs
+            })
+          }
         }
       }
 

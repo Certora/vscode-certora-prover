@@ -95,7 +95,7 @@
         'progress',
         'result',
       )}&output=${clickedRuleOrAssert.output}`
-      getOutput(outputUrl)
+      getOutput(outputUrl, vr.name)
       outputRunName = vr.name
     } else {
       console.log(
@@ -407,6 +407,7 @@
         }
         removeScript(runName)
         runs = setStatus(runName, Status.jobFailed)
+        console.log(runName, runs, 'runs after parse-error')
         break
       }
       case EventTypesFromExtension.InitialJobs: {
@@ -514,14 +515,17 @@
    * @returns new list of runs after change
    */
   function setStatus(runName: string, value: Status): Run[] {
-    runs.forEach(run => {
+    runs = runs.map(run => {
       if (
         run.name === runName &&
         !(run.status === Status.success && value === Status.ready)
       ) {
         run.status = value
+        console.log('update', run, runName, value)
       }
+      return run
     })
+    console.log('set status for parse-error', runs)
     return runs
   }
 

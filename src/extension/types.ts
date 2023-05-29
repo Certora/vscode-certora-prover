@@ -248,7 +248,7 @@ export type EventFromResultsWebview =
     }
   | {
       command: CommandFromResultsWebview.GetOutput
-      payload: string
+      payload: { url: string; name: string }
     }
   | {
       command: CommandFromResultsWebview.OpenLogFile
