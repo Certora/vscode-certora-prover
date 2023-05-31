@@ -407,7 +407,6 @@
         }
         removeScript(runName)
         runs = setStatus(runName, Status.jobFailed)
-        console.log(runName, runs, 'runs after parse-error')
         break
       }
       case EventTypesFromExtension.InitialJobs: {
@@ -521,11 +520,9 @@
         !(run.status === Status.success && value === Status.ready)
       ) {
         run.status = value
-        console.log('update', run, runName, value)
       }
       return run
     })
-    console.log('set status for parse-error', runs)
     return runs
   }
 
