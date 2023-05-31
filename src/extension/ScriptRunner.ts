@@ -357,18 +357,6 @@ export class ScriptRunner {
         })
       }
 
-      console.log(vrLink, cliVersion, 'right now this is data2')
-
-      if (!vrLink) {
-        // no connection to the prover
-        this.removeRunningScript(pid)
-        await this.errorMsgWithLogAction(
-          `Lost connection to certora prover, this job's information can be found in the log file.`,
-          confFile,
-          ts,
-        )
-      }
-
       this.resultsWebviewProvider.postMessage<{ pid: number; vrLink: string }>({
         type: 'run-next',
         payload: { pid: pid, vrLink: vrLink },
