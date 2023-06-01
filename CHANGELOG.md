@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 
 ### Bug Fixes
 
-* Added compatibility with cvl 1 ([#105](https://github.com/Certora/vscode-certora-prover/pull/105))
+* Added dual support for both CVL versions (CVL1+CVL2), according to the installed certora-cli version. ([#105](https://github.com/Certora/vscode-certora-prover/pull/105))
 * Results are not lost if the IDE is re-loaded ([#105](https://github.com/Certora/vscode-certora-prover/pull/105))
 
 ### 0.1.8 (2023-05-15)

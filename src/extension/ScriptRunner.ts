@@ -6,13 +6,18 @@ import { spawn, exec, ChildProcessWithoutNullStreams } from 'child_process'
 import { ScriptProgressLongPolling } from './ScriptProgressLongPolling'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 import { getProgressUrl } from './utils/getProgressUrl'
-import { Job, CERTORA_INNER_DIR, LOG_DIRECTORY_DEFAULT } from './types'
+import {
+  Job,
+  CERTORA_INNER_DIR,
+  LOG_DIRECTORY_DEFAULT,
+  CvlVersion,
+} from './types'
 import { PostProblems } from './PostProblems'
 import fetch from 'node-fetch'
 import * as os from 'os'
 import { getInternalDirPath } from './utils/getRunInternalInfo'
 
-export let cliVersion = 1
+export let cvlVersion = CvlVersion.cvlVersion1
 
 type RunningScript = {
   pid: number
@@ -160,11 +165,11 @@ export class ScriptRunner {
    * return the cvl version number
    * @param str
    */
-  private whichVersion(str: string): number {
-    if (str.includes('certora-cli-')) return 2
+  private whichVersion(str: string): CvlVersion {
+    if (str.includes('certora-cli-')) return CvlVersion.cvlVersion2
     const versionReg = /certora-cli 4.*/i
-    if (versionReg.exec(str)) return 2
-    return 1
+    if (versionReg.exec(str)) return CvlVersion.cvlVersion2
+    return CvlVersion.cvlVersion1
   }
 
   /**
@@ -182,7 +187,7 @@ export class ScriptRunner {
     versionScript.stdout.on('data', async data => {
       const str = data.toString() as string
       this.cliVersion = str
-      cliVersion = this.whichVersion(str)
+      cvlVersion = this.whichVersion(str)
     })
 
     versionScript.on('error', async err => {
@@ -286,14 +291,14 @@ export class ScriptRunner {
 
     this.script.on('close', async code => {
       let vrLink = ''
-      if (cliVersion === 1) {
+      if (cvlVersion === CvlVersion.cvlVersion1) {
         const curRunningScript = this.runningScripts.find(rs => {
           return rs.pid === pid
         })
         if (curRunningScript?.vrLink) {
           vrLink = curRunningScript.vrLink
         }
-      } else if (cliVersion === 2) {
+      } else if (cvlVersion === CvlVersion.cvlVersion2) {
         const innerLinkFiles = await workspace.findFiles(
           '**/*{.vscode_extension_info.json}',
           '{.certora_config,.git,emv-*,**/emv-*,**/*.certora_config,**/*.certora_sources}/**',

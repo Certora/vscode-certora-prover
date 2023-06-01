@@ -17,6 +17,11 @@ export type JumpToDefinition = {
   col: number
 }
 
+export enum CvlVersion {
+  cvlVersion1 = 1,
+  cvlVersion2 = 2,
+}
+
 export enum RuleStatuses {
   Verified = 'VERIFIED',
   Violated = 'VIOLATED',
