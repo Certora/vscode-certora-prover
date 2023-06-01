@@ -18,6 +18,9 @@ import {
   Job,
 } from './types'
 import { checkDir } from './utils/checkDir'
+import { Run } from '../results/types'
+import { getProgressUrl } from './utils/getProgressUrl'
+import { ScriptProgressLongPolling } from './ScriptProgressLongPolling'
 
 export function activate(context: vscode.ExtensionContext): void {
   /**
@@ -434,7 +437,7 @@ export function activate(context: vscode.ExtensionContext): void {
     try {
       const internalUri = vscode.Uri.parse(path.uri.path + CERTORA_INNER_DIR)
       const fileSystemWatcher = vscode.workspace.createFileSystemWatcher(
-        new vscode.RelativePattern(internalUri, '**/.last_confs**/*.conf'),
+        new vscode.RelativePattern(internalUri, '**/*.conf'),
       )
       fileSystemWatcher.onDidCreate(async file => {
         await copyCreatedConf(file)
@@ -449,10 +452,19 @@ export function activate(context: vscode.ExtensionContext): void {
     const jsonContent = JSON.parse(strContent)
     if (jsonContent && jsonContent.build_only) {
       delete jsonContent.build_only
-      const newConfFileUri = getConfUri(
-        jsonContent.verify[0].split(':')[0] +
-          getFileName(file.path).replace('last_conf', ''),
-      )
+      let verifyStr = ''
+      if (typeof jsonContent.verify === 'string') {
+        verifyStr = jsonContent.verify
+      } else {
+        verifyStr = jsonContent.verify[0]
+      }
+      const reg = /^[0-9_]+$/i
+      const pathArr = file.path.split('/')
+      const dateAndTime =
+        pathArr.find(item => {
+          return reg.exec(item)
+        }) || ''
+      const newConfFileUri = getConfUri(verifyStr.split(':')[0] + dateAndTime)
       if ('staging' in jsonContent && jsonContent.staging === '') {
         jsonContent.staging = 'master'
       }
@@ -558,7 +570,7 @@ export function activate(context: vscode.ExtensionContext): void {
         confFile.verify !== undefined &&
         confFile.files?.length &&
         // verify is not an empty array and not an empty string
-        (confFile.verify?.length || confFile.verify !== '') &&
+        confFile.verify?.length &&
         confFile.solc
       ) {
         fileObj.allowRun = 1
@@ -612,9 +624,15 @@ export function activate(context: vscode.ExtensionContext): void {
               const job: Job = jsonContent.data
               job.runName = name
               if (job) {
-                resultsWebviewProvider.postMessage<Job>({
-                  type: 'receive-new-job-result',
-                  payload: job,
+                const polling = new ScriptProgressLongPolling(
+                  resultsWebviewProvider,
+                )
+                await polling.run(job.progressUrl, name, async data => {
+                  data.runName = name
+                  resultsWebviewProvider.postMessage<Job>({
+                    type: 'receive-new-job-result',
+                    payload: data,
+                  })
                 })
               }
             }

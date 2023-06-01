@@ -95,7 +95,7 @@
         'progress',
         'result',
       )}&output=${clickedRuleOrAssert.output}`
-      getOutput(outputUrl)
+      getOutput(outputUrl, vr.name)
       outputRunName = vr.name
     } else {
       console.log(
@@ -514,13 +514,14 @@
    * @returns new list of runs after change
    */
   function setStatus(runName: string, value: Status): Run[] {
-    runs.forEach(run => {
+    runs = runs.map(run => {
       if (
         run.name === runName &&
         !(run.status === Status.success && value === Status.ready)
       ) {
         run.status = value
       }
+      return run
     })
     return runs
   }

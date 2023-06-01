@@ -17,6 +17,11 @@ export type JumpToDefinition = {
   col: number
 }
 
+export enum CvlVersion {
+  cvlVersion1 = 1,
+  cvlVersion2 = 2,
+}
+
 export enum RuleStatuses {
   Verified = 'VERIFIED',
   Violated = 'VIOLATED',
@@ -248,7 +253,7 @@ export type EventFromResultsWebview =
     }
   | {
       command: CommandFromResultsWebview.GetOutput
-      payload: string
+      payload: { url: string; name: string }
     }
   | {
       command: CommandFromResultsWebview.OpenLogFile
@@ -312,7 +317,7 @@ export type EventFromSettingsWebview =
 
 export type ConfFile = {
   files?: string[]
-  verify?: string
+  verify?: string | string[]
   solc?: string
   link?: string[]
   settings?: string[]
