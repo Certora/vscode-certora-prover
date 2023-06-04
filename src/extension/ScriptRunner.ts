@@ -206,6 +206,8 @@ export class ScriptRunner {
       `Certora IDE - ${confFile}-${ts}`,
     )
 
+    process.env.CERTORA_OLD_API = '1'
+
     this.script = spawn(
       `certoraRun`,
       ['--run_source', 'VSCODE', '--send_only', confFile],
