@@ -222,7 +222,7 @@ export function newFormToConf(newForm: NewForm): string {
   processLinking(newForm.solidityObj, config)
 
   if (newForm.specObj.runOnStg) {
-    config.staging = newForm.specObj.branchName || 'master'
+    config.staging = newForm.specObj.branchName || ''
   }
   if (newForm.specObj.branchName && !newForm.specObj.runOnStg) {
     config.cloud = newForm.specObj.branchName

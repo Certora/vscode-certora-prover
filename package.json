@@ -116,7 +116,7 @@
           },
           "Branch": {
             "type": "string",
-            "default": "master",
+            "default": "",
             "order": 3
           }
         }

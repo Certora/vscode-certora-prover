@@ -18,8 +18,8 @@ import {
   Job,
 } from './types'
 import { checkDir } from './utils/checkDir'
-import { Run } from '../results/types'
-import { getProgressUrl } from './utils/getProgressUrl'
+// import { Run } from '../results/types'
+// import { getProgressUrl } from './utils/getProgressUrl'
 import { ScriptProgressLongPolling } from './ScriptProgressLongPolling'
 
 export function activate(context: vscode.ExtensionContext): void {
@@ -90,7 +90,7 @@ export function activate(context: vscode.ExtensionContext): void {
       vscode.workspace.getConfiguration().get('Staging') || false
     let branch = ''
     if (staging) {
-      branch = vscode.workspace.getConfiguration().get('Branch') || 'master'
+      branch = vscode.workspace.getConfiguration().get('Branch') || ''
     }
     const confFileDefault: ConfFile = {
       solc: solcPath + solc,
@@ -466,7 +466,7 @@ export function activate(context: vscode.ExtensionContext): void {
         }) || ''
       const newConfFileUri = getConfUri(verifyStr.split(':')[0] + dateAndTime)
       if ('staging' in jsonContent && jsonContent.staging === '') {
-        jsonContent.staging = 'master'
+        jsonContent.staging = ''
       }
       if (newConfFileUri) {
         const encoder = new TextEncoder()

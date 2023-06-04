@@ -220,6 +220,8 @@ export class ScriptRunner {
     if (!path) return
     if (!this.checkCliVersion(confFile)) return
 
+    process.env.CERTORA_OLD_API = '1'
+
     const ts = Date.now()
     const channel = window.createOutputChannel(
       `Certora IDE - ${confFile}-${ts}`,
@@ -290,6 +292,7 @@ export class ScriptRunner {
     })
 
     this.script.on('close', async code => {
+      let progressUrl = ''
       let vrLink = ''
       if (cvlVersion === CvlVersion.cvlVersion1) {
         const curRunningScript = this.runningScripts.find(rs => {
@@ -314,6 +317,7 @@ export class ScriptRunner {
             decoder.decode(await workspace.fs.readFile(lastFileByDate)),
           )
           vrLink = jsonContent.verification_report_url
+
           if (vrLink) {
             this.runningScripts = this.runningScripts.map(rs => {
               if (rs.pid === pid) {
@@ -323,11 +327,10 @@ export class ScriptRunner {
               }
               return rs
             })
+            progressUrl = getProgressUrl(vrLink) || ''
           }
         }
       }
-
-      const progressUrl = getProgressUrl(vrLink)
 
       const confFileName = this.getConfFileName(confFile).replace('.conf', '')
 
