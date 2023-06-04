@@ -18,8 +18,6 @@ import {
   Job,
 } from './types'
 import { checkDir } from './utils/checkDir'
-// import { Run } from '../results/types'
-// import { getProgressUrl } from './utils/getProgressUrl'
 import { ScriptProgressLongPolling } from './ScriptProgressLongPolling'
 
 export function activate(context: vscode.ExtensionContext): void {
