@@ -42,7 +42,7 @@ export class SmartContractsFilesWatcher {
     this.webview = webview
     this.files = await vscode.workspace.findFiles(
       '**/*.{spec,sol}',
-      '{.certora_config,.git,emv-*,**/emv-*,**/*.certora_config,**/*.certora_sources,**/*.certora_internal}/**',
+      '{node_modules,.certora_config,.git,emv-*,**/emv-*,**/*.certora_config,**/*.certora_sources,**/*.certora_internal}/**',
     )
 
     this.filesSol = []

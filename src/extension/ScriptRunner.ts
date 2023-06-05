@@ -11,11 +11,14 @@ import {
   CERTORA_INNER_DIR,
   LOG_DIRECTORY_DEFAULT,
   CONF_DIRECTORY,
+  CvlVersion,
 } from './types'
 import { PostProblems } from './PostProblems'
 import fetch from 'node-fetch'
 import * as os from 'os'
 import { getInternalDirPath } from './utils/getRunInternalInfo'
+
+export let cvlVersion = CvlVersion.cvlVersion1
 
 type RunningScript = {
   pid: number
@@ -45,6 +48,12 @@ export class ScriptRunner {
   private getConfFileName(path: string): string {
     const splittedPathToConfFile = path.split('/')
     return splittedPathToConfFile[splittedPathToConfFile.length - 1]
+  }
+
+  private getUrlReg(): RegExp {
+    const pattern =
+      'https://(prover|vaas-stg).certora.com/output/[a-zA-Z0-9/?=]+'
+    return new RegExp(pattern)
   }
 
   private async getLogFilePath(pathToConfFile: string, ts: number) {
@@ -146,9 +155,19 @@ export class ScriptRunner {
    * @returns job id (string)
    */
   private getJobId(link: string): string {
-    const pattern = 'https://(prover|vaas-stg).certora.com/output/'
-    const regExp = new RegExp(pattern)
+    const regExp = this.getUrlReg()
     return link.split('?anonymousKey')[0].replace(regExp, '').split('/')[1]
+  }
+
+  /**
+   * return the cvl version number
+   * @param str
+   */
+  private whichVersion(str: string): CvlVersion {
+    if (str.includes('certora-cli-')) return CvlVersion.cvlVersion2
+    const versionReg = /certora-cli 4.*/i
+    if (versionReg.exec(str)) return CvlVersion.cvlVersion2
+    return CvlVersion.cvlVersion1
   }
 
   /**
@@ -166,6 +185,7 @@ export class ScriptRunner {
     versionScript.stdout.on('data', async data => {
       const str = data.toString() as string
       this.cliVersion = str
+      cvlVersion = this.whichVersion(str)
     })
 
     versionScript.on('error', async err => {
@@ -236,12 +256,24 @@ export class ScriptRunner {
         await this.errorMsgWithLogAction(strMsg, confFile, ts)
       }
       channel.appendLine(str)
+
+      // look for url in the logs for cli version 1
+      const regExp = this.getUrlReg()
+      const curLink = regExp.exec(str)
+      if (curLink) {
+        this.runningScripts = this.runningScripts.map(rs => {
+          if (rs.pid === pid) {
+            rs.vrLink = curLink[0]
+          }
+          return rs
+        })
+      }
     })
 
     // when there was an error that prevented the prover from running
     this.script.on('error', async err => {
       // my internal log
-      console.log(err, 'this is an error from the cli')
+      console.log(err)
       this.removeRunningScript(pid)
       this.resultsWebviewProvider.postMessage({
         type: 'parse-error',
@@ -265,29 +297,64 @@ export class ScriptRunner {
     })
 
     this.script.on('close', async code => {
-      const vrLink = await this.getVrLink(confFile, pid)
-      if (vrLink) {
-        // this handles the results - moved here because we get the link from the
-        // inner files, not from the log
-        const progressUrl = getProgressUrl(vrLink)
-        const confFileName = confFile
-        if (progressUrl) {
-          await this.polling.run(progressUrl, confFileName, async data => {
-            data.pid = pid
-            data.runName = confFile
-            await this.saveLastResults(path, confFile, data)
-            this.runningScripts.forEach(rs => {
-              if (rs && rs.pid === pid && rs.vrLink) {
-                data.verificationReportLink = rs.vrLink
-                this.resultsWebviewProvider.postMessage<Job>({
-                  type: 'receive-new-job-result',
-                  payload: data,
-                })
-              }
-            })
+      let vrLink = ''
+      let progressUrl = ''
+      if (cvlVersion === CvlVersion.cvlVersion1) {
+        const curRunningScript = this.runningScripts.find(rs => {
+          return rs.pid === pid
+        })
+        if (curRunningScript?.vrLink) {
+          vrLink = curRunningScript.vrLink
+          progressUrl = getProgressUrl(vrLink) || ''
+        }
+      } else if (cvlVersion === CvlVersion.cvlVersion2) {
+        vrLink = (await this.getVrLink(confFile, pid)) || ''
+        if (vrLink) {
+          this.runningScripts = this.runningScripts.map(rs => {
+            if (rs.pid === pid) {
+              rs.vrLink = vrLink
+              rs.jobId = this.getJobId(vrLink)
+              rs.uploaded = true
+            }
+            return rs
           })
+          progressUrl = getProgressUrl(vrLink) || ''
         }
       }
+
+      const confFileName = confFile
+
+      if (progressUrl) {
+        await this.saveLastResults(path, confFile, {
+          progressUrl: progressUrl,
+          jobId: '',
+          jobStatus: '',
+          jobEnded: false,
+          cloudErrorMessages: [],
+          verificationProgress: {
+            spec: '',
+            contract: '',
+            rules: [],
+            timestamp: 0,
+          },
+          creationTime: '',
+        })
+        await this.polling.run(progressUrl, confFileName, async data => {
+          data.pid = pid
+          data.runName = confFileName
+          await this.saveLastResults(path, confFile, data)
+          this.runningScripts.forEach(rs => {
+            if (rs && rs.pid === pid && rs.vrLink) {
+              data.verificationReportLink = rs.vrLink
+              this.resultsWebviewProvider.postMessage<Job>({
+                type: 'receive-new-job-result',
+                payload: data,
+              })
+            }
+          })
+        })
+      }
+
       this.resultsWebviewProvider.postMessage<{ pid: number; vrLink: string }>({
         type: 'run-next',
         payload: { pid: pid, vrLink: vrLink || '' },
@@ -328,7 +395,7 @@ export class ScriptRunner {
   private async getVrLink(confFile: string, pid: number) {
     const innerLinkFiles = await workspace.findFiles(
       '**/*{.vscode_extension_info.json}',
-      '{.certora_config,.git,emv-*,**/emv-*,**/*.certora_config,**/*.certora_sources}/**',
+      '{node_modules,.certora_config,.git,emv-*,**/emv-*,**/*.certora_config,**/*.certora_sources}/**',
     )
     let vrLink = ''
     if (innerLinkFiles?.length) {

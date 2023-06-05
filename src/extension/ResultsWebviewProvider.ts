@@ -175,9 +175,9 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
             log({
               action: 'Received "get-output" command',
               source: Sources.Extension,
-              info: e.payload,
+              info: { url: e.payload.url, name: e.payload.name },
             })
-            this.getOutput(e.payload)
+            this.getOutput(e.payload.url, e.payload.name)
             break
           case CommandFromResultsWebview.DeleteConfFile:
             log({
@@ -273,7 +273,7 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
     this._panel.postMessage(message)
   }
 
-  private async getOutput(outputUrl: string): Promise<void> {
+  private async getOutput(outputUrl: string, confName: string): Promise<void> {
     try {
       const { data } = await axios.get<Output>(outputUrl)
 
@@ -284,6 +284,10 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
       })
       this.postMessage<Output>({ type: 'set-output', payload: data })
     } catch (e) {
+      this.postMessage<{ confFile: string; logFile: string }>({
+        type: 'parse-error',
+        payload: { confFile: confName, logFile: '' },
+      })
       vscode.window.showErrorMessage(
         `Certora verification service is currently unavailable. Please, try again later. ${e}`,
       )

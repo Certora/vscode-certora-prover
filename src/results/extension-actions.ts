@@ -248,14 +248,14 @@ export function navigateToCode(
   })
 }
 
-export function getOutput(url: string): void {
+export function getOutput(url: string, name: string): void {
   log({
     action: 'Send "get-output" command',
     source: Sources.ResultsWebview,
-    info: url,
+    info: { url: url, name: name },
   })
   vscode.postMessage({
     command: Commands.GetOutput,
-    payload: url,
+    payload: { url: url, name: name },
   })
 }

@@ -415,7 +415,10 @@
           runningScripts.forEach(rs => {
             if (r.confPath === rs.confFile) {
               r.id = rs.pid
-              if (r.status !== Status.incompleteResults) {
+              if (
+                r.status !== Status.incompleteResults &&
+                r.status !== Status.success
+              ) {
                 runs = setStatus(r.confPath, Status.running)
               }
             }
@@ -671,16 +674,16 @@
    * @param runToDelete run to delete
    */
   function deleteRun(runToDelete: Run): void {
-    const name = runToDelete.confPath
+    const path = runToDelete.confPath
 
     //delete results
     $verificationResults = $verificationResults.filter(vr => {
-      return vr.name !== name
+      return vr.name !== path
     })
 
     //delete from running scripts
     runningScripts = runningScripts.filter(rs => {
-      return rs.confFile !== name
+      return rs.confFile !== path
     })
 
     //delete run
@@ -688,7 +691,7 @@
       return run !== runToDelete
     })
     namesMap.delete(runToDelete.name)
-    if (output && outputRunName === name) {
+    if (output && outputRunName === path) {
       clearOutput()
     }
     runsCounter--
@@ -838,7 +841,7 @@
         'progress',
         'result',
       )}&output=${clickedRuleOrAssert.output}`
-      getOutput(outputUrl)
+      getOutput(outputUrl, vr.name)
       outputRunName = vr.name
     } else {
       console.log(
@@ -940,7 +943,7 @@
                   confPath: runs[index].confPath,
                   displayName: namesMap.get(runs[index].name),
                 })
-                const modal = runs[index].status !== Status.running
+                const modal = runs[index].status === Status.incompleteResults
                 stopScript(runs[index].id, modal)
               }}
               inactiveSelected={focusedRun}

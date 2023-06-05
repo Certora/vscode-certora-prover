@@ -368,7 +368,7 @@
                       <div class="dark_input">
                         <h3>Branch</h3>
                         <CustomInput
-                          placeholder="default: master"
+                          placeholder=""
                           bind:bindValue={$specObj.branchName}
                           infoObj={infoObjArr.stg}
                           source={Source.Spec}

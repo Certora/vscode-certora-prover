@@ -18,6 +18,9 @@ import {
   Job,
 } from './types'
 import { checkDir } from './utils/checkDir'
+// import { Run } from '../results/types'
+// import { getProgressUrl } from './utils/getProgressUrl'
+import { ScriptProgressLongPolling } from './ScriptProgressLongPolling'
 
 // all directory watchers will ne added to this array so we can delete them later
 const watchers: vscode.FileSystemWatcher[] = []
@@ -85,7 +88,7 @@ export function activate(context: vscode.ExtensionContext): void {
       vscode.workspace.getConfiguration().get('Staging') || false
     let branch = ''
     if (staging) {
-      branch = vscode.workspace.getConfiguration().get('Branch') || 'master'
+      branch = vscode.workspace.getConfiguration().get('Branch') || ''
     }
     const confFileDefault: ConfFile = {
       solc: solcPath + solc,
@@ -429,7 +432,7 @@ export function activate(context: vscode.ExtensionContext): void {
     try {
       const internalUri = vscode.Uri.parse(basePath + CERTORA_INNER_DIR)
       const fileSystemWatcher = vscode.workspace.createFileSystemWatcher(
-        new vscode.RelativePattern(internalUri, '**/*run.conf'),
+        new vscode.RelativePattern(internalUri, '**/*.conf'),
       )
       fileSystemWatcher.onDidCreate(async file => {
         await copyCreatedConf(file)
@@ -463,9 +466,7 @@ export function activate(context: vscode.ExtensionContext): void {
       const newConfFileUri = getConfUri(
         `${strName.split(':')[0]}_${dateTimeToUse}`,
       )
-      if ('staging' in jsonContent && jsonContent.staging === '') {
-        jsonContent.staging = 'master'
-      }
+
       if (newConfFileUri) {
         const encoder = new TextEncoder()
         const content = encoder.encode(JSON.stringify(jsonContent, null, 2))
@@ -617,7 +618,7 @@ export function activate(context: vscode.ExtensionContext): void {
         confFile.verify !== undefined &&
         confFile.files?.length &&
         // verify is not an empty array and not an empty string
-        (confFile.verify?.length || confFile.verify !== '') &&
+        confFile.verify?.length &&
         confFile.solc
       ) {
         fileObj.allowRun = 1
@@ -653,7 +654,7 @@ export function activate(context: vscode.ExtensionContext): void {
    */
   function getLastResults(files: ConfToCreate[]) {
     files.forEach(async file => {
-      const name = getFileName(file.confPath)
+      const name = file.confPath
       const internalUri = getLastResultsUri(file.confPath)
       if (!internalUri) return
       const dirExists = await checkDir(internalUri)
@@ -661,7 +662,7 @@ export function activate(context: vscode.ExtensionContext): void {
         const confFiles = vscode.workspace.fs.readDirectory(internalUri)
         confFiles.then(f => {
           f.forEach(async fileArr => {
-            if (fileArr[0].replace('.json', '') === name) {
+            if (fileArr[0].replace('.json', '') === getFileName(name)) {
               const pathUri = vscode.Uri.parse(
                 internalUri.path + '/' + fileArr[0],
               )
@@ -676,9 +677,15 @@ export function activate(context: vscode.ExtensionContext): void {
                 'output',
               )
               if (job) {
-                resultsWebviewProvider.postMessage<Job>({
-                  type: 'receive-new-job-result',
-                  payload: job,
+                const polling = new ScriptProgressLongPolling(
+                  resultsWebviewProvider,
+                )
+                await polling.run(job.progressUrl, name, async data => {
+                  data.runName = name
+                  resultsWebviewProvider.postMessage<Job>({
+                    type: 'receive-new-job-result',
+                    payload: job,
+                  })
                 })
               }
             }

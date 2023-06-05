@@ -573,7 +573,6 @@
         />
       </div>
       <div style="margin-bottom:55px;" />
-      <!-- <div class="command-description">Create your first job</div> -->
       <button
         class="command-button"
         disabled={$disableButtons}
