@@ -107,6 +107,36 @@ The following image shows possible job status:
 
 ## Troubleshooting
 
+### Errors Running the Prover
+
+### Settings Errors
+
+If a job's settings were incompatible with the prover or with the smart contract requirements, you might see an error in the
+settings form, characterized by a red border around the input slot and a short message under it.
+In this case, you wont be able to run the job until the field in changed, and the error is fixed.
+
+Here is an example of such error:
+
+
+
+Notice that a contract name cannot include special characters like the dollar sign.
+To solve the problem, we will have to remove all special characters. 
+
+
+### Running Errors
+
+If the prover encountered an error while running, you will get a popup with a message
+explaining what went wrong. Sometimes the popup will include a button that opens the
+log file, that details the error extensively.
+
+Here is an example of such error:
+
+
+Notice that "BordaFixed" is not the name of the main contract of the file "Borda.sol".
+Even though this is a "legal" contract name, it is not the one that was declared in
+the solidity file.
+To solve this problem, we will have to change the contract name to the correct one that was declared in the solidity file. We can do it by editing the settings via the settings form.  
+
 ### Freeze
 
 If you experience a frozen state (e.g. buttons don't work), you need to use `cmd/ctrl + shift + p` and find the `Developer: Open Webview Developer Tools` command. Go to the `console` in the devtool window, and copy (or make a screenshot of) the logs. Next, press `cmd/ctrl + shift + p` and type `Developer: Reload Window`.
