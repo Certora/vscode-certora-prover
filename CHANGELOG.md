@@ -1,6 +1,12 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+### 0.2.0 ()
+
+## Features
+
+* Support multiple repos workspace ([#96](https://github.com/Certora/vscode-certora-prover/pull/96))
+
 ### 0.1.9 (2023-06-01)
 
 ### Bug Fixes
