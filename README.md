@@ -117,6 +117,10 @@ In this case, you wont be able to run the job until the field in changed, and th
 
 Here is an example of such error:
 
+![Screen Shot 2023-06-07 at 11 05 33](https://github.com/Certora/vscode-certora-prover/assets/101042618/df3bc8d8-6fc1-4072-b18e-ba638dc5b2ab)
+
+
+![Screen Shot 2023-06-07 at 10 45 09](https://github.com/Certora/vscode-certora-prover/assets/101042618/e961cdab-1328-4314-b473-872ba94aef62)
 
 
 Notice that a contract name cannot include special characters like the dollar sign.
@@ -131,6 +135,11 @@ log file, that details the error extensively.
 
 Here is an example of such error:
 
+![Screen Shot 2023-06-07 at 10 55 13](https://github.com/Certora/vscode-certora-prover/assets/101042618/e2e20caf-1f57-44a8-9df8-af2707d70436)
+
+![Screen Shot 2023-06-07 at 10 55 36](https://github.com/Certora/vscode-certora-prover/assets/101042618/d9e6cce2-ec85-4def-a676-50abf289925d)
+
+![Screen Shot 2023-06-07 at 10 51 59](https://github.com/Certora/vscode-certora-prover/assets/101042618/33e82157-72f0-4b13-8be9-afbde36e10fc)
 
 Notice that "BordaFixed" is not the name of the main contract of the file "Borda.sol".
 Even though this is a "legal" contract name, it is not the one that was declared in
