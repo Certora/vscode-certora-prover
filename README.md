@@ -124,7 +124,7 @@ Here is an example of such error:
 
 
 Notice that a contract name cannot include special characters like the dollar sign.
-To solve the problem, we will have to remove all special characters. 
+To solve the problem, you will have to remove all special characters. 
 
 
 ### Running Errors
@@ -144,7 +144,7 @@ Here is an example of such error:
 Notice that "BordaFixed" is not the name of the main contract of the file "Borda.sol".
 Even though this is a "legal" contract name, it is not the one that was declared in
 the solidity file.
-To solve this problem, we will have to change the contract name to the correct one that was declared in the solidity file. We can do it by editing the settings via the settings form.  
+To solve this problem, you will have to change the contract name to the correct one that was declared in the solidity file. You can do it by editing the settings via the settings form.  
 
 ### Freeze
 
