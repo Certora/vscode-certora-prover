@@ -27,6 +27,7 @@
     <i class="codicon codicon-folder-opened" />
   </button>
 </div>
+
 <div
   class="showtxt"
   class:hovering={showInfo}
@@ -38,8 +39,17 @@
   <p>
     {$$props.infoText}
   </p>
-  <a href={$$props.infoLink}>link to documentation</a>
 </div>
+{#if $$props.invalid}
+  <div style="margin-top:20px; margin-left:-4px;">
+    <div class={$$props.invalid ? 'input_error_message' : ''}>
+      {#if $$props.invalid}
+        <i class={'codicon codicon-warning'} />
+      {/if}
+      {$$props.errorText}
+    </div>
+  </div>
+{/if}
 
 <style>
   .codicon {
@@ -48,7 +58,7 @@
   }
   .icon_wrapper {
     order: 3;
-    /* margin-right: -4px; */
+    margin-right: 10px;
     margin-left: auto;
     display: flex;
     z-index: 3;
@@ -86,10 +96,10 @@
     z-index: 3;
     /* color: var(--dropdown-text-color); */
   }
-  .showtxt a {
+  /* .showtxt a {
     margin-top: 8px;
     text-decoration: none;
-  }
+  } */
   .showtxt p {
     margin: 0;
   }

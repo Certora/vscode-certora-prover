@@ -14,6 +14,7 @@ import {
   CommandFromResultsWebview,
   EventFromResultsWebview,
   JobNameMap,
+  ConfToCreate,
 } from './types'
 
 export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
@@ -29,7 +30,12 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   public deleteConf: null | ((name: JobNameMap) => void) = null
   public askToDeleteJob: null | ((name: JobNameMap) => void) = null
   public createInitialJobs: null | (() => Promise<void>) = null
-  public uploadConf: null | (() => Promise<void>) = null
+  public uploadConf: null | ((path: string) => Promise<void>) = null
+  public getDirs: null | (() => Promise<void>) = null
+  public uploadDir:
+    | null
+    | ((path: string, createConf?: boolean) => Promise<void>) = null
+
   public duplicate:
     | null
     | ((
@@ -43,6 +49,8 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
   public enableEdit: null | ((name: JobNameMap) => void) = null
   public removeScript: null | ((name: string) => void) = null
   public clearResults: null | ((name: string) => void) = null
+
+  public getLastResults: null | ((files: ConfToCreate[]) => void) = null
 
   constructor(private readonly _extensionUri: vscode.Uri) {
     this._extensionUri = _extensionUri
@@ -68,6 +76,16 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
               this.createInitialJobs()
             }
             break
+          case CommandFromResultsWebview.GetLastResults:
+            log({
+              action: 'Received "get-last-results" command',
+              source: Sources.Extension,
+              info: e.payload,
+            })
+            if (typeof this.getLastResults === 'function') {
+              this.getLastResults(e.payload)
+            }
+            break
           case CommandFromResultsWebview.OpenLogFile:
             log({
               action: 'Received "open-log-file" command',
@@ -87,13 +105,22 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
               this.clearResults(e.payload)
             }
             break
+          case CommandFromResultsWebview.GetDirs:
+            log({
+              action: 'Received "get-dirs" command',
+              source: Sources.Extension,
+            })
+            if (typeof this.getDirs === 'function') {
+              this.getDirs()
+            }
+            break
           case CommandFromResultsWebview.NavigateToCode:
             log({
               action: 'Received "navigate-to-code" command',
               source: Sources.Extension,
               info: e.payload,
             })
-            navigateToCode(e.payload)
+            navigateToCode(e.payload.jumpToDefinition, e.payload.path)
             break
           case CommandFromResultsWebview.StopScript:
             log({
@@ -200,9 +227,20 @@ export class ResultsWebviewProvider implements vscode.WebviewViewProvider {
             log({
               action: 'Received "upload-conf" command',
               source: Sources.Extension,
+              info: e.payload,
             })
             if (typeof this.uploadConf === 'function') {
-              this.uploadConf()
+              this.uploadConf(e.payload)
+            }
+            break
+          case CommandFromResultsWebview.UploadDir:
+            log({
+              action: 'Received "upload-dir" command',
+              source: Sources.Extension,
+              info: e.payload,
+            })
+            if (typeof this.uploadDir === 'function') {
+              this.uploadDir(e.payload.path, e.payload.createConf)
             }
             break
           case CommandFromResultsWebview.EnableEdit:

@@ -8,9 +8,8 @@
   import { navigateToCode } from '../extension-actions'
   import type { Rule, CallTraceFunction } from '../types'
   import { TreeType } from '../types'
-  import { expandables } from '../store/store'
-  export let runDisplayName
   export let jobEnded: boolean = false
+  export let pathToCode: string
   export let data:
     | {
         type: TreeType.Rules
@@ -21,28 +20,6 @@
         type: TreeType.Calltrace
         tree: CallTraceFunction[]
       }
-
-  function getInitialExpandedState(rule: Rule): boolean {
-    let initExpandedState: boolean = false
-    $expandables.forEach(element => {
-      if (element.title === runDisplayName && element.tree.length) {
-        const initExpandedStateArr = element.tree.map(treeItem => {
-          if (treeItem.title === rule.name) {
-            return treeItem.isExpanded
-          }
-        })
-        const tempState = initExpandedStateArr.find(item => {
-          {
-            return typeof item === 'boolean'
-          }
-        })
-        if (tempState !== undefined) {
-          initExpandedState = tempState
-        }
-      }
-    })
-    return initExpandedState
-  }
 </script>
 
 <div class="tree">
@@ -50,8 +27,8 @@
     {#each data.tree as rule, i}
       <RulesTreeItem
         {rule}
-        initialExpandedState={getInitialExpandedState(rule)}
-        {runDisplayName}
+        {pathToCode}
+        initialExpandedState={rule.isExpanded || false}
         setSize={data.tree.length}
         posInset={i + 1}
         actions={rule.jumpToDefinition.length
@@ -60,13 +37,14 @@
                 title: 'Go to code',
                 icon: 'go-to-file',
                 onClick: () => {
-                  navigateToCode(rule.jumpToDefinition)
+                  navigateToCode(rule.jumpToDefinition, pathToCode)
                 },
               },
             ]
           : []}
         duplicateFunc={data.tree.length !== 1 ? data.duplicateFunc : null}
         {jobEnded}
+        bind:isExpanded={rule.isExpanded}
         on:fetchOutput
       />
     {/each}
@@ -83,7 +61,7 @@
                 title: 'Go to code',
                 icon: 'go-to-file',
                 onClick: () => {
-                  navigateToCode(callTraceFunction.jumpToDefinition)
+                  navigateToCode(callTraceFunction.jumpToDefinition, pathToCode)
                 },
               },
             ]

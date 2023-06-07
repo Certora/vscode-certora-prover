@@ -10,6 +10,7 @@ import {
   Job,
   CERTORA_INNER_DIR,
   LOG_DIRECTORY_DEFAULT,
+  CONF_DIRECTORY,
   CvlVersion,
 } from './types'
 import { PostProblems } from './PostProblems'
@@ -56,29 +57,23 @@ export class ScriptRunner {
   }
 
   private async getLogFilePath(pathToConfFile: string, ts: number) {
-    let path = await getInternalDirPath()
+    let logFilePath
+    let path = await getInternalDirPath(pathToConfFile)
     if (path) {
-      const logFilePath = Uri.joinPath(
+      logFilePath = Uri.joinPath(
         path,
         `${this.getConfFileName(pathToConfFile)}.log`,
       )
-      return logFilePath
-    }
-    // if we can't find the relevant directory in [CERTORA_INNER_DIR] --> create log file in another directory named [LOG_DIRECTORY_DEFAULT] inside it. in this case we need timestamps to be not run over older log files
-    path = workspace.workspaceFolders?.[0]?.uri
-    if (!path) return
-    const logFilePath = Uri.joinPath(
-      path,
-      CERTORA_INNER_DIR,
-      LOG_DIRECTORY_DEFAULT,
-      `${this.getConfFileName(pathToConfFile)}-${ts}.log`,
-    )
-
-    try {
-      // check if file curLog exists
-      await workspace.fs.stat(logFilePath)
-    } catch (e) {
-      return
+    } else {
+      // if we can't find the relevant directory in [CERTORA_INNER_DIR] --> create log file in another directory named [LOG_DIRECTORY_DEFAULT] inside it. in this case we need timestamps to be not run over older log files
+      path = workspace.workspaceFolders?.[0]?.uri
+      if (!path) return
+      logFilePath = Uri.joinPath(
+        path,
+        CERTORA_INNER_DIR,
+        LOG_DIRECTORY_DEFAULT,
+        `${this.getConfFileName(pathToConfFile)}-${ts}.log`,
+      )
     }
     return logFilePath
   }
@@ -115,8 +110,11 @@ export class ScriptRunner {
     }
   }
 
-  public async buildSh(shFile: string): Promise<boolean> {
-    const path = workspace.workspaceFolders?.[0]
+  public async buildSh(shFile: string, basePath?: string): Promise<boolean> {
+    let path = workspace.workspaceFolders?.[0]?.uri
+    if (basePath) {
+      path = Uri.parse(basePath)
+    }
     if (!path) {
       await window.showErrorMessage(
         'Failed to build ' +
@@ -126,7 +124,7 @@ export class ScriptRunner {
       return false
     }
     const shScript = spawn(`sh`, [shFile], {
-      cwd: path.uri.fsPath,
+      cwd: path.fsPath,
     })
     if (!shScript) {
       await window.showErrorMessage(
@@ -195,7 +193,7 @@ export class ScriptRunner {
       this.resultsWebviewProvider.postMessage({
         type: 'parse-error',
         payload: {
-          confFile: this.getConfFileName(confFile).replace('.conf', ''),
+          confFile: confFile,
           logFile: '',
         },
       })
@@ -215,20 +213,26 @@ export class ScriptRunner {
   public run(confFile: string): void {
     PostProblems.resetDiagnosticCollection()
 
-    const path = workspace.workspaceFolders?.[0]
+    const path = Uri.parse(
+      confFile
+        .replace(this.getConfFileName(confFile), '')
+        .replace(CONF_DIRECTORY, ''),
+    )
 
-    if (!path) return
     if (!this.checkCliVersion(confFile)) return
 
     const ts = Date.now()
     const channel = window.createOutputChannel(
       `Certora IDE - ${confFile}-${ts}`,
     )
+
+    process.env.CERTORA_OLD_API = '1'
+
     this.script = spawn(
       `certoraRun`,
       ['--run_source', 'VSCODE', '--send_only', confFile],
       {
-        cwd: path.uri.fsPath,
+        cwd: path.fsPath,
       },
     )
 
@@ -245,8 +249,11 @@ export class ScriptRunner {
       str = str.replace(re, '')
       this.log(str, confFile, ts)
       // parse errors are shown in an error message.
-      if (str.includes('CRITICAL')) {
-        await this.errorMsgWithLogAction(str, confFile, ts)
+      const critical = 'CRITICAL:'
+      if (str.includes(critical)) {
+        const strMsgArr = str.split(critical)
+        const strMsg = critical + strMsgArr[strMsgArr.length - 1]
+        await this.errorMsgWithLogAction(strMsg, confFile, ts)
       }
       channel.appendLine(str)
 
@@ -271,7 +278,7 @@ export class ScriptRunner {
       this.resultsWebviewProvider.postMessage({
         type: 'parse-error',
         payload: {
-          confFile: this.getConfFileName(confFile).replace('.conf', ''),
+          confFile: confFile,
           logFile: '',
         },
       })
@@ -291,48 +298,34 @@ export class ScriptRunner {
 
     this.script.on('close', async code => {
       let vrLink = ''
+      let progressUrl = ''
       if (cvlVersion === CvlVersion.cvlVersion1) {
         const curRunningScript = this.runningScripts.find(rs => {
           return rs.pid === pid
         })
         if (curRunningScript?.vrLink) {
           vrLink = curRunningScript.vrLink
+          progressUrl = getProgressUrl(vrLink) || ''
         }
       } else if (cvlVersion === CvlVersion.cvlVersion2) {
-        const innerLinkFiles = await workspace.findFiles(
-          '**/*{.vscode_extension_info.json}',
-          '{.certora_config,.git,emv-*,**/emv-*,**/*.certora_config,**/*.certora_sources}/**',
-        )
-
-        if (innerLinkFiles?.length) {
-          const sortedFiles = innerLinkFiles.sort((uri1, uri2) => {
-            return uri1.path > uri2.path ? -1 : 1
+        vrLink = (await this.getVrLink(confFile, pid)) || ''
+        if (vrLink) {
+          this.runningScripts = this.runningScripts.map(rs => {
+            if (rs.pid === pid) {
+              rs.vrLink = vrLink
+              rs.jobId = this.getJobId(vrLink)
+              rs.uploaded = true
+            }
+            return rs
           })
-          const lastFileByDate = sortedFiles[0]
-          const decoder = new TextDecoder()
-          const jsonContent = JSON.parse(
-            decoder.decode(await workspace.fs.readFile(lastFileByDate)),
-          )
-          vrLink = jsonContent.verification_report_url
-          if (vrLink) {
-            this.runningScripts = this.runningScripts.map(rs => {
-              if (rs.pid === pid) {
-                rs.vrLink = vrLink
-                rs.jobId = this.getJobId(vrLink)
-                rs.uploaded = true
-              }
-              return rs
-            })
-          }
+          progressUrl = getProgressUrl(vrLink) || ''
         }
       }
 
-      const progressUrl = getProgressUrl(vrLink)
-
-      const confFileName = this.getConfFileName(confFile).replace('.conf', '')
+      const confFileName = confFile
 
       if (progressUrl) {
-        await this.saveLastResults(path.uri, confFile, {
+        await this.saveLastResults(path, confFile, {
           progressUrl: progressUrl,
           jobId: '',
           jobStatus: '',
@@ -349,7 +342,7 @@ export class ScriptRunner {
         await this.polling.run(progressUrl, confFileName, async data => {
           data.pid = pid
           data.runName = confFileName
-          await this.saveLastResults(path.uri, confFile, data)
+          await this.saveLastResults(path, confFile, data)
           this.runningScripts.forEach(rs => {
             if (rs && rs.pid === pid && rs.vrLink) {
               data.verificationReportLink = rs.vrLink
@@ -364,7 +357,7 @@ export class ScriptRunner {
 
       this.resultsWebviewProvider.postMessage<{ pid: number; vrLink: string }>({
         type: 'run-next',
-        payload: { pid: pid, vrLink: vrLink },
+        payload: { pid: pid, vrLink: vrLink || '' },
       })
       if (code === 1) {
         this.removeRunningScript(pid)
@@ -372,11 +365,12 @@ export class ScriptRunner {
         PostProblems.postProblems(confFile)
 
         const curLog = await this.getLogFilePath(confFile, ts)
+        const logToUse = await this.checkFileValidity(curLog)
         this.resultsWebviewProvider.postMessage({
           type: 'parse-error',
           payload: {
-            confFile: this.getConfFileName(confFile).replace('.conf', ''),
-            logFile: curLog?.path || '',
+            confFile: confFile,
+            logFile: logToUse,
           },
         })
         await window.showErrorMessage(
@@ -390,6 +384,65 @@ export class ScriptRunner {
         )
       }
     })
+  }
+
+  /**
+   * get the rule report link from the inner file
+   * @param confFile path to current conf file
+   * @param pid process id
+   * @returns link to rule report (string path)
+   */
+  private async getVrLink(confFile: string, pid: number) {
+    const innerLinkFiles = await workspace.findFiles(
+      '**/*{.vscode_extension_info.json}',
+      '{node_modules,.certora_config,.git,emv-*,**/emv-*,**/*.certora_config,**/*.certora_sources}/**',
+    )
+    let vrLink = ''
+    if (innerLinkFiles?.length) {
+      const sortedFiles = innerLinkFiles
+        .sort((uri1, uri2) => {
+          return uri1.path > uri2.path ? -1 : 1
+        })
+        .filter(uri => {
+          return uri.path.startsWith(confFile.split(CONF_DIRECTORY)[0])
+        })
+      const lastFileByDate = sortedFiles[0]
+      if (lastFileByDate) {
+        const decoder = new TextDecoder()
+        try {
+          const jsonContent = JSON.parse(
+            decoder.decode(await workspace.fs.readFile(lastFileByDate)),
+          )
+          vrLink = jsonContent.verification_report_url
+        } catch (e) {
+          console.log('[INNER ERROR] Cannot read file', lastFileByDate, e)
+        }
+        if (vrLink) {
+          this.runningScripts = this.runningScripts.map(rs => {
+            if (rs.pid === pid) {
+              rs.vrLink = vrLink
+              rs.jobId = this.getJobId(vrLink)
+              rs.uploaded = true
+            }
+            return rs
+          })
+        }
+      }
+      return vrLink
+    }
+  }
+
+  private async checkFileValidity(fileUri?: Uri): Promise<string> {
+    try {
+      // check if file curLog exists
+      if (fileUri) {
+        await workspace.fs.stat(fileUri)
+        return fileUri.path
+      }
+      return ''
+    } catch (e) {
+      return ''
+    }
   }
 
   /**
@@ -442,7 +495,8 @@ export class ScriptRunner {
     )
     if (action === 'Open Execution Log File') {
       const logFilePath = await this.getLogFilePath(confFile, ts)
-      if (logFilePath !== undefined) {
+      const checkValidity = await this.checkFileValidity(logFilePath)
+      if (logFilePath && checkValidity) {
         try {
           const document = await workspace.openTextDocument(logFilePath)
           await window.showTextDocument(document)
@@ -580,7 +634,7 @@ export class ScriptRunner {
 
   public removeRunningScriptByName(name: string): void {
     this.runningScripts = this.runningScripts.filter(script => {
-      return this.getConfFileName(script.confFile).replace('.conf', '') !== name
+      return script.confFile !== name
     })
     this.filterLogFiles(name)
     this.sendRunningScriptsToWebview()

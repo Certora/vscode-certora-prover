@@ -2,8 +2,6 @@
  *  Here we declare types and enums
  *-------------------------------------------------------------------------------------------- */
 
-export const CONF_DIRECTORY = 'certora/conf/'
-
 export type Action = {
   title: string
   onClick?: () => void
@@ -40,6 +38,7 @@ export type Assert = {
   jumpToDefinition: JumpToDefinition[]
   output: string | null | string[]
   jobId: string | null
+  isExpanded?: boolean
 }
 
 // output can be either a string of a path or array of strings of path
@@ -53,6 +52,7 @@ export type Rule = {
   duration: number
   output: string | null | string[]
   jobId: string | null
+  isExpanded?: boolean
 }
 
 export type Tree = {
@@ -162,12 +162,13 @@ export type CreationTime = {
 }
 
 export type ConfToCreate = {
-  fileName: string
+  confPath: string
   allowRun: number
+  workspaceFolder: string
 }
 export type JobNameMap = {
   displayName: string
-  fileName: string
+  confPath: string
 }
 
 export enum EventTypesFromExtension {
@@ -185,15 +186,22 @@ export enum EventTypesFromExtension {
   ScriptStopped = 'script-stopped',
   InitialJobs = 'initial-jobs',
   DeleteJob = 'delete-job',
-  DeleteResults = 'delete-results',
   RunJob = 'run-job',
   SettingsError = 'settings-error',
+  clearResults = 'clear-results',
+  EmptyWorkspace = 'empty-workspace',
+  GetDirChoice = 'get-dir-choice',
+  FilesFromWorkspace = 'files-from-workspace',
 }
 
 export type EventsFromExtension =
   | {
       type: EventTypesFromExtension.ReceiveNewJobResult
       payload: Job
+    }
+  | {
+      type: EventTypesFromExtension.FilesFromWorkspace
+      payload: string[]
     }
   | {
       type: EventTypesFromExtension.RunningScriptChanged
@@ -222,11 +230,23 @@ export type EventsFromExtension =
       payload: { confFile: string; logFile: string }
     }
   | {
+      type: EventTypesFromExtension.EmptyWorkspace
+      payload: string
+    }
+  | {
       type: EventTypesFromExtension.AllowRun
       payload: string
     }
   | {
       type: EventTypesFromExtension.BlockRun
+      payload: string
+    }
+  | {
+      type: EventTypesFromExtension.clearResults
+      payload: string
+    }
+  | {
+      type: EventTypesFromExtension.GetDirChoice
       payload: string
     }
   | {
@@ -254,10 +274,6 @@ export type EventsFromExtension =
       payload: string
     }
   | {
-      type: EventTypesFromExtension.DeleteResults
-      payload: string
-    }
-  | {
       type: EventTypesFromExtension.RunJob
       payload: string
     }
@@ -276,6 +292,18 @@ export enum Status {
 export type Run = {
   id: number
   name: string
+  confPath: string
   status: Status
+  isExpanded: boolean
+  showContextMenu: boolean
   vrLink?: string
+}
+
+export type jobList = {
+  runs: Run[]
+  namesMap: Map<string, string>
+  path: string
+  title: string
+  isExpanded: boolean
+  children: jobList[]
 }

@@ -222,7 +222,7 @@ export function newFormToConf(newForm: NewForm): string {
   processLinking(newForm.solidityObj, config)
 
   if (newForm.specObj.runOnStg) {
-    config.staging = newForm.specObj.branchName || 'master'
+    config.staging = newForm.specObj.branchName || ''
   }
   if (newForm.specObj.branchName && !newForm.specObj.runOnStg) {
     config.cloud = newForm.specObj.branchName
@@ -305,11 +305,7 @@ export async function createConfFile(
     const encoder = new TextEncoder()
     const convertedData = newFormToConf(formData)
     const content = encoder.encode(convertedData)
-    const path = Uri.joinPath(
-      basePath.uri,
-      CONF_DIRECTORY_NAME,
-      `${confFileName}.conf`,
-    )
+    const path = Uri.parse(confFileName)
     await workspace.fs.writeFile(path, content)
     log({
       action: `Conf file was created`,

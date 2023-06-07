@@ -7,6 +7,7 @@
   import type { ContractCallResolution } from '../types'
 
   export let contractCallResolution: ContractCallResolution
+  export let pathToCode: string
 </script>
 
 <div
@@ -14,7 +15,7 @@
   tabindex="0"
   role="button"
   on:click={() => {
-    navigateToCode(contractCallResolution.caller.jumpToDefinition)
+    navigateToCode(contractCallResolution.caller.jumpToDefinition, pathToCode)
   }}
 >
   <div class="caller">{contractCallResolution.caller.name}</div>

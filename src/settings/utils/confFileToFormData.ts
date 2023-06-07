@@ -326,7 +326,6 @@ function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
   const tempFormArr: SolidityObj[] = []
   confFile.files?.forEach(contractStr => {
     const mainContract = getContractNameFromFile(contractStr)
-    console.log(mainContract, form.solidityObj.mainContract, '========')
     if (mainContract !== form.solidityObj.mainContract) {
       // create contract
       const tempForm: SolidityObj = {

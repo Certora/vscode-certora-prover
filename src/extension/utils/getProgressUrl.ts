@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------------------------------
- *  Gets the progress url / creation time url, by string processsing.
+ *  Gets the progress url / creation time url, by string processing.
  *-------------------------------------------------------------------------------------------- */
 
 export function getProgressUrl(text: string): string | null {
@@ -8,7 +8,7 @@ export function getProgressUrl(text: string): string | null {
 
   if (urlMatches) {
     const url = urlMatches.find(url => {
-      return url.includes('anonymousKey')
+      return url.includes('output')
     })
     if (url?.includes('output')) {
       return url.replace('output', 'progress')

@@ -5,7 +5,7 @@
  *-------------------------------------------------------------------------------------------- */
 
 import { log, Sources } from './utils/log'
-import type { JobNameMap, JumpToDefinition } from './types'
+import type { ConfToCreate, JobNameMap, JumpToDefinition } from './types'
 
 enum Commands {
   StopScript = 'stop-script',
@@ -23,7 +23,42 @@ enum Commands {
   EnableEdit = 'enable-edit',
   Rename = 'rename',
   ClearResults = 'clear-results',
+  UploadDir = 'upload-dir',
+  GetLastResults = 'get-last-results',
+  GetDirs = 'get-dirs',
   OpenLogFile = 'open-log-file',
+}
+
+export function getDirs(): void {
+  log({
+    action: 'Send "get-dirs" command',
+    source: Sources.ResultsWebview,
+  })
+  vscode.postMessage({
+    command: Commands.GetDirs,
+  })
+}
+
+export function getLastResults(files: ConfToCreate[]): void {
+  log({
+    action: 'Send "get-last-results" command',
+    source: Sources.ResultsWebview,
+  })
+  vscode.postMessage({
+    command: Commands.GetLastResults,
+    payload: files,
+  })
+}
+
+export function UploadDir(path: string, createConf?: boolean): void {
+  log({
+    action: 'Send "upload-dir" command',
+    source: Sources.ResultsWebview,
+  })
+  vscode.postMessage({
+    command: Commands.UploadDir,
+    payload: { path: path, createConf: createConf },
+  })
 }
 
 export function openLogFile(logFile: string): void {
@@ -48,7 +83,7 @@ export function enableEdit(name: JobNameMap): void {
   })
 }
 
-export function clearResults(name: string) {
+export function clearResults(name: string): void {
   log({
     action: 'Send "clear-results" command',
     source: Sources.ResultsWebview,
@@ -60,13 +95,14 @@ export function clearResults(name: string) {
   })
 }
 
-export function uploadConf(): void {
+export function uploadConf(path: string): void {
   log({
     action: 'Send "upload-conf" command',
     source: Sources.ResultsWebview,
   })
   vscode.postMessage({
     command: Commands.UploadConf,
+    payload: path,
   })
 }
 
@@ -194,18 +230,21 @@ export function rename(oldName: JobNameMap, newName: JobNameMap): void {
   })
 }
 
-export function navigateToCode(jumpToDefinition: JumpToDefinition[]): void {
+export function navigateToCode(
+  jumpToDefinition: JumpToDefinition[],
+  path: string,
+): void {
   log({
     action: 'Send "navigate-to-code" command',
     source: Sources.ResultsWebview,
-    info: jumpToDefinition,
+    info: { jumpToDefinition: jumpToDefinition, path: path },
   })
 
   if (!jumpToDefinition.length) return
 
   vscode.postMessage({
     command: Commands.NavigateToCode,
-    payload: jumpToDefinition,
+    payload: { jumpToDefinition: jumpToDefinition, path: path },
   })
 }
 

@@ -3,13 +3,11 @@
  *-------------------------------------------------------------------------------------------- */
 
 import { Writable, writable } from 'svelte/store'
-import type { Verification } from '../types'
+import type { jobList, Verification } from '../types'
 
-export const expandables = writable([])
-export const expandCollapse = writable({
-  title: 'Expand All',
-  icon: 'expand-all',
-  var: true,
-  hasResults: false,
-})
+export const CERTORA_CONF = '/certora/conf/'
+export const JOB_LIST = 'JOB LIST'
+
 export const verificationResults: Writable<Verification[]> = writable([])
+
+export const jobLists: Writable<jobList[]> = writable([])

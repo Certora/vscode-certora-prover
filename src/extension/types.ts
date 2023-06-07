@@ -3,7 +3,7 @@
  *-------------------------------------------------------------------------------------------- */
 
 export const CONF_DIRECTORY_NAME = 'certora/conf'
-export const CONF_DIRECTORY = 'certora/conf/'
+export const CONF_DIRECTORY = '/certora/conf/'
 export const SH_DIRECTORY_NAME = 'certora/scripts'
 export const SH_DIRECTORY = 'certora/scripts/'
 export const CERTORA_INNER_DIR = '/.certora_internal/'
@@ -135,7 +135,7 @@ export type Output = {
 
 export type JobNameMap = {
   displayName: string
-  fileName: string
+  confPath: string
 }
 
 export type Compiler = {
@@ -209,6 +209,12 @@ export type NewForm = {
   checkMyInputs: boolean
 }
 
+export type ConfToCreate = {
+  confPath: string
+  allowRun: number
+  workspaceFolder: string
+}
+
 export enum CommandFromResultsWebview {
   NavigateToCode = 'navigate-to-code',
   StopScript = 'stop-script',
@@ -225,6 +231,10 @@ export enum CommandFromResultsWebview {
   EnableEdit = 'enable-edit',
   Rename = 'rename',
   ClearResults = 'clear-results',
+  UploadDir = 'upload-dir',
+  GetLastResults = 'get-last-results',
+  OpenBrowser = 'open-browser',
+  GetDirs = 'get-dirs',
   OpenLogFile = 'open-log-file',
 }
 
@@ -237,7 +247,7 @@ export enum CommandFromSettingsWebview {
 export type EventFromResultsWebview =
   | {
       command: CommandFromResultsWebview.NavigateToCode
-      payload: JumpToDefinition[]
+      payload: { jumpToDefinition: JumpToDefinition[]; path: string }
     }
   | {
       command: CommandFromResultsWebview.StopScript
@@ -283,6 +293,13 @@ export type EventFromResultsWebview =
       command: CommandFromResultsWebview.InitResults
     }
   | {
+      command: CommandFromResultsWebview.GetDirs
+    }
+  | {
+      command: CommandFromResultsWebview.GetLastResults
+      payload: ConfToCreate[]
+    }
+  | {
       command: CommandFromResultsWebview.Duplicate
       payload: {
         toDuplicate: JobNameMap
@@ -296,10 +313,19 @@ export type EventFromResultsWebview =
     }
   | {
       command: CommandFromResultsWebview.UploadConf
+      payload: string
+    }
+  | {
+      command: CommandFromResultsWebview.UploadDir
+      payload: { path: string; createConf: boolean }
     }
   | {
       command: CommandFromResultsWebview.Rename
       payload: { oldName: JobNameMap; newName: JobNameMap }
+    }
+  | {
+      command: CommandFromSettingsWebview.OpenBrowser
+      payload: { fileType: string; index: number }
     }
 
 export type EventFromSettingsWebview =
@@ -341,7 +367,8 @@ export type ResourceError = {
   topics: Topic[]
 }
 
-export type ConfToCreate = {
-  fileName: string
-  allowRun: number
+export type DirObj = {
+  path: string
+  runs: ConfToCreate[]
+  children: DirObj[]
 }

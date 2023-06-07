@@ -31,7 +31,7 @@
     loadFilesFolder: loadFilesFolder,
     fileType: 'sol',
     index: index,
-    ifoText: infoObjArr.mainFile.infoText,
+    infoText: infoObjArr.mainFile.infoText,
     infoLink: infoObjArr.mainFile.infoText,
   }
 

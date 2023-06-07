@@ -13,6 +13,7 @@ import {
   JobNameMap,
   EventFromSettingsWebview,
   NewForm,
+  CONF_DIRECTORY,
 } from './types'
 import { ResultsWebviewProvider } from './ResultsWebviewProvider'
 
@@ -21,19 +22,18 @@ export class SettingsPanel {
   private readonly _panel: vscode.WebviewPanel
   private _disposables: vscode.Disposable[] = []
   private watcher: SmartContractsFilesWatcher
-  // private editConfFile?: ConfFile
+  private confFilePath: string
   private static allPanels: SettingsPanel[] = []
-  private curConfFileDisplayName: string
   private static resultsWebviewProvider: ResultsWebviewProvider
 
   private constructor(
     panel: vscode.WebviewPanel,
     extensionUri: vscode.Uri,
     confFileDisplayName: string,
-    confFileName: string,
+    confFilePath: string,
     editConfFile?: ConfFile,
   ) {
-    this.curConfFileDisplayName = confFileDisplayName
+    this.confFilePath = confFilePath
 
     this._panel = panel
 
@@ -41,17 +41,16 @@ export class SettingsPanel {
       this._panel.webview,
       extensionUri,
     )
-
-    this.watcher = new SmartContractsFilesWatcher()
-    this.watcher.init(this._panel.webview)
+    const pathToUse = confFilePath.split(CONF_DIRECTORY)[0]
+    this.watcher = new SmartContractsFilesWatcher(vscode.Uri.parse(pathToUse))
+    this.watcher.init(this._panel.webview, vscode.Uri.parse(pathToUse))
     if (editConfFile) {
       const name =
-        confFileDisplayName !== '' ? confFileDisplayName : confFileName
+        confFileDisplayName !== '' ? confFileDisplayName : confFilePath
       this._panel.webview.postMessage({
         type: 'edit-conf-file',
         payload: { confFile: editConfFile, runName: name },
       })
-      // this.editConfFile = editConfFile
     }
 
     this._panel.onDidChangeViewState(e => {
@@ -59,7 +58,7 @@ export class SettingsPanel {
         if (SettingsPanel.resultsWebviewProvider) {
           SettingsPanel.resultsWebviewProvider.postMessage({
             type: 'focus-changed',
-            payload: confFileName,
+            payload: confFilePath,
           })
         }
       }
@@ -73,7 +72,15 @@ export class SettingsPanel {
               action: 'Received "smart-contracts-files-refresh" command',
               source: Sources.Extension,
             })
-            this.watcher.init(this._panel.webview)
+            if (confFilePath) {
+              const pathToUse = confFilePath.split(CONF_DIRECTORY)[0]
+              this.watcher.init(
+                this._panel.webview,
+                vscode.Uri.parse(pathToUse),
+              )
+            } else {
+              this.watcher.init(this._panel.webview)
+            }
             break
           case CommandFromSettingsWebview.CreateConfFile: {
             log({
@@ -82,8 +89,8 @@ export class SettingsPanel {
               info: e.payload,
             })
             const form: NewForm = e.payload
-            if (confFileName) {
-              createConfFile(form, confFileName)
+            if (confFilePath) {
+              createConfFile(form, confFilePath)
             }
             if (
               form.solidityObj.mainContract &&
@@ -95,17 +102,17 @@ export class SettingsPanel {
               // if all mandatory fields are filled - allow running
               SettingsPanel.resultsWebviewProvider.postMessage({
                 type: 'allow-run',
-                payload: confFileName,
+                payload: confFilePath,
               })
             } else if (!e.payload.checkMyInputs) {
               SettingsPanel.resultsWebviewProvider.postMessage({
                 type: 'block-run',
-                payload: confFileName,
+                payload: confFilePath,
               })
             } else {
               SettingsPanel.resultsWebviewProvider.postMessage({
                 type: 'settings-error',
-                payload: confFileName,
+                payload: confFilePath,
               })
             }
             break
@@ -148,24 +155,24 @@ export class SettingsPanel {
 
   public static disableForm(name: string): void {
     const panelToDisable = SettingsPanel.allPanels.find(
-      panel => panel.curConfFileDisplayName === name,
+      panel => panel.confFilePath === name,
     )
     if (panelToDisable !== undefined) {
       panelToDisable._panel.webview.postMessage({
         type: 'disable-form',
-        payload: panelToDisable.curConfFileDisplayName,
+        payload: panelToDisable.confFilePath,
       })
     }
   }
 
   public static enableForm(name: string): void {
     const panelToDisable = SettingsPanel.allPanels.find(
-      panel => panel.curConfFileDisplayName === name,
+      panel => panel.confFilePath === name,
     )
     if (panelToDisable !== undefined) {
       panelToDisable._panel.webview.postMessage({
         type: 'enable-form',
-        payload: panelToDisable.curConfFileDisplayName,
+        payload: panelToDisable.confFilePath,
       })
     }
   }
@@ -196,21 +203,21 @@ export class SettingsPanel {
       panel,
       extensionUri,
       confFileName.displayName,
-      confFileName.fileName,
+      confFileName.confPath,
       editConfFile,
     )
     this.allPanels.push(SettingsPanel.currentPanel)
     if (SettingsPanel.resultsWebviewProvider) {
       SettingsPanel.resultsWebviewProvider.postMessage({
         type: 'focus-changed',
-        payload: confFileName.fileName,
+        payload: confFileName.confPath,
       })
     }
   }
 
   public static removePanel(name: string): void {
     const panelToRemove = SettingsPanel.allPanels.find(
-      panel => panel.curConfFileDisplayName === name,
+      panel => panel.confFilePath === name,
     )
     panelToRemove?.dispose()
   }
@@ -278,7 +285,7 @@ export class SettingsPanel {
     let isOpened = false
     if (editConfFile) {
       SettingsPanel.allPanels.forEach(panel => {
-        if (panel.curConfFileDisplayName === confName.displayName) {
+        if (panel.confFilePath === confName.confPath) {
           isOpened = true
           SettingsPanel.currentPanel = panel
         }

@@ -17,16 +17,18 @@
   } from '../types'
   import Pane from './Pane.svelte'
   import Tree from './Tree.svelte'
-  import { verificationResults } from '../store/store'
+  import { CERTORA_CONF, verificationResults } from '../store/store'
   import { writable } from 'svelte/store'
   import { clearResults, openLogFile } from '../extension-actions'
 
+  export let pathToConf: string
   export let editFunc: () => void
   export let deleteFunc: () => void
   export let deleteRun: () => void
   export let namesMap: Map<string, string>
   export let runName: string = ''
   const renameJob = writable(runName === '')
+  export let isExpanded
   // this creates the new conf file
   export let renameRun: (oldName: string, newName: string) => void
   export let duplicateFunc: (
@@ -40,23 +42,23 @@
     vr: Verification,
   ) => void
 
-  export let expandedState = false
-  export let nowRunning = false
+  export let status: Status
 
-  export let isPending = false
+  let expandedState = false
+  $: status === Status.incompleteResults || status === Status.success
+    ? (expandedState = true)
+    : (expandedState = false)
 
   export let pendingStopFunc: () => void
   export let runningStopFunc: () => void
 
+  export let resetHide: () => void
+
   export let inactiveSelected: string = ''
-
-  export let setStatus: (name: string, status: Status) => void
-
-  export let status: Status
 
   export let vrLink = ''
 
-  export let hide = true
+  export let hide = false
 
   export let pos
 
@@ -134,7 +136,7 @@
   }
 
   function renameDuplicate(name: string, counter: number): string {
-    return name + ' (' + counter.toString() + ')'
+    return `${name} ${counter.toString()}`
   }
 
   function spacesToUnderscores(name: string): string {
@@ -150,8 +152,13 @@
     if (!e.currentTarget.value) {
       return
     }
+    const oldName = runName
     runName = e.currentTarget.value
     titleHandle()
+    pathToConf = pathToConf.replace(
+      spacesToUnderscores(oldName) + '.conf',
+      spacesToUnderscores(runName) + '.conf',
+    )
     // in rename mode we rename
     if (e.currentTarget.value) {
       renameRun(beforeRename, spacesToUnderscores(runName))
@@ -167,18 +174,6 @@
   }
 
   /**
-   * returns the status for a run that was just ran
-   */
-  function getRunStatus(): Status {
-    if (isPending) {
-      statusChange(Status.pending)
-    } else if (nowRunning) {
-      statusChange(Status.running)
-    }
-    return status
-  }
-
-  /**
    * duplicate this run
    */
   function duplicate(rule?: string): void {
@@ -191,7 +186,7 @@
   }
 
   /**
-   * creates actions for the missingSettings, ready and unableToRun statuses.
+   * creates actions for the missingSettings, ready and jobFailed statuses.
    * the actions are: rename, edit, delete, duplicate, and if possible: run
    */
   function createActions(): Action[] {
@@ -218,7 +213,7 @@
   }
 
   /**
-   * creates actions for the missingSettings, ready and unableToRun statuses.
+   * creates actions for the missingSettings, ready and jobFailed statuses.
    * the actions are: rename, edit, delete, duplicate, and if possible: run
    */
   function createFixedActions(): Action[] {
@@ -247,7 +242,7 @@
   }
 
   /**
-   * creates actions for the missingSettings, ready and unableToRun statuses.
+   * creates actions for the missingSettings, ready and jobFailed statuses.
    * the actions are: rename, edit, delete, duplicate, and if possible: run
    */
   function createActionsForContextMenu(): Action[] {
@@ -286,14 +281,14 @@
     }
     if (
       $verificationResults.find(vr => {
-        return vr.name === runName
+        return vr.name === pathToConf
       }) !== undefined
     ) {
       actions.push({
         title: 'Clear Results',
         icon: '',
         onClick: () => {
-          clearResults(runName)
+          clearResults(pathToConf)
         },
       })
     }
@@ -301,28 +296,10 @@
   }
 
   /**
-   * change run status
-   * @param newStatus status to change to
-   */
-  function statusChange(newStatus: Status): void {
-    status = newStatus
-    setStatus(runName, newStatus)
-  }
-
-  /**
-   * stops a pending run
-   */
-  function pendingRunStop(): void {
-    statusChange(Status.ready)
-    pendingStopFunc()
-    isPending = false
-  }
-
-  /**
    * creates 'stop' action according to run status
    */
   function createActionsForRunningScript(): Action[] {
-    if (isPending) {
+    if (status === Status.pending) {
       return [
         {
           title: 'Edit',
@@ -332,11 +309,11 @@
         {
           title: 'Stop',
           icon: 'stop-circle',
-          onClick: pendingRunStop,
+          onClick: pendingStopFunc,
         },
       ]
     }
-    if (nowRunning) {
+    if (status === Status.running) {
       return [
         {
           title: 'Edit',
@@ -412,8 +389,8 @@
         on:change={onChange}
       />
     </div>
-  {:else if !nowRunning}
-    {#key [status, inactiveSelected]}
+  {:else if !(status === Status.running || status === Status.pending)}
+    {#key [inactiveSelected, vrLink]}
       <div class="results" on:click={onClick}>
         <Pane
           title={namesMap.get(runName)}
@@ -421,21 +398,24 @@
           fixedActions={createFixedActions()}
           showExpendIcon={expandedState}
           {status}
-          inactiveSelected={runName === inactiveSelected}
+          inactiveSelected={pathToConf === inactiveSelected}
           runFunc={status === Status.ready ||
           status === Status.success ||
           status === Status.jobFailed
             ? runFunc
             : null}
+          bind:isExpanded
         >
           {#each $verificationResults as vr, index (index)}
-            {#if vr.name === runName}
+            {#if vr.name === pathToConf}
               <li
                 class="tree"
-                on:contextmenu|stopPropagation|preventDefault={() => null}
+                on:contextmenu|stopPropagation|preventDefault={() => {
+                  resetHide()
+                }}
               >
                 <Tree
-                  runDisplayName={namesMap.get(runName)}
+                  pathToCode={vr.name.split(CERTORA_CONF)[0]}
                   data={{
                     type: TreeType.Rules,
                     tree: retrieveRules(vr.jobs),
@@ -454,12 +434,16 @@
     {#key [vrLink]}
       <div
         class="running"
-        on:contextmenu|stopPropagation|preventDefault={() => null}
+        on:contextmenu|stopPropagation|preventDefault={() => {
+          resetHide()
+        }}
       >
         <Pane
           title={namesMap.get(runName)}
-          actions={createActionsForRunningScript()}
-          status={getRunStatus()}
+          actions={status
+            ? createActionsForRunningScript()
+            : createActionsForRunningScript()}
+          {status}
           showExpendIcon={false}
           fixedActions={createFixedActions()}
         />

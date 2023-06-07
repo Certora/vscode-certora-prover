@@ -6,7 +6,6 @@
   import Toolbar from './Toolbar.svelte'
   import { Action, Status } from '../types'
   import { getIconPath } from '../utils/getIconPath'
-  import { expandables } from '../store/store'
 
   export let title: string
   export let actions: Action[] = []
@@ -15,6 +14,7 @@
   export let status: Status | string = ''
   export let inactiveSelected: boolean = false
   export let runFunc: () => void = null
+  export let isExpanded = false
 
   const statusIcons = {
     missingSettings: 'finish-setup.svg',
@@ -22,7 +22,7 @@
     running: 'running-rule-status.svg',
     pending: 'pending.svg',
     success: 'rerun-success.svg',
-    unableToRun: 'unable-to-run.svg',
+    jobFailed: 'unable-to-run.svg',
     settingsError: 'error-rule-status.svg',
   }
 
@@ -33,7 +33,7 @@
     [Status.ready, statusIcons.ready],
     [Status.pending, statusIcons.pending],
     [Status.success, statusIcons.success],
-    [Status.jobFailed, statusIcons.unableToRun],
+    [Status.jobFailed, statusIcons.jobFailed],
     [Status.incompleteResults, statusIcons.running],
     [Status.settingsError, statusIcons.settingsError],
   ])
@@ -64,52 +64,22 @@
     }
     return className
   }
-
-  function toggleExpand() {
-    if (
-      $expandables.find(element => {
-        return element.title === title
-      }) === undefined
-    ) {
-      $expandables.push({
-        title: title,
-        isExpanded: false,
-        tree: [],
-      })
-    }
-    $expandables = $expandables.map(element => {
-      if (element.title === title) {
-        element.isExpanded = !element.isExpanded
-      }
-      return element
-    })
-  }
 </script>
 
-<div
-  class="pane"
-  class:expanded={$expandables.find(element => {
-    return element.title === title
-  })?.isExpanded}
-  id={title}
->
+<div class="pane" class:expanded={isExpanded} id={title}>
   <div
     class={getPaneClassName()}
-    on:click={toggleExpand}
+    on:click={() => {
+      isExpanded = !isExpanded
+    }}
     tabindex="0"
     role="button"
     aria-label={`${title} section`}
-    aria-expanded={$expandables.find(element => {
-      return element.title === title
-    })?.isExpanded}
+    aria-expanded={isExpanded}
   >
     {#if showExpendIcon}
       <div
-        class="arrow-icon codicon codicon-chevron-{$expandables.find(
-          element => {
-            return element.title === title
-          },
-        )?.isExpanded
+        class="arrow-icon codicon codicon-chevron-{isExpanded
           ? 'down'
           : 'right'}"
       />
@@ -138,9 +108,7 @@
       <Toolbar actions={fixedActions} />
     </div>
   </div>
-  {#if $expandables.find(element => {
-    return element.title === title
-  })?.isExpanded}
+  {#if isExpanded}
     <div class="pane-body">
       <slot />
     </div>

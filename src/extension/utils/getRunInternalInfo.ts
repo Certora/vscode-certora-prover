@@ -1,16 +1,20 @@
 import { FileType, Uri, workspace } from 'vscode'
-import { CERTORA_INNER_DIR } from '../types'
+import { CERTORA_INNER_DIR, CONF_DIRECTORY } from '../types'
 import { checkDir } from './checkDir'
 
 /**
  * returns a uri of the conf.log file if the workspace path exists, null otherwise
  * @returns the full path to the conf.log file or null
  */
-export async function getInternalDirPath(): Promise<Uri | undefined> {
-  const path = workspace.workspaceFolders?.[0]
+export async function getInternalDirPath(
+  pathToConfFile: string,
+): Promise<Uri | undefined> {
+  const path =
+    pathToConfFile?.split(CONF_DIRECTORY)[0] ||
+    workspace.workspaceFolders?.[0]?.uri.path
   if (!path) return
 
-  const internalUri = Uri.parse(path.uri.path + CERTORA_INNER_DIR)
+  const internalUri = Uri.parse(path + CERTORA_INNER_DIR)
   const checked = await checkDir(internalUri)
   if (checked) {
     let innerDirs: [string, FileType][] = await workspace.fs.readDirectory(

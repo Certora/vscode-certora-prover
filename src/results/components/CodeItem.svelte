@@ -9,6 +9,7 @@
   export let name: string
   export let value: string | boolean
   export let jumpToDefinition: JumpToDefinition[]
+  export let pathToCode: string
 </script>
 
 <div
@@ -16,7 +17,7 @@
   tabindex="0"
   role="button"
   on:click={() => {
-    navigateToCode(jumpToDefinition)
+    navigateToCode(jumpToDefinition, pathToCode)
   }}
 >
   <div class="name">{name}</div>
