@@ -16,6 +16,7 @@ import {
   CERTORA_INNER_DIR_BUILD,
   CERTORA_INNER_DIR,
   Job,
+  NewForm,
 } from './types'
 import { checkDir } from './utils/checkDir'
 import { ScriptProgressLongPolling } from './ScriptProgressLongPolling'
@@ -177,9 +178,14 @@ export function activate(context: vscode.ExtensionContext): void {
    */
   async function readConf(confFileUri: vscode.Uri): Promise<ConfFile> {
     const decoder = new TextDecoder()
-    return JSON.parse(
-      decoder.decode(await vscode.workspace.fs.readFile(confFileUri)),
+    const fileContent = await vscode.workspace.fs.readFile(confFileUri)
+    const decodedContent = decoder.decode(fileContent)
+    const decodedNoComments = decodedContent.replace(
+      /\\"|"(?:\\"|[^"])*"|(\/\/.*|\/\*[\s\S]*?\*\/)/g,
+      (m, g) => (g ? '' : m),
     )
+    const jsonContent = JSON.parse(decodedNoComments)
+    return jsonContent
   }
 
   /**
