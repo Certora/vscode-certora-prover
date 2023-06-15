@@ -177,9 +177,14 @@ export function activate(context: vscode.ExtensionContext): void {
    */
   async function readConf(confFileUri: vscode.Uri): Promise<ConfFile> {
     const decoder = new TextDecoder()
-    return JSON.parse(
-      decoder.decode(await vscode.workspace.fs.readFile(confFileUri)),
+    const fileContent = await vscode.workspace.fs.readFile(confFileUri)
+    const decodedContent = decoder.decode(fileContent)
+    const decodedNoComments = decodedContent.replace(
+      /\\"|"(?:\\"|[^"])*"|(\/\/.*|\/\*[\s\S]*?\*\/)/g,
+      (m, g) => (g ? '' : m),
     )
+    const jsonContent = JSON.parse(decodedNoComments)
+    return jsonContent
   }
 
   /**
@@ -596,21 +601,6 @@ export function activate(context: vscode.ExtensionContext): void {
     }
     try {
       const confFile: ConfFile = await readConf(file)
-      // add disableLocalTypeChecking flags to conf file, if they don't exist
-      if (
-        !Object.entries(confFile).find(entry => {
-          return entry[0] === 'disableLocalTypeChecking'
-        })
-      ) {
-        try {
-          confFile.disableLocalTypeChecking = false
-          const encoder = new TextEncoder()
-          const content = encoder.encode(JSON.stringify(confFile, null, 2))
-          await vscode.workspace.fs.writeFile(file, content)
-        } catch (e) {
-          console.log('[Inner Error] Failed to write file:', e)
-        }
-      }
       if (
         confFile.files !== undefined &&
         confFile.verify !== undefined &&

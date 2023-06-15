@@ -83,9 +83,6 @@ function getAdditionalSettings(confFile: ConfFile) {
  */
 function processCompiler(solc: string, solidityObj: SolidityObj) {
   if (solc.includes('/')) {
-    // const index = solc.lastIndexOf('/')
-    // solidityObj.compiler.exe = solc.slice(0, index)
-    // solidityObj.compiler.ver = solc.slice(index + 1, solc.length)
     const solcArr = solc.split('/')
     solidityObj.compiler.ver = solcArr.pop()
     solidityObj.compiler.exe = solcArr.join('/')
