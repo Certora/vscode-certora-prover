@@ -165,7 +165,7 @@ export class ScriptRunner {
    */
   private whichVersion(str: string): CvlVersion {
     if (str.includes('certora-cli-')) return CvlVersion.cvlVersion2
-    const versionReg = /certora-cli 4.*/i
+    const versionReg = /(certora-cli 5.|certora-cli-beta)*/i
     if (versionReg.exec(str)) return CvlVersion.cvlVersion2
     return CvlVersion.cvlVersion1
   }
@@ -225,16 +225,16 @@ export class ScriptRunner {
     const channel = window.createOutputChannel(
       `Certora IDE - ${confFile}-${ts}`,
     )
+    // in the previous cli version, "send_only" flag is needed
+    // from the new version onwards, this flag is deprecated
+    let runArgs = ['--run_source', 'VSCODE', confFile]
+    if (cvlVersion === CvlVersion.cvlVersion1) {
+      runArgs = ['--send_only', ...runArgs]
+    }
 
-    process.env.CERTORA_OLD_API = '1'
-
-    this.script = spawn(
-      `certoraRun`,
-      ['--run_source', 'VSCODE', '--send_only', confFile],
-      {
-        cwd: path.fsPath,
-      },
-    )
+    this.script = spawn(`certoraRun`, runArgs, {
+      cwd: path.fsPath,
+    })
 
     if (!this.script) return
 
