@@ -103,7 +103,6 @@ export function activate(context: vscode.ExtensionContext): void {
           tempSolcArgs.push(tempValue.toString())
         }
       })
-      confFileDefault.solc_args = tempSolcArgs
     }
     if (defaultDirectoryForPackagesDependencies) {
       confFileDefault.packages_path = defaultDirectoryForPackagesDependencies
@@ -129,9 +128,9 @@ export function activate(context: vscode.ExtensionContext): void {
       })
     }
     if (!typeCheck) {
-      confFileDefault.disableLocalTypeChecking = true
+      confFileDefault.disable_local_typechecking = true
     } else if (typeCheck === true) {
-      confFileDefault.disableLocalTypeChecking = false
+      confFileDefault.disable_local_typechecking = false
     }
     return confFileDefault
   }
@@ -297,7 +296,19 @@ export function activate(context: vscode.ExtensionContext): void {
   async function runScript(name: JobNameMap): Promise<void> {
     SettingsPanel.disableForm(name.confPath)
     const confUri = vscode.Uri.parse(name.confPath)
+    // new flag "wait_for_results" should be set to "none" if exists
+    await dontWaitForResults(vscode.Uri.parse(name.confPath))
     scriptRunner.run(confUri.path)
+  }
+
+  async function dontWaitForResults(confFilePath: vscode.Uri): Promise<void> {
+    const confFileContent = await readConf(confFilePath)
+    if (confFileContent.wait_for_results) {
+      confFileContent.wait_for_results = 'none'
+      const encoder = new TextEncoder()
+      const content = encoder.encode(JSON.stringify(confFileContent, null, 2))
+      await vscode.workspace.fs.writeFile(confFilePath, content)
+    }
   }
 
   function getConfUri(name: string): vscode.Uri | void {
@@ -446,13 +457,10 @@ export function activate(context: vscode.ExtensionContext): void {
     const jsonContent = JSON.parse(strContent)
     if (jsonContent && jsonContent.build_only) {
       delete jsonContent.build_only
-      let strName = ''
-      if (jsonContent.msg) strName = jsonContent.msg
-      else if (typeof jsonContent.verify === 'string') {
-        strName = jsonContent.verify
-      } else {
-        strName = jsonContent.verify[0]
-      }
+      let verify = ''
+      if (jsonContent.verify) verify = jsonContent.verify
+      else if (jsonContent.msg) verify = jsonContent.msg
+
       let dateTimeToUse = ''
       const pathArr = file.path.split('/')
       const dateTimeReg = /^[0-9_]+$/i
@@ -462,7 +470,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
       if (dateTimeStr) dateTimeToUse = dateTimeStr
       const newConfFileUri = getConfUri(
-        `${strName.split(':')[0]}_${dateTimeToUse}`,
+        `${verify.split(':')[0]}_${dateTimeToUse}`,
       )
 
       if (newConfFileUri) {
@@ -596,14 +604,14 @@ export function activate(context: vscode.ExtensionContext): void {
     }
     try {
       const confFile: ConfFile = await readConf(file)
-      // add disableLocalTypeChecking flags to conf file, if they don't exist
+      // add disable_local_typechecking flags to conf file, if they don't exist
       if (
         !Object.entries(confFile).find(entry => {
-          return entry[0] === 'disableLocalTypeChecking'
+          return entry[0] === 'disable_local_typechecking'
         })
       ) {
         try {
-          confFile.disableLocalTypeChecking = false
+          confFile.disable_local_typechecking = false
           const encoder = new TextEncoder()
           const content = encoder.encode(JSON.stringify(confFile, null, 2))
           await vscode.workspace.fs.writeFile(file, content)

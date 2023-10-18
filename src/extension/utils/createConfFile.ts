@@ -17,7 +17,6 @@ type ConfFile = {
   cache?: string
   msg?: string
   packages?: string[]
-  solc_args?: string[]
   solc_map?: any
   rule?: string[]
 } & Record<string, boolean | string>
@@ -152,15 +151,7 @@ export function newFormToConf(newForm: NewForm): string {
 
   if (newForm.specObj.specFile && newForm.solidityObj.mainContract) {
     // verify is an array in the old version, string in the new one
-    const oldCliVersion = cvlVersion === CvlVersion.cvlVersion1
-
-    if (oldCliVersion) {
-      config.verify = [
-        `${newForm.solidityObj.mainContract}:${newForm.specObj.specFile.value}`,
-      ]
-    } else {
-      config.verify = `${newForm.solidityObj.mainContract}:${newForm.specObj.specFile.value}`
-    }
+    config.verify = `${newForm.solidityObj.mainContract}:${newForm.specObj.specFile.value}`
   }
 
   if (newForm.solidityObj.mainFile) {
@@ -202,9 +193,6 @@ export function newFormToConf(newForm: NewForm): string {
         strSolcArgs.push(arg.value)
       }
     })
-    if (strSolcArgs) {
-      config.solc_args = strSolcArgs
-    }
   }
 
   const solDir = newForm.solidityObj.solidityPackageDir
@@ -257,7 +245,7 @@ export function newFormToConf(newForm: NewForm): string {
   }
 
   if (newForm.specObj.localTypeChecking) {
-    config.disableLocalTypeChecking = setAdditionalSetting(
+    config.disable_local_typechecking = setAdditionalSetting(
       (!newForm.specObj.localTypeChecking).toString(),
     )
   }
