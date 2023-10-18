@@ -125,7 +125,8 @@ export type ConfFile = {
   solc?: string
   link?: string[]
   settings?: string[]
-  staging?: string
+  prover_version?: string
+  server?: string
   cache?: string
   msg?: string
   solc_map?: JSON

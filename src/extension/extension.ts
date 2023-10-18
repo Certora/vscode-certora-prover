@@ -90,7 +90,8 @@ export function activate(context: vscode.ExtensionContext): void {
     }
     const confFileDefault: ConfFile = {
       solc: solcPath + solc,
-      staging: branch,
+      server: 'staging',
+      prover_version: branch,
     }
     if (solcArgs !== '{}') {
       // from object '{'flag': '', 'flag2': 'value2'}' to array of strings ['--flag', '--flag2', 'value2']

@@ -48,7 +48,8 @@ const stableFields = [
   'verify',
   'solc',
   'link',
-  'staging',
+  'prover_version',
+  'server',
   'msg',
   'multi_assert_check',
   'packages',
@@ -180,12 +181,12 @@ function processSpecAttributes(confFile: ConfFile, specObj: SpecObj) {
     specObj.localTypeChecking = !confFile.disable_local_typechecking as boolean
   }
 
-  if (confFile.staging) {
+  if (confFile.server === 'staging') {
     specObj.runOnStg = true
-    if (confFile.staging.toString() === 'true') {
-      confFile.staging = ''
-    }
-    specObj.branchName = confFile.staging.toString() || ''
+  }
+
+  if (confFile.prover_version) {
+    specObj.branchName = confFile.prover_version.toString() || ''
   }
 
   if (confFile.cloud) {

@@ -13,7 +13,6 @@ type ConfFile = {
   solc?: string
   link?: string[]
   settings?: string[]
-  staging?: string
   cache?: string
   msg?: string
   packages?: string[]
@@ -210,10 +209,12 @@ export function newFormToConf(newForm: NewForm): string {
   processLinking(newForm.solidityObj, config)
 
   if (newForm.specObj.runOnStg) {
-    config.staging = newForm.specObj.branchName || ''
+    config.server = 'staging'
+    config.prover_version = newForm.specObj.branchName || ''
   }
   if (newForm.specObj.branchName && !newForm.specObj.runOnStg) {
-    config.cloud = newForm.specObj.branchName
+    config.server = 'production'
+    config.prover_version = newForm.specObj.branchName
   }
 
   if (newForm.verificationMessage) {
