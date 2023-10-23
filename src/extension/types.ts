@@ -341,7 +341,6 @@ export type ConfFile = {
   solc?: string
   link?: string[]
   settings?: string[]
-  // staging?: string
   server: string
   cache?: string
   msg?: string

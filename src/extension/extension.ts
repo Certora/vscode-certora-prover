@@ -451,7 +451,6 @@ export function activate(context: vscode.ExtensionContext): void {
     if (jsonContent && jsonContent.build_only) {
       delete jsonContent.build_only
       let verify = ''
-      // future todo: delete this option
       if (jsonContent.verify && typeof jsonContent.verify === 'string')
         verify = jsonContent.verify
       else if (jsonContent.msg) verify = jsonContent.msg
