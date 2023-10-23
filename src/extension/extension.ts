@@ -19,7 +19,6 @@ import {
 } from './types'
 import { checkDir } from './utils/checkDir'
 import { ScriptProgressLongPolling } from './ScriptProgressLongPolling'
-import { type } from 'os'
 
 // all directory watchers will ne added to this array so we can delete them later
 const watchers: vscode.FileSystemWatcher[] = []
