@@ -1,6 +1,13 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+
+### 0.2.1 (2023-10-23)
+
+## Features
+
+* Support newer versions of certora-cli ([#109](https://github.com/Certora/vscode-certora-prover/pull/109))
+
 ### 0.2.0 (2023-06-07)
 
 ## Features
