@@ -302,10 +302,15 @@ export function activate(context: vscode.ExtensionContext): void {
     scriptRunner.run(confUri.path)
   }
 
+  /**
+   * avoid waiting for all the results to be printed out
+   * @param confFilePath
+   */
   async function dontWaitForResults(confFilePath: vscode.Uri): Promise<void> {
     const confFileContent = await readConf(confFilePath)
-    if (confFileContent.wait_for_results) {
+    if (confFileContent.wait_for_results || confFileContent.send_only) {
       confFileContent.wait_for_results = 'none'
+      delete confFileContent.send_only
       const encoder = new TextEncoder()
       const content = encoder.encode(JSON.stringify(confFileContent, null, 2))
       await vscode.workspace.fs.writeFile(confFilePath, content)
@@ -943,7 +948,6 @@ export function activate(context: vscode.ExtensionContext): void {
       'https://forms.gle/zTadNeJZ7g1vmqFg6',
     )
   }
-
   const resultsWebviewProvider = new ResultsWebviewProvider(
     context.extensionUri,
   )
@@ -966,6 +970,9 @@ export function activate(context: vscode.ExtensionContext): void {
   resultsWebviewProvider.openLogFile = openLogFile
 
   const scriptRunner = new ScriptRunner(resultsWebviewProvider)
+  // we check the cli version on activation because we have an important flag that
+  // was deactivated in later versions (send_only)
+  scriptRunner.checkCliVersion()
 
   context.subscriptions.push(
     vscode.commands.registerCommand(
