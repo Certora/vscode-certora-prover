@@ -49,12 +49,6 @@
         'https://docs.certora.com/en/latest/docs/prover/cli/options.html#solc',
       validator: 'filePathValidator',
     },
-    solc_args: {
-      infoText: 'Gets an argument to pass to the Solidity compiler.',
-      infoLink:
-        'https://docs.certora.com/en/latest/docs/prover/cli/options.html#solc-args',
-      validator: 'spaceAndDash',
-    },
     package: {
       infoText:
         'For each package, gets the path to a directory including that Solidity package.',
@@ -272,55 +266,8 @@
                         <i class="codicon codicon-gear" />
                         <h3>Advanced Settings</h3>
                       </div>
-                      <div slot="body" class="most_inner_card border_light">
-                        <div class="dark_input">
-                          <h3
-                            style="font-size: 12px;
-                          line-height: 14px;
-                          font-weight: 500;"
-                          >
-                            Solidity Compiler Arguments
-                          </h3>
-                          {#each $solidityObj.solidityArgs as obj, index}
-                            <div class="input_wrapper mt-8px">
-                              <div class="dark_input">
-                                <CustomInput
-                                  infoObj={infoObjArr.solc_args}
-                                  placeholder="example: optimize-runs"
-                                  source={Source.Sol}
-                                  bind:bindValue={obj.key}
-                                />
-                              </div>
-                              <div class="dark_input">
-                                <CustomInput
-                                  infoObj={infoObjArr.solc_args}
-                                  placeholder="value (optional)"
-                                  source={Source.Sol}
-                                  bind:bindValue={obj.value}
-                                />
-                              </div>
-                              <i
-                                class="codicon codicon-trash"
-                                on:click={removeObj(
-                                  $solidityObj.solidityArgs,
-                                  index,
-                                )}
-                              />
-                            </div>
-                          {/each}
-                        </div>
-                        <button
-                          class="btn_add"
-                          on:click={pushNewObj($solidityObj.solidityArgs, {
-                            key: '',
-                            value: '',
-                          })}
-                          ><i class="codicon codicon-add" /> Add Argument</button
-                        >
-                        <div
-                          class="dark_input border_light mt-8px"
-                          style="border-top: 1px solid var(--vscode-foreground); padding-top:8px;"
-                        >
+                      <div slot="body" class="most_inner_card">
+                        <div class="dark_input mt-8px">
                           <h3
                             style="font-size: 12px;
                           line-height: 14px;

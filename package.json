@@ -3,7 +3,7 @@
   "displayName": "Certora IDE",
   "description": "Check and validate smart contracts in VS Code",
   "publisher": "Certora",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "license": "SEE LICENSE IN LICENSE",
   "repository": "https://github.com/Certora/vscode-certora-prover",
   "homepage": "https://github.com/Certora/vscode-certora-prover/blob/main/README.md",
@@ -43,13 +43,6 @@
         "title": "Compiler Advanced Settings",
         "order": 1,
         "properties": {
-          "SolidityArguments": {
-            "markdownDescription": "A list of arguments to pass to the Solidity compiler.\nNo need to add ```'--'``` to the keys.",
-            "type": "object",
-            "additionalProperties": "string",
-            "properties": {},
-            "order": 0
-          },
           "Solidity.DefaultDirectoryForPackagesDependencies": {
             "description": "Default path for relative input.",
             "type": "string",

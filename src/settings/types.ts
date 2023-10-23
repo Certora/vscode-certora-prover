@@ -50,11 +50,6 @@ export type SolidityPackageDir = {
   path: string
 }
 
-export type SolcArg = {
-  key: string
-  value: string
-}
-
 export type FileFormat = {
   value: string
   label: string
@@ -68,7 +63,6 @@ export type SolidityObj = {
   mainContract: string
   linking: Link[]
   compiler: Compiler
-  solidityArgs: SolcArg[]
   solidityPackageDefaultPath: string
   solidityPackageDir: SolidityPackageDir[]
 }
@@ -121,11 +115,12 @@ export enum Source {
 
 export type ConfFile = {
   files?: string[]
-  verify?: string | string[]
+  verify?: string
   solc?: string
   link?: string[]
   settings?: string[]
-  staging?: string
+  prover_version?: string
+  server?: string
   cache?: string
   msg?: string
   solc_map?: JSON

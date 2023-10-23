@@ -9,15 +9,13 @@ import { cvlVersion } from '../ScriptRunner'
 
 type ConfFile = {
   files?: string[]
-  verify?: string | string[]
+  verify?: string
   solc?: string
   link?: string[]
   settings?: string[]
-  staging?: string
   cache?: string
   msg?: string
   packages?: string[]
-  solc_args?: string[]
   solc_map?: any
   rule?: string[]
 } & Record<string, boolean | string>
@@ -152,15 +150,7 @@ export function newFormToConf(newForm: NewForm): string {
 
   if (newForm.specObj.specFile && newForm.solidityObj.mainContract) {
     // verify is an array in the old version, string in the new one
-    const oldCliVersion = cvlVersion === CvlVersion.cvlVersion1
-
-    if (oldCliVersion) {
-      config.verify = [
-        `${newForm.solidityObj.mainContract}:${newForm.specObj.specFile.value}`,
-      ]
-    } else {
-      config.verify = `${newForm.solidityObj.mainContract}:${newForm.specObj.specFile.value}`
-    }
+    config.verify = `${newForm.solidityObj.mainContract}:${newForm.specObj.specFile.value}`
   }
 
   if (newForm.solidityObj.mainFile) {
@@ -191,22 +181,6 @@ export function newFormToConf(newForm: NewForm): string {
     config.solc_map[newForm.solidityObj.mainContract] = solc
   }
 
-  const solcArgs = newForm.solidityObj.solidityArgs
-  if (solcArgs) {
-    const strSolcArgs: string[] = []
-    solcArgs.forEach(arg => {
-      if (arg.key) {
-        strSolcArgs.push('--' + arg.key)
-      }
-      if (arg.value) {
-        strSolcArgs.push(arg.value)
-      }
-    })
-    if (strSolcArgs) {
-      config.solc_args = strSolcArgs
-    }
-  }
-
   const solDir = newForm.solidityObj.solidityPackageDir
   if (solDir && solDir.length) {
     const packages: string[] = []
@@ -222,10 +196,12 @@ export function newFormToConf(newForm: NewForm): string {
   processLinking(newForm.solidityObj, config)
 
   if (newForm.specObj.runOnStg) {
-    config.staging = newForm.specObj.branchName || ''
+    config.server = 'staging'
+    config.prover_version = newForm.specObj.branchName || ''
   }
   if (newForm.specObj.branchName && !newForm.specObj.runOnStg) {
-    config.cloud = newForm.specObj.branchName
+    config.server = 'production'
+    config.prover_version = newForm.specObj.branchName
   }
 
   if (newForm.verificationMessage) {
@@ -257,7 +233,7 @@ export function newFormToConf(newForm: NewForm): string {
   }
 
   if (newForm.specObj.localTypeChecking) {
-    config.disableLocalTypeChecking = setAdditionalSetting(
+    config.disable_local_typechecking = setAdditionalSetting(
       (!newForm.specObj.localTypeChecking).toString(),
     )
   }

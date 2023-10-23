@@ -155,8 +155,8 @@ export class ScriptRunner {
    * @returns job id (string)
    */
   private getJobId(link: string): string {
-    const regExp = this.getUrlReg()
-    return link.split('?anonymousKey')[0].replace(regExp, '').split('/')[1]
+    const splittedLink = link.replace('https://', '').split('/')
+    return splittedLink[3].split('?')[0]
   }
 
   /**
@@ -165,7 +165,7 @@ export class ScriptRunner {
    */
   private whichVersion(str: string): CvlVersion {
     if (str.includes('certora-cli-')) return CvlVersion.cvlVersion2
-    const versionReg = /certora-cli 4.*/i
+    const versionReg = /(certora-cli 5.|certora-cli-beta 5.)*/i
     if (versionReg.exec(str)) return CvlVersion.cvlVersion2
     return CvlVersion.cvlVersion1
   }
@@ -175,7 +175,7 @@ export class ScriptRunner {
    * @param confFile path to conf file (string)
    * @returns true if cli version is found, false otherwise
    */
-  private checkCliVersion(confFile: string) {
+  public checkCliVersion(confFile?: string) {
     const versionScript = spawn(`certoraRun`, ['--version'], {
       cwd: workspace.workspaceFolders?.[0].uri.fsPath,
     })
@@ -190,13 +190,16 @@ export class ScriptRunner {
 
     versionScript.on('error', async err => {
       console.log(err)
-      this.resultsWebviewProvider.postMessage({
-        type: 'parse-error',
-        payload: {
-          confFile: confFile,
-          logFile: '',
-        },
-      })
+      if (confFile) {
+        this.resultsWebviewProvider.postMessage({
+          type: 'parse-error',
+          payload: {
+            confFile: confFile,
+            logFile: '',
+          },
+        })
+      }
+
       await window.showErrorMessage(
         `Command not found: certoraRun. Please make sure certora cli is installed.`,
       )
@@ -225,16 +228,16 @@ export class ScriptRunner {
     const channel = window.createOutputChannel(
       `Certora IDE - ${confFile}-${ts}`,
     )
+    // in the previous cli version, "send_only" flag is needed
+    // from the new version onwards, this flag is deprecated
+    let runArgs = ['--run_source', 'VSCODE', confFile]
+    if (cvlVersion === CvlVersion.cvlVersion1) {
+      runArgs = ['--send_only', ...runArgs]
+    }
 
-    process.env.CERTORA_OLD_API = '1'
-
-    this.script = spawn(
-      `certoraRun`,
-      ['--run_source', 'VSCODE', '--send_only', confFile],
-      {
-        cwd: path.fsPath,
-      },
-    )
+    this.script = spawn(`certoraRun`, runArgs, {
+      cwd: path.fsPath,
+    })
 
     if (!this.script) return
 
@@ -373,6 +376,7 @@ export class ScriptRunner {
             logFile: logToUse,
           },
         })
+
         await window.showErrorMessage(
           `Job ended with exit code ${code}. \n${
             this.errorMsg.length > 300
@@ -532,7 +536,7 @@ export class ScriptRunner {
       )
         .then(response => response.text())
         .then(result => console.log(result))
-        .catch(error => console.log('error', error))
+        .catch(error => console.log(error))
     } catch (e) {
       console.log(e, '[INNER ERROR FROM API CALL]')
     }
@@ -576,6 +580,10 @@ export class ScriptRunner {
       )
     }
     if (!doStop) return
+
+    if (scriptToStop.vrLink !== undefined) {
+      scriptToStop.jobId = this.getJobId(scriptToStop.vrLink)
+    }
 
     if (scriptToStop.jobId !== undefined && scriptToStop.vrLink !== undefined) {
       this.stopUploadedScript(scriptToStop)

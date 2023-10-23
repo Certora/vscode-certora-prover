@@ -19,7 +19,6 @@ const newForm: NewForm = {
       exe: '',
       ver: '',
     },
-    solidityArgs: [],
     solidityPackageDefaultPath: '',
     solidityPackageDir: [],
   },
@@ -48,15 +47,15 @@ const stableFields = [
   'verify',
   'solc',
   'link',
-  'staging',
+  'prover_version',
+  'server',
   'msg',
   'multi_assert_check',
   'packages',
   'rule',
-  'solc_args',
   'smt_timeout',
   'loop_iter',
-  'disableLocalTypeChecking',
+  'disable_local_typechecking',
   'optimistic_loop',
   'packages_path',
   'solc_map',
@@ -64,6 +63,7 @@ const stableFields = [
   'send_only',
   'run_source',
   'cloud',
+  'wait_for_results',
 ]
 
 function getAdditionalSettings(confFile: ConfFile) {
@@ -148,26 +148,6 @@ function processSolidityAttributes(
   if (confFile.packages) {
     processPackages(confFile.packages as string[], solidityObj)
   }
-
-  if (confFile.solc_args) {
-    try {
-      const solcArgsArr = confFile.solc_args as unknown as string[]
-      solcArgsArr.forEach(arg => {
-        const tempArg = { key: '', value: '' }
-        if (arg.includes('--')) {
-          tempArg.key = arg.replace('--', '')
-          solidityObj.solidityArgs.push(tempArg)
-        } else {
-          const index = solidityObj.solidityArgs.length - 1
-          solidityObj.solidityArgs[index].value = arg
-        }
-      })
-    } catch (e) {
-      console.log(e, '[INNER ERROR - solc_args]')
-    }
-  } else {
-    solidityObj.solidityArgs.push({ key: '', value: '' })
-  }
 }
 
 /**
@@ -196,16 +176,16 @@ function processSpecAttributes(confFile: ConfFile, specObj: SpecObj) {
     specObj.loopUnroll = confFile.loop_iter.toString()
   }
 
-  if (confFile.disableLocalTypeChecking !== undefined) {
-    specObj.localTypeChecking = !confFile.disableLocalTypeChecking as boolean
+  if (confFile.disable_local_typechecking !== undefined) {
+    specObj.localTypeChecking = !confFile.disable_local_typechecking as boolean
   }
 
-  if (confFile.staging) {
+  if (confFile.server === 'staging') {
     specObj.runOnStg = true
-    if (confFile.staging.toString() === 'true') {
-      confFile.staging = ''
-    }
-    specObj.branchName = confFile.staging.toString() || ''
+  }
+
+  if (confFile.prover_version) {
+    specObj.branchName = confFile.prover_version.toString() || ''
   }
 
   if (confFile.cloud) {
@@ -243,9 +223,8 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
       const contract = getContractNameFromFile(file)
       // verify is either an array or a string
       let mainContract = ''
-      if (Array.isArray(confFile.verify)) {
-        mainContract = confFile.verify ? confFile.verify[0].split(':')[0] : ''
-      } else if (typeof confFile.verify === 'string') {
+
+      if (confFile.verify && typeof confFile.verify === 'string') {
         mainContract = confFile.verify ? confFile.verify.split(':')[0] : ''
       }
 
@@ -269,14 +248,12 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
 
   let mainContractName, specFile
   let verifyStrArr = []
-  if (typeof confFile.verify === 'string') {
+  if (confFile.verify && typeof confFile.verify === 'string') {
     verifyStrArr = confFile.verify.split(':')
-  } else if (confFile.verify?.length) {
-    verifyStrArr = confFile.verify[0].split(':')
-  }
-  if (verifyStrArr.length) {
-    mainContractName = verifyStrArr[0]
-    specFile = verifyStrArr[1]
+    if (verifyStrArr.length) {
+      mainContractName = verifyStrArr[0]
+      specFile = verifyStrArr[1]
+    }
   }
 
   if (mainContractName) {
@@ -336,7 +313,6 @@ function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
           exe: '',
           ver: '',
         },
-        solidityArgs: [],
         solidityPackageDefaultPath: '',
         solidityPackageDir: [],
       }
