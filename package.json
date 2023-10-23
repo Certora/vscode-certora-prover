@@ -43,13 +43,6 @@
         "title": "Compiler Advanced Settings",
         "order": 1,
         "properties": {
-          "SolidityArguments": {
-            "markdownDescription": "A list of arguments to pass to the Solidity compiler.\nNo need to add ```'--'``` to the keys.",
-            "type": "object",
-            "additionalProperties": "string",
-            "properties": {},
-            "order": 0
-          },
           "Solidity.DefaultDirectoryForPackagesDependencies": {
             "description": "Default path for relative input.",
             "type": "string",

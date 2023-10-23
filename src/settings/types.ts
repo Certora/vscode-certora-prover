@@ -50,11 +50,6 @@ export type SolidityPackageDir = {
   path: string
 }
 
-export type SolcArg = {
-  key: string
-  value: string
-}
-
 export type FileFormat = {
   value: string
   label: string
@@ -68,7 +63,6 @@ export type SolidityObj = {
   mainContract: string
   linking: Link[]
   compiler: Compiler
-  solidityArgs: SolcArg[]
   solidityPackageDefaultPath: string
   solidityPackageDir: SolidityPackageDir[]
 }

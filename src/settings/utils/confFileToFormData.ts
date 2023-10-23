@@ -19,7 +19,6 @@ const newForm: NewForm = {
       exe: '',
       ver: '',
     },
-    solidityArgs: [],
     solidityPackageDefaultPath: '',
     solidityPackageDir: [],
   },
@@ -225,7 +224,7 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
       // verify is either an array or a string
       let mainContract = ''
 
-      if (confFile.verify) {
+      if (confFile.verify && typeof confFile.verify === 'string') {
         mainContract = confFile.verify ? confFile.verify.split(':')[0] : ''
       }
 
@@ -249,10 +248,12 @@ export function confFileToFormData(confFile: ConfFile): NewForm {
 
   let mainContractName, specFile
   let verifyStrArr = []
-  verifyStrArr = confFile.verify.split(':')
-  if (verifyStrArr.length) {
-    mainContractName = verifyStrArr[0]
-    specFile = verifyStrArr[1]
+  if (confFile.verify && typeof confFile.verify === 'string') {
+    verifyStrArr = confFile.verify.split(':')
+    if (verifyStrArr.length) {
+      mainContractName = verifyStrArr[0]
+      specFile = verifyStrArr[1]
+    }
   }
 
   if (mainContractName) {
@@ -312,7 +313,6 @@ function processAdditionalContracts(confFile: ConfFile, form: NewForm): void {
           exe: '',
           ver: '',
         },
-        solidityArgs: [],
         solidityPackageDefaultPath: '',
         solidityPackageDir: [],
       }

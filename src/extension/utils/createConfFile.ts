@@ -9,7 +9,7 @@ import { cvlVersion } from '../ScriptRunner'
 
 type ConfFile = {
   files?: string[]
-  verify?: string | string[]
+  verify?: string
   solc?: string
   link?: string[]
   settings?: string[]
@@ -179,19 +179,6 @@ export function newFormToConf(newForm: NewForm): string {
 
   if (config.solc_map) {
     config.solc_map[newForm.solidityObj.mainContract] = solc
-  }
-
-  const solcArgs = newForm.solidityObj.solidityArgs
-  if (solcArgs) {
-    const strSolcArgs: string[] = []
-    solcArgs.forEach(arg => {
-      if (arg.key) {
-        strSolcArgs.push('--' + arg.key)
-      }
-      if (arg.value) {
-        strSolcArgs.push(arg.value)
-      }
-    })
   }
 
   const solDir = newForm.solidityObj.solidityPackageDir

@@ -19,6 +19,7 @@ import {
 } from './types'
 import { checkDir } from './utils/checkDir'
 import { ScriptProgressLongPolling } from './ScriptProgressLongPolling'
+import { type } from 'os'
 
 // all directory watchers will ne added to this array so we can delete them later
 const watchers: vscode.FileSystemWatcher[] = []
@@ -57,9 +58,6 @@ export function activate(context: vscode.ExtensionContext): void {
     }
     const solc: string =
       vscode.workspace.getConfiguration().get('SolcExecutable') || ''
-    const solcArgs: string = JSON.stringify(
-      vscode.workspace.getConfiguration().get('SolidityArguments'),
-    )
 
     const defaultDirectoryForPackagesDependencies: string =
       vscode.workspace
@@ -93,18 +91,7 @@ export function activate(context: vscode.ExtensionContext): void {
       server: 'staging',
       prover_version: branch,
     }
-    if (solcArgs !== '{}') {
-      // from object '{'flag': '', 'flag2': 'value2'}' to array of strings ['--flag', '--flag2', 'value2']
-      const tempSolcArgs: string[] = []
-      const tempArgs = JSON.parse(solcArgs)
-      Object.entries(tempArgs).forEach(arg => {
-        const tempValue = arg[1]
-        tempSolcArgs.push('--' + arg[0].replace('--', ''))
-        if (tempValue) {
-          tempSolcArgs.push(tempValue.toString())
-        }
-      })
-    }
+
     if (defaultDirectoryForPackagesDependencies) {
       confFileDefault.packages_path = defaultDirectoryForPackagesDependencies
     }
@@ -464,7 +451,9 @@ export function activate(context: vscode.ExtensionContext): void {
     if (jsonContent && jsonContent.build_only) {
       delete jsonContent.build_only
       let verify = ''
-      if (jsonContent.verify) verify = jsonContent.verify
+      // future todo: delete this option
+      if (jsonContent.verify && typeof jsonContent.verify === 'string')
+        verify = jsonContent.verify
       else if (jsonContent.msg) verify = jsonContent.msg
 
       let dateTimeToUse = ''
