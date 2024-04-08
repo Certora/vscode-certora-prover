@@ -1,6 +1,6 @@
-# Certora IDE
+# Certora IDE (Deprecated)
 
-The new version of the Certora IDE extension is out!
+_**Deprecated**: This IDE extension is not maintained anymore. Note, Certora has [another IDE extension](https://marketplace.visualstudio.com/items?itemName=Certora.evmspec-lsp) that allows syntax highlighting of CVL files which is still being maintained._
 
 The Certora Prover checks at compile-time that all smart contract executions fulfill a set of security rules and interface requirements of other contracts. Certora’s blockchain-independent and language-agnostic Prover technology precisely identifies bugs in smart contracts or proves their absence.
 
