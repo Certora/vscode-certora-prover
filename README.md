@@ -1,6 +1,6 @@
 # Certora IDE (Deprecated)
 
-_**Deprecated**: This IDE extension is not maintained anymore. Please checkout the Certora [Documentation](https://docs.certora.com/en/latest/docs/user-guide/install.html) for up to date information on how to use Certora._
+_**Deprecated**: This IDE extension is not maintained anymore. Please checkout the Certora [Installation Guide](https://docs.certora.com/en/latest/docs/user-guide/install.html) for up to date information on how to use Certora._
 
 The Certora Prover checks at compile-time that all smart contract executions fulfill a set of security rules and interface requirements of other contracts. Certora’s blockchain-independent and language-agnostic Prover technology precisely identifies bugs in smart contracts or proves their absence.
 
