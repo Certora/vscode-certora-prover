@@ -520,11 +520,8 @@ export class ScriptRunner {
       }
 
       const requestOptions: any = {
-        method: 'POST',
+        method: 'GET',
         headers: myHeaders,
-        body: JSON.stringify({
-          certoraKey: certoraKey,
-        }),
         redirect: 'follow',
       }
 
